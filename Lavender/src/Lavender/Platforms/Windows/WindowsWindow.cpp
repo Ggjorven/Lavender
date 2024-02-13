@@ -66,7 +66,7 @@ namespace Lavender
 		m_Window = glfwCreateWindow((int)properties.Width, (int)properties.Height, properties.Name.c_str(), nullptr, nullptr);
 		s_Instances++;
 
-		m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window);
+		m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window, properties.VSync);
 		m_GraphicsContext->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data); //So we can access/get to the data in lambda functions
