@@ -28,6 +28,9 @@ namespace Lavender
 
         vkDeviceWaitIdle(info.Device);
 
+        for (auto& renderpass : m_RenderPasses)
+            delete renderpass;
+
         // Cleanup depth resources
         vkDestroyImageView(info.Device, m_DepthImageView, nullptr);
         if (m_DepthImage != VK_NULL_HANDLE)
@@ -56,6 +59,8 @@ namespace Lavender
     void VulkanResources::RecreateDepthResources()
     {
         VulkanDeviceInfo& info = VulkanManager::GetDeviceInfo();
+
+        vkDeviceWaitIdle(info.Device);
 
         // Cleanup depth resources
         vkDestroyImageView(info.Device, m_DepthImageView, nullptr);

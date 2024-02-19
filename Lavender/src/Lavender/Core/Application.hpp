@@ -7,7 +7,7 @@
 
 #include "Lavender/ImGui/BaseImGuiLayer.hpp"
 
-//#include "Lavender/Renderer/RenderingAPI.hpp"
+#include "Lavender/Renderer/RenderingAPI.hpp"
 
 #include <vector>
 #include <memory>
@@ -20,7 +20,7 @@ namespace Lavender
 	{
 	public:
 		WindowProperties WindowProperties = {};
-		//mutable APISpecifications APISpecs = {};
+		mutable APISpecifications APISpecs = {};
 		int ArgCount = 0;
 		char** Args = nullptr;
 

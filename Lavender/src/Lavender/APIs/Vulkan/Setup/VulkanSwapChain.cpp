@@ -116,6 +116,8 @@ namespace Lavender
 	{
 		VulkanDeviceInfo& info = VulkanManager::GetDeviceInfo();
 
+		vkDeviceWaitIdle(info.Device);
+
 		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
 			vkDestroyImageView(info.Device, m_SwapChainImageViews[i], nullptr);
 

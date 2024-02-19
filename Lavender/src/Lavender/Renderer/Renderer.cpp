@@ -23,6 +23,10 @@ namespace Lavender
 	{
 		s_APISpecs = specs;
 		s_Instance = new Renderer();
+
+		VulkanSwapChainInfo& info = VulkanManager::GetSwapChainInfo();
+		s_Instance->m_DefaultRenderPass = new VulkanRenderPass({ info.SwapChainExtent.width, info.SwapChainExtent.height }, VulkanRenderPass::ColourSpace::Unorm, ColourAttachment | DepthAttachment);
+		GraphicsContext::Get()->GetResources()->AddRenderPass(s_Instance->m_DefaultRenderPass);
 	}
 
 	void Renderer::Destroy()
