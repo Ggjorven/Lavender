@@ -6,6 +6,7 @@
 #include "Lavender/APIs/Vulkan/VulkanManager.hpp"
 #include "Lavender/APIs/Vulkan/Setup/VulkanHelper.hpp"
 #include "Lavender/APIs/Vulkan/Setup/VulkanImageHelper.hpp"
+#include "Lavender/APIs/Vulkan/Setup/VulkanBufferHelper.hpp"
 #include "Lavender/Renderer/GraphicsContext.hpp"
 
 namespace Lavender
@@ -29,8 +30,8 @@ namespace Lavender
 
         // Cleanup depth resources
         vkDestroyImageView(info.Device, m_DepthImageView, nullptr);
-        vkDestroyImage(info.Device, m_DepthImage, nullptr);
-        vkFreeMemory(info.Device, m_DepthImageMemory, nullptr);
+        if (m_DepthImage != VK_NULL_HANDLE)
+            vmaDestroyImage(VulkanBufferHelper::GetAllocator(), m_DepthImage, m_DepthImageMemory);
 
         for (size_t i = 0; i < LV_MAX_FRAMES_IN_FLIGHT; i++)
         {
@@ -58,8 +59,8 @@ namespace Lavender
 
         // Cleanup depth resources
         vkDestroyImageView(info.Device, m_DepthImageView, nullptr);
-        vkDestroyImage(info.Device, m_DepthImage, nullptr);
-        vkFreeMemory(info.Device, m_DepthImageMemory, nullptr);
+        if (m_DepthImage != VK_NULL_HANDLE)
+            vmaDestroyImage(VulkanBufferHelper::GetAllocator(), m_DepthImage, m_DepthImageMemory);
 
         CreateDepthResources();
     }
@@ -133,7 +134,8 @@ namespace Lavender
 
         VkFormat depthFormat = VulkanHelper::FindDepthFormat();
 
-        VulkanImageHelper::CreateImage(info.SwapChainExtent.width, info.SwapChainExtent.height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
+        uint32_t mips = 1;
+        VulkanImageHelper::CreateImage(info.SwapChainExtent.width, info.SwapChainExtent.height, mips, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_DepthImage, m_DepthImageMemory);
 
         m_DepthImageView = VulkanImageHelper::CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 

@@ -29,19 +29,21 @@ namespace Lavender
 		m_Instance = new VulkanInstance();
 		VulkanManager::PopulateDeviceInfo();
 
+		VulkanBufferHelper::Init();
+
 		m_SwapChain = new VulkanSwapChain();
 		VulkanManager::PopulateSwapChainInfo();
 
 		m_Resources = new VulkanResources();
 		VulkanManager::PopulateResourceInfo();
-
-		VulkanBufferHelper::Init();
 	}
 
 	void GraphicsContext::Destroy()
 	{
+
 		delete m_SwapChain;
 		delete m_Resources;
+		VulkanBufferHelper::Destroy();
 		delete m_Instance;
 
 		s_Instance = nullptr;

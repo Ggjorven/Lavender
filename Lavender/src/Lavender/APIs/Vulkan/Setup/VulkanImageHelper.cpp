@@ -10,8 +10,10 @@
 namespace Lavender
 {
 
-	void VulkanImageHelper::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+	void VulkanImageHelper::CreateImage(uint32_t width, uint32_t height, uint32_t& mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& outImage, VmaAllocation& outAllocation)
 	{
+		mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
 		VkImageCreateInfo imageInfo = {};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -27,23 +29,11 @@ namespace Lavender
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		auto logicalDevice = VulkanManager::GetDeviceInfo().Device;
+		VmaAllocationCreateInfo allocCreateInfo = {};
+		allocCreateInfo.usage = memoryUsage;
 
-		if (vkCreateImage(logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS)
-			LV_LOG_ERROR("Failed to create image!");
-
-		VkMemoryRequirements memRequirements = {};
-		vkGetImageMemoryRequirements(logicalDevice, image, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = VulkanBufferHelper::FindMemoryType(memRequirements.memoryTypeBits, properties);
-
-		if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-			LV_LOG_ERROR("Failed to allocate image memory!");
-
-		vkBindImageMemory(logicalDevice, image, imageMemory, 0);
+		if (vmaCreateImage(VulkanBufferHelper::GetAllocator(), &imageInfo, &allocCreateInfo, &outImage, &outAllocation, nullptr) != VK_SUCCESS)
+			LV_LOG_ERROR("Failed to create image.");
 	}
 
 	void VulkanImageHelper::TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 #include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
 
@@ -48,7 +49,7 @@ namespace Lavender
 
 		// Colour and render images.
 		VkImage m_DepthImage = VK_NULL_HANDLE;
-		VkDeviceMemory m_DepthImageMemory = VK_NULL_HANDLE;
+		VmaAllocation m_DepthImageMemory = VK_NULL_HANDLE;
 		VkImageView m_DepthImageView = VK_NULL_HANDLE;
 
 		friend class VulkanManager;

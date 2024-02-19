@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 #include "tracy/Tracy.hpp"
 #include "tracy/TracyVulkan.hpp"
@@ -51,7 +52,7 @@ namespace Lavender
 		std::vector<VkFence> InFlightFences = { };
 
 		VkImage DepthImage = VK_NULL_HANDLE;
-		VkDeviceMemory DepthImageMemory = VK_NULL_HANDLE;
+		VmaAllocation DepthImageMemory = VK_NULL_HANDLE;
 		VkImageView DepthImageView = VK_NULL_HANDLE;
 	};
 
