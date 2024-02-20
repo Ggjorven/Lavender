@@ -11,6 +11,7 @@
 namespace Lavender
 {
 
+	// TODO: Add more customizability
 	class RenderController
 	{
 	public:
