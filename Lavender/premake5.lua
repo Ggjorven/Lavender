@@ -24,7 +24,8 @@ project "Lavender"
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"yaml_cpp_EXPORTS"
 		-- "ASSIMP_BUILD_STATIC_LIB"
 	}
 
@@ -37,6 +38,7 @@ project "Lavender"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.tracy}",
@@ -50,6 +52,7 @@ project "Lavender"
 
 		"GLFW",
 		"ImGui",
+		"yaml-cpp",
 		"Tracy",
 		"VMA"
 	}
@@ -95,7 +98,7 @@ project "Lavender"
 	filter "configurations:Dist"
 		defines "LV_DIST"
 		runtime "Release"
-		optimize "full"
+		optimize "Full"
 
 	filter { "system:windows", "configurations:Debug" }
 		links

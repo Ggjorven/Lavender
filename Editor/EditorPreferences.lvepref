@@ -1,0 +1,2 @@
+Preferences: Editor
+ImGui: "[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Abc]\nPos=18,17\nSize=251,212\nCollapsed=0\n\n[Docking][Data]\n\n"

@@ -39,3 +39,7 @@ project "VMA"
 	filter "configurations:Release"
 		runtime "Release"
 		optimize "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "Full"

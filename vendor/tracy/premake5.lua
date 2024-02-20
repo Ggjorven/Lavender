@@ -4,8 +4,6 @@ project "Tracy"
 	cppdialect "C++17"
 	staticruntime "Off"
 
-	--toolset "clang"
-
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -26,8 +24,6 @@ project "Tracy"
 		"tracy/public/libbacktrace/alloc.cpp",
 		"tracy/public/libbacktrace/sort.cpp",
 		"tracy/public/libbacktrace/state.cpp"
-
-		-- "tracy/public/TracyClient.cpp"
 	}
 
 	includedirs { "tracy/public/" }
@@ -49,7 +45,8 @@ project "Tracy"
 
 	filter "system:linux"
 		staticruntime "On"
-		files {
+		files 
+		{
 			"tracy/public/libbacktrace/posix.cpp",
 			"tracy/public/libbacktrace/mmapio.cpp",
 			"tracy/public/libbacktrace/macho.cpp",
@@ -63,7 +60,8 @@ project "Tracy"
 		symbols "On"
 		conformancemode "On"
 
-		defines {
+		defines 
+		{
 			"TRACY_ENABLE",
 			"TRACY_ON_DEMAND"
 		}
@@ -73,7 +71,8 @@ project "Tracy"
 		optimize "On"
 		conformancemode "On"
 
-		defines {
+		defines 
+		{
 			"TRACY_ENABLE",
 			"TRACY_ON_DEMAND"
 		}
@@ -83,7 +82,8 @@ project "Tracy"
 		optimize "Full"
 		conformancemode "On"
 
-		defines {
+		defines 
+		{
 			"TRACY_ENABLE",
 			"TRACY_ON_DEMAND"
 		}

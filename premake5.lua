@@ -2,7 +2,7 @@ include "Dependencies.lua"
 
 workspace "Lavender"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "Editor"
 
 	configurations
 	{
@@ -22,6 +22,7 @@ group "Dependencies"
 	include "vendor/GLFW"
 	include "vendor/ImGui"
 	include "vendor/tracy"
+	include "vendor/yaml-cpp"
 	include "vendor/VulkanMemoryAllocator"
 group ""
 
@@ -29,4 +30,4 @@ group "Lavender"
 	include "Lavender"
 group ""
 
-include "Sandbox"
+include "Editor"

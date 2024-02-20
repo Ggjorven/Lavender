@@ -12,7 +12,7 @@ namespace Lavender
 
 	void VulkanImageHelper::CreateImage(uint32_t width, uint32_t height, uint32_t& mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& outImage, VmaAllocation& outAllocation)
 	{
-		#undef max(a, b)
+		#undef max
 		mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 		VkImageCreateInfo imageInfo = {};
