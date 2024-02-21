@@ -6,6 +6,8 @@
 
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/Renderer/Renderer.hpp"
+
 namespace Lavender
 {
 
@@ -37,7 +39,7 @@ namespace Lavender
 	void WindowsWindow::SetVSync(bool enabled)
 	{
 		// Note(Jorben): We resize cause resize recreates the swapchain
-		//Renderer::OnResize(GetWidth(), GetHeight());
+		Renderer::OnResize(GetWidth(), GetHeight());
 
 		m_Data.Vsync = enabled;
 	}

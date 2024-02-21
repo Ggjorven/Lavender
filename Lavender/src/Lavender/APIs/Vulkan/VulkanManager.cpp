@@ -21,8 +21,14 @@ namespace Lavender
 		VulkanSwapChain& vc = *GraphicsContext::Get()->GetSwapChain();
 		vc.RecreateSwapChain();
 
+		VulkanManager::PopulateResourceInfo();
+
 		auto& resources = *GraphicsContext::Get()->GetResources();
-		// TODO(Jorben): Recreate the depth and colour resources
+
+		// TODO(Jorben): Recreate colour resources (TODO)
+		resources.RecreateDepthResources();
+
+		VulkanManager::PopulateResourceInfo();
 		resources.RecreateFramebuffers();
 	}
 

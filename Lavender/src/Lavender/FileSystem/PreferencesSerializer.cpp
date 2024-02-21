@@ -58,7 +58,7 @@ namespace Lavender
 		}
 		catch (YAML::BadFile e)
 		{
-			LV_LOG_ERROR("Failed to load {0} (Code: {1})\n\tLoading empty preferences.", file.string(), e.what());
+			LV_LOG_WARN("Failed to load {0} (Code: {1})\n\tLoading empty preferences.", file.string(), e.what());
 			return;
 		}
 

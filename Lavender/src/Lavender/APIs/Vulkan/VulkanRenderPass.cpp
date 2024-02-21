@@ -2,6 +2,7 @@
 #include "VulkanRenderPass.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Core/Application.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanManager.hpp"
 #include "Lavender/APIs/Vulkan/Setup/VulkanHelper.hpp"
@@ -52,7 +53,9 @@ namespace Lavender
 		for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
 			vkDestroyFramebuffer(info.Device, m_SwapChainFramebuffers[i], nullptr);
 
-		CreateFrameBuffers({ VulkanManager::GetSwapChainInfo().SwapChainExtent.width, VulkanManager::GetSwapChainInfo().SwapChainExtent.height }, m_ColourSpace, m_Attachments);
+		auto& window = Application::Get().GetWindow();
+
+		CreateFrameBuffers({ window.GetWidth(), window.GetHeight() }, m_ColourSpace, m_Attachments);
 	}
 
 	void VulkanRenderPass::CreateRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments)

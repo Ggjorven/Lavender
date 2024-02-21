@@ -5,6 +5,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Lavender/Core/Application.hpp"
 #include "Lavender/Renderer/IndexBuffer.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanManager.hpp"
@@ -156,13 +157,14 @@ namespace Lavender
 		else if (result != VK_SUCCESS)
 			LV_LOG_ERROR("Failed to present swap chain image!");
 
-		// Note(Jorben): We use the & operator since MAX_FRAMES_IN_FLIGHT is a power of 2 and this is a lot cheaper, if it's not use the % operator
 		m_CurrentFrame = (m_CurrentFrame + 1) % LV_MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Renderer::RecordCommandBuffer(VkCommandBuffer& commandBuffer, uint32_t imageIndex)
 	{
 		LV_PROFILE_SCOPE("RecordCommandBuffer");
+
+		auto& window = Application::Get().GetWindow();
 
 		VulkanSwapChainInfo& swapchainInfo = VulkanManager::GetSwapChainInfo();
 
@@ -197,7 +199,7 @@ namespace Lavender
 		renderPassInfo.renderPass = renderPass->m_RenderPass;
 		renderPassInfo.framebuffer = renderPass->m_SwapChainFramebuffers[imageIndex];
 		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = swapchainInfo.SwapChainExtent;
+		renderPassInfo.renderArea.extent = { window.GetWidth(), window.GetHeight() };
 
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 		renderPassInfo.pClearValues = clearValues.data();
@@ -210,15 +212,15 @@ namespace Lavender
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = (float)swapchainInfo.SwapChainExtent.width;
-		viewport.height = (float)swapchainInfo.SwapChainExtent.height;
+		viewport.width = (float)window.GetWidth();
+		viewport.height = (float)window.GetHeight();
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 		VkRect2D scissor = {};
 		scissor.offset = { 0, 0 };
-		scissor.extent = swapchainInfo.SwapChainExtent;
+		scissor.extent = { window.GetWidth(), window.GetHeight() };
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 		// Execute all commands
