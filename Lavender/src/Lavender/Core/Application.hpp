@@ -7,35 +7,32 @@
 
 #include "Lavender/ImGui/BaseImGuiLayer.hpp"
 
-#include "Lavender/Renderer/RenderingAPI.hpp"
+//#include "Lavender/Renderer/RenderingAPI.hpp"
 
 #include <vector>
 #include <memory>
+#include <queue>
 #include <filesystem>
 
 namespace Lavender
 {
 
-	struct AppInfo
+	struct ApplicationSpecification
 	{
 	public:
-		WindowProperties WindowProperties = {};
-		mutable APISpecifications APISpecs = {};
-		int ArgCount = 0;
-		char** Args = nullptr;
+		WindowProperties WindowProperties = { };
+		// TODO: Add more
 
-		AppInfo() = default;
-		AppInfo(int argc, char** argv)
-			: ArgCount(argc), Args(argv) {}
+		ApplicationSpecification() = default;
 	};
 
 	class Application
 	{
 	public:
-		Application(const AppInfo& appInfo);
+		Application(const ApplicationSpecification& appInfo);
 		virtual ~Application();
 
-		void OnEvent(Event& e);
+		void OnEvent(std::shared_ptr<Event>& e);
 
 		void Run();
 		inline void Close() { m_Running = false; }
@@ -45,26 +42,26 @@ namespace Lavender
 
 		inline Window& GetWindow() { return *m_Window; }
 
-		template<typename TEvent>
-		inline void DispatchEvent(TEvent e = TEvent()) { static_assert(std::is_base_of<Event, TEvent>::value); OnEvent(e); }
-
 		inline static Application& Get() { return *s_Instance; }
-		inline static std::filesystem::path GetWorkingDirectory() { return std::filesystem::path(s_Instance->m_AppInfo.Args[0]).parent_path(); }
 
 		inline bool IsMinimized() const { return m_Minimized; }
 
 	private:
-		void Init(const AppInfo& appInfo);
+		void Init(const ApplicationSpecification& appInfo);
 
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 
+		void HandleEvents();
+
 	private:
-		AppInfo m_AppInfo;
+		ApplicationSpecification m_AppInfo;
 
 		std::unique_ptr<Window> m_Window = nullptr;
 		bool m_Running = true;
 		bool m_Minimized = false;
+
+		std::queue<std::shared_ptr<Event>> m_EventQueue = { };
 
 		LayerStack m_LayerStack;
 		BaseImGuiLayer* m_ImGuiLayer = nullptr;

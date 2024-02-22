@@ -2,7 +2,7 @@
 
 #include "Lavender/Core/Window.hpp"
 
-#include "Lavender/Renderer/GraphicsContext.hpp"
+//#include "Lavender/Renderer/GraphicsContext.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -41,7 +41,7 @@ namespace Lavender
 		static uint32_t s_Instances;
 
 		GLFWwindow* m_Window = nullptr;
-		std::unique_ptr<GraphicsContext> m_GraphicsContext = nullptr;
+		//std::unique_ptr<GraphicsContext> m_GraphicsContext = nullptr;
 		WindowData m_Data = {};
 
 	};

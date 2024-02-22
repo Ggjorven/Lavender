@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Lavender/Core/Logging.hpp"
-#include "Lavender/Renderer/Renderer.hpp"
+//#include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/Utils/Profiler.hpp"
 
@@ -13,7 +13,7 @@ namespace Lavender
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const AppInfo& appInfo)
+	Application::Application(const ApplicationSpecification& appInfo)
 		: m_AppInfo(appInfo)
 	{
 		Init(appInfo);
@@ -21,7 +21,7 @@ namespace Lavender
 
 	Application::~Application()
 	{
-		Renderer::Wait();
+		//Renderer::Wait();
 
 		for (Layer* layer : m_LayerStack)
 		{
@@ -29,22 +29,12 @@ namespace Lavender
 			delete layer;
 		}
 
-		Renderer::Destroy();
+		//Renderer::Destroy();
 	}
 
-	void Application::OnEvent(Event& e)
+	void Application::OnEvent(std::shared_ptr<Event>& e)
 	{
-		EventHandler handler(e);
-
-		handler.Handle<WindowCloseEvent>(LV_BIND_EVENT_FN(Application::OnWindowClose));
-		handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(Application::OnWindowResize));
-
-		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
-		{
-			if (e.Handled)
-				break;
-			(*it)->OnEvent(e);
-		}
+		m_EventQueue.push(e);
 	}
 
 	void Application::Run()
@@ -60,6 +50,7 @@ namespace Lavender
 
 			// Update & Render
 			m_Window->OnUpdate();
+			HandleEvents();
 			{
 				LV_PROFILE_SCOPE("Update & Render");
 				for (Layer* layer : m_LayerStack)
@@ -83,7 +74,7 @@ namespace Lavender
 				}
 			}
 
-			Renderer::Display();
+			//Renderer::Display();
 
 			m_Window->OnRender();
 		}
@@ -99,7 +90,7 @@ namespace Lavender
 		m_LayerStack.AddOverlay(layer);
 	}
 
-	void Application::Init(const AppInfo& appInfo)
+	void Application::Init(const ApplicationSpecification& appInfo)
 	{
 		s_Instance = this;
 
@@ -108,7 +99,7 @@ namespace Lavender
 		m_Window = Window::Create(appInfo.WindowProperties);
 		m_Window->SetEventCallBack(LV_BIND_EVENT_FN(Application::OnEvent));
 
-		Renderer::Init(appInfo.APISpecs);
+		//Renderer::Init(appInfo.APISpecs);
 
 		m_ImGuiLayer = new BaseImGuiLayer();
 		AddOverlay(m_ImGuiLayer);
@@ -128,9 +119,32 @@ namespace Lavender
 			return true;
 		}
 
-		Renderer::OnResize(e.GetWidth(), e.GetHeight());
+		//Renderer::OnResize(e.GetWidth(), e.GetHeight());
 		m_Minimized = false;
 		return false;
+	}
+
+	void Application::HandleEvents()
+	{
+		while (!m_EventQueue.empty())
+		{
+			std::shared_ptr<Event> rawEvent = m_EventQueue.front();
+			Event& e = *rawEvent;
+
+			EventHandler handler(e);
+
+			handler.Handle<WindowCloseEvent>(LV_BIND_EVENT_FN(Application::OnWindowClose));
+			handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(Application::OnWindowResize));
+
+			for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+			{
+				if (e.Handled)
+					break;
+				(*it)->OnEvent(e);
+			}
+
+			m_EventQueue.pop();
+		}
 	}
 
 }

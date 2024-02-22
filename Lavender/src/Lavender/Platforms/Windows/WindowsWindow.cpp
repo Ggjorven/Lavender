@@ -6,7 +6,7 @@
 
 #include "Lavender/Utils/Profiler.hpp"
 
-#include "Lavender/Renderer/Renderer.hpp"
+//#include "Lavender/Renderer/Renderer.hpp"
 
 namespace Lavender
 {
@@ -39,7 +39,7 @@ namespace Lavender
 	void WindowsWindow::SetVSync(bool enabled)
 	{
 		// Note(Jorben): We resize cause resize recreates the swapchain
-		Renderer::OnResize(GetWidth(), GetHeight());
+		//Renderer::OnResize(GetWidth(), GetHeight());
 
 		m_Data.Vsync = enabled;
 	}
@@ -68,8 +68,8 @@ namespace Lavender
 		m_Window = glfwCreateWindow((int)properties.Width, (int)properties.Height, properties.Name.c_str(), nullptr, nullptr);
 		s_Instances++;
 
-		m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window, properties.VSync);
-		m_GraphicsContext->Init();
+		//m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window, properties.VSync);
+		//m_GraphicsContext->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data); //So we can access/get to the data in lambda functions
 		if (properties.CustomPos) glfwSetWindowPos(m_Window, properties.X, properties.Y);
@@ -81,14 +81,15 @@ namespace Lavender
 				data.Width = width;
 				data.Height = height;
 
-				WindowResizeEvent event(width, height);
+				std::shared_ptr<Event> event = std::make_shared<WindowResizeEvent>(width, height);
 				data.CallBack(event);
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				WindowCloseEvent event;
+				
+				std::shared_ptr<Event> event = std::make_shared<WindowCloseEvent>();
 				data.CallBack(event);
 			});
 
@@ -101,19 +102,19 @@ namespace Lavender
 				{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(key, 0);
+					std::shared_ptr<Event> event = std::make_shared<KeyPressedEvent>(key, 0);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent event(key);
+					std::shared_ptr<Event> event = std::make_shared<KeyReleasedEvent>(key);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(key, 1);
+					std::shared_ptr<Event> event = std::make_shared<KeyPressedEvent>(key, 1);
 					data.CallBack(event);
 					break;
 				}
@@ -124,7 +125,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				KeyTypedEvent event(keycode);
+				std::shared_ptr<Event> event = std::make_shared<KeyTypedEvent>(keycode);
 				data.CallBack(event);
 			});
 
@@ -136,13 +137,13 @@ namespace Lavender
 				{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent event(button);
+					std::shared_ptr<Event> event = std::make_shared<MouseButtonPressedEvent>(button);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent event(button);
+					std::shared_ptr<Event> event = std::make_shared<MouseButtonReleasedEvent>(button);
 					data.CallBack(event);
 					break;
 				}
@@ -153,7 +154,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				MouseScrolledEvent event((float)xOffset, (float)yOffset);
+				std::shared_ptr<Event> event = std::make_shared<MouseScrolledEvent>((float)xOffset, (float)yOffset);
 				data.CallBack(event);
 			});
 
@@ -161,7 +162,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				MouseMovedEvent event((float)xPos, (float)yPos);
+				std::shared_ptr<Event> event = std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos);
 				data.CallBack(event);
 			});
 
@@ -171,7 +172,7 @@ namespace Lavender
 
 	void WindowsWindow::Shutdown()
 	{
-		m_GraphicsContext->Destroy();
+		//m_GraphicsContext->Destroy();
 
 		glfwDestroyWindow(m_Window);
 		s_Instances--;

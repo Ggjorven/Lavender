@@ -7,13 +7,13 @@
 
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
-#include "Lavender/Renderer/Renderer.hpp"
-
-#include "Lavender/Renderer/GraphicsContext.hpp"
-#include "Lavender/APIs/Vulkan/VulkanManager.hpp"
-#include "Lavender/APIs/Vulkan/VulkanActions.hpp"
-#include "Lavender/APIs/Vulkan/Setup/VulkanHelper.hpp"
-#include "Lavender/APIs/Vulkan/Setup/VulkanResources.hpp"
+//#include "Lavender/Renderer/Renderer.hpp"
+//
+//#include "Lavender/Renderer/GraphicsContext.hpp"
+//#include "Lavender/APIs/Vulkan/VulkanManager.hpp"
+//#include "Lavender/APIs/Vulkan/VulkanActions.hpp"
+//#include "Lavender/APIs/Vulkan/Setup/VulkanHelper.hpp"
+//#include "Lavender/APIs/Vulkan/Setup/VulkanResources.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -22,6 +22,7 @@ namespace Lavender
 
 	void BaseImGuiLayer::OnAttach()
 	{
+		/*
 		CreateDescriptorPool();
 
 		IMGUI_CHECKVERSION();
@@ -83,10 +84,12 @@ namespace Lavender
 
 			ImGui_ImplVulkan_DestroyFontUploadObjects();
 		}
+		*/
 	}
 
 	void BaseImGuiLayer::OnDetach()
 	{
+		/*
 		vkDeviceWaitIdle(VulkanManager::GetDeviceInfo().Device);
 
 		vkDestroyDescriptorPool(VulkanManager::GetDeviceInfo().Device, m_DescriptorPool, nullptr);
@@ -94,17 +97,21 @@ namespace Lavender
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+		*/
 	}
 
 	void BaseImGuiLayer::Begin()
 	{
+		/*
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		*/
 	}
 
 	void BaseImGuiLayer::End()
 	{
+		/*
 		ImGuiIO& io = ImGui::GetIO();
 
 		io.DisplaySize = ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight());
@@ -126,10 +133,12 @@ namespace Lavender
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+		*/
 	}
 
 	void BaseImGuiLayer::CreateDescriptorPool()
 	{
+		/*
 		std::vector<VkDescriptorPoolSize> poolSizes =
 		{
 			{ VK_DESCRIPTOR_TYPE_SAMPLER, 10 },
@@ -153,6 +162,7 @@ namespace Lavender
 
 		if (vkCreateDescriptorPool(VulkanManager::GetDeviceInfo().Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
 			LV_LOG_ERROR("Failed to create descriptor pool!");
+		*/
 	}
 
 }

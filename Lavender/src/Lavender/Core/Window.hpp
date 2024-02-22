@@ -9,7 +9,7 @@
 namespace Lavender
 {
 
-	using EventCallBackFunction = std::function<void(Event&)>;
+	using EventCallBackFunction = std::function<void(std::shared_ptr<Event>&)>;
 
 	struct WindowProperties
 	{
@@ -24,7 +24,7 @@ namespace Lavender
 		uint32_t X = 0u;
 		uint32_t Y = 0u;
 
-		WindowProperties(std::string name = "VulkanApp Window", uint32_t width = 1280u, uint32_t height = 720u)
+		WindowProperties(std::string name = "Lavender Window", uint32_t width = 1280u, uint32_t height = 720u)
 			: Name(name), Width(width), Height(height)
 		{
 		}
@@ -39,12 +39,12 @@ namespace Lavender
 		bool Vsync = false;
 		EventCallBackFunction CallBack;
 
-		WindowData(std::string name = "VulkanApp Window", uint32_t width = 1280, uint32_t height = 720)
+		WindowData(std::string name = "Lavender Window", uint32_t width = 1280, uint32_t height = 720)
 			: Name(name), Width(width), Height(height)
 		{
 		}
 
-		WindowData operator=(WindowProperties const& properties)
+		WindowData operator = (WindowProperties const& properties)
 		{
 			WindowData newData;
 			newData.Name = properties.Name;
