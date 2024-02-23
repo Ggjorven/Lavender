@@ -6,6 +6,24 @@
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+struct A
+{
+	virtual ~A() = default;
+
+	void Potato()
+	{
+		LV_LOG_TRACE("Potato");
+	}
+};
+
+struct B : public A
+{
+	void Carrot()
+	{
+		LV_LOG_TRACE("Carrot");
+	}
+};
+
 void EditorLayer::OnAttach()
 {
 }

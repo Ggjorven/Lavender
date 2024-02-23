@@ -101,7 +101,7 @@ namespace Lavender
 
 		//Renderer::Init(appInfo.APISpecs);
 
-		m_ImGuiLayer = new BaseImGuiLayer();
+		m_ImGuiLayer = BaseImGuiLayer::Create();
 		AddOverlay(m_ImGuiLayer);
 	}
 

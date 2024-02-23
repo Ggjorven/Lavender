@@ -6,13 +6,15 @@
 
 #include "Lavender/Utils/Profiler.hpp"
 
-//#include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/Renderer.hpp"
 
 namespace Lavender
 {
 
 	bool WindowsWindow::s_GLFWinitialized = false;
 	uint32_t WindowsWindow::s_Instances = 0u;
+
+	static void SetupAPIWindowHints();
 
 	WindowsWindow::WindowsWindow(const WindowProperties properties)
 	{
@@ -38,8 +40,7 @@ namespace Lavender
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
-		// Note(Jorben): We resize cause resize recreates the swapchain
-		//Renderer::OnResize(GetWidth(), GetHeight());
+		// TODO: Recreate Vulkan swapchain
 
 		m_Data.Vsync = enabled;
 	}
@@ -64,7 +65,7 @@ namespace Lavender
 		}
 		m_Data.Vsync = properties.VSync;
 
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		SetupAPIWindowHints();
 		m_Window = glfwCreateWindow((int)properties.Width, (int)properties.Height, properties.Name.c_str(), nullptr, nullptr);
 		s_Instances++;
 
@@ -184,6 +185,20 @@ namespace Lavender
 	void WindowsWindow::ErrorCallBack(int errorCode, const char* description)
 	{
 		LV_LOG_ERROR("[GLFW]: ({0}), {1}", errorCode, description);
+	}
+
+	void SetupAPIWindowHints()
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			break;
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
 	}
 
 }
