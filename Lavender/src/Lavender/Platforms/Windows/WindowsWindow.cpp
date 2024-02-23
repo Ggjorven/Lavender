@@ -69,8 +69,8 @@ namespace Lavender
 		m_Window = glfwCreateWindow((int)properties.Width, (int)properties.Height, properties.Name.c_str(), nullptr, nullptr);
 		s_Instances++;
 
-		//m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window, properties.VSync);
-		//m_GraphicsContext->Init();
+		m_RenderingContext = RenderingContext::Create();
+		m_RenderingContext->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data); //So we can access/get to the data in lambda functions
 		if (properties.CustomPos) glfwSetWindowPos(m_Window, properties.X, properties.Y);
@@ -173,7 +173,7 @@ namespace Lavender
 
 	void WindowsWindow::Shutdown()
 	{
-		//m_GraphicsContext->Destroy();
+		m_RenderingContext->Destroy();
 
 		glfwDestroyWindow(m_Window);
 		s_Instances--;

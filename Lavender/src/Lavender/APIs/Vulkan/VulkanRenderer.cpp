@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Renderer/Renderer.hpp"
+
 namespace Lavender
 {
 	
@@ -15,14 +17,20 @@ namespace Lavender
 	
 	VulkanRenderData* s_RenderData = nullptr;
 
-	VulkanRenderer::VulkanRenderer()
+	VulkanRenderer::VulkanRenderer(const RendererSpecification& specs)
 	{
 		s_RenderData = new VulkanRenderData();
 	}
 
 	VulkanRenderer::~VulkanRenderer()
 	{
+		// TODO: Wait till idle
+
 		delete s_RenderData;
+	}
+
+	void VulkanRenderer::Display()
+	{
 	}
 
 	void VulkanRenderer::OnResize(uint32_t widht, uint32_t height)

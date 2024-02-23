@@ -2,30 +2,31 @@
 
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Logging.hpp>
+#include <Lavender/Utils/Utils.hpp>
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-struct A
-{
-	virtual ~A() = default;
+#include <functional>
 
-	void Potato()
-	{
-		LV_LOG_TRACE("Potato");
-	}
-};
-
-struct B : public A
+static void A(int a)
 {
-	void Carrot()
-	{
-		LV_LOG_TRACE("Carrot");
-	}
-};
+	LV_LOG_TRACE("A: {0}", a);
+}
+
+static void B(int b)
+{
+	LV_LOG_TRACE("B: {0}", b);
+}
 
 void EditorLayer::OnAttach()
 {
+	Utils::Queue<std::function<void(int)>> queue = {};
+
+	queue.Add(&A);
+	queue.Add(&B);
+
+	queue.Execute(2);
 }
 
 void EditorLayer::OnDetach()

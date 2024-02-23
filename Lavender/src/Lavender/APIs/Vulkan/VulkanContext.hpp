@@ -4,6 +4,8 @@
 
 #include "Lavender/APIs/Vulkan/VulkanSwapChain.hpp"
 
+#include <vulkan/vulkan.h>
+
 namespace Lavender
 {
 
@@ -14,18 +16,16 @@ namespace Lavender
 		virtual ~VulkanContext();
 
 		void Init() override;
+		void Destroy() override;
 
 	private:
 		// TODO: Add a lot of vulkan related stuff
-		// Devices
-		//Ref<VulkanPhysicalDevice> m_PhysicalDevice;
-		//Ref<VulkanDevice> m_Device;
-		//
-		//// Vulkan instance
-		//inline static VkInstance s_VulkanInstance;
-		//	VkDebugUtilsMessengerEXT m_DebugUtilsMessenger = VK_NULL_HANDLE;
-		//VkPipelineCache m_PipelineCache = nullptr;
-		//
-		//VulkanSwapChain m_SwapChain;
+		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
+		VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
+
+		//std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice = VK_NULL_HANDLE;
+		//std::shared_ptr<VulkanDevice> m_Device = VK_NULL_HANDLE;
+
+		//std::shared_ptr<VulkanSwapChain> m_SwapChain = VK_NULL_HANDLE;
 	};
 }

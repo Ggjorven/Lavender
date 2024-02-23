@@ -3,14 +3,24 @@
 
 #include "Lavender/Core/Logging.hpp"
 
-//#include "Lavender/APIs/Vulkan/VulkanContext.hpp" // TODO
+#include "Lavender/Renderer/Renderer.hpp"
+
+#include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 
 namespace Lavender
 {
 
 	std::shared_ptr<RenderingContext> RenderingContext::Create()
 	{
-		// TODO
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			return std::make_shared<VulkanContext>();
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
 
 		return nullptr;
 	}

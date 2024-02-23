@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Lavender/Core/Logging.hpp"
-//#include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/Utils/Profiler.hpp"
 
@@ -21,15 +21,13 @@ namespace Lavender
 
 	Application::~Application()
 	{
-		//Renderer::Wait();
-
 		for (Layer* layer : m_LayerStack)
 		{
 			layer->OnDetach();
 			delete layer;
 		}
 
-		//Renderer::Destroy();
+		Renderer::Destroy();
 	}
 
 	void Application::OnEvent(std::shared_ptr<Event>& e)
@@ -74,7 +72,7 @@ namespace Lavender
 				}
 			}
 
-			//Renderer::Display();
+			Renderer::Display();
 
 			m_Window->OnRender();
 		}
@@ -99,7 +97,7 @@ namespace Lavender
 		m_Window = Window::Create(appInfo.WindowProperties);
 		m_Window->SetEventCallBack(LV_BIND_EVENT_FN(Application::OnEvent));
 
-		//Renderer::Init(appInfo.APISpecs);
+		Renderer::Init(appInfo.RenderSpecs);
 
 		m_ImGuiLayer = BaseImGuiLayer::Create();
 		AddOverlay(m_ImGuiLayer);
@@ -119,7 +117,7 @@ namespace Lavender
 			return true;
 		}
 
-		//Renderer::OnResize(e.GetWidth(), e.GetHeight());
+		Renderer::OnResize(e.GetWidth(), e.GetHeight());
 		m_Minimized = false;
 		return false;
 	}

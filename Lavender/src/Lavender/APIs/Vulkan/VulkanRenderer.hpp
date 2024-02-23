@@ -8,8 +8,10 @@ namespace Lavender
 	class VulkanRenderer : public RenderInstance
 	{
 	public:
-		VulkanRenderer();
+		VulkanRenderer(const RendererSpecification& specs);
 		virtual ~VulkanRenderer();
+
+		void Display() override;
 
 		void OnResize(uint32_t widht, uint32_t height) override;
 	};

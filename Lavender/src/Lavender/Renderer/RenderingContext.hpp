@@ -12,6 +12,7 @@ namespace Lavender
 		virtual ~RenderingContext() = default;
 
 		virtual void Init() = 0;
+		virtual void Destroy() = 0;
 
 		static std::shared_ptr<RenderingContext> Create();
 	};

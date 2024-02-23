@@ -14,7 +14,6 @@ namespace Lavender
 
 		// TODO: ... 
 
-
 	private:
 		/* // TODO: Add all of this
 		VkInstance m_Instance = nullptr;

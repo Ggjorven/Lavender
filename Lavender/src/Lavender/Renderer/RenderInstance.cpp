@@ -5,12 +5,22 @@
 
 #include "Lavender/Renderer/Renderer.hpp"
 
+#include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
+
 namespace Lavender
 {
 
-	RenderInstance* RenderInstance::Create()
+	RenderInstance* RenderInstance::Create(const RendererSpecification& specs)
 	{
-		// TODO
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			return new VulkanRenderer(specs);
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
 
 		return nullptr;
 	}

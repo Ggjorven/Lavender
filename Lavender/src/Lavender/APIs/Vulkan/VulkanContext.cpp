@@ -18,4 +18,8 @@ namespace Lavender
 	{
 	}
 
+	void VulkanContext::Destroy()
+	{
+	}
+
 }

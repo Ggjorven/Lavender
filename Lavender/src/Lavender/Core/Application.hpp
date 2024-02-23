@@ -7,7 +7,7 @@
 
 #include "Lavender/ImGui/BaseImGuiLayer.hpp"
 
-//#include "Lavender/Renderer/RenderingAPI.hpp"
+#include "Lavender/Renderer/RenderConfig.hpp"
 
 #include <vector>
 #include <memory>
@@ -21,7 +21,7 @@ namespace Lavender
 	{
 	public:
 		WindowProperties WindowProperties = { };
-		// TODO: Add more
+		RendererSpecification RenderSpecs = { };
 
 		ApplicationSpecification() = default;
 	};

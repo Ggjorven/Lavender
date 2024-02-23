@@ -6,10 +6,12 @@
 
 #include "Lavender/Core/Events.hpp"
 
+#include "Lavender/Renderer/RenderingContext.hpp"
+
 namespace Lavender
 {
 
-	using EventCallBackFunction = std::function<void(std::shared_ptr<Event>&)>;
+	typedef std::function<void(std::shared_ptr<Event>&)> EventCallBackFunction;
 
 	struct WindowProperties
 	{
@@ -76,6 +78,8 @@ namespace Lavender
 		virtual void SetTitle(const std::string& title) = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+
+		virtual std::shared_ptr<RenderingContext> GetRenderingContext() = 0;
 
 		static std::unique_ptr<Window> Create(const WindowProperties properties = WindowProperties());
 	};

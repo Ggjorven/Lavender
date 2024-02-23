@@ -30,6 +30,8 @@ namespace Lavender
 
 		void* GetNativeWindow() const override { return (void*)m_Window; }
 
+		std::shared_ptr<RenderingContext> GetRenderingContext() override { return m_RenderingContext; }
+
 	private:
 		bool Init(WindowProperties properties);
 		void Shutdown();
@@ -41,7 +43,7 @@ namespace Lavender
 		static uint32_t s_Instances;
 
 		GLFWwindow* m_Window = nullptr;
-		//std::unique_ptr<GraphicsContext> m_GraphicsContext = nullptr;
+		std::shared_ptr<RenderingContext> m_RenderingContext = nullptr;
 		WindowData m_Data = {};
 
 	};
