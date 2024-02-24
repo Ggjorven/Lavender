@@ -19,6 +19,9 @@ namespace Lavender
 		void Init(uint32_t width, uint32_t height, const bool vsync);
 		void Destroy();
 
+		void BeginFrame();
+		void EndFrame();
+
 		void OnResize(uint32_t width, uint32_t height, const bool vsync);
 
 		VkFramebuffer GetCurrentFrameBuffer() const { return m_Framebuffers[m_CurrentFrame]; }
@@ -30,6 +33,8 @@ namespace Lavender
 	private:
 		uint32_t AcquireNextImage();
 		void FindImageFormatAndColorSpace();
+
+		void TempRecordDefaultCommandBuffer();
 
 	private:
 		VkInstance m_Instance = VK_NULL_HANDLE;
@@ -53,6 +58,9 @@ namespace Lavender
 		std::vector<VkFramebuffer> m_Framebuffers;
 		VkRenderPass m_RenderPass = nullptr;
 
+		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
+		std::vector<VkCommandBuffer> m_CommandBuffers = { };
+
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores = { };
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores = { };
 		std::vector<VkFence> m_InFlightFences = { };
@@ -61,6 +69,7 @@ namespace Lavender
 		VkColorSpaceKHR m_ColorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
 
 		uint32_t m_CurrentFrame = 0;
+		uint32_t m_AquiredImage = 0;
 	};
 
 }

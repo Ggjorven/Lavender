@@ -50,6 +50,8 @@ namespace Lavender
 			// Update & Render
 			m_Window->OnUpdate();
 			HandleEvents();
+
+			Renderer::BeginFrame();
 			{
 				LV_PROFILE_SCOPE("Update & Render");
 				for (Layer* layer : m_LayerStack)
@@ -73,7 +75,7 @@ namespace Lavender
 				}
 			}
 
-			Renderer::Display();
+			Renderer::EndFrame();
 			m_Window->OnRender();
 		}
 	}

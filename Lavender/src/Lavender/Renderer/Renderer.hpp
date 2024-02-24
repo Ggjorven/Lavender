@@ -17,7 +17,8 @@ namespace Lavender
 		static void Init(const RendererSpecification& specs);
 		static void Destroy();
 
-		static void Display();
+		static void BeginFrame();
+		static void EndFrame();
 
 		static void OnResize(uint32_t width, uint32_t height);
 

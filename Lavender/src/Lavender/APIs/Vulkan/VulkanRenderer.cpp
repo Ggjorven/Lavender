@@ -33,12 +33,22 @@ namespace Lavender
 		delete s_RenderData;
 	}
 
-	void VulkanRenderer::Display()
+	void VulkanRenderer::BeginFrame()
 	{
+		auto swapchain = Utils::As<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		swapchain->BeginFrame();
 	}
 
-	void VulkanRenderer::OnResize(uint32_t widht, uint32_t height)
+	void VulkanRenderer::EndFrame() // A.k.a Display/Present
 	{
+		auto swapchain = Utils::As<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		swapchain->EndFrame();
+	}
+
+	void VulkanRenderer::OnResize(uint32_t width, uint32_t height)
+	{
+		auto swapchain = Utils::As<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		swapchain->OnResize(width, height, Application::Get().GetWindow().IsVSync());
 	}
 
 }

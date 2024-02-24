@@ -22,9 +22,14 @@ namespace Lavender
 		delete s_RenderInstance;
 	}
 
-	void Renderer::Display()
+	void Renderer::BeginFrame()
 	{
-		s_RenderInstance->Display();
+		s_RenderInstance->BeginFrame();
+	}
+
+	void Renderer::EndFrame()
+	{
+		s_RenderInstance->EndFrame();
 	}
 
 	void Renderer::OnResize(uint32_t width, uint32_t height)

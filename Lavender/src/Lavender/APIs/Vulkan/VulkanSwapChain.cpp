@@ -194,79 +194,66 @@ namespace Lavender
 			vkCreateImageView(device, &colorAttachmentView, nullptr, &m_Images[i].ImageView);
 		}
 
-		//
-		// TODO: EVerything below
-		//
-		/*
-
-		// Create command buffers
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Command buffers/pools
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
+		if (!m_CommandPool)
 		{
-			for (auto& commandBuffer : m_CommandBuffers)
-				vkDestroyCommandPool(device, commandBuffer.CommandPool, nullptr);
+			QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices::Find(m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice());
 
-			VkCommandPoolCreateInfo cmdPoolInfo = {};
-			cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			cmdPoolInfo.queueFamilyIndex = m_QueueNodeIndex;
-			cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+			VkCommandPoolCreateInfo poolInfo = {};
+			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
 
-			VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
-			commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			commandBufferAllocateInfo.commandBufferCount = 1;
+			if (vkCreateCommandPool(m_Device->GetVulkanDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to create command pool!");
 
-			m_CommandBuffers.resize(m_ImageCount);
-			for (auto& commandBuffer : m_CommandBuffers)
-			{
-				VK_CHECK_RESULT(vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &commandBuffer.CommandPool));
+			m_CommandBuffers.resize(framesInFlight);
 
-				commandBufferAllocateInfo.commandPool = commandBuffer.CommandPool;
-				VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer.CommandBuffer));
-			}
+			VkCommandBufferAllocateInfo allocInfo = {};
+			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			allocInfo.commandPool = m_CommandPool;
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
+
+			if (vkAllocateCommandBuffers(m_Device->GetVulkanDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to allocate command buffers!");
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Synchronization Objects
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if (!m_Semaphores.RenderComplete || !m_Semaphores.PresentComplete)
+		if (m_ImageAvailableSemaphores.empty() || m_RenderFinishedSemaphores.empty() || m_InFlightFences.empty())
 		{
-			VkSemaphoreCreateInfo semaphoreCreateInfo{};
-			semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			VK_CHECK_RESULT(vkCreateSemaphore(m_Device->GetVulkanDevice(), &semaphoreCreateInfo, nullptr, &m_Semaphores.RenderComplete));
-			VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_SEMAPHORE, "Swapchain Semaphore RenderComplete", m_Semaphores.RenderComplete);
-			VK_CHECK_RESULT(vkCreateSemaphore(m_Device->GetVulkanDevice(), &semaphoreCreateInfo, nullptr, &m_Semaphores.PresentComplete));
-			VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_SEMAPHORE, "Swapchain Semaphore PresentComplete", m_Semaphores.PresentComplete);
-		}
+			m_ImageAvailableSemaphores.resize(framesInFlight);
+			m_RenderFinishedSemaphores.resize(framesInFlight);
+			m_InFlightFences.resize(framesInFlight);
 
-		if (m_WaitFences.size() != m_ImageCount)
-		{
-			VkFenceCreateInfo fenceCreateInfo{};
-			fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+			VkSemaphoreCreateInfo semaphoreInfo = {};
+			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-			m_WaitFences.resize(m_ImageCount);
-			for (auto& fence : m_WaitFences)
+			VkFenceCreateInfo fenceInfo = {};
+			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			for (size_t i = 0; i < framesInFlight; i++)
 			{
-				VK_CHECK_RESULT(vkCreateFence(m_Device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence));
-				VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_FENCE, "Swapchain Fence", fence);
+				if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS ||
+					vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
+					vkCreateFence(device, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+				{
+					LV_LOG_ERROR("Failed to create synchronization objects for a frame!");
+				}
 			}
 		}
 
-		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
-		m_SubmitInfo = {};
-		m_SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		m_SubmitInfo.pWaitDstStageMask = &pipelineStageFlags;
-		m_SubmitInfo.waitSemaphoreCount = 1;
-		m_SubmitInfo.pWaitSemaphores = &m_Semaphores.PresentComplete;
-		m_SubmitInfo.signalSemaphoreCount = 1;
-		m_SubmitInfo.pSignalSemaphores = &m_Semaphores.RenderComplete;
-
-
-		VkFormat depthFormat = m_Device->GetPhysicalDevice()->GetDepthFormat();
-
-		// Render Pass
-		VkAttachmentDescription colorAttachmentDesc = {};
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Renderpass
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Color attachment
+		VkAttachmentDescription colorAttachmentDesc = {};
 		colorAttachmentDesc.format = m_ColorFormat;
 		colorAttachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
 		colorAttachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -311,31 +298,30 @@ namespace Lavender
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		VK_CHECK_RESULT(vkCreateRenderPass(m_Device->GetVulkanDevice(), &renderPassInfo, nullptr, &m_RenderPass));
-		VKUtils::SetDebugUtilsObjectName(device, VK_OBJECT_TYPE_RENDER_PASS, "Swapchain render pass", m_RenderPass);
-
+		vkCreateRenderPass(m_Device->GetVulkanDevice(), &renderPassInfo, nullptr, &m_RenderPass);
 		// Create framebuffers for every swapchain image
 		{
+			// Destroy existing framebuffers
 			for (auto& framebuffer : m_Framebuffers)
 				vkDestroyFramebuffer(device, framebuffer, nullptr);
+
+			auto& window = Application::Get().GetWindow();
 
 			VkFramebufferCreateInfo frameBufferCreateInfo = {};
 			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			frameBufferCreateInfo.renderPass = m_RenderPass;
 			frameBufferCreateInfo.attachmentCount = 1;
-			frameBufferCreateInfo.width = m_Width;
-			frameBufferCreateInfo.height = m_Height;
+			frameBufferCreateInfo.width = window.GetWidth();
+			frameBufferCreateInfo.height = window.GetHeight();
 			frameBufferCreateInfo.layers = 1;
 
-			m_Framebuffers.resize(m_ImageCount);
+			m_Framebuffers.resize(imageCount);
 			for (uint32_t i = 0; i < m_Framebuffers.size(); i++)
 			{
 				frameBufferCreateInfo.pAttachments = &m_Images[i].ImageView;
-				VK_CHECK_RESULT(vkCreateFramebuffer(m_Device->GetVulkanDevice(), &frameBufferCreateInfo, nullptr, &m_Framebuffers[i]));
-				VKUtils::SetDebugUtilsObjectName(m_Device->GetVulkanDevice(), VK_OBJECT_TYPE_FRAMEBUFFER, fmt::format("Swapchain framebuffer (Frame in flight: {})", i), m_Framebuffers[i]);
+				vkCreateFramebuffer(m_Device->GetVulkanDevice(), &frameBufferCreateInfo, nullptr, &m_Framebuffers[i]);
 			}
 		}
-		*/
 	}
 
 	void VulkanSwapChain::Destroy()
@@ -349,8 +335,7 @@ namespace Lavender
 		for (auto& image : m_Images)
 			vkDestroyImageView(device, image.ImageView, nullptr);
 
-		//for (auto& commandBuffer : m_CommandBuffers)
-		//	vkDestroyCommandPool(device, commandBuffer.CommandPool, nullptr);
+		vkDestroyCommandPool(device, m_CommandPool, nullptr);
 
 		if (m_RenderPass)
 			vkDestroyRenderPass(device, m_RenderPass, nullptr);
@@ -358,14 +343,81 @@ namespace Lavender
 		for (auto framebuffer : m_Framebuffers)
 			vkDestroyFramebuffer(device, framebuffer, nullptr);
 
-		//for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
-		//{
-		//	vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
-		//	vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
-		//	vkDestroyFence(device, m_InFlightFences[i], nullptr);
-		//}
+		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+		{
+			vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
+			vkDestroyFence(device, m_InFlightFences[i], nullptr);
+		}
 
 		vkDeviceWaitIdle(device);
+	}
+
+	void VulkanSwapChain::BeginFrame()
+	{
+		m_AquiredImage = AcquireNextImage();
+
+		vkResetFences(m_Device->GetVulkanDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
+		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
+
+		// TODO: Remove
+		TempRecordDefaultCommandBuffer();
+	}
+
+	void VulkanSwapChain::EndFrame()
+	{
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		{
+			LV_PROFILE_SCOPE("Submit Graphics Queue");
+			if (vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to submit draw command buffer!");
+		}
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+
+		VkSwapchainKHR swapChains[] = { m_SwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &m_AquiredImage;
+		presentInfo.pResults = nullptr; // Optional
+
+		VkResult result = VK_SUCCESS;
+		{
+			LV_PROFILE_SCOPE("QueuePresent");
+			result = vkQueuePresentKHR(m_Device->GetPresentQueue(), &presentInfo);
+		}
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+		{
+			auto& window = Application::Get().GetWindow();
+			OnResize(window.GetWidth(), window.GetHeight(), window.IsVSync());
+		}
+		else if (result != VK_SUCCESS)
+		{
+			LV_LOG_ERROR("Failed to present swap chain image!");
+		}
+
+		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetSpecification().FramesInFlight;
+
+		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height, const bool vsync)
@@ -436,6 +488,70 @@ namespace Lavender
 				m_ColorFormat = surfaceFormats[0].format;
 				m_ColorSpace = surfaceFormats[0].colorSpace;
 			}
+		}
+	}
+
+	void VulkanSwapChain::TempRecordDefaultCommandBuffer()
+	{
+		VkCommandBuffer commandBuffer = m_CommandBuffers[m_CurrentFrame];
+		auto& window = Application::Get().GetWindow();
+		VkExtent2D swapchainExtent = { window.GetWidth(), window.GetHeight() };
+
+		VkCommandBufferBeginInfo beginInfo = {};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		{
+			LV_PROFILE_SCOPE("BeginCmdBuf");
+			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to begin recording command buffer!");
+		}
+
+		std::vector<VkClearValue> clearValues = {};
+		clearValues.resize(2); // for colour and depth
+
+		clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
+		VkRenderPassBeginInfo renderPassInfo = {};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = m_RenderPass;
+		renderPassInfo.framebuffer = m_Framebuffers[m_AquiredImage];
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = swapchainExtent;
+
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		{
+			LV_PROFILE_SCOPE("BeginRenderPass");
+			vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		}
+
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = (float)swapchainExtent.width;
+		viewport.height = (float)swapchainExtent.height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor = {};
+		scissor.offset = { 0, 0 };
+		scissor.extent = swapchainExtent;
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+		// Execute something here
+
+		{
+			LV_PROFILE_SCOPE("EndRenderPass");
+			vkCmdEndRenderPass(commandBuffer);
+		}
+
+		{
+			LV_PROFILE_SCOPE("EndCmdBuf");
+			if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to record command buffer!");
 		}
 	}
 

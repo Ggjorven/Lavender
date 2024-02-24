@@ -38,14 +38,19 @@ namespace Lavender
 
 		inline VkPhysicalDevice& GetVulkanPhysicalDevice() { return m_PhysicalDevice; }
 
+		inline VkFormat GetDepthFormat() const { return m_Depthformat; }
+
 		static std::shared_ptr<VulkanPhysicalDevice> Select();
 
 	private:
 		bool PhysicalDeviceSuitable(const VkPhysicalDevice& device);
 		bool ExtensionsSupported(const VkPhysicalDevice& device);
+		VkFormat GetDepthFormat();
 
 	private:
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
+		
+		VkFormat m_Depthformat = VK_FORMAT_UNDEFINED;
 	};
 
 }

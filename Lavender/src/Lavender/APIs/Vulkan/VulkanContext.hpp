@@ -36,6 +36,7 @@ namespace Lavender
 
 		inline std::shared_ptr<VulkanDevice> GetLogicalDevice() { return m_Device; }
 		inline std::shared_ptr<VulkanPhysicalDevice> GetPhysicalDevice() { return m_PhysicalDevice; }
+		inline std::shared_ptr<VulkanSwapChain> GetSwapChain() { return m_SwapChain; }
 
 	private:
 		VkInstance m_VulkanInstance = VK_NULL_HANDLE;

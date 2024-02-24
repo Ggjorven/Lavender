@@ -11,9 +11,10 @@ namespace Lavender
 		VulkanRenderer(const RendererSpecification& specs);
 		virtual ~VulkanRenderer();
 
-		void Display() override;
+		void BeginFrame() override;
+		void EndFrame() override;
 
-		void OnResize(uint32_t widht, uint32_t height) override;
+		void OnResize(uint32_t width, uint32_t height) override;
 	};
 
 }
