@@ -2,8 +2,11 @@
 #include "VulkanRenderer.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
+
+#include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 
 namespace Lavender
 {
@@ -24,7 +27,8 @@ namespace Lavender
 
 	VulkanRenderer::~VulkanRenderer()
 	{
-		// TODO: Wait till idle
+		VkDevice& device = Utils::As<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		vkDeviceWaitIdle(device);
 
 		delete s_RenderData;
 	}

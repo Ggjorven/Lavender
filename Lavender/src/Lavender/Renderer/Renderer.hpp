@@ -24,8 +24,10 @@ namespace Lavender
 		inline static std::shared_ptr<RenderingContext> GetContext() { return Application::Get().GetWindow().GetRenderingContext(); }
 
 		inline constexpr static const RenderingAPI GetAPI() { return s_API; }
+		inline static RendererSpecification GetSpecification() { return s_Specifications; }
 		
 	private:
 		inline constexpr static const RenderingAPI s_API = RenderingAPI::Vulkan;
+		static RendererSpecification s_Specifications;
 	};
 }

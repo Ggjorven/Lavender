@@ -1,77 +1,66 @@
 #pragma once
 
+#include <stdint.h>
+#include <memory>
+
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
+
+#include "Lavender/APIs/Vulkan/VulkanDevice.hpp"
 
 namespace Lavender
 {
 
-	class VulkanContext;
-
 	class VulkanSwapChain
 	{
 	public:
-		VulkanSwapChain() = default;
+		VulkanSwapChain(VkInstance vkInstance, std::shared_ptr<VulkanDevice> vkDevice);
 
-		// TODO: ... 
+		void Init(uint32_t width, uint32_t height, const bool vsync);
+		void Destroy();
+
+		void OnResize(uint32_t width, uint32_t height, const bool vsync);
+
+		VkFramebuffer GetCurrentFrameBuffer() const { return m_Framebuffers[m_CurrentFrame]; }
+		// TODO: Add a way of checking the index is valid
+		VkFramebuffer GetFramebuffer(uint32_t index) { return m_Framebuffers[index]; }
+
+		static std::shared_ptr<VulkanSwapChain> Create(VkInstance vkInstance, std::shared_ptr<VulkanDevice> vkDevice);
 
 	private:
-		/* // TODO: Add all of this
-		VkInstance m_Instance = nullptr;
-		Ref<VulkanDevice> m_Device;
-		bool m_VSync = false;
+		uint32_t AcquireNextImage();
+		void FindImageFormatAndColorSpace();
 
-		VkFormat m_ColorFormat;
-		VkColorSpaceKHR m_ColorSpace;
-
-		VkSwapchainKHR m_SwapChain = nullptr;
-		uint32_t m_ImageCount = 0;
-		std::vector<VkImage> m_VulkanImages;
+	private:
+		VkInstance m_Instance = VK_NULL_HANDLE;
+		std::shared_ptr<VulkanDevice> m_Device = VK_NULL_HANDLE;
+		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
 		struct SwapchainImage
 		{
-			VkImage Image = nullptr;
-			VkImageView ImageView = nullptr;
+			VkImage Image = VK_NULL_HANDLE;
+			VkImageView ImageView = VK_NULL_HANDLE;
 		};
 		std::vector<SwapchainImage> m_Images;
 
 		struct
 		{
-			VkImage Image = nullptr;
-			VmaAllocation MemoryAlloc = nullptr;
-			VkImageView ImageView = nullptr;
+			VkImage Image = VK_NULL_HANDLE;
+			VmaAllocation MemoryAlloc = VK_NULL_HANDLE;
+			VkImageView ImageView = VK_NULL_HANDLE;
 		} m_DepthStencil;
 
 		std::vector<VkFramebuffer> m_Framebuffers;
-
-		struct SwapchainCommandBuffer
-		{
-			VkCommandPool CommandPool = nullptr;
-			VkCommandBuffer CommandBuffer = nullptr;
-		};
-		std::vector<SwapchainCommandBuffer> m_CommandBuffers;
-
-		struct
-		{
-			// Swap chain
-			VkSemaphore PresentComplete = nullptr;
-			// Command buffer
-			VkSemaphore RenderComplete = nullptr;
-		} m_Semaphores;
-		VkSubmitInfo m_SubmitInfo;
-
-		std::vector<VkFence> m_WaitFences;
-
 		VkRenderPass m_RenderPass = nullptr;
-		uint32_t m_CurrentBufferIndex = 0;
-		uint32_t m_CurrentImageIndex = 0;
 
-		uint32_t m_QueueNodeIndex = UINT32_MAX;
-		uint32_t m_Width = 0, m_Height = 0;
+		std::vector<VkSemaphore> m_ImageAvailableSemaphores = { };
+		std::vector<VkSemaphore> m_RenderFinishedSemaphores = { };
+		std::vector<VkFence> m_InFlightFences = { };
 
-		VkSurfaceKHR m_Surface;
-		*/
+		VkFormat m_ColorFormat = VK_FORMAT_UNDEFINED;
+		VkColorSpaceKHR m_ColorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
 
-		friend class VulkanContext;
+		uint32_t m_CurrentFrame = 0;
 	};
 
 }

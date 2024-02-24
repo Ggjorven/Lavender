@@ -13,7 +13,7 @@ namespace Lavender
 
 	typedef std::function<void(std::shared_ptr<Event>&)> EventCallBackFunction;
 
-	struct WindowProperties
+	struct WindowSpecification
 	{
 		std::string Name;
 		uint32_t Width;
@@ -26,7 +26,7 @@ namespace Lavender
 		uint32_t X = 0u;
 		uint32_t Y = 0u;
 
-		WindowProperties(std::string name = "Lavender Window", uint32_t width = 1280u, uint32_t height = 720u)
+		WindowSpecification(std::string name = "Lavender Window", uint32_t width = 1280u, uint32_t height = 720u)
 			: Name(name), Width(width), Height(height)
 		{
 		}
@@ -46,7 +46,7 @@ namespace Lavender
 		{
 		}
 
-		WindowData operator = (WindowProperties const& properties)
+		WindowData operator = (WindowSpecification const& properties)
 		{
 			WindowData newData;
 			newData.Name = properties.Name;
@@ -79,9 +79,12 @@ namespace Lavender
 
 		virtual void* GetNativeWindow() const = 0;
 
+		virtual bool Init(const WindowSpecification& properties = WindowSpecification()) = 0; 
+		virtual void Shutdown() = 0;
+
 		virtual std::shared_ptr<RenderingContext> GetRenderingContext() = 0;
 
-		static std::unique_ptr<Window> Create(const WindowProperties properties = WindowProperties());
+		static std::unique_ptr<Window> Create();
 	};
 
 }

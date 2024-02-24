@@ -9,10 +9,12 @@ namespace Lavender
 {
 
 	static RenderInstance* s_RenderInstance = nullptr;
+	RendererSpecification Renderer::s_Specifications = {};
 
 	void Renderer::Init(const RendererSpecification& specs)
 	{
 		s_RenderInstance = RenderInstance::Create(specs);
+		s_Specifications = specs;
 	}
 
 	void Renderer::Destroy()

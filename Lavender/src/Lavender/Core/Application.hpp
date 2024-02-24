@@ -20,7 +20,7 @@ namespace Lavender
 	struct ApplicationSpecification
 	{
 	public:
-		WindowProperties WindowProperties = { };
+		WindowSpecification WindowSpecs = { };
 		RendererSpecification RenderSpecs = { };
 
 		ApplicationSpecification() = default;

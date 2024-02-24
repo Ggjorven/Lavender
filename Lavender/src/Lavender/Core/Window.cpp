@@ -6,10 +6,10 @@
 namespace Lavender
 {
 
-	std::unique_ptr<Window> Window::Create(const WindowProperties properties)
+	std::unique_ptr<Window> Window::Create()
 	{
 		#ifdef LV_PLATFORM_WINDOWS
-		return std::make_unique<WindowsWindow>(properties);
+		return std::make_unique<WindowsWindow>();
 		#endif
 
 		// TODO(Jorben): Add all the platforms

@@ -28,6 +28,7 @@ namespace Lavender
 		}
 
 		Renderer::Destroy();
+		m_Window->Shutdown();
 	}
 
 	void Application::OnEvent(std::shared_ptr<Event>& e)
@@ -73,7 +74,6 @@ namespace Lavender
 			}
 
 			Renderer::Display();
-
 			m_Window->OnRender();
 		}
 	}
@@ -94,7 +94,8 @@ namespace Lavender
 
 		Log::Init();
 		
-		m_Window = Window::Create(appInfo.WindowProperties);
+		m_Window = Window::Create();
+		m_Window->Init(appInfo.WindowSpecs);
 		m_Window->SetEventCallBack(LV_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init(appInfo.RenderSpecs);

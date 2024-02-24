@@ -16,15 +16,12 @@ namespace Lavender
 
 	static void SetupAPIWindowHints();
 
-	WindowsWindow::WindowsWindow(const WindowProperties properties)
+	WindowsWindow::WindowsWindow()
 	{
-		if (Init(properties))
-			LV_LOG_ERROR("{0}", "WindowsWindow failed to initialize.");
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
-		Shutdown();
 	}
 
 	void WindowsWindow::OnUpdate()
@@ -50,7 +47,7 @@ namespace Lavender
 		glfwSetWindowTitle(m_Window, title.c_str());
 	}
 	
-	bool WindowsWindow::Init(WindowProperties properties)
+	bool WindowsWindow::Init(const WindowSpecification& properties)
 	{
 		if (!s_GLFWinitialized)
 		{
