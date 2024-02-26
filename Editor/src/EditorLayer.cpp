@@ -10,7 +10,7 @@
 
 void EditorLayer::OnAttach()
 {
-	m_CommandBuffer = RenderCommandBuffer::Create();
+	m_RenderPass = RenderPass::Create();
 }
 
 void EditorLayer::OnDetach()
@@ -23,13 +23,17 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 void EditorLayer::OnRender()
 {
+	LV_LOG_TRACE("A");
+	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
+	LV_LOG_TRACE("A");
 
-	Renderer::WaitFor(m_CommandBuffer);
+	m_RenderPass->Begin();
+	LV_LOG_TRACE("A");
+	m_RenderPass->End();
+	LV_LOG_TRACE("A");
+	m_RenderPass->Submit();
 
-	m_CommandBuffer->Begin();
-	m_CommandBuffer->End();
-	m_CommandBuffer->Submit();
-
+	LV_LOG_TRACE("A");
 }
 
 void EditorLayer::OnImGuiRender()

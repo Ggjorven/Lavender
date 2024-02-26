@@ -2,7 +2,7 @@
 
 #include <Lavender/Core/Layer.hpp>
 #include <Lavender/Utils/Utils.hpp>
-#include <Lavender/Renderer/RenderCommandBuffer.hpp>
+#include <Lavender/Renderer/RenderPass.hpp>
 
 using namespace Lavender;
 
@@ -19,5 +19,5 @@ public:
 	void OnEvent(Event& e);
 
 private:
-	Ref<RenderCommandBuffer> m_CommandBuffer = nullptr;
+	Ref<RenderPass> m_RenderPass = nullptr;
 };

@@ -25,27 +25,26 @@ namespace Lavender
 
 		void OnResize(uint32_t width, uint32_t height, const bool vsync);
 
+		inline VkFormat GetColourFormat() const { return m_ColourFormat; }
+
 		inline uint32_t GetCurrentFrame() const { return m_CurrentFrame; }
 		inline uint32_t GetAquiredImage() const { return m_AquiredImage; }
+
+		std::vector<VkImageView> GetImageViews();
+
+		inline VkImage& GetCurrentImage() { return m_Images[m_CurrentFrame].Image; }
 
 		// Note(Jorben): This function is used by VulkanRenderCommandBuffers to wait for the image to be available
 		inline VkSemaphore& GetCurrentImageAvailableSemaphore() { return m_ImageAvailableSemaphores[m_CurrentFrame]; }
 		inline VkSemaphore& GetImageAvailableSemaphore(uint32_t index) { return m_ImageAvailableSemaphores[index]; }
 
-		inline VkFramebuffer GetCurrentFrameBuffer() const { return m_Framebuffers[m_CurrentFrame]; }
-		// TODO: Add a way of checking the index is valid
-		inline VkFramebuffer GetFramebuffer(uint32_t index) const { return m_Framebuffers[index]; }
-
 		inline VkCommandPool& GetCommandPool() { return m_CommandPool; }
 
 		static Ref<VulkanSwapChain> Create(VkInstance vkInstance, Ref<VulkanDevice> vkDevice);
-
-		void TempRecordDefaultCommandBuffer(); // TODO: Remove...
 	
 	private:
 		uint32_t AcquireNextImage();
 		void FindImageFormatAndColorSpace();
-
 
 	private:
 		VkInstance m_Instance = VK_NULL_HANDLE;
@@ -66,15 +65,14 @@ namespace Lavender
 			VkImageView ImageView = VK_NULL_HANDLE;
 		} m_DepthStencil;
 
-		std::vector<VkFramebuffer> m_Framebuffers;
 		VkRenderPass m_RenderPass = nullptr;
 
 		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
 
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores = { };
 
-		VkFormat m_ColorFormat = VK_FORMAT_UNDEFINED;
-		VkColorSpaceKHR m_ColorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
+		VkFormat m_ColourFormat = VK_FORMAT_UNDEFINED;
+		VkColorSpaceKHR m_ColourSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
 
 		uint32_t m_CurrentFrame = 0;
 		uint32_t m_AquiredImage = 0;

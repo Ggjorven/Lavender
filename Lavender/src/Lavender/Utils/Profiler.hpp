@@ -6,7 +6,9 @@
 #include <new>
 #include <cstdlib>
 
-#if !defined(LV_DIST)
+#define LV_ENABLE_PROFILING 0
+
+#if !defined(LV_DIST) && LV_ENABLE_PROFILING
 #define LV_PROFILE_SCOPE(name) ZoneScopedN(name)
 
 void* operator new(std::size_t size);

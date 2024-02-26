@@ -84,9 +84,6 @@ namespace Lavender
 			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to begin recording command buffer!");
 		}
-
-		// TODO: Remove once renderpass has been implemented
-		RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->TempRecordDefaultCommandBuffer();
 	}
 
 	void VulkanRenderCommandBuffer::End()

@@ -43,8 +43,6 @@ namespace Lavender
 
 	void VulkanRenderer::EndFrame() // A.k.a Display/Present
 	{
-		// TODO: Wait for CommandBuffers
-
 		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->EndFrame();
 	}
@@ -70,7 +68,8 @@ namespace Lavender
 		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
 
 		std::vector<VkSemaphore> semaphores = { };
-		semaphores.resize(m_WaitForCommandBuffers.size());
+		semaphores.clear();
+		//semaphores.resize(m_WaitForCommandBuffers.size());
 
 		for (auto& cmd : m_WaitForCommandBuffers)
 		{

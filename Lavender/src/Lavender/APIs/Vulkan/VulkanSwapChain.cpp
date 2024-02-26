@@ -122,8 +122,8 @@ namespace Lavender
 		swapchainCI.pNext = NULL;
 		swapchainCI.surface = surface;
 		swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
-		swapchainCI.imageFormat = m_ColorFormat;
-		swapchainCI.imageColorSpace = m_ColorSpace;
+		swapchainCI.imageFormat = m_ColourFormat;
+		swapchainCI.imageColorSpace = m_ColourSpace;
 		swapchainCI.imageExtent = { swapchainExtent.width, swapchainExtent.height };
 		swapchainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		swapchainCI.preTransform = (VkSurfaceTransformFlagBitsKHR)preTransform;
@@ -176,7 +176,7 @@ namespace Lavender
 			VkImageViewCreateInfo colorAttachmentView = {};
 			colorAttachmentView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			colorAttachmentView.pNext = NULL;
-			colorAttachmentView.format = m_ColorFormat;
+			colorAttachmentView.format = m_ColourFormat;
 			colorAttachmentView.image = m_Images[i].Image;
 			colorAttachmentView.components = 
 			{
@@ -235,80 +235,6 @@ namespace Lavender
 				}
 			}
 		}
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Renderpass
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Color attachment
-		VkAttachmentDescription colorAttachmentDesc = {};
-		colorAttachmentDesc.format = m_ColorFormat;
-		colorAttachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachmentDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachmentDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-		VkAttachmentReference colorReference = {};
-		colorReference.attachment = 0;
-		colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		VkAttachmentReference depthReference = {};
-		depthReference.attachment = 1;
-		depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpassDescription = {};
-		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpassDescription.colorAttachmentCount = 1;
-		subpassDescription.pColorAttachments = &colorReference;
-		subpassDescription.inputAttachmentCount = 0;
-		subpassDescription.pInputAttachments = nullptr;
-		subpassDescription.preserveAttachmentCount = 0;
-		subpassDescription.pPreserveAttachments = nullptr;
-		subpassDescription.pResolveAttachments = nullptr;
-
-		VkSubpassDependency dependency = {};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		VkRenderPassCreateInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = 1;
-		renderPassInfo.pAttachments = &colorAttachmentDesc;
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpassDescription;
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
-
-		vkCreateRenderPass(m_Device->GetVulkanDevice(), &renderPassInfo, nullptr, &m_RenderPass);
-		// Create framebuffers for every swapchain image
-		{
-			// Destroy existing framebuffers
-			for (auto& framebuffer : m_Framebuffers)
-				vkDestroyFramebuffer(device, framebuffer, nullptr);
-
-			auto& window = Application::Get().GetWindow();
-
-			VkFramebufferCreateInfo frameBufferCreateInfo = {};
-			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			frameBufferCreateInfo.renderPass = m_RenderPass;
-			frameBufferCreateInfo.attachmentCount = 1;
-			frameBufferCreateInfo.width = window.GetWidth();
-			frameBufferCreateInfo.height = window.GetHeight();
-			frameBufferCreateInfo.layers = 1;
-
-			m_Framebuffers.resize(imageCount);
-			for (uint32_t i = 0; i < m_Framebuffers.size(); i++)
-			{
-				frameBufferCreateInfo.pAttachments = &m_Images[i].ImageView;
-				vkCreateFramebuffer(m_Device->GetVulkanDevice(), &frameBufferCreateInfo, nullptr, &m_Framebuffers[i]);
-			}
-		}
 	}
 
 	void VulkanSwapChain::Destroy()
@@ -327,9 +253,6 @@ namespace Lavender
 		if (m_RenderPass)
 			vkDestroyRenderPass(device, m_RenderPass, nullptr);
 
-		for (auto framebuffer : m_Framebuffers)
-			vkDestroyFramebuffer(device, framebuffer, nullptr);
-
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
 			vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
@@ -340,27 +263,24 @@ namespace Lavender
 
 	void VulkanSwapChain::BeginFrame()
 	{
-		m_AquiredImage = AcquireNextImage();
+		// TODO: WAIT FOR ALL COMMANDBUFFER FENCES
 
-		// TODO: Remove
-		//TempRecordDefaultCommandBuffer();
+		m_AquiredImage = AcquireNextImage();
 	}
 
 	void VulkanSwapChain::EndFrame()
 	{
-		// TODO: WAIT FOR ALL COMMANDBUFFER FENCES
 		auto renderer = ((VulkanRenderer*)(Renderer::GetInstance()));
+		auto semaphores = renderer->GetSemaphores();
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = renderer->GetSemaphores().data(); // TODO: Wait for all commandBuffers waitSemaphores?
-		presentInfo.swapchainCount = (uint32_t)renderer->GetSemaphores().size();
+		presentInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
+		presentInfo.pWaitSemaphores = semaphores.data(); // TODO: Wait for all commandBuffers waitSemaphores?
+		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = &m_SwapChain;
 		presentInfo.pImageIndices = &m_AquiredImage;
 		presentInfo.pResults = nullptr; // Optional
-
-		// TODO: Wait for all commandBuffers fences
 
 		VkResult result = VK_SUCCESS;
 		{
@@ -380,7 +300,7 @@ namespace Lavender
 
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetSpecification().FramesInFlight;
 
-		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
+		//vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height, const bool vsync)
@@ -390,6 +310,17 @@ namespace Lavender
 		vkDeviceWaitIdle(device);
 		Init(width, height, vsync);
 		vkDeviceWaitIdle(device);
+	}
+
+	std::vector<VkImageView> VulkanSwapChain::GetImageViews()
+	{
+		std::vector<VkImageView> views = { };
+		views.clear();
+
+		for (auto& image : m_Images)
+			views.push_back(image.ImageView);
+
+		return views;
 	}
 
 	uint32_t VulkanSwapChain::AcquireNextImage()
@@ -427,8 +358,8 @@ namespace Lavender
 		// there is no preferered format, so we assume VK_FORMAT_B8G8R8A8_UNORM
 		if ((formatCount == 1) && (surfaceFormats[0].format == VK_FORMAT_UNDEFINED))
 		{
-			m_ColorFormat = VK_FORMAT_B8G8R8A8_UNORM;
-			m_ColorSpace = surfaceFormats[0].colorSpace;
+			m_ColourFormat = VK_FORMAT_B8G8R8A8_UNORM;
+			m_ColourSpace = surfaceFormats[0].colorSpace;
 		}
 		else
 		{
@@ -437,8 +368,8 @@ namespace Lavender
 			{
 				if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
 				{
-					m_ColorFormat = surfaceFormat.format;
-					m_ColorSpace = surfaceFormat.colorSpace;
+					m_ColourFormat = surfaceFormat.format;
+					m_ColourSpace = surfaceFormat.colorSpace;
 					found_B8G8R8A8_UNORM = true;
 					break;
 				}
@@ -448,59 +379,9 @@ namespace Lavender
 			// select the first available color format
 			if (!found_B8G8R8A8_UNORM)
 			{
-				m_ColorFormat = surfaceFormats[0].format;
-				m_ColorSpace = surfaceFormats[0].colorSpace;
+				m_ColourFormat = surfaceFormats[0].format;
+				m_ColourSpace = surfaceFormats[0].colorSpace;
 			}
-		}
-	}
-
-	void VulkanSwapChain::TempRecordDefaultCommandBuffer()
-	{
-		auto renderer = ((VulkanRenderer*)(Renderer::GetInstance()));
-
-		VkCommandBuffer commandBuffer = renderer->GetCommandBuffers()[0]->GetVulkanCommandBuffer(); // TODO: Remove
-		auto& window = Application::Get().GetWindow();
-		VkExtent2D swapchainExtent = { window.GetWidth(), window.GetHeight() };
-
-		std::vector<VkClearValue> clearValues = {};
-		clearValues.resize(2); // for colour and depth
-
-		clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-
-		VkRenderPassBeginInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_RenderPass;
-		renderPassInfo.framebuffer = m_Framebuffers[m_AquiredImage];
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = swapchainExtent;
-
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
-
-		{
-			LV_PROFILE_SCOPE("BeginRenderPass");
-			vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		}
-
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = (float)swapchainExtent.width;
-		viewport.height = (float)swapchainExtent.height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor = {};
-		scissor.offset = { 0, 0 };
-		scissor.extent = swapchainExtent;
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-		// Execute something here
-		{
-			LV_PROFILE_SCOPE("EndRenderPass");
-			vkCmdEndRenderPass(commandBuffer);
 		}
 	}
 
