@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Lavender/Core/Layer.hpp>
+#include <Lavender/Utils/Utils.hpp>
+#include <Lavender/Renderer/RenderCommandBuffer.hpp>
 
 using namespace Lavender;
 
@@ -15,4 +17,7 @@ public:
 	void OnImGuiRender() override;
 
 	void OnEvent(Event& e);
+
+private:
+	Ref<RenderCommandBuffer> m_CommandBuffer = nullptr;
 };

@@ -11,7 +11,7 @@
 namespace Lavender
 {
 
-	typedef std::function<void(std::shared_ptr<Event>&)> EventCallBackFunction;
+	typedef std::function<void(Ref<Event>&)> EventCallBackFunction;
 
 	struct WindowSpecification
 	{
@@ -82,7 +82,7 @@ namespace Lavender
 		virtual bool Init(const WindowSpecification& properties = WindowSpecification()) = 0; 
 		virtual void Shutdown() = 0;
 
-		virtual std::shared_ptr<RenderingContext> GetRenderingContext() = 0;
+		virtual Ref<RenderingContext> GetRenderingContext() = 0;
 
 		static std::unique_ptr<Window> Create();
 	};

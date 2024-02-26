@@ -1,21 +1,21 @@
 #include "lvpch.h"
-#include "RenderingContext.hpp"
+#include "RenderCommandBuffer.hpp"
 
 #include "Lavender/Core/Logging.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 
-#include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
 namespace Lavender
 {
 
-	Ref<RenderingContext> RenderingContext::Create()
+	Ref<RenderCommandBuffer> RenderCommandBuffer::Create()
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanContext>();
+			return RefHelper::Create<VulkanRenderCommandBuffer>();
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");

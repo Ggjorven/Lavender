@@ -31,7 +31,7 @@ namespace Lavender
 		bool Init(const WindowSpecification& properties) override;
 		void Shutdown() override;
 
-		std::shared_ptr<RenderingContext> GetRenderingContext() override { return m_RenderingContext; }
+		Ref<RenderingContext> GetRenderingContext() override { return m_RenderingContext; }
 
 	private:
 		static void ErrorCallBack(int errorCode, const char* description);
@@ -41,7 +41,7 @@ namespace Lavender
 		static uint32_t s_Instances;
 
 		GLFWwindow* m_Window = nullptr;
-		std::shared_ptr<RenderingContext> m_RenderingContext = nullptr;
+		Ref<RenderingContext> m_RenderingContext = nullptr;
 		WindowData m_Data = {};
 
 	};

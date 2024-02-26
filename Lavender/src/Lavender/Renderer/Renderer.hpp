@@ -10,6 +10,9 @@
 namespace Lavender
 {
 
+	class RenderCommandBuffer;
+	class RenderInstance;
+
 	// TODO: Add more functionality
 	class Renderer
 	{
@@ -20,9 +23,13 @@ namespace Lavender
 		static void BeginFrame();
 		static void EndFrame();
 
+		static void Submit(RenderFunction function);
+		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer);
+
 		static void OnResize(uint32_t width, uint32_t height);
 
-		inline static std::shared_ptr<RenderingContext> GetContext() { return Application::Get().GetWindow().GetRenderingContext(); }
+		inline static Ref<RenderingContext> GetContext() { return Application::Get().GetWindow().GetRenderingContext(); }
+		static RenderInstance* GetInstance();
 
 		inline constexpr static const RenderingAPI GetAPI() { return s_API; }
 		inline static RendererSpecification GetSpecification() { return s_Specifications; }
@@ -31,4 +38,5 @@ namespace Lavender
 		inline constexpr static const RenderingAPI s_API = RenderingAPI::Vulkan;
 		static RendererSpecification s_Specifications;
 	};
+
 }

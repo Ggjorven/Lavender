@@ -5,6 +5,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Lavender/Utils/Utils.hpp"
+
 namespace Lavender
 {
 
@@ -40,7 +42,7 @@ namespace Lavender
 
 		inline VkFormat GetDepthFormat() const { return m_Depthformat; }
 
-		static std::shared_ptr<VulkanPhysicalDevice> Select();
+		static Ref<VulkanPhysicalDevice> Select();
 
 	private:
 		bool PhysicalDeviceSuitable(const VkPhysicalDevice& device);

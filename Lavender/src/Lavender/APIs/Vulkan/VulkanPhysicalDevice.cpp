@@ -16,7 +16,7 @@ namespace Lavender
 
 	VulkanPhysicalDevice::VulkanPhysicalDevice()
 	{
-		VkInstance& instance = Utils::As<VulkanContext>(Application::Get().GetWindow().GetRenderingContext())->GetVulkanInstance();
+		VkInstance& instance = RefHelper::RefAs<VulkanContext>(Application::Get().GetWindow().GetRenderingContext())->GetVulkanInstance();
 
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -69,7 +69,7 @@ namespace Lavender
 				indices.GraphicsFamily = i;
 
 			VkBool32 presentSupport = false;
-			VkSurfaceKHR& surface = Utils::As<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
+			VkSurfaceKHR& surface = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
 			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 			if (presentSupport)
 				indices.PresentFamily = i;
@@ -84,7 +84,7 @@ namespace Lavender
 	{
 		SwapChainSupportDetails details;
 
-		VkSurfaceKHR& surface = Utils::As<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
+		VkSurfaceKHR& surface = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
 
 		// Capabilities
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.Capabilities);
@@ -173,9 +173,9 @@ namespace Lavender
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	std::shared_ptr<VulkanPhysicalDevice> VulkanPhysicalDevice::Select()
+	Ref<VulkanPhysicalDevice> VulkanPhysicalDevice::Select()
 	{
-		return std::make_shared<VulkanPhysicalDevice>();
+		return RefHelper::Create<VulkanPhysicalDevice>();
 	}
 
 }

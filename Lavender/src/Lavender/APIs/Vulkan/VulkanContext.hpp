@@ -34,18 +34,18 @@ namespace Lavender
 		inline VkInstance& GetVulkanInstance() { return m_VulkanInstance; }
 		inline VkSurfaceKHR& GetVulkanSurface() { return m_Surface; }
 
-		inline std::shared_ptr<VulkanDevice> GetLogicalDevice() { return m_Device; }
-		inline std::shared_ptr<VulkanPhysicalDevice> GetPhysicalDevice() { return m_PhysicalDevice; }
-		inline std::shared_ptr<VulkanSwapChain> GetSwapChain() { return m_SwapChain; }
+		inline Ref<VulkanDevice> GetLogicalDevice() { return m_Device; }
+		inline Ref<VulkanPhysicalDevice> GetPhysicalDevice() { return m_PhysicalDevice; }
+		inline Ref<VulkanSwapChain> GetSwapChain() { return m_SwapChain; }
 
 	private:
 		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
 		VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 
-		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanDevice> m_Device = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanSwapChain> m_SwapChain = VK_NULL_HANDLE;
+		Ref<VulkanPhysicalDevice> m_PhysicalDevice = VK_NULL_HANDLE;
+		Ref<VulkanDevice> m_Device = VK_NULL_HANDLE;
+		Ref<VulkanSwapChain> m_SwapChain = VK_NULL_HANDLE;
 	};
 
 }

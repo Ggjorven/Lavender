@@ -27,7 +27,7 @@ namespace Lavender
 
 	VulkanRenderer::~VulkanRenderer()
 	{
-		VkDevice& device = Utils::As<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		VkDevice& device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		vkDeviceWaitIdle(device);
 
 		delete s_RenderData;
@@ -35,20 +35,49 @@ namespace Lavender
 
 	void VulkanRenderer::BeginFrame()
 	{
-		auto swapchain = Utils::As<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		// TODO: Execute resourceFree queue
+
+		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->BeginFrame();
 	}
 
 	void VulkanRenderer::EndFrame() // A.k.a Display/Present
 	{
-		auto swapchain = Utils::As<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		// TODO: Wait for CommandBuffers
+
+		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->EndFrame();
+	}
+
+	void VulkanRenderer::Submit(RenderFunction function)
+	{
+		m_RenderQueue.Add(function);
+	}
+
+	void VulkanRenderer::WaitFor(Ref<RenderCommandBuffer> commandBuffer)
+	{
+		m_WaitForCommandBuffers.push_back(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer));
 	}
 
 	void VulkanRenderer::OnResize(uint32_t width, uint32_t height)
 	{
-		auto swapchain = Utils::As<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->OnResize(width, height, Application::Get().GetWindow().IsVSync());
+	}
+
+	std::vector<VkSemaphore> VulkanRenderer::GetSemaphores()
+	{
+		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
+
+		std::vector<VkSemaphore> semaphores = { };
+		semaphores.resize(m_WaitForCommandBuffers.size());
+
+		for (auto& cmd : m_WaitForCommandBuffers)
+		{
+			semaphores.push_back(cmd->GetRenderFinishedSemaphore(currentFrame));
+		}
+
+		return semaphores;
 	}
 
 }

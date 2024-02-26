@@ -8,6 +8,8 @@
 namespace Lavender
 {
 
+	class RenderCommandBuffer;
+
 	class RenderInstance
 	{
 	public:
@@ -17,12 +19,12 @@ namespace Lavender
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
+		virtual void Submit(RenderFunction function) = 0;
+		virtual void WaitFor(Ref<RenderCommandBuffer> commandBuffer) = 0;
+
 		virtual void OnResize(uint32_t width, uint32_t height) = 0;
 
 		static RenderInstance* Create(const RendererSpecification& specs);
-
-	protected:
-		Utils::Queue<RenderFunction> m_RenderQueue = { };
 	};
 
 }

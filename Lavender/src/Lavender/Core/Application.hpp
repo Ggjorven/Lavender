@@ -32,7 +32,7 @@ namespace Lavender
 		Application(const ApplicationSpecification& appInfo);
 		virtual ~Application();
 
-		void OnEvent(std::shared_ptr<Event>& e);
+		void OnEvent(Ref<Event>& e);
 
 		void Run();
 		inline void Close() { m_Running = false; }
@@ -61,7 +61,7 @@ namespace Lavender
 		bool m_Running = true;
 		bool m_Minimized = false;
 
-		std::queue<std::shared_ptr<Event>> m_EventQueue = { };
+		std::queue<Ref<Event>> m_EventQueue = { };
 
 		LayerStack m_LayerStack;
 		BaseImGuiLayer* m_ImGuiLayer = nullptr;

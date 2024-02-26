@@ -31,7 +31,7 @@ namespace Lavender
 		m_Window->Shutdown();
 	}
 
-	void Application::OnEvent(std::shared_ptr<Event>& e)
+	void Application::OnEvent(Ref<Event>& e)
 	{
 		m_EventQueue.push(e);
 	}
@@ -129,7 +129,7 @@ namespace Lavender
 	{
 		while (!m_EventQueue.empty())
 		{
-			std::shared_ptr<Event> rawEvent = m_EventQueue.front();
+			Ref<Event> rawEvent = m_EventQueue.front();
 			Event& e = *rawEvent;
 
 			EventHandler handler(e);

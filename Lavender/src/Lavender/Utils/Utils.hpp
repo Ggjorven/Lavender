@@ -23,7 +23,7 @@ constexpr Type operator ^ (Type lhs, Type rhs) \
     return static_cast<Type>(static_cast<int>(lhs) ^ static_cast<int>(rhs)); \
 } \
 
-namespace Utils
+namespace Lavender::Utils
 {
 
     // A class to be used for function queues
@@ -56,20 +56,38 @@ namespace Utils
         std::queue<Func> m_Queue = { };
     };
 
-    // Note(Jorben): This function name is not the most descriptive since I didn't want it to be a long name,
-    // but all this function does is convert a shared_ptr of one type to another type.
-    template<typename T, typename T2>
-    std::shared_ptr<T> As(std::shared_ptr<T2> ptr)
-    {
-        std::shared_ptr<T> newPtr = std::dynamic_pointer_cast<T>(ptr);
+}
 
-        if (!newPtr)
+// Note(Jorben): More like core functionality // TODO: Maybe move this?
+namespace Lavender
+{
+
+    // Give std::shared_ptr a custom name
+    template<typename T>
+    using Ref = std::shared_ptr<T>;
+
+    class RefHelper
+    {
+    public:
+        template<typename T, typename... Args>
+        static Ref<T> Create(Args&&... args)
         {
-            // TODO: Maybe make an assert?
-            LV_LOG_ERROR("Failed to convert std::shared_ptr<T2> to a std::shared_ptr<T>");
+            return std::make_shared<T>(std::forward<Args>(args)...);
         }
 
-        return newPtr;
-    }
+        template<typename T, typename T2>
+        static Ref<T> RefAs(Ref<T2> ptr)
+        {
+            Ref<T> newPtr = std::dynamic_pointer_cast<T>(ptr);
+
+            if (!newPtr)
+            {
+                // TODO: Maybe make an assert?
+                LV_LOG_ERROR("Failed to convert Ref<T2> to a Ref<T>");
+            }
+
+            return newPtr;
+        }
+    };
 
 }

@@ -12,7 +12,7 @@
 namespace Lavender
 {
 
-	PreferencesSerializer::PreferencesSerializer(std::shared_ptr<UIPreferences>& preferences)
+	PreferencesSerializer::PreferencesSerializer(Ref<UIPreferences>& preferences)
 		: m_Preferences(preferences)
 	{
 	}

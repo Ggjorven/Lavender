@@ -8,7 +8,7 @@
 namespace Lavender
 {
 
-	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice)
+	VulkanDevice::VulkanDevice(Ref<VulkanPhysicalDevice> physicalDevice)
 		: m_PhysicalDevice(physicalDevice)
 	{
 		QueueFamilyIndices indices = QueueFamilyIndices::Find(m_PhysicalDevice->GetVulkanPhysicalDevice());
@@ -65,9 +65,9 @@ namespace Lavender
 		vkDestroyDevice(m_LogicalDevice, nullptr);
 	}
 
-	std::shared_ptr<VulkanDevice> VulkanDevice::Create(std::shared_ptr<VulkanPhysicalDevice> physicalDevice)
+	Ref<VulkanDevice> VulkanDevice::Create(Ref<VulkanPhysicalDevice> physicalDevice)
 	{
-		return std::make_shared<VulkanDevice>(physicalDevice);
+		return RefHelper::Create<VulkanDevice>(physicalDevice);
 	}
 
 }

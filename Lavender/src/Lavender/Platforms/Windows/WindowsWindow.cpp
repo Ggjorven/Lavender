@@ -79,7 +79,7 @@ namespace Lavender
 				data.Width = width;
 				data.Height = height;
 
-				std::shared_ptr<Event> event = std::make_shared<WindowResizeEvent>(width, height);
+				Ref<Event> event = RefHelper::Create<WindowResizeEvent>(width, height);
 				data.CallBack(event);
 			});
 
@@ -87,7 +87,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				
-				std::shared_ptr<Event> event = std::make_shared<WindowCloseEvent>();
+				Ref<Event> event = RefHelper::Create<WindowCloseEvent>();
 				data.CallBack(event);
 			});
 
@@ -100,19 +100,19 @@ namespace Lavender
 				{
 				case GLFW_PRESS:
 				{
-					std::shared_ptr<Event> event = std::make_shared<KeyPressedEvent>(key, 0);
+					Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 0);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					std::shared_ptr<Event> event = std::make_shared<KeyReleasedEvent>(key);
+					Ref<Event> event = RefHelper::Create<KeyReleasedEvent>(key);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					std::shared_ptr<Event> event = std::make_shared<KeyPressedEvent>(key, 1);
+					Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 1);
 					data.CallBack(event);
 					break;
 				}
@@ -123,7 +123,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				std::shared_ptr<Event> event = std::make_shared<KeyTypedEvent>(keycode);
+				Ref<Event> event = RefHelper::Create<KeyTypedEvent>(keycode);
 				data.CallBack(event);
 			});
 
@@ -135,13 +135,13 @@ namespace Lavender
 				{
 				case GLFW_PRESS:
 				{
-					std::shared_ptr<Event> event = std::make_shared<MouseButtonPressedEvent>(button);
+					Ref<Event> event = RefHelper::Create<MouseButtonPressedEvent>(button);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					std::shared_ptr<Event> event = std::make_shared<MouseButtonReleasedEvent>(button);
+					Ref<Event> event = RefHelper::Create<MouseButtonReleasedEvent>(button);
 					data.CallBack(event);
 					break;
 				}
@@ -152,7 +152,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				std::shared_ptr<Event> event = std::make_shared<MouseScrolledEvent>((float)xOffset, (float)yOffset);
+				Ref<Event> event = RefHelper::Create<MouseScrolledEvent>((float)xOffset, (float)yOffset);
 				data.CallBack(event);
 			});
 
@@ -160,7 +160,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				std::shared_ptr<Event> event = std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos);
+				Ref<Event> event = RefHelper::Create<MouseMovedEvent>((float)xPos, (float)yPos);
 				data.CallBack(event);
 			});
 

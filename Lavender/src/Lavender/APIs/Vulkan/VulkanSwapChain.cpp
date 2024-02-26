@@ -8,12 +8,14 @@
 #include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
 namespace Lavender
 {
 
-	VulkanSwapChain::VulkanSwapChain(VkInstance vkInstance, std::shared_ptr<VulkanDevice> vkDevice)
+	VulkanSwapChain::VulkanSwapChain(VkInstance vkInstance, Ref<VulkanDevice> vkDevice)
 		: m_Instance(vkInstance), m_Device(vkDevice)
 	{
 		FindImageFormatAndColorSpace();
@@ -23,7 +25,7 @@ namespace Lavender
 	{
 		VkDevice device = m_Device->GetVulkanDevice();
 		VkPhysicalDevice physicalDevice = m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice();
-		VkSurfaceKHR& surface = Utils::As<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
+		VkSurfaceKHR& surface = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
 
 		VkSwapchainKHR oldSwapchain = m_SwapChain;
 
@@ -209,27 +211,14 @@ namespace Lavender
 
 			if (vkCreateCommandPool(m_Device->GetVulkanDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to create command pool!");
-
-			m_CommandBuffers.resize(framesInFlight);
-
-			VkCommandBufferAllocateInfo allocInfo = {};
-			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			allocInfo.commandPool = m_CommandPool;
-			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
-
-			if (vkAllocateCommandBuffers(m_Device->GetVulkanDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to allocate command buffers!");
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Synchronization Objects
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if (m_ImageAvailableSemaphores.empty() || m_RenderFinishedSemaphores.empty() || m_InFlightFences.empty())
+		if (m_ImageAvailableSemaphores.empty())
 		{
 			m_ImageAvailableSemaphores.resize(framesInFlight);
-			m_RenderFinishedSemaphores.resize(framesInFlight);
-			m_InFlightFences.resize(framesInFlight);
 
 			VkSemaphoreCreateInfo semaphoreInfo = {};
 			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -240,9 +229,7 @@ namespace Lavender
 
 			for (size_t i = 0; i < framesInFlight; i++)
 			{
-				if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS ||
-					vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
-					vkCreateFence(device, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+				if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS)
 				{
 					LV_LOG_ERROR("Failed to create synchronization objects for a frame!");
 				}
@@ -345,9 +332,7 @@ namespace Lavender
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
-			vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
 			vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
-			vkDestroyFence(device, m_InFlightFences[i], nullptr);
 		}
 
 		vkDeviceWaitIdle(device);
@@ -357,47 +342,25 @@ namespace Lavender
 	{
 		m_AquiredImage = AcquireNextImage();
 
-		vkResetFences(m_Device->GetVulkanDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
-		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
-
 		// TODO: Remove
-		TempRecordDefaultCommandBuffer();
+		//TempRecordDefaultCommandBuffer();
 	}
 
 	void VulkanSwapChain::EndFrame()
 	{
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
-
-		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		{
-			LV_PROFILE_SCOPE("Submit Graphics Queue");
-			if (vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to submit draw command buffer!");
-		}
+		// TODO: WAIT FOR ALL COMMANDBUFFER FENCES
+		auto renderer = ((VulkanRenderer*)(Renderer::GetInstance()));
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-
-		VkSwapchainKHR swapChains[] = { m_SwapChain };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
+		presentInfo.pWaitSemaphores = renderer->GetSemaphores().data(); // TODO: Wait for all commandBuffers waitSemaphores?
+		presentInfo.swapchainCount = (uint32_t)renderer->GetSemaphores().size();
+		presentInfo.pSwapchains = &m_SwapChain;
 		presentInfo.pImageIndices = &m_AquiredImage;
 		presentInfo.pResults = nullptr; // Optional
+
+		// TODO: Wait for all commandBuffers fences
 
 		VkResult result = VK_SUCCESS;
 		{
@@ -451,7 +414,7 @@ namespace Lavender
 	void VulkanSwapChain::FindImageFormatAndColorSpace()
 	{
 		VkPhysicalDevice physicalDevice = m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice();
-		VkSurfaceKHR& surface = Utils::As<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
+		VkSurfaceKHR& surface = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
 
 		// Get list of supported surface formats
 		uint32_t formatCount;
@@ -493,18 +456,11 @@ namespace Lavender
 
 	void VulkanSwapChain::TempRecordDefaultCommandBuffer()
 	{
-		VkCommandBuffer commandBuffer = m_CommandBuffers[m_CurrentFrame];
+		auto renderer = ((VulkanRenderer*)(Renderer::GetInstance()));
+
+		VkCommandBuffer commandBuffer = renderer->GetCommandBuffers()[0]->GetVulkanCommandBuffer(); // TODO: Remove
 		auto& window = Application::Get().GetWindow();
 		VkExtent2D swapchainExtent = { window.GetWidth(), window.GetHeight() };
-
-		VkCommandBufferBeginInfo beginInfo = {};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-		{
-			LV_PROFILE_SCOPE("BeginCmdBuf");
-			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to begin recording command buffer!");
-		}
 
 		std::vector<VkClearValue> clearValues = {};
 		clearValues.resize(2); // for colour and depth
@@ -542,21 +498,14 @@ namespace Lavender
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 		// Execute something here
-
 		{
 			LV_PROFILE_SCOPE("EndRenderPass");
 			vkCmdEndRenderPass(commandBuffer);
 		}
-
-		{
-			LV_PROFILE_SCOPE("EndCmdBuf");
-			if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to record command buffer!");
-		}
 	}
 
-	std::shared_ptr<VulkanSwapChain> VulkanSwapChain::Create(VkInstance vkInstance, std::shared_ptr<VulkanDevice> vkDevice)
+	Ref<VulkanSwapChain> VulkanSwapChain::Create(VkInstance vkInstance, Ref<VulkanDevice> vkDevice)
 	{
-		return std::make_shared<VulkanSwapChain>(vkInstance, vkDevice);
+		return RefHelper::Create<VulkanSwapChain>(vkInstance, vkDevice);
 	}
 }

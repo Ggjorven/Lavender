@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "Lavender/Utils/Utils.hpp"
+
 namespace Lavender
 {
 
@@ -14,7 +16,7 @@ namespace Lavender
 		virtual void Init() = 0;
 		virtual void Destroy() = 0;
 
-		static std::shared_ptr<RenderingContext> Create();
+		static Ref<RenderingContext> Create();
 	};
 
 }

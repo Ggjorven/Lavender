@@ -7,6 +7,7 @@
 #include <vk_mem_alloc.h>
 
 #include "Lavender/APIs/Vulkan/VulkanDevice.hpp"
+#include "Lavender/Utils/Utils.hpp"
 
 namespace Lavender
 {
@@ -14,7 +15,7 @@ namespace Lavender
 	class VulkanSwapChain
 	{
 	public:
-		VulkanSwapChain(VkInstance vkInstance, std::shared_ptr<VulkanDevice> vkDevice);
+		VulkanSwapChain(VkInstance vkInstance, Ref<VulkanDevice> vkDevice);
 
 		void Init(uint32_t width, uint32_t height, const bool vsync);
 		void Destroy();
@@ -24,21 +25,31 @@ namespace Lavender
 
 		void OnResize(uint32_t width, uint32_t height, const bool vsync);
 
-		VkFramebuffer GetCurrentFrameBuffer() const { return m_Framebuffers[m_CurrentFrame]; }
+		inline uint32_t GetCurrentFrame() const { return m_CurrentFrame; }
+		inline uint32_t GetAquiredImage() const { return m_AquiredImage; }
+
+		// Note(Jorben): This function is used by VulkanRenderCommandBuffers to wait for the image to be available
+		inline VkSemaphore& GetCurrentImageAvailableSemaphore() { return m_ImageAvailableSemaphores[m_CurrentFrame]; }
+		inline VkSemaphore& GetImageAvailableSemaphore(uint32_t index) { return m_ImageAvailableSemaphores[index]; }
+
+		inline VkFramebuffer GetCurrentFrameBuffer() const { return m_Framebuffers[m_CurrentFrame]; }
 		// TODO: Add a way of checking the index is valid
-		VkFramebuffer GetFramebuffer(uint32_t index) { return m_Framebuffers[index]; }
+		inline VkFramebuffer GetFramebuffer(uint32_t index) const { return m_Framebuffers[index]; }
 
-		static std::shared_ptr<VulkanSwapChain> Create(VkInstance vkInstance, std::shared_ptr<VulkanDevice> vkDevice);
+		inline VkCommandPool& GetCommandPool() { return m_CommandPool; }
 
+		static Ref<VulkanSwapChain> Create(VkInstance vkInstance, Ref<VulkanDevice> vkDevice);
+
+		void TempRecordDefaultCommandBuffer(); // TODO: Remove...
+	
 	private:
 		uint32_t AcquireNextImage();
 		void FindImageFormatAndColorSpace();
 
-		void TempRecordDefaultCommandBuffer();
 
 	private:
 		VkInstance m_Instance = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanDevice> m_Device = VK_NULL_HANDLE;
+		Ref<VulkanDevice> m_Device = VK_NULL_HANDLE;
 		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
 		struct SwapchainImage
@@ -59,11 +70,8 @@ namespace Lavender
 		VkRenderPass m_RenderPass = nullptr;
 
 		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
-		std::vector<VkCommandBuffer> m_CommandBuffers = { };
 
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores = { };
-		std::vector<VkSemaphore> m_RenderFinishedSemaphores = { };
-		std::vector<VkFence> m_InFlightFences = { };
 
 		VkFormat m_ColorFormat = VK_FORMAT_UNDEFINED;
 		VkColorSpaceKHR m_ColorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
