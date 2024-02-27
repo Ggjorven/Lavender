@@ -23,15 +23,18 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 void EditorLayer::OnRender()
 {
-	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
-	
 	m_RenderPass->Begin();
 	m_RenderPass->End();
 	m_RenderPass->Submit();
+
+	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
 }
 
 void EditorLayer::OnImGuiRender()
 {
+	ImGui::Begin("A");
+	ImGui::Text("TEXT");
+	ImGui::End();
 }
 
 void EditorLayer::OnEvent(Event& e)

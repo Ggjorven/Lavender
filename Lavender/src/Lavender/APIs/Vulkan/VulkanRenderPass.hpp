@@ -26,6 +26,7 @@ namespace Lavender
 		void Resize(uint32_t width, uint32_t height) override;
 
 		Ref<RenderCommandBuffer> GetCommandBuffer() override { return m_CommandBuffer; }
+		VkRenderPass& GetVulkanRenderPass() { return m_RenderPass; }
 
 	private:
 		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;

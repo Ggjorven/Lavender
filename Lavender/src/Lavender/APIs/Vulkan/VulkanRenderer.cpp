@@ -36,9 +36,21 @@ namespace Lavender
 	void VulkanRenderer::BeginFrame()
 	{
 		// TODO: Execute resourceFree queue
-		m_WaitForCommandBuffers.clear();
 
-		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+
+		std::vector<VkFence> fences = { };
+		for (auto& cmd : m_WaitForCommandBuffers) // These are the WaitCommandBuffers from the last frame
+			fences.push_back(cmd->GetInFlightFence((context->GetSwapChain()->GetCurrentFrame() + Renderer::GetSpecification().FramesInFlight - 1) % Renderer::GetSpecification().FramesInFlight));
+		
+		// Wait for all previous fences
+		if (fences.size() > 0)
+			vkWaitForFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, UINT64_MAX);
+
+		m_WaitForCommandBuffers.clear();
+		VulkanRenderCommandBuffer::ResetCounter();
+
+		auto swapchain = context->GetSwapChain();
 		swapchain->BeginFrame();
 	}
 

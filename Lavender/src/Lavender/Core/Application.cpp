@@ -121,6 +121,8 @@ namespace Lavender
 		}
 
 		Renderer::OnResize(e.GetWidth(), e.GetHeight());
+		m_ImGuiLayer->Resize(e.GetWidth(), e.GetHeight());
+
 		m_Minimized = false;
 		return false;
 	}

@@ -21,8 +21,11 @@ namespace Lavender
 		void Submit() override;
 
 		inline VkSemaphore GetRenderFinishedSemaphore(uint32_t index) const { return m_RenderFinishedSemaphores[index]; }
+		inline VkFence GetInFlightFence(uint32_t index) const { return m_InFlightFences[index]; }
 
 		VkCommandBuffer GetVulkanCommandBuffer();
+
+		static void ResetCounter();
 
 	private:
 		std::vector<VkCommandBuffer> m_CommandBuffers = { };

@@ -300,7 +300,7 @@ namespace Lavender
 
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetSpecification().FramesInFlight;
 
-		//vkDeviceWaitIdle(m_Device->GetVulkanDevice());
+		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height, const bool vsync)

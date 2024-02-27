@@ -7,15 +7,11 @@
 
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
-
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
-
-//#include "Lavender/Renderer/GraphicsContext.hpp"
-//#include "Lavender/APIs/Vulkan/VulkanManager.hpp"
-//#include "Lavender/APIs/Vulkan/VulkanActions.hpp"
-//#include "Lavender/APIs/Vulkan/Setup/VulkanHelper.hpp"
-//#include "Lavender/APIs/Vulkan/Setup/VulkanResources.hpp"
+#include "Lavender/APIs/Vulkan/VulkanCommands.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -98,22 +94,20 @@ namespace Lavender
 		//init_info.MSAASamples = vkMSAASamples; // The number of samples per pixel in case of MSAA
 		//init_info.Subpass = 0; // The index of the subpass where ImGui will be drawn
 
+		// Create renderpass
+		m_Renderpass = RefHelper::Create<VulkanRenderPass>();
 
-		// TODO: Implement
-		/*
-		// TODO(Jorben): Create some sort of renderpass for ImGui
-		ImGui_ImplVulkan_Init(&initInfo, GraphicsContext::Get()->GetResources()->GetRenderPasses()[0]->m_RenderPass);
+		ImGui_ImplVulkan_Init(&initInfo, m_Renderpass->GetVulkanRenderPass());
 
 		// Create fonts
 		io.Fonts->AddFontDefault();
 		{
-			VkCommandBuffer commandBuffer = VulkanActions::BeginSingleTimeCommands();
+			VkCommandBuffer commandBuffer = VulkanCommands::Begin();
 			ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
-			VulkanActions::EndSingleTimeCommands(commandBuffer);
+			VulkanCommands::EndAndSubmit(commandBuffer);
 
 			ImGui_ImplVulkan_DestroyFontUploadObjects();
 		}
-		*/
 	}
 
 	void VulkanImGuiLayer::OnDetach()
@@ -124,39 +118,29 @@ namespace Lavender
 
 		vkDestroyDescriptorPool(device, s_ImGuiPool, nullptr);
 
-		// TODO: Implement ^^^
-		/*
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-		*/
 	}
 
 	void VulkanImGuiLayer::Begin()
 	{
-		/*
+		m_Renderpass->Begin();
+
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		*/
 	}
 
 	void VulkanImGuiLayer::End()
 	{
-		/*
 		ImGuiIO& io = ImGui::GetIO();
 
 		io.DisplaySize = ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight());
 
-		auto& resourceInfo = VulkanManager::GetResourceInfo();
-
 		// Rendering
 		ImGui::Render();
-		Renderer::AddToUIQueue([this]() {
-			auto& resourceInfo = VulkanManager::GetResourceInfo();
-
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), resourceInfo.CommandBuffers[Renderer::GetCurrentFrame()]);
-			});
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), RefHelper::RefAs<VulkanRenderCommandBuffer>(m_Renderpass->GetCommandBuffer())->GetVulkanCommandBuffer());
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -165,7 +149,16 @@ namespace Lavender
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
-		*/
+
+		m_Renderpass->End();
+		m_Renderpass->Submit();
+
+		Renderer::WaitFor(m_Renderpass->GetCommandBuffer());
+	}
+
+	void VulkanImGuiLayer::Resize(uint32_t width, uint32_t height)
+	{
+		m_Renderpass->Resize(width, height);
 	}
 
 }

@@ -14,6 +14,8 @@
 namespace Lavender
 {
 
+	static uint32_t s_RenderPasses = 0;
+
 	VulkanRenderCommandBuffer::VulkanRenderCommandBuffer()
 	{
 		VkDevice device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
@@ -107,10 +109,13 @@ namespace Lavender
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
+		std::vector<VkSemaphore> semaphores = { };
+		// TODO: Maybe add semaphores?
+
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentImageAvailableSemaphore();
+		submitInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
+		submitInfo.pWaitSemaphores = semaphores.data();
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
@@ -122,6 +127,8 @@ namespace Lavender
 			if (vkQueueSubmit(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[currentFrame]) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to submit draw command buffer!");
 		}
+
+		s_RenderPasses++;
 	}
 
 	VkCommandBuffer VulkanRenderCommandBuffer::GetVulkanCommandBuffer()
@@ -129,6 +136,11 @@ namespace Lavender
 		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
 
 		return m_CommandBuffers[currentFrame];
+	}
+
+	void VulkanRenderCommandBuffer::ResetCounter()
+	{
+		s_RenderPasses = 0;
 	}
 
 }
