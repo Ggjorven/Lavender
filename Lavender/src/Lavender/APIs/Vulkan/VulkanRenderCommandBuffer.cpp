@@ -14,7 +14,7 @@
 namespace Lavender
 {
 
-	static uint32_t s_RenderPasses = 0;
+	static VkSemaphore s_Semaphore = VK_NULL_HANDLE;
 
 	VulkanRenderCommandBuffer::VulkanRenderCommandBuffer()
 	{
@@ -109,13 +109,10 @@ namespace Lavender
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
-		std::vector<VkSemaphore> semaphores = { };
-		// TODO: Maybe add semaphores?
-
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
-		submitInfo.pWaitSemaphores = semaphores.data();
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = &s_Semaphore;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
@@ -128,7 +125,7 @@ namespace Lavender
 				LV_LOG_ERROR("Failed to submit draw command buffer!");
 		}
 
-		s_RenderPasses++;
+		s_Semaphore = m_RenderFinishedSemaphores[currentFrame]; // For the next commandBuffer
 	}
 
 	VkCommandBuffer VulkanRenderCommandBuffer::GetVulkanCommandBuffer()
@@ -138,9 +135,14 @@ namespace Lavender
 		return m_CommandBuffers[currentFrame];
 	}
 
-	void VulkanRenderCommandBuffer::ResetCounter()
+	void VulkanRenderCommandBuffer::ResetSemaphore()
 	{
-		s_RenderPasses = 0;
+		s_Semaphore = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentImageAvailableSemaphore();
+	}
+
+	VkSemaphore VulkanRenderCommandBuffer::GetSemaphore()
+	{
+		return s_Semaphore;
 	}
 
 }

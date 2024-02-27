@@ -25,7 +25,8 @@ namespace Lavender
 
 		VkCommandBuffer GetVulkanCommandBuffer();
 
-		static void ResetCounter();
+		static void ResetSemaphore();
+		static VkSemaphore GetSemaphore();
 
 	private:
 		std::vector<VkCommandBuffer> m_CommandBuffers = { };

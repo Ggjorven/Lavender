@@ -27,7 +27,6 @@ namespace Lavender
 		void OnResize(uint32_t width, uint32_t height) override;
 
 		std::vector<Ref<VulkanRenderCommandBuffer>> GetCommandBuffers() { return m_WaitForCommandBuffers; }
-		std::vector<VkSemaphore> GetSemaphores();
 
 	private:
 		Utils::Queue<RenderFunction> m_RenderQueue = { };

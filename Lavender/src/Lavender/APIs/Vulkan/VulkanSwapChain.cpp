@@ -263,20 +263,17 @@ namespace Lavender
 
 	void VulkanSwapChain::BeginFrame()
 	{
-		// TODO: WAIT FOR ALL COMMANDBUFFER FENCES
-
 		m_AquiredImage = AcquireNextImage();
 	}
 
 	void VulkanSwapChain::EndFrame()
 	{
-		auto renderer = ((VulkanRenderer*)(Renderer::GetInstance()));
-		auto semaphores = renderer->GetSemaphores();
+		VkSemaphore lastCmdBufSemaphore = VulkanRenderCommandBuffer::GetSemaphore();
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
-		presentInfo.pWaitSemaphores = semaphores.data(); // TODO: Wait for all commandBuffers waitSemaphores?
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = &lastCmdBufSemaphore;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = &m_SwapChain;
 		presentInfo.pImageIndices = &m_AquiredImage;

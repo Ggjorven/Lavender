@@ -48,7 +48,7 @@ namespace Lavender
 			vkWaitForFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, UINT64_MAX);
 
 		m_WaitForCommandBuffers.clear();
-		VulkanRenderCommandBuffer::ResetCounter();
+		VulkanRenderCommandBuffer::ResetSemaphore();
 
 		auto swapchain = context->GetSwapChain();
 		swapchain->BeginFrame();
@@ -74,22 +74,6 @@ namespace Lavender
 	{
 		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->OnResize(width, height, Application::Get().GetWindow().IsVSync());
-	}
-
-	std::vector<VkSemaphore> VulkanRenderer::GetSemaphores()
-	{
-		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
-
-		std::vector<VkSemaphore> semaphores = { };
-		semaphores.clear();
-		//semaphores.resize(m_WaitForCommandBuffers.size());
-
-		for (auto& cmd : m_WaitForCommandBuffers)
-		{
-			semaphores.push_back(cmd->GetRenderFinishedSemaphore(currentFrame));
-		}
-
-		return semaphores;
 	}
 
 }
