@@ -23,17 +23,11 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 void EditorLayer::OnRender()
 {
-	LV_LOG_TRACE("A");
 	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
-	LV_LOG_TRACE("A");
-
+	
 	m_RenderPass->Begin();
-	LV_LOG_TRACE("A");
 	m_RenderPass->End();
-	LV_LOG_TRACE("A");
 	m_RenderPass->Submit();
-
-	LV_LOG_TRACE("A");
 }
 
 void EditorLayer::OnImGuiRender()
@@ -42,4 +36,14 @@ void EditorLayer::OnImGuiRender()
 
 void EditorLayer::OnEvent(Event& e)
 {
+	EventHandler handler(e);
+
+	handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(EditorLayer::OnResizeEvent));
+}
+
+bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
+{
+	m_RenderPass->Resize(e.GetWidth(), e.GetHeight());
+
+	return false;
 }

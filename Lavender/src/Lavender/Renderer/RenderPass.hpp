@@ -17,6 +17,8 @@ namespace Lavender
 		virtual void End() = 0;
 		virtual void Submit() = 0;
 
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+
 		virtual Ref<RenderCommandBuffer> GetCommandBuffer() = 0;
 
 		static Ref<RenderPass> Create();

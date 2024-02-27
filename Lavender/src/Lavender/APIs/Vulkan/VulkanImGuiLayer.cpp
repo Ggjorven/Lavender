@@ -7,8 +7,10 @@
 
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
-//#include "Lavender/Renderer/Renderer.hpp"
-//
+#include "Lavender/Renderer/Renderer.hpp"
+
+#include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+
 //#include "Lavender/Renderer/GraphicsContext.hpp"
 //#include "Lavender/APIs/Vulkan/VulkanManager.hpp"
 //#include "Lavender/APIs/Vulkan/VulkanActions.hpp"
@@ -26,31 +28,30 @@ namespace Lavender
 
 	void VulkanImGuiLayer::OnAttach()
 	{
-		/*
+		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		{
-			/*
 			std::vector<VkDescriptorPoolSize> poolSizes =
 			{
-				{ VK_DESCRIPTOR_TYPE_SAMPLER, 10 },
-				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }, // Important for ImGui
-				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 10 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 10 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 10 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 10 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 10 },
-				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 10 }
+				{ VK_DESCRIPTOR_TYPE_SAMPLER, 100 },
+				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 100 }, // Important for ImGui
+				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 100 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 100 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 100 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 100 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 100 },
+				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 100 }
 			};
 
 			VkDescriptorPoolCreateInfo poolInfo = {};
 			poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 			poolInfo.pPoolSizes = poolSizes.data();
-			poolInfo.maxSets = static_cast<uint32_t>(LV_MAX_FRAMES_IN_FLIGHT); // Amount of sets?
+			poolInfo.maxSets = static_cast<uint32_t>(Renderer::GetSpecification().FramesInFlight);
 
-			if (vkCreateDescriptorPool(VulkanManager::GetDeviceInfo().Device, &poolInfo, nullptr, &s_ImGuiPool) != VK_SUCCESS)
+			if (vkCreateDescriptorPool(context->GetLogicalDevice()->GetVulkanDevice(), &poolInfo, nullptr, &s_ImGuiPool) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to create descriptor pool!");
 		}
 
@@ -82,25 +83,24 @@ namespace Lavender
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		ImGui_ImplGlfw_InitForVulkan(window, true);
 
-		auto& deviceInfo = VulkanManager::GetDeviceInfo();
-		auto& swapchainInfo = VulkanManager::GetSwapChainInfo();
-		auto& resourceInfo = VulkanManager::GetResourceInfo();
-
 		ImGui_ImplVulkan_InitInfo  initInfo = {};
-		initInfo.Instance = deviceInfo.Instance;
-		initInfo.PhysicalDevice = deviceInfo.PhysicalDevice;
-		initInfo.Device = deviceInfo.Device;
-		initInfo.QueueFamily = VulkanHelper::QueueFamilyIndices::Find(GraphicsContext::Get()->GetInstance(), deviceInfo.PhysicalDevice).GraphicsFamily.value();
-		initInfo.Queue = deviceInfo.GraphicsQueue;
+		initInfo.Instance = context->GetVulkanInstance();
+		initInfo.PhysicalDevice = context->GetPhysicalDevice()->GetVulkanPhysicalDevice();
+		initInfo.Device = context->GetLogicalDevice()->GetVulkanDevice();
+		initInfo.QueueFamily = QueueFamilyIndices::Find(context->GetPhysicalDevice()->GetVulkanPhysicalDevice()).GraphicsFamily.value();
+		initInfo.Queue = context->GetLogicalDevice()->GetGraphicsQueue();
 		//initInfo.PipelineCache = vkPipelineCache;
-		initInfo.DescriptorPool = m_DescriptorPool;
+		initInfo.DescriptorPool = s_ImGuiPool;
 		initInfo.Allocator = nullptr; // Optional, use nullptr to use the default allocator
-		initInfo.MinImageCount = static_cast<uint32_t>(swapchainInfo.SwapChainImageViews.size());
-		initInfo.ImageCount = static_cast<uint32_t>(swapchainInfo.SwapChainImageViews.size());
+		initInfo.MinImageCount = static_cast<uint32_t>(context->GetSwapChain()->GetImageViews().size());
+		initInfo.ImageCount = static_cast<uint32_t>(context->GetSwapChain()->GetImageViews().size());
 		initInfo.CheckVkResultFn = nullptr; // Optional, a callback function for Vulkan errors
 		//init_info.MSAASamples = vkMSAASamples; // The number of samples per pixel in case of MSAA
 		//init_info.Subpass = 0; // The index of the subpass where ImGui will be drawn
 
+
+		// TODO: Implement
+		/*
 		// TODO(Jorben): Create some sort of renderpass for ImGui
 		ImGui_ImplVulkan_Init(&initInfo, GraphicsContext::Get()->GetResources()->GetRenderPasses()[0]->m_RenderPass);
 
@@ -118,11 +118,14 @@ namespace Lavender
 
 	void VulkanImGuiLayer::OnDetach()
 	{
+		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+		vkDeviceWaitIdle(device);
+
+		vkDestroyDescriptorPool(device, s_ImGuiPool, nullptr);
+
+		// TODO: Implement ^^^
 		/*
-		vkDeviceWaitIdle(VulkanManager::GetDeviceInfo().Device);
-
-		vkDestroyDescriptorPool(VulkanManager::GetDeviceInfo().Device, m_DescriptorPool, nullptr);
-
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();

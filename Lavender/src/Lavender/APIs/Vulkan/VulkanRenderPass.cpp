@@ -75,7 +75,7 @@ namespace Lavender
             // TODO: Maybe add depth
             VkImageView attachments[] = { context->GetSwapChain()->GetImageViews()[i] };
 
-            VkFramebufferCreateInfo framebufferInfo{};
+            VkFramebufferCreateInfo framebufferInfo = {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = m_RenderPass;
             framebufferInfo.attachmentCount = 1;
@@ -92,6 +92,8 @@ namespace Lavender
 	VulkanRenderPass::~VulkanRenderPass()
 	{
         auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
+
+        vkDeviceWaitIdle(device->GetVulkanDevice());
 
         for (auto& framebuffer : m_Framebuffers)
             vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
@@ -130,7 +132,7 @@ namespace Lavender
         viewport.maxDepth = 1.0f;
         vkCmdSetViewport(m_CommandBuffer->GetVulkanCommandBuffer(), 0, 1, &viewport);
 
-        VkRect2D scissor{};
+        VkRect2D scissor = {};
         scissor.offset = { 0, 0 };
         scissor.extent = swapChainExtent;
         vkCmdSetScissor(m_CommandBuffer->GetVulkanCommandBuffer(), 0, 1, &scissor);
@@ -147,5 +149,38 @@ namespace Lavender
 	{
         m_CommandBuffer->Submit();
 	}
+
+    void VulkanRenderPass::Resize(uint32_t width, uint32_t height)
+    {
+        auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+        auto device = context->GetLogicalDevice();
+
+        // Destroy
+        for (auto& framebuffer : m_Framebuffers)
+            vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+
+        // Recreate framebuffers
+        auto imageViews = context->GetSwapChain()->GetImageViews();
+
+        m_Framebuffers.resize(imageViews.size());
+
+        for (size_t i = 0; i < imageViews.size(); i++)
+        {
+            // TODO: Maybe add depth
+            VkImageView attachments[] = { context->GetSwapChain()->GetImageViews()[i] };
+
+            VkFramebufferCreateInfo framebufferInfo = {};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = m_RenderPass;
+            framebufferInfo.attachmentCount = 1;
+            framebufferInfo.pAttachments = attachments;
+            framebufferInfo.width = Application::Get().GetWindow().GetWidth();
+            framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
+                LV_LOG_ERROR("Failed to create framebuffer!");
+        }
+    }
 
 }

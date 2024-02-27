@@ -24,7 +24,7 @@ namespace Lavender
 		static void EndFrame();
 
 		static void Submit(RenderFunction function);
-		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer);
+		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer); // TODO: Remove this and replace with something else
 
 		static void OnResize(uint32_t width, uint32_t height);
 

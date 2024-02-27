@@ -19,5 +19,8 @@ public:
 	void OnEvent(Event& e);
 
 private:
+	bool OnResizeEvent(WindowResizeEvent& e);
+
+private:
 	Ref<RenderPass> m_RenderPass = nullptr;
 };

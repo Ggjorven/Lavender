@@ -36,6 +36,7 @@ namespace Lavender
 	void VulkanRenderer::BeginFrame()
 	{
 		// TODO: Execute resourceFree queue
+		m_WaitForCommandBuffers.clear();
 
 		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->BeginFrame();

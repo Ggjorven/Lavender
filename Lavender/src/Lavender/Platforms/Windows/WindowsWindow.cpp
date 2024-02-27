@@ -32,7 +32,7 @@ namespace Lavender
 
 	void WindowsWindow::OnRender()
 	{
-		FrameMark;
+		LV_MARK_FRAME;
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
