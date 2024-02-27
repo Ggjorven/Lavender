@@ -12,7 +12,7 @@ namespace Lavender
 {
 
 	VulkanRenderPass::VulkanRenderPass()
-        : VulkanRenderPass(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create()))
+        : VulkanRenderPass(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
     {
 	}
 

@@ -10,12 +10,12 @@
 namespace Lavender
 {
 
-	Ref<RenderCommandBuffer> RenderCommandBuffer::Create()
+	Ref<RenderCommandBuffer> RenderCommandBuffer::Create(Usage usage)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanRenderCommandBuffer>();
+			return RefHelper::Create<VulkanRenderCommandBuffer>(usage);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");

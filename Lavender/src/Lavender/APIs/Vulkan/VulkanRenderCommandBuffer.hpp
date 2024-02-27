@@ -13,7 +13,7 @@ namespace Lavender
 	class VulkanRenderCommandBuffer : public RenderCommandBuffer
 	{
 	public:
-		VulkanRenderCommandBuffer();
+		VulkanRenderCommandBuffer(RenderCommandBuffer::Usage usage);
 		virtual ~VulkanRenderCommandBuffer();
 
 		void Begin() override;
@@ -29,6 +29,8 @@ namespace Lavender
 		static VkSemaphore GetSemaphore();
 
 	private:
+		RenderCommandBuffer::Usage m_Usage = Usage::None;
+
 		std::vector<VkCommandBuffer> m_CommandBuffers = { };
 
 		// Sync objects

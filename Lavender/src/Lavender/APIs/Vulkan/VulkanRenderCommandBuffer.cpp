@@ -16,7 +16,8 @@ namespace Lavender
 
 	static VkSemaphore s_Semaphore = VK_NULL_HANDLE;
 
-	VulkanRenderCommandBuffer::VulkanRenderCommandBuffer()
+	VulkanRenderCommandBuffer::VulkanRenderCommandBuffer(RenderCommandBuffer::Usage usage)
+		: m_Usage(usage)
 	{
 		VkDevice device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
@@ -111,8 +112,18 @@ namespace Lavender
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &s_Semaphore;
+
+		if (m_Usage == RenderCommandBuffer::Usage::Sequential)
+		{
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = &s_Semaphore;
+		}
+		if (m_Usage == RenderCommandBuffer::Usage::Standalone)
+		{
+			submitInfo.waitSemaphoreCount = 0;
+			submitInfo.pWaitSemaphores = nullptr;
+		}
+
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
@@ -125,7 +136,8 @@ namespace Lavender
 				LV_LOG_ERROR("Failed to submit draw command buffer!");
 		}
 
-		s_Semaphore = m_RenderFinishedSemaphores[currentFrame]; // For the next commandBuffer
+		if (m_Usage == RenderCommandBuffer::Usage::Sequential)
+			s_Semaphore = m_RenderFinishedSemaphores[currentFrame]; // For the next commandBuffer
 	}
 
 	VkCommandBuffer VulkanRenderCommandBuffer::GetVulkanCommandBuffer()
