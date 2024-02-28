@@ -11,6 +11,10 @@
 void EditorLayer::OnAttach()
 {
 	m_RenderPass = RenderPass::Create();
+
+	// TODO: Shader
+
+	m_Pipeline = Pipeline::Create();
 }
 
 void EditorLayer::OnDetach()
@@ -33,7 +37,13 @@ void EditorLayer::OnRender()
 void EditorLayer::OnImGuiRender()
 {
 	ImGui::Begin("A");
+
 	ImGui::Text("TEXT");
+	if (ImGui::Button("BUTTON"))
+	{
+		LV_LOG_TRACE("BUTTON");
+	}
+
 	ImGui::End();
 }
 

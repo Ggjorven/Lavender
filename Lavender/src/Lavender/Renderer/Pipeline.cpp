@@ -40,4 +40,49 @@ namespace Lavender
 		return nullptr;
 	}
 
+	Ref<Pipeline> Pipeline::Create(PipelineLayout layout, Ref<Shader> shader)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			return RefHelper::Create<VulkanPipeline>(layout, shader);
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
+
+		return nullptr;
+	}
+
+	Ref<Pipeline> Pipeline::Create(PipelineLayout layout, Ref<RenderPass> renderpass)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			return RefHelper::Create<VulkanPipeline>(layout,renderpass);
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
+
+		return nullptr;
+	}
+
+	Ref<Pipeline> Pipeline::Create(PipelineLayout layout, Ref<Shader> shader, Ref<RenderPass> renderpass)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			return RefHelper::Create<VulkanPipeline>(layout, shader, renderpass);
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
+
+		return nullptr;
+	}
+
 }

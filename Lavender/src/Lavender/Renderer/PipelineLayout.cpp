@@ -73,7 +73,7 @@ namespace Lavender
 
 
 
-	UniformElement::UniformElement(UniformDataType type, uint32_t set, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count)
+	UniformElement::UniformElement(UniformDataType type, SetID set, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count)
 		: Type(type), Set(set), Binding(binding), Name(name), Stage(stage), Count(count)
 	{
 	}
@@ -85,42 +85,42 @@ namespace Lavender
 
 	}
 
-	uint32_t UniformLayout::UniqueCount() const
+	uint32_t UniformLayout::UniqueCount(SetID set) const
 	{
-		return (uint32_t)UniqueTypes().size();
+		return (uint32_t)UniqueTypes(set).size();
 	}
 
-	std::unordered_set<UniformDataType> UniformLayout::UniqueTypes() const
+	std::unordered_set<UniformDataType> UniformLayout::UniqueTypes(SetID set) const
 	{
-		std::unordered_set<UniformDataType> unique = { };
-		unique.clear();
-		
-		for (auto& set : m_Elements)
+		std::unordered_set<UniformDataType> unique;
+
+		auto it = m_Elements.find(set);
+		if (it != m_Elements.end()) 
 		{
-			for (auto& e : set.second)
-			{
+			for (const auto& e : it->second)
 				unique.insert(e.Type);
-			}
 		}
 
 		return unique;
 	}
 
-	uint32_t UniformLayout::AmountOf(UniformDataType type) const
+	uint32_t UniformLayout::AmountOf(SetID set, UniformDataType type) const
 	{
 		uint32_t count = 0;
-		
-		for (auto& set : m_Elements)
+
+		auto it = m_Elements.find(set);
+		if (it != m_Elements.end()) 
 		{
-			for (auto& e : set.second)
+			for (const auto& e : it->second) 
 			{
 				if (e.Type == type)
 					count++;
 			}
 		}
-		
+
 		return count;
 	}
+
 
 
 

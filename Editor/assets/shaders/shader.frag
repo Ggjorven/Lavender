@@ -1,11 +1,13 @@
 #version 460 core
 
-layout(location = 0) out vec4 colour;
-layout(location = 0) in vec2 v_TexCoord;
+layout(location = 0) out vec4 o_Colour;
 
-layout(binding = 0) uniform sampler2D u_Tex;
-
-void main()
+layout(std140, set = 0, binding = 0) uniform ColourBlock 
 {
-    colour = texture(u_Tex, v_TexCoord);
+    vec4 u_Colour;
+} m_ColourBlock;
+
+void main() 
+{
+    o_Colour = m_ColourBlock.u_Colour;
 }

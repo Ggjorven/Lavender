@@ -58,6 +58,8 @@ namespace Lavender
 
 
 
+	typedef uint32_t SetID;
+
 	enum class UniformDataType
 	{
 		None = 0, UniformBuffer, Image
@@ -75,14 +77,14 @@ namespace Lavender
 
 	public:
 		std::string Name = "Empty";
-		uint32_t Set = 0;
+		SetID Set = 0;
 		uint32_t Binding = 0;
 		UniformDataType Type = UniformDataType::None;
 		uint32_t Count = 1;
 		ShaderStage Stage = ShaderStage::None;
 
 		UniformElement() = default;
-		UniformElement(UniformDataType type, uint32_t set, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count = 1);
+		UniformElement(UniformDataType type, SetID set, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count = 1);
 		virtual ~UniformElement() = default;
 	};
 
@@ -95,13 +97,13 @@ namespace Lavender
 
 		inline const std::unordered_map<uint32_t, std::vector<UniformElement>>& GetElements() const { return m_Elements; }
 
-		uint32_t UniqueCount() const;
-		std::unordered_set<UniformDataType> UniqueTypes() const;
-		uint32_t AmountOf(UniformDataType type) const;
+		uint32_t UniqueCount(SetID set) const;
+		std::unordered_set<UniformDataType> UniqueTypes(SetID set) const;
+		uint32_t AmountOf(SetID set, UniformDataType type) const;
 
 	private:
 		// First element is the Set, second are the elements in that Set
-		std::unordered_map<uint32_t, std::vector<UniformElement>> m_Elements = { };
+		std::unordered_map<SetID, std::vector<UniformElement>> m_Elements = { };
 	};
 	DEFINE_BITWISE_OPS(UniformElement::ShaderStage)
 
