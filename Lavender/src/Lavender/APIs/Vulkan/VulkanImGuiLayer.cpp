@@ -95,8 +95,12 @@ namespace Lavender
 		//init_info.Subpass = 0; // The index of the subpass where ImGui will be drawn
 
 		// Create renderpass
-		m_Renderpass = RefHelper::Create<VulkanRenderPass>();
+		RenderPassSpecification specs = {};
+		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Load; // To not overwrite previous drawn things
+		specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 
+		m_Renderpass = RefHelper::Create<VulkanRenderPass>(specs);
+		
 		ImGui_ImplVulkan_Init(&initInfo, m_Renderpass->GetVulkanRenderPass());
 
 		// Create fonts

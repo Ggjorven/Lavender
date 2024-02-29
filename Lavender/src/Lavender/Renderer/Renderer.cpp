@@ -43,6 +43,11 @@ namespace Lavender
 		s_RenderInstance->WaitFor(commandBuffer);
 	}
 
+	void Renderer::DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer)
+	{
+		s_RenderInstance->DrawIndexed(commandBuffer, indexBuffer);
+	}
+
 	void Renderer::OnResize(uint32_t width, uint32_t height)
 	{
 		s_RenderInstance->OnResize(width, height);

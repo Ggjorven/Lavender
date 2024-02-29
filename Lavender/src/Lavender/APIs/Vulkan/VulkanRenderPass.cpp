@@ -11,13 +11,13 @@
 namespace Lavender
 {
 
-	VulkanRenderPass::VulkanRenderPass()
-        : VulkanRenderPass(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
+	VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs)
+        : VulkanRenderPass(specs, RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
     {
 	}
 
-	VulkanRenderPass::VulkanRenderPass(Ref<RenderCommandBuffer> commandBuffer)
-        : m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer))
+	VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer)
+        : m_Specification(specs), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer))
 	{
         auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 
@@ -27,12 +27,12 @@ namespace Lavender
         VkAttachmentDescription colorAttachment = {};
         colorAttachment.format = context->GetSwapChain()->GetColourFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.loadOp = (VkAttachmentLoadOp)((int)m_Specification.ColourLoadOp);
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        colorAttachment.initialLayout = (VkImageLayout)((int)m_Specification.PreviousImageLayout);
+        colorAttachment.finalLayout = (VkImageLayout)((int)m_Specification.FinalImageLayout);
 
         VkAttachmentReference colorAttachmentRef = {};
         colorAttachmentRef.attachment = 0;

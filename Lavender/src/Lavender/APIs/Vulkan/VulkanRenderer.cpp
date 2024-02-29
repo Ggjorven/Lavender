@@ -5,8 +5,10 @@
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/IndexBuffer.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
 namespace Lavender
 {
@@ -68,6 +70,12 @@ namespace Lavender
 	void VulkanRenderer::WaitFor(Ref<RenderCommandBuffer> commandBuffer)
 	{
 		m_WaitForCommandBuffers.push_back(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer));
+	}
+
+	void VulkanRenderer::DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer)
+	{
+		auto cmdBuf = RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer);
+		vkCmdDrawIndexed(cmdBuf->GetVulkanCommandBuffer(), indexBuffer->GetCount(), 1, 0, 0, 0);
 	}
 
 	void VulkanRenderer::OnResize(uint32_t width, uint32_t height)

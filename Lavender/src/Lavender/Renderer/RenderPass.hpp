@@ -7,6 +7,26 @@ namespace Lavender
 
 	class RenderCommandBuffer;
 
+	struct RenderPassSpecification // TODO: Add more
+	{
+	public:
+		enum class ColourLoadOperation
+		{
+			Load = 0, Clear = 1
+		};
+
+		enum class ImageLayout
+		{
+			Undefined = 0, Presentation = 1000001002
+		};
+
+	public:
+		ColourLoadOperation ColourLoadOp = ColourLoadOperation::Clear;
+
+		ImageLayout PreviousImageLayout = ImageLayout::Undefined;
+		ImageLayout FinalImageLayout = ImageLayout::Presentation;
+	};
+
 	class RenderPass
 	{
 	public:
@@ -21,8 +41,8 @@ namespace Lavender
 
 		virtual Ref<RenderCommandBuffer> GetCommandBuffer() = 0;
 
-		static Ref<RenderPass> Create();
-		static Ref<RenderPass> CreateFromCommandBuffer(Ref<RenderCommandBuffer> commandBuffer);
+		static Ref<RenderPass> Create(RenderPassSpecification specs = RenderPassSpecification());
+		static Ref<RenderPass> CreateFromCommandBuffer(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
 	};
 
 }

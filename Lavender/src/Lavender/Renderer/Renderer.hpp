@@ -12,6 +12,7 @@ namespace Lavender
 
 	class RenderCommandBuffer;
 	class RenderInstance;
+	class IndexBuffer;
 
 	// TODO: Add more functionality
 	class Renderer
@@ -25,6 +26,8 @@ namespace Lavender
 
 		static void Submit(RenderFunction function);
 		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer); // TODO: Remove this and replace with something else
+
+		static void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer);
 
 		static void OnResize(uint32_t width, uint32_t height);
 

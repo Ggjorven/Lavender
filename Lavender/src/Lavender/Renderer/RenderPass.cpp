@@ -10,12 +10,12 @@
 namespace Lavender
 {
 
-	Ref<RenderPass> RenderPass::Create()
+	Ref<RenderPass> RenderPass::Create(RenderPassSpecification specs)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanRenderPass>();
+			return RefHelper::Create<VulkanRenderPass>(specs);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");
@@ -25,12 +25,12 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<RenderPass> RenderPass::CreateFromCommandBuffer(Ref<RenderCommandBuffer> commandBuffer)
+	Ref<RenderPass> RenderPass::CreateFromCommandBuffer(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanRenderPass>(commandBuffer);
+			return RefHelper::Create<VulkanRenderPass>(specs, commandBuffer);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");

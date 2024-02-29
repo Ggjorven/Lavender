@@ -2,8 +2,11 @@
 
 #include <Lavender/Core/Layer.hpp>
 #include <Lavender/Utils/Utils.hpp>
+
 #include <Lavender/Renderer/RenderPass.hpp>
 #include <Lavender/Renderer/Pipeline.hpp>
+#include <Lavender/Renderer/VertexBuffer.hpp>
+#include <Lavender/Renderer/IndexBuffer.hpp>
 
 using namespace Lavender;
 
@@ -25,4 +28,7 @@ private:
 private:
 	Ref<Pipeline> m_Pipeline = nullptr;
 	Ref<RenderPass> m_RenderPass = nullptr;
+
+	Ref<VertexBuffer> m_VertexBuffer = nullptr;
+	Ref<IndexBuffer> m_IndexBuffer = nullptr;
 };

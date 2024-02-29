@@ -12,10 +12,11 @@ namespace Lavender
 	struct ShaderCode
 	{
 	public:
-		std::optional<std::vector<char>> FragmentSPIRV = {};
-		std::optional<std::vector<char>> VertexSPIRV = {};
+		std::vector<char> FragmentSPIRV = {};
+		std::vector<char> VertexSPIRV = {};
 
 	public:
+		ShaderCode() = default;
 		ShaderCode(const std::vector<char>& fragment, const std::vector<char>& vertex);
 	};
 

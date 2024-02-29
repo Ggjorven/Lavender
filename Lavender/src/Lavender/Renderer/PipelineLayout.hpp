@@ -103,9 +103,11 @@ namespace Lavender
 
 	private:
 		// First element is the Set, second are the elements in that Set
-		std::unordered_map<SetID, std::vector<UniformElement>> m_Elements = { };
+		std::unordered_map<SetID, std::vector<UniformElement>> m_Elements = { }; // TODO: Give a more appropriate name?
 	};
 	DEFINE_BITWISE_OPS(UniformElement::ShaderStage)
+
+
 
 	// TODO: Add more customizability
 	struct PipelineLayout
@@ -125,5 +127,8 @@ namespace Lavender
 		BufferLayout m_BufferLayout = {};
 		UniformLayout m_UniformLayout = {};
 	};
+
+	// TODO: Pipeline settings?
+
 
 }

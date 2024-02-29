@@ -11,8 +11,8 @@ namespace Lavender
 
 	VulkanShader::VulkanShader(ShaderCode code)
 	{
-		if (code.VertexSPIRV.has_value()) m_VertexShader = CreateShaderModule(code.VertexSPIRV.value());
-		if (code.FragmentSPIRV.has_value()) m_FragmentShader = CreateShaderModule(code.FragmentSPIRV.value());
+		if (code.VertexSPIRV.size() != 0) m_VertexShader = CreateShaderModule(code.VertexSPIRV);
+		if (code.FragmentSPIRV.size() != 0) m_FragmentShader = CreateShaderModule(code.FragmentSPIRV);
 	}
 
 	VulkanShader::~VulkanShader()

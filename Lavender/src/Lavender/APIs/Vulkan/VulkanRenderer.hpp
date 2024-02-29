@@ -24,6 +24,8 @@ namespace Lavender
 		void Submit(RenderFunction function);
 		void WaitFor(Ref<RenderCommandBuffer> commandBuffer);
 
+		void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer);
+
 		void OnResize(uint32_t width, uint32_t height) override;
 
 		std::vector<Ref<VulkanRenderCommandBuffer>> GetCommandBuffers() { return m_WaitForCommandBuffers; }

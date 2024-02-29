@@ -15,8 +15,8 @@ namespace Lavender
 	class VulkanRenderPass : public RenderPass
 	{
 	public:
-		VulkanRenderPass();
-		VulkanRenderPass(Ref<RenderCommandBuffer> commandBuffer);
+		VulkanRenderPass(RenderPassSpecification specs);
+		VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
 		virtual ~VulkanRenderPass();
 
 		void Begin() override;
@@ -33,5 +33,7 @@ namespace Lavender
 
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 		std::vector<VkFramebuffer> m_Framebuffers = { };
+
+		RenderPassSpecification m_Specification = {};
 	};
 }

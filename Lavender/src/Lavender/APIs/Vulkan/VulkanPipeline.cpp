@@ -130,16 +130,20 @@ namespace Lavender
 			vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 			vertShaderStageInfo.module = vertex;
 			vertShaderStageInfo.pName = "main";
+
+			shaderStages.push_back(vertShaderStageInfo);
 		}
 
 		auto fragment = vulkanShader->GetFragmentShader();
 		if (fragment)
 		{
-			VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-			vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-			vertShaderStageInfo.module = fragment;
-			vertShaderStageInfo.pName = "main";
+			VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+			fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			fragShaderStageInfo.module = fragment;
+			fragShaderStageInfo.pName = "main";
+
+			shaderStages.push_back(fragShaderStageInfo);
 		}
 		
 		auto bindingDescription = GetBindingDescription();
@@ -168,7 +172,7 @@ namespace Lavender
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // Change to VK_CULL_MODE_BACK_BIT? // VK_CULL_MODE_FRONT_BIT
+		rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; // Change to VK_CULL_MODE_BACK_BIT? // VK_CULL_MODE_FRONT_BIT
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		
