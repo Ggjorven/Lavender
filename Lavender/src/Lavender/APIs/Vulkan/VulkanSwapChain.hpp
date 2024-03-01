@@ -31,6 +31,7 @@ namespace Lavender
 		inline uint32_t GetAquiredImage() const { return m_AquiredImage; }
 
 		std::vector<VkImageView> GetImageViews();
+		inline VkImageView GetDepthImageView() { return m_DepthStencil.ImageView; }
 
 		inline VkImage& GetCurrentImage() { return m_Images[m_CurrentFrame].Image; }
 
@@ -56,7 +57,7 @@ namespace Lavender
 			VkImage Image = VK_NULL_HANDLE;
 			VkImageView ImageView = VK_NULL_HANDLE;
 		};
-		std::vector<SwapchainImage> m_Images;
+		std::vector<SwapchainImage> m_Images = { };
 
 		struct
 		{
@@ -65,7 +66,7 @@ namespace Lavender
 			VkImageView ImageView = VK_NULL_HANDLE;
 		} m_DepthStencil;
 
-		VkRenderPass m_RenderPass = nullptr;
+		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 
 		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
 

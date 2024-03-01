@@ -148,6 +148,7 @@ namespace Lavender
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		m_Device = VulkanDevice::Create(m_PhysicalDevice);
 
+		VulkanAllocator::Init();
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Swapchain creation
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,17 +156,15 @@ namespace Lavender
 
 		m_SwapChain = VulkanSwapChain::Create(m_VulkanInstance, m_Device);
 		m_SwapChain->Init(window.GetWidth(), window.GetHeight(), window.IsVSync());
-
-		VulkanAllocator::Init();
 	}
 
 	void VulkanContext::Destroy()
 	{
 		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 
-		VulkanAllocator::Destroy();
-		
 		m_SwapChain->Destroy();
+		
+		VulkanAllocator::Destroy();
 
 		m_Device->Destroy();
 

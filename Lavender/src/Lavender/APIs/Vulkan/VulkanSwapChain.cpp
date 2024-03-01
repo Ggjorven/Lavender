@@ -11,6 +11,7 @@
 #include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 
 namespace Lavender
 {
@@ -158,6 +159,11 @@ namespace Lavender
 			vkDestroyImageView(device, image.ImageView, nullptr);
 		m_Images.clear();
 
+		if (m_DepthStencil.Image)
+			VulkanAllocator::DestroyImage(m_DepthStencil.Image, m_DepthStencil.MemoryAlloc);
+		if (m_DepthStencil.ImageView)
+			vkDestroyImageView(device, m_DepthStencil.ImageView, nullptr);
+
 		// Get the swap chain images
 		static uint32_t imageCount = 0;
 		static std::vector<VkImage> imageCopies = { };
@@ -197,7 +203,7 @@ namespace Lavender
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Command buffers/pools
+		// Command pools
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
 		if (!m_CommandPool)
@@ -212,6 +218,13 @@ namespace Lavender
 			if (vkCreateCommandPool(m_Device->GetVulkanDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to create command pool!");
 		}
+
+		// Create depth images (after commandBuffer are created since we need them)
+		VkFormat depthFormat = VulkanAllocator::FindDepthFormat();
+		m_DepthStencil.MemoryAlloc = VulkanAllocator::CreateImage(width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_DepthStencil.Image);
+
+		m_DepthStencil.ImageView = VulkanAllocator::CreateImageView(m_DepthStencil.Image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+		VulkanAllocator::TransitionImageLayout(m_DepthStencil.Image, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Synchronization Objects
@@ -247,6 +260,9 @@ namespace Lavender
 
 		for (auto& image : m_Images)
 			vkDestroyImageView(device, image.ImageView, nullptr);
+
+		VulkanAllocator::DestroyImage(m_DepthStencil.Image, m_DepthStencil.MemoryAlloc);
+		vkDestroyImageView(device, m_DepthStencil.ImageView, nullptr);
 
 		vkDestroyCommandPool(device, m_CommandPool, nullptr);
 

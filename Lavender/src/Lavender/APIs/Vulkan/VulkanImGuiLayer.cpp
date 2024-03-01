@@ -96,6 +96,8 @@ namespace Lavender
 
 		// Create renderpass
 		RenderPassSpecification specs = {};
+		specs.DepthAttachment = false;
+
 		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Load; // To not overwrite previous drawn things
 		specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 

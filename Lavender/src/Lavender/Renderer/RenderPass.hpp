@@ -21,6 +21,7 @@ namespace Lavender
 		};
 
 	public:
+		bool DepthAttachment = true;
 		ColourLoadOperation ColourLoadOp = ColourLoadOperation::Clear;
 
 		ImageLayout PreviousImageLayout = ImageLayout::Undefined;
