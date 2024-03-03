@@ -41,6 +41,7 @@ namespace Lavender
 		void AddOverlay(Layer* layer);
 
 		inline Window& GetWindow() { return *m_Window; }
+		inline BaseImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
 		inline static Application& Get() { return *s_Instance; }
 

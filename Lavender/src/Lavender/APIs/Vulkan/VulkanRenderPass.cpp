@@ -8,6 +8,7 @@
 #include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
+#include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
 namespace Lavender
 {
@@ -20,8 +21,7 @@ namespace Lavender
 	VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer)
         : m_Specification(specs), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer))
 	{
-        if (specs.DepthAttachment) CreateColourAndDepth();
-        else CreateColour();
+        Create();
 	}
 
 	VulkanRenderPass::~VulkanRenderPass()
@@ -54,7 +54,7 @@ namespace Lavender
         VkClearValue colourClear = { { {0.0f, 0.0f, 0.0f, 1.0f} } };
         clearValues.push_back(colourClear);
 
-        if (m_Specification.DepthAttachment)
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
         {
             VkClearValue depthClear = { { { 1.0f, 0 } } };
             clearValues.push_back(depthClear);
@@ -109,7 +109,12 @@ namespace Lavender
         for (size_t i = 0; i < imageViews.size(); i++)
         {
             std::vector<VkImageView> attachments = { context->GetSwapChain()->GetImageViews()[i] };
-            if (m_Specification.DepthAttachment) attachments.push_back(context->GetSwapChain()->GetDepthImageView());
+
+            if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            {
+                auto depthImageView = context->GetSwapChain()->GetDepthImageView();
+                attachments.push_back(depthImageView);
+            }
 
             VkFramebufferCreateInfo framebufferInfo = {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -125,128 +130,68 @@ namespace Lavender
         }
     }
 
-    void VulkanRenderPass::CreateColour()
+    void VulkanRenderPass::Create()
     {
         auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Renderpass
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = context->GetSwapChain()->GetColourFormat();
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = (VkAttachmentLoadOp)((int)m_Specification.ColourLoadOp);
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = (VkImageLayout)((int)m_Specification.PreviousImageLayout);
-        colorAttachment.finalLayout = (VkImageLayout)((int)m_Specification.FinalImageLayout);
+        std::vector<VkAttachmentDescription> attachments = { };
+        std::vector<VkAttachmentReference> attachmentRefs = { };
 
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpass = {};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-
-        VkSubpassDependency dependency = {};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        VkRenderPassCreateInfo renderPassInfo = {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = 1;
-        renderPassInfo.pAttachments = &colorAttachment;
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = 1;
-        renderPassInfo.pDependencies = &dependency;
-
-        if (vkCreateRenderPass(context->GetLogicalDevice()->GetVulkanDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
-            LV_LOG_ERROR("Failed to create render pass!");
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Framebuffers
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        auto imageViews = context->GetSwapChain()->GetImageViews();
-
-        m_Framebuffers.resize(imageViews.size());
-
-        for (size_t i = 0; i < imageViews.size(); i++)
         {
-            // TODO: Maybe add depth
-            VkImageView attachments[] = { context->GetSwapChain()->GetImageViews()[i] };
+            VkAttachmentDescription& colorAttachment = attachments.emplace_back();
+            colorAttachment.format = context->GetSwapChain()->GetColourFormat();
+            colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            colorAttachment.loadOp = (VkAttachmentLoadOp)((int)m_Specification.ColourLoadOp);
+            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            colorAttachment.initialLayout = (VkImageLayout)((int)m_Specification.PreviousImageLayout);
+            colorAttachment.finalLayout = (VkImageLayout)((int)m_Specification.FinalImageLayout);
 
-            VkFramebufferCreateInfo framebufferInfo = {};
-            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = m_RenderPass;
-            framebufferInfo.attachmentCount = 1;
-            framebufferInfo.pAttachments = attachments;
-            framebufferInfo.width = Application::Get().GetWindow().GetWidth();
-            framebufferInfo.height = Application::Get().GetWindow().GetHeight();
-            framebufferInfo.layers = 1;
-
-            if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
-                LV_LOG_ERROR("Failed to create framebuffer!");
+            VkAttachmentReference& colorAttachmentRef = attachmentRefs.emplace_back();
+            colorAttachmentRef.attachment = 0;
+            colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         }
-    }
 
-    void VulkanRenderPass::CreateColourAndDepth()
-    {
-        auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+        {
+            VkAttachmentDescription& depthAttachment = attachments.emplace_back();
+            depthAttachment.format = VulkanAllocator::FindDepthFormat();
+            depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Renderpass
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = context->GetSwapChain()->GetColourFormat();
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = (VkAttachmentLoadOp)((int)m_Specification.ColourLoadOp);
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = (VkImageLayout)((int)m_Specification.PreviousImageLayout);
-        colorAttachment.finalLayout = (VkImageLayout)((int)m_Specification.FinalImageLayout);
-
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentDescription depthAttachment = {};
-        depthAttachment.format = VulkanAllocator::FindDepthFormat();
-        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference depthAttachmentRef = {};
-        depthAttachmentRef.attachment = 1;
-        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            VkAttachmentReference& depthAttachmentRef = attachmentRefs.emplace_back();
+            depthAttachmentRef.attachment = 1;
+            depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        }
 
         VkSubpassDescription subpass = {};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+        subpass.pColorAttachments = &attachmentRefs[0];
+
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            subpass.pDepthStencilAttachment = &attachmentRefs[1];
 
         VkSubpassDependency dependency = {};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         dependency.dstSubpass = 0;
         dependency.srcAccessMask = 0;
         dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-        std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            dependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -261,16 +206,20 @@ namespace Lavender
             LV_LOG_ERROR("Failed to create render pass!");
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Framebuffers
+        // Framebuffers // TODO: Framebuffer class
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         auto imageViews = context->GetSwapChain()->GetImageViews();
-        auto depthImageView = context->GetSwapChain()->GetDepthImageView();
 
         m_Framebuffers.resize(imageViews.size());
 
         for (size_t i = 0; i < imageViews.size(); i++)
         {
-            std::array<VkImageView, 2> attachments = { context->GetSwapChain()->GetImageViews()[i], depthImageView };
+            std::vector<VkImageView> attachments = { context->GetSwapChain()->GetImageViews()[i] };
+            if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            {
+                auto depthImageView = context->GetSwapChain()->GetDepthImageView();
+                attachments.push_back(depthImageView);
+            }
 
             VkFramebufferCreateInfo framebufferInfo = {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

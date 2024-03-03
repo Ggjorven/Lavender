@@ -23,6 +23,7 @@ namespace Lavender
 		static void CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
 		static VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 		static void DestroyImage(VkImage& image, VmaAllocation& allocation);
+		static VkSampler CreateSampler(uint32_t mipLevels); // TODO: Make it usable with multiple formats and stuff.
 
 		static void MapMemory(VmaAllocation& allocation, void*& mapData);
 		static void UnMapMemory(VmaAllocation& allocation);

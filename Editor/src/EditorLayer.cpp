@@ -7,22 +7,26 @@
 
 #include <Lavender/Renderer/Shader.hpp>
 
-#include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 static float vertices[] = {
-	0.0f,  0.5f, 0.0f,  // Vertex 0: Top
-   -0.5f, -0.5f, 0.0f,  // Vertex 1: Bottom-left
-	0.5f, -0.5f, 0.0f   // Vertex 2: Bottom-right
+	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+	0.5f, -0.5, 0.0f, 0.0f, 0.0f,
+	0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+	-0.5f, 0.5, 0.0f, 1.0f, 1.0f
 };
 
 static uint32_t indices[] = {
-	0, 1, 2
+	0, 1, 2,
+	2, 3, 0
 };
 
 void EditorLayer::OnAttach()
 {
-	m_RenderPass = RenderPass::Create();
+	RenderPassSpecification specs = {};
+	specs.UsedAttachments = RenderPassSpecification::Attachments::Depth;
+
+	m_RenderPass = RenderPass::Create(specs);
 
 	ShaderCode code = {};
 	code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
@@ -34,13 +38,21 @@ void EditorLayer::OnAttach()
 
 	BufferLayout bufferLayout = {
 		{ DataType::Float3, 0, "a_Position" },
+		{ DataType::Float2, 1, "a_TexCoord" },
+	};
+
+	UniformLayout uniformLayout = {
+		{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment }
 	};
 
 	PipelineLayout pipelineLayout = {};
 	pipelineLayout.SetBufferLayout(bufferLayout);
+	pipelineLayout.SetUniformLayout(uniformLayout);
 
 	m_Pipeline = Pipeline::Create(pipelineLayout, shader, m_RenderPass);
 	m_Pipeline->Initialize();
+
+	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
 }
 
 void EditorLayer::OnDetach()

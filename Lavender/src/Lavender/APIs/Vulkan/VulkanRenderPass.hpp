@@ -29,8 +29,7 @@ namespace Lavender
 		VkRenderPass& GetVulkanRenderPass() { return m_RenderPass; }
 
 	private:
-		void CreateColour();
-		void CreateColourAndDepth();
+		void Create();
 
 	private:
 		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;

@@ -12,6 +12,7 @@
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanCommands.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -96,7 +97,7 @@ namespace Lavender
 
 		// Create renderpass
 		RenderPassSpecification specs = {};
-		specs.DepthAttachment = false;
+		specs.UsedAttachments = RenderPassSpecification::Attachments::None;
 
 		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Load; // To not overwrite previous drawn things
 		specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation

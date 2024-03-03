@@ -15,6 +15,13 @@ namespace Lavender
 	class VulkanSwapChain
 	{
 	public:
+		struct SwapchainImage
+		{
+			VkImage Image = VK_NULL_HANDLE;
+			VkImageView ImageView = VK_NULL_HANDLE;
+		};
+
+	public:
 		VulkanSwapChain(VkInstance vkInstance, Ref<VulkanDevice> vkDevice);
 
 		void Init(uint32_t width, uint32_t height, const bool vsync);
@@ -32,6 +39,8 @@ namespace Lavender
 
 		std::vector<VkImageView> GetImageViews();
 		inline VkImageView GetDepthImageView() { return m_DepthStencil.ImageView; }
+
+		std::vector<SwapchainImage> GetSwapChainImages() { return m_Images; }
 
 		inline VkImage& GetCurrentImage() { return m_Images[m_CurrentFrame].Image; }
 
@@ -52,11 +61,6 @@ namespace Lavender
 		Ref<VulkanDevice> m_Device = VK_NULL_HANDLE;
 		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
-		struct SwapchainImage
-		{
-			VkImage Image = VK_NULL_HANDLE;
-			VkImageView ImageView = VK_NULL_HANDLE;
-		};
 		std::vector<SwapchainImage> m_Images = { };
 
 		struct

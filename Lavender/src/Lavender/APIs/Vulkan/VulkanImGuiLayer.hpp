@@ -5,6 +5,9 @@
 
 #include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
 
+#include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
+
 namespace Lavender
 {
 

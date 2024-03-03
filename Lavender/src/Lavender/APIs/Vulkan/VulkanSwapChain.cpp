@@ -28,6 +28,26 @@ namespace Lavender
 		VkPhysicalDevice physicalDevice = m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice();
 		VkSurfaceKHR& surface = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetVulkanSurface();
 
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Command pools
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
+		if (!m_CommandPool)
+		{
+			QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices::Find(m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice());
+
+			VkCommandPoolCreateInfo poolInfo = {};
+			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
+
+			if (vkCreateCommandPool(m_Device->GetVulkanDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to create command pool!");
+		}
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SwapChain
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkSwapchainKHR oldSwapchain = m_SwapChain;
 
 		// Get physical device surface properties and formats
@@ -153,7 +173,7 @@ namespace Lavender
 		vkCreateSwapchainKHR(device, &swapchainCI, nullptr, &m_SwapChain);
 
 		if (oldSwapchain)
-			vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
+			vkDestroySwapchainKHR(device, oldSwapchain, nullptr); // Destroys Images?
 
 		for (auto& image : m_Images)
 			vkDestroyImageView(device, image.ImageView, nullptr);
@@ -202,24 +222,6 @@ namespace Lavender
 			vkCreateImageView(device, &colorAttachmentView, nullptr, &m_Images[i].ImageView);
 		}
 
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Command pools
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
-		if (!m_CommandPool)
-		{
-			QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices::Find(m_Device->GetPhysicalDevice()->GetVulkanPhysicalDevice());
-
-			VkCommandPoolCreateInfo poolInfo = {};
-			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-			poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
-
-			if (vkCreateCommandPool(m_Device->GetVulkanDevice(), &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to create command pool!");
-		}
-
-		// Create depth images (after commandBuffer are created since we need them)
 		VkFormat depthFormat = VulkanAllocator::FindDepthFormat();
 		m_DepthStencil.MemoryAlloc = VulkanAllocator::CreateImage(width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_DepthStencil.Image);
 

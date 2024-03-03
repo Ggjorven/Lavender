@@ -87,6 +87,25 @@ namespace Lavender
 
 	}
 
+	UniformElement UniformLayout::GetElementByName(SetID set, const std::string& name)
+	{
+		for (const auto& setIterator : m_Elements) 
+		{
+			if (setIterator.first == set) 
+			{
+				for (const auto& element : setIterator.second)
+				{
+					if (element.Name == name)
+						return element;
+				}
+			}
+		}
+
+		LV_LOG_WARN("Failed to find element by name: {0}", name);
+		return {};
+	}
+
+
 	uint32_t UniformLayout::UniqueCount(SetID set) const
 	{
 		return (uint32_t)UniqueTypes(set).size();

@@ -20,13 +20,19 @@ namespace Lavender
 			Undefined = 0, Presentation = 1000001002
 		};
 
+		enum class Attachments // Note(Jorben): Colour is always included
+		{
+			None = 0, Depth = BIT(0)
+		};
+
 	public:
-		bool DepthAttachment = true;
+		Attachments UsedAttachments = Attachments::None;
 		ColourLoadOperation ColourLoadOp = ColourLoadOperation::Clear;
 
 		ImageLayout PreviousImageLayout = ImageLayout::Undefined;
 		ImageLayout FinalImageLayout = ImageLayout::Presentation;
 	};
+	DEFINE_BITWISE_OPS(RenderPassSpecification::Attachments)
 
 	class RenderPass
 	{

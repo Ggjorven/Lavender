@@ -97,13 +97,15 @@ namespace Lavender
 
 		inline const std::unordered_map<uint32_t, std::vector<UniformElement>>& GetElements() const { return m_Elements; }
 
+		UniformElement GetElementByName(SetID set, const std::string& name);
+
 		uint32_t UniqueCount(SetID set) const;
 		std::unordered_set<UniformDataType> UniqueTypes(SetID set) const;
 		uint32_t AmountOf(SetID set, UniformDataType type) const;
 
 	private:
 		// First element is the Set, second are the elements in that Set
-		std::unordered_map<SetID, std::vector<UniformElement>> m_Elements = { }; // TODO: Give a more appropriate name?
+		std::unordered_map<SetID, std::vector<UniformElement>> m_Elements = { }; 
 	};
 	DEFINE_BITWISE_OPS(UniformElement::ShaderStage)
 
