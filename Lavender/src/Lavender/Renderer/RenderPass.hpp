@@ -6,6 +6,7 @@ namespace Lavender
 {
 
 	class RenderCommandBuffer;
+	class Image2D;
 
 	struct RenderPassSpecification // TODO: Add more
 	{
@@ -43,6 +44,8 @@ namespace Lavender
 		virtual void Begin() = 0;
 		virtual void End() = 0;
 		virtual void Submit() = 0;
+
+		virtual void AddAttachment(Ref<Image2D> attachment) = 0;
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 

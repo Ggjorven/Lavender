@@ -17,9 +17,14 @@ namespace Lavender
 	public:
 		VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, uint32_t width, uint32_t height);
 		VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, const std::filesystem::path& path);
+		VulkanImage2D(uint32_t width, uint32_t height); // TODO: Create amount of images as the swapchain images, since this is an attachment
 		virtual ~VulkanImage2D();
 
 		void SetData(void* data, size_t size) override;
+
+		VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
+
+		VkImageView GetImageView() { return m_ImageView; }
 
 	private:
 		void Upload();

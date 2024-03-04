@@ -21,10 +21,10 @@ namespace Lavender
 	{
 	public:
 		VulkanPipeline();
-		VulkanPipeline(PipelineLayout layout);
-		VulkanPipeline(PipelineLayout layout, Ref<Shader> shader);
-		VulkanPipeline(PipelineLayout layout, Ref<RenderPass> renderpass);
-		VulkanPipeline(PipelineLayout layout, Ref<Shader> shader, Ref<RenderPass> renderpass);
+		VulkanPipeline(PipelineSpecification specs);
+		VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader);
+		VulkanPipeline(PipelineSpecification specs, Ref<RenderPass> renderpass);
+		VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass);
 		virtual ~VulkanPipeline();
 
 		void Initialize() override;
@@ -45,7 +45,7 @@ namespace Lavender
 		Ref<Shader> m_Shader = nullptr;
 		Ref<RenderPass> m_RenderPass = nullptr;
 
-		PipelineLayout m_Layout = {};
+		PipelineSpecification m_Specification = {};
 
 		VkPipeline m_GraphicsPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;

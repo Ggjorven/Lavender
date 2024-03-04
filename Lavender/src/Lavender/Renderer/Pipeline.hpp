@@ -29,10 +29,10 @@ namespace Lavender
 
 		// TODO: Make some arguments = nullptr to remove the clutter of constructors
 		static Ref<Pipeline> Create();
-		static Ref<Pipeline> Create(PipelineLayout layout);
-		static Ref<Pipeline> Create(PipelineLayout layout, Ref<Shader> shader);
-		static Ref<Pipeline> Create(PipelineLayout layout, Ref<RenderPass> renderpass);
-		static Ref<Pipeline> Create(PipelineLayout layout, Ref<Shader> shader, Ref<RenderPass> renderpass);
+		static Ref<Pipeline> Create(PipelineSpecification specs);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<RenderPass> renderpass);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass);
 	};
 
 }

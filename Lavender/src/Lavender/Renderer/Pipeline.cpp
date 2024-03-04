@@ -25,12 +25,12 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<Pipeline> Pipeline::Create(PipelineLayout layout)
+	Ref<Pipeline> Pipeline::Create(PipelineSpecification specs)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanPipeline>(layout);
+			return RefHelper::Create<VulkanPipeline>(specs);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");
@@ -40,12 +40,12 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<Pipeline> Pipeline::Create(PipelineLayout layout, Ref<Shader> shader)
+	Ref<Pipeline> Pipeline::Create(PipelineSpecification specs, Ref<Shader> shader)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanPipeline>(layout, shader);
+			return RefHelper::Create<VulkanPipeline>(specs, shader);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");
@@ -55,12 +55,12 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<Pipeline> Pipeline::Create(PipelineLayout layout, Ref<RenderPass> renderpass)
+	Ref<Pipeline> Pipeline::Create(PipelineSpecification specs, Ref<RenderPass> renderpass)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanPipeline>(layout,renderpass);
+			return RefHelper::Create<VulkanPipeline>(specs, renderpass);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");
@@ -70,12 +70,12 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<Pipeline> Pipeline::Create(PipelineLayout layout, Ref<Shader> shader, Ref<RenderPass> renderpass)
+	Ref<Pipeline> Pipeline::Create(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanPipeline>(layout, shader, renderpass);
+			return RefHelper::Create<VulkanPipeline>(specs, shader, renderpass);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");

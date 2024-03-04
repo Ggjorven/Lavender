@@ -4,6 +4,8 @@
 #include "Lavender/Core/Logging.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/PipelineLayout.hpp"
+
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanShader.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
@@ -20,23 +22,23 @@ namespace Lavender
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineLayout layout)
-		: m_Layout(layout)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs)
+		: m_Specification(specs)
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineLayout layout, Ref<Shader> shader)
-		: m_Layout(layout), m_Shader(shader)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader)
+		: m_Specification(specs), m_Shader(shader)
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineLayout layout, Ref<RenderPass> renderpass)
-		: m_Layout(layout), m_RenderPass(renderpass)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<RenderPass> renderpass)
+		: m_Specification(specs), m_RenderPass(renderpass)
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineLayout layout, Ref<Shader> shader, Ref<RenderPass> renderpass)
-		: m_Layout(layout), m_Shader(shader), m_RenderPass(renderpass)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass)
+		: m_Specification(specs), m_Shader(shader), m_RenderPass(renderpass)
 	{
 	}
 
@@ -89,7 +91,7 @@ namespace Lavender
 	// Note(Jorben): Just for myself, this specifies all the different types that are gonna be in a descriptor set
 	void VulkanPipeline::CreateDescriptorSetLayout()
 	{
-		for (auto& set : m_Layout.GetUnifomLayout().GetElements())
+		for (auto& set : m_Specification.Uniformlayout.GetElements())
 		{
 			std::vector<VkDescriptorSetLayoutBinding> layouts = { };
 
@@ -189,8 +191,18 @@ namespace Lavender
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlending.logicOpEnable = VK_FALSE;
 		colorBlending.logicOp = VK_LOGIC_OP_COPY;
-		colorBlending.attachmentCount = 1;
-		colorBlending.pAttachments = &colorBlendAttachment;
+		colorBlending.attachmentCount = m_Specification.UseAdditionalAttachment ? 2 : 1;
+
+		if (m_Specification.UseAdditionalAttachment)
+		{
+			VkPipelineColorBlendAttachmentState attachments[] = { colorBlendAttachment, colorBlendAttachment };
+			colorBlending.pAttachments = attachments;
+		}
+		else
+		{
+			colorBlending.pAttachments = &colorBlendAttachment;
+		}
+
 		colorBlending.blendConstants[0] = 0.0f;
 		colorBlending.blendConstants[1] = 0.0f;
 		colorBlending.blendConstants[2] = 0.0f;
@@ -263,18 +275,18 @@ namespace Lavender
 	{
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		for (auto& set : m_Layout.GetUnifomLayout().GetElements())
+		for (auto& set : m_Specification.Uniformlayout.GetElements())
 		{
 			// Note(Jorben): Just for myself, the poolSizes is just the amount of elements of a certain type to able to allocate per pool
 			std::vector<VkDescriptorPoolSize> poolSizes = { };
-			poolSizes.resize((size_t)m_Layout.GetUnifomLayout().UniqueCount(set.first));
+			poolSizes.resize((size_t)m_Specification.Uniformlayout.UniqueCount(set.first));
 			poolSizes.clear(); // Note(Jorben): For some reason without this line there is a VK_SAMPLER or something in the list.
 
-			for (auto& type : m_Layout.GetUnifomLayout().UniqueTypes(set.first))
+			for (auto& type : m_Specification.Uniformlayout.UniqueTypes(set.first))
 			{
 				VkDescriptorPoolSize poolSize = {};
 				poolSize.type = UniformDataTypeToVulkanDescriptorType(type);
-				poolSize.descriptorCount = m_Layout.GetUnifomLayout().AmountOf(set.first, type) * Renderer::GetSpecification().FramesInFlight;
+				poolSize.descriptorCount = m_Specification.Uniformlayout.AmountOf(set.first, type) * Renderer::GetSpecification().FramesInFlight;
 
 				poolSizes.push_back(poolSize);
 			}
@@ -295,7 +307,7 @@ namespace Lavender
 	{
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		
-		for (auto& set : m_Layout.GetUnifomLayout().GetElements())
+		for (auto& set : m_Specification.Uniformlayout.GetElements())
 		{
 			std::vector<VkDescriptorSetLayout> layouts(Renderer::GetSpecification().FramesInFlight, m_DescriptorLayouts[set.first]);
 
@@ -315,7 +327,7 @@ namespace Lavender
 	{
 		VkVertexInputBindingDescription description = {};
 		description.binding = 0;
-		description.stride = m_Layout.GetBufferLayout().GetStride();
+		description.stride = m_Specification.Bufferlayout.GetStride();
 		description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		return description;
@@ -324,9 +336,9 @@ namespace Lavender
 	std::vector<VkVertexInputAttributeDescription> VulkanPipeline::GetAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions = {};
-		attributeDescriptions.resize(m_Layout.GetBufferLayout().GetElements().size());
+		attributeDescriptions.resize(m_Specification.Bufferlayout.GetElements().size());
 
-		auto& elements = m_Layout.GetBufferLayout().GetElements();
+		auto& elements = m_Specification.Bufferlayout.GetElements();
 		for (size_t i = 0; i < elements.size(); i++)
 		{
 			attributeDescriptions[i].binding = 0;

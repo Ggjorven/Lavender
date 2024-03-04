@@ -145,8 +145,8 @@ namespace Lavender
 
 
 
-	PipelineLayout::PipelineLayout(BufferLayout bufferLayout, UniformLayout uniformLayout)
-		: m_BufferLayout(bufferLayout), m_UniformLayout(uniformLayout)
+	PipelineSpecification::PipelineSpecification(BufferLayout bufferLayout, UniformLayout uniformLayout)
+		: Bufferlayout(bufferLayout), Uniformlayout(uniformLayout)
 	{
 	}
 

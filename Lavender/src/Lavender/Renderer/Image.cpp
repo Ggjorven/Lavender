@@ -40,4 +40,19 @@ namespace Lavender
 		return nullptr;
 	}
 
+	Ref<Image2D> Image2D::CreateAsAttachment(uint32_t width, uint32_t height)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			return RefHelper::Create<VulkanImage2D>(width, height);
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
+
+		return nullptr;
+	}
+
 }

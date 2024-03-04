@@ -112,25 +112,19 @@ namespace Lavender
 
 
 	// TODO: Add more customizability
-	struct PipelineLayout
+	struct PipelineSpecification
 	{
 	public:
-		PipelineLayout() = default;
-		PipelineLayout(BufferLayout bufferLayout, UniformLayout uniformLayout);
-		virtual ~PipelineLayout() = default;
+		BufferLayout Bufferlayout = {};
+		UniformLayout Uniformlayout = {};
 
-		inline BufferLayout& GetBufferLayout() { return m_BufferLayout; }
-		inline UniformLayout& GetUnifomLayout() { return m_UniformLayout; }
+		bool UseAdditionalAttachment = false;
 
-		inline void SetBufferLayout(BufferLayout bufferLayout) { m_BufferLayout = bufferLayout; }
-		inline void SetUniformLayout(UniformLayout uniformLayout) { m_UniformLayout = uniformLayout; }
-
-	private:
-		BufferLayout m_BufferLayout = {};
-		UniformLayout m_UniformLayout = {};
+	public:
+		PipelineSpecification() = default;
+		PipelineSpecification(BufferLayout bufferLayout, UniformLayout uniformLayout);
+		virtual ~PipelineSpecification() = default;
 	};
-
-	// TODO: Pipeline settings?
 
 
 }

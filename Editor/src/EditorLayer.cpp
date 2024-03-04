@@ -9,6 +9,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <backends/imgui_impl_vulkan.h>
+
 static float vertices[] = {
 	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
 	0.5f, -0.5, 0.0f, 0.0f, 0.0f,
@@ -27,6 +31,8 @@ void EditorLayer::OnAttach()
 	specs.UsedAttachments = RenderPassSpecification::Attachments::Depth;
 
 	m_RenderPass = RenderPass::Create(specs);
+	auto attachment = Image2D::CreateAsAttachment(1280, 720);
+	m_RenderPass->AddAttachment(attachment);
 
 	ShaderCode code = {};
 	code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
@@ -45,11 +51,13 @@ void EditorLayer::OnAttach()
 		{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment }
 	};
 
-	PipelineLayout pipelineLayout = {};
-	pipelineLayout.SetBufferLayout(bufferLayout);
-	pipelineLayout.SetUniformLayout(uniformLayout);
+	PipelineSpecification pipelineSpecs = {};
+	pipelineSpecs.Bufferlayout = bufferLayout;
+	pipelineSpecs.Uniformlayout = uniformLayout;
 
-	m_Pipeline = Pipeline::Create(pipelineLayout, shader, m_RenderPass);
+	pipelineSpecs.UseAdditionalAttachment = true;
+
+	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_RenderPass);
 	m_Pipeline->Initialize();
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
@@ -78,6 +86,9 @@ void EditorLayer::OnRender()
 	m_RenderPass->Submit();
 
 	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
+
+	//auto attachment = Image2D::CreateAsAttachment(1280, 720);
+	//m_RenderPass->AddAttachment(attachment);
 }
 
 void EditorLayer::OnImGuiRender()
@@ -89,6 +100,7 @@ void EditorLayer::OnImGuiRender()
 	{
 		LV_LOG_TRACE("BUTTON");
 	}
+
 
 	ImGui::End();
 }
