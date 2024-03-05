@@ -11,7 +11,7 @@
 namespace Lavender
 {
 
-	enum class DataType
+	enum class DataType : uint8_t
 	{
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
 	};
@@ -60,7 +60,7 @@ namespace Lavender
 
 	typedef uint32_t SetID;
 
-	enum class UniformDataType
+	enum class UniformDataType : uint8_t
 	{
 		None = 0, UniformBuffer, Image
 	};
@@ -69,7 +69,7 @@ namespace Lavender
 	struct UniformElement
 	{
 	public:
-		enum class ShaderStage
+		enum class ShaderStage : uint8_t
 		{
 			None = 0, Vertex = BIT(0), Fragment = BIT(1)
 		};
@@ -115,10 +115,25 @@ namespace Lavender
 	struct PipelineSpecification
 	{
 	public:
+		enum class CullingMode : uint8_t
+		{
+			None = LV_MAX_UINT8, Front = 1, Back, FrontAndBack
+		};
+
+		enum class PolygonMode : uint8_t
+		{
+			None = LV_MAX_UINT8, Fill = 0, Line = 1
+		};
+
+	public:
 		BufferLayout Bufferlayout = {};
 		UniformLayout Uniformlayout = {};
 
-		bool UseAdditionalAttachment = false;
+		PolygonMode Polygonmode = PolygonMode::Fill;
+		float LineWidth = 1.0f;
+		CullingMode Cullingmode = CullingMode::Front;
+
+		bool Blending = false;
 
 	public:
 		PipelineSpecification() = default;
@@ -126,5 +141,89 @@ namespace Lavender
 		virtual ~PipelineSpecification() = default;
 	};
 
+	/*
+	Shader Stages:
 
+Vertex Shader
+Tessellation Control Shader
+Tessellation Evaluation Shader
+Geometry Shader
+Fragment Shader
+Compute Shader
+Vertex Input:
+
+Vertex Input Bindings (VkVertexInputBindingDescription)
+Vertex Input Attributes (VkVertexInputAttributeDescription)
+Input Assembly:
+
+Primitive Topology (VkPrimitiveTopology)
+Primitive Restart
+Viewport and Scissor:
+
+Viewport (VkViewport)
+Scissor (VkRect2D)
+Rasterization:
+
+Polygon Mode (VkPolygonMode)
+Culling Mode (VkCullModeFlags)
+Front Face Winding Order (VkFrontFace)
+Line Width
+Multisampling:
+
+Sample Count (VkSampleCountFlagBits)
+Depth and Stencil:
+
+Depth Test Enable/Disable
+Depth Write Enable/Disable
+Depth Compare Operation (VkCompareOp)
+Depth Bounds Test Enable/Disable
+Stencil Test Enable/Disable
+Stencil Operations (VkStencilOpState)
+Color Blend:
+
+Blend Enable/Disable for each attachment
+Blend Factors (VkBlendFactor)
+Blend Operations (VkBlendOp)
+Color Mask for each attachment
+Dynamic State:
+
+Dynamic Viewport
+Dynamic Scissor
+Dynamic Line Width
+Dynamic Depth Bias
+Dynamic Blend Constants
+Dynamic Depth Bounds
+Dynamic Stencil Compare Mask
+Dynamic Stencil Write Mask
+Dynamic Stencil Reference
+Pipeline Layout:
+
+Descriptor Set Layouts
+Push Constants Ranges
+Subpass:
+
+Render Pass
+Subpass Index
+Tessellation:
+
+Tessellation Patch Control Points
+Tessellation Factors Buffer
+Vertex Post-processing:
+
+Primitive Restart Enable/Disable
+Transform Feedback Enable/Disable
+Stream Output Targets
+Pipeline Derivatives:
+
+Base Pipeline Handle
+Base Pipeline Index
+Pipeline Cache:
+
+Pipeline Cache Object
+Pipeline Creation Flags:
+
+Allow Derivatives
+Derivative
+Mutable Aliases
+	*/
 }

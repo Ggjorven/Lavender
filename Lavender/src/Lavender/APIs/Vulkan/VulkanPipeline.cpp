@@ -172,9 +172,9 @@ namespace Lavender
 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		rasterizer.depthClampEnable = VK_FALSE;
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
-		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; // Change to VK_CULL_MODE_BACK_BIT? // VK_CULL_MODE_FRONT_BIT
+		rasterizer.polygonMode = (VkPolygonMode)(m_Specification.Polygonmode);
+		rasterizer.lineWidth = m_Specification.LineWidth;
+		rasterizer.cullMode = (VkCullModeFlags)(m_Specification.Cullingmode); // Change to VK_CULL_MODE_BACK_BIT? // VK_CULL_MODE_FRONT_BIT
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		
@@ -185,24 +185,14 @@ namespace Lavender
 		
 		VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachment.blendEnable = VK_FALSE; // Note(Jorben): Set true for transparancy
+		colorBlendAttachment.blendEnable = m_Specification.Blending; // Note(Jorben): Set true for transparancy
 		
 		VkPipelineColorBlendStateCreateInfo colorBlending = {};
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlending.logicOpEnable = VK_FALSE;
 		colorBlending.logicOp = VK_LOGIC_OP_COPY;
-		colorBlending.attachmentCount = m_Specification.UseAdditionalAttachment ? 2 : 1;
-
-		if (m_Specification.UseAdditionalAttachment)
-		{
-			VkPipelineColorBlendAttachmentState attachments[] = { colorBlendAttachment, colorBlendAttachment };
-			colorBlending.pAttachments = attachments;
-		}
-		else
-		{
-			colorBlending.pAttachments = &colorBlendAttachment;
-		}
-
+		colorBlending.attachmentCount = 1;
+		colorBlending.pAttachments = &colorBlendAttachment;
 		colorBlending.blendConstants[0] = 0.0f;
 		colorBlending.blendConstants[1] = 0.0f;
 		colorBlending.blendConstants[2] = 0.0f;

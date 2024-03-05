@@ -56,6 +56,8 @@ namespace Lavender
 
 		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		VulkanAllocator::TransitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, m_Miplevels);
 	}
 
 	VulkanImage2D::~VulkanImage2D()

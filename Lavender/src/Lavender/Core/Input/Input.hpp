@@ -11,7 +11,7 @@
 namespace Lavender
 {
 
-	enum class CursorMode
+	enum class CursorMode : uint32_t
 	{
 		Shown = 0x00034001,
 		Hidden = 0x00034002,

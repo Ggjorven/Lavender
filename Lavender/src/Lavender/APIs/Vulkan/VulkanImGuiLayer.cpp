@@ -100,6 +100,7 @@ namespace Lavender
 		specs.UsedAttachments = RenderPassSpecification::Attachments::None;
 
 		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Load; // To not overwrite previous drawn things
+		// TODO: Change back to presentation
 		specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 
 		m_Renderpass = RefHelper::Create<VulkanRenderPass>(specs);

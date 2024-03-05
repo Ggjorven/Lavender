@@ -8,7 +8,7 @@ namespace Lavender
 	class RenderCommandBuffer
 	{
 	public:
-		enum class Usage
+		enum class Usage : uint8_t
 		{
 			None = 0, Sequential, Standalone
 		};

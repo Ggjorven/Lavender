@@ -11,17 +11,17 @@ namespace Lavender
 	struct RenderPassSpecification // TODO: Add more
 	{
 	public:
-		enum class ColourLoadOperation
+		enum class ColourLoadOperation : uint8_t
 		{
 			Load = 0, Clear = 1
 		};
 
-		enum class ImageLayout
+		enum class ImageLayout : uint32_t
 		{
-			Undefined = 0, Presentation = 1000001002
+			Undefined = 0, Colour = 2, ShaderRead = 5, Presentation = 1000001002
 		};
 
-		enum class Attachments // Note(Jorben): Colour is always included
+		enum class Attachments : uint8_t // Note(Jorben): Colour is always included
 		{
 			None = 0, Depth = BIT(0)
 		};
@@ -45,14 +45,13 @@ namespace Lavender
 		virtual void End() = 0;
 		virtual void Submit() = 0;
 
-		virtual void AddAttachment(Ref<Image2D> attachment) = 0;
-
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Ref<RenderCommandBuffer> GetCommandBuffer() = 0;
 
 		static Ref<RenderPass> Create(RenderPassSpecification specs = RenderPassSpecification());
 		static Ref<RenderPass> CreateFromCommandBuffer(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
+		static Ref<RenderPass> CreateFromImage(RenderPassSpecification specs, Ref<Image2D> image);
 	};
 
 }

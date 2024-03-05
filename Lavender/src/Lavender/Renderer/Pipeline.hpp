@@ -22,11 +22,6 @@ namespace Lavender
 
 		virtual void SetShader(Ref<Shader> shader) = 0;
 
-		// Note (Jorben): Make sure you have this UniformBuffer specified in the layout
-		//virtual void AddUniformBuffer(/*TODO*/) = 0;
-		// Note (Jorben): Make sure you have this Image specified in the layout
-		//virtual void AddImage(/*TODO*/) = 0;
-
 		// TODO: Make some arguments = nullptr to remove the clutter of constructors
 		static Ref<Pipeline> Create();
 		static Ref<Pipeline> Create(PipelineSpecification specs);

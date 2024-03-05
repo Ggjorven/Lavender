@@ -4,6 +4,7 @@
 #include <Lavender/Core/Logging.hpp>
 #include <Lavender/Utils/Utils.hpp>
 #include <Lavender/Renderer/Renderer.hpp>
+#include <Lavender/APIs/Vulkan/VulkanImage.hpp>
 
 #include <Lavender/Renderer/Shader.hpp>
 
@@ -27,12 +28,15 @@ static uint32_t indices[] = {
 
 void EditorLayer::OnAttach()
 {
+	Ref<Image2D> image = Image2D::Create(1280, 720);
+
 	RenderPassSpecification specs = {};
 	specs.UsedAttachments = RenderPassSpecification::Attachments::Depth;
+	specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Undefined;
+	specs.FinalImageLayout = RenderPassSpecification::ImageLayout::Presentation;
 
-	m_RenderPass = RenderPass::Create(specs);
-	auto attachment = Image2D::CreateAsAttachment(1280, 720);
-	m_RenderPass->AddAttachment(attachment);
+	//m_RenderPass = RenderPass::Create(specs);
+	m_RenderPass = RenderPass::CreateFromImage(specs, image);
 
 	ShaderCode code = {};
 	code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
@@ -44,7 +48,7 @@ void EditorLayer::OnAttach()
 
 	BufferLayout bufferLayout = {
 		{ DataType::Float3, 0, "a_Position" },
-		{ DataType::Float2, 1, "a_TexCoord" },
+		{ DataType::Float2, 1, "a_TexCoord" }
 	};
 
 	UniformLayout uniformLayout = {
@@ -55,12 +59,18 @@ void EditorLayer::OnAttach()
 	pipelineSpecs.Bufferlayout = bufferLayout;
 	pipelineSpecs.Uniformlayout = uniformLayout;
 
-	pipelineSpecs.UseAdditionalAttachment = true;
+	pipelineSpecs.Polygonmode = PipelineSpecification::PolygonMode::Fill;
+	pipelineSpecs.LineWidth = 1.0f;
+	pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Front;
 
 	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_RenderPass);
 	m_Pipeline->Initialize();
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
+
+	// ImGui
+	//auto vkImage = RefHelper::RefAs<VulkanImage2D>(image);
+	//m_ImGuiTexture = ImGui_ImplVulkan_AddTexture(vkImage->GetSampler(), vkImage->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void EditorLayer::OnDetach()
@@ -86,9 +96,6 @@ void EditorLayer::OnRender()
 	m_RenderPass->Submit();
 
 	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
-
-	//auto attachment = Image2D::CreateAsAttachment(1280, 720);
-	//m_RenderPass->AddAttachment(attachment);
 }
 
 void EditorLayer::OnImGuiRender()
@@ -101,6 +108,7 @@ void EditorLayer::OnImGuiRender()
 		LV_LOG_TRACE("BUTTON");
 	}
 
+	//ImGui::Image(m_ImGuiTexture, ImVec2(200.0f, 200.0f));
 
 	ImGui::End();
 }

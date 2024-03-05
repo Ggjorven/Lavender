@@ -12,9 +12,9 @@ namespace Lavender
 	class Log
 	{
 	public:
-		enum class Level
+		enum class Level : uint8_t
 		{
-			None = -1, Trace, Info, Warn, Error, Fatal
+			Trace = 0, Info, Warn, Error, Fatal, None = 255
 		};
 
 		static void Init();

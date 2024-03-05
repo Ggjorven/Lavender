@@ -6,7 +6,7 @@
 namespace Lavender
 {
 
-	enum class RenderingAPI
+	enum class RenderingAPI : uint8_t
 	{
 		None = 0, Vulkan
 	};

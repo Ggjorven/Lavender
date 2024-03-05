@@ -46,8 +46,19 @@ namespace Lavender
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
+		//auto device = context->GetLogicalDevice()->GetVulkanDevice();
+		
+		//VkFence transitionFence = VK_NULL_HANDLE;
+		//VkFenceCreateInfo fenceCreateInfo = {};
+		//fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		//vkCreateFence(device, &fenceCreateInfo, nullptr, &transitionFence);
+
 		vkQueueSubmit(context->GetLogicalDevice()->GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 		vkQueueWaitIdle(context->GetLogicalDevice()->GetGraphicsQueue());
+
+		//vkWaitForFences(device, 1, &transitionFence, VK_TRUE, UINT64_MAX);
+		//vkResetFences(device, 1, &transitionFence);
+		//vkDestroyFence(device, transitionFence, nullptr);
 
 		vkFreeCommandBuffers(context->GetLogicalDevice()->GetVulkanDevice(), context->GetSwapChain()->GetCommandPool(), 1, &commandBuffer);
 	}

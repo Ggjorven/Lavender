@@ -4,7 +4,7 @@ namespace Lavender
 {
 
 	// From glfw3.h
-	enum class MouseButton
+	enum class MouseButton : uint8_t
 	{
 		B1 = 0, 
 		B2 = 1, 

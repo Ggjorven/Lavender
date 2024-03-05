@@ -3,7 +3,7 @@
 namespace Lavender
 {
 
-    enum class Key
+    enum class Key : uint16_t
     {
         Space = 32,
         Apostrophe = 39, /* ' */

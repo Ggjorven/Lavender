@@ -24,6 +24,12 @@ namespace Lavender
         Create();
 	}
 
+    VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs, Ref<Image2D> image)
+        : m_Specification(specs), m_Image(RefHelper::RefAs<VulkanImage2D>(image)), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
+    {
+        Create();
+    }
+
 	VulkanRenderPass::~VulkanRenderPass()
 	{
         Destroy();
@@ -51,11 +57,6 @@ namespace Lavender
         {
             VkClearValue depthClear = { { { 1.0f, 0 } } };
             clearValues.push_back(depthClear);
-        }
-
-        if (m_Attachment)
-        {
-            clearValues.push_back(colourClear);
         }
 
         renderPassInfo.clearValueCount = (uint32_t)clearValues.size();
@@ -91,14 +92,6 @@ namespace Lavender
         m_CommandBuffer->Submit();
 	}
 
-    void VulkanRenderPass::AddAttachment(Ref<Image2D> attachment)
-    {
-        m_Attachment = RefHelper::RefAs<VulkanImage2D>(attachment);
-
-        Destroy();
-        Create();
-    }
-
     void VulkanRenderPass::Resize(uint32_t width, uint32_t height)
     {
         auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
@@ -114,17 +107,20 @@ namespace Lavender
         
         for (size_t i = 0; i < imageViews.size(); i++)
         {
-            std::vector<VkImageView> attachments = { context->GetSwapChain()->GetImageViews()[i] };
+            std::vector<VkImageView> attachments = { };
+            if (!m_Image)
+            {
+                attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+            }
+            else
+            {
+                attachments.push_back(m_Image->GetImageView());
+            }
 
             if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             {
                 auto depthImageView = context->GetSwapChain()->GetDepthImageView();
                 attachments.push_back(depthImageView);
-            }
-
-            if (m_Attachment)
-            {
-                attachments.push_back(m_Attachment->GetImageView());
             }
 
             VkFramebufferCreateInfo framebufferInfo = {};
@@ -153,14 +149,14 @@ namespace Lavender
 
         {
             VkAttachmentDescription& colorAttachment = attachments.emplace_back();
-            colorAttachment.format = context->GetSwapChain()->GetColourFormat();
+            colorAttachment.format = m_Image ? m_Image->GetFormat() : context->GetSwapChain()->GetColourFormat();
             colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            colorAttachment.loadOp = (VkAttachmentLoadOp)((int)m_Specification.ColourLoadOp);
+            colorAttachment.loadOp = (VkAttachmentLoadOp)m_Specification.ColourLoadOp;
             colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
             colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            colorAttachment.initialLayout = (VkImageLayout)((int)m_Specification.PreviousImageLayout);
-            colorAttachment.finalLayout = (VkImageLayout)((int)m_Specification.FinalImageLayout);
+            colorAttachment.initialLayout = (VkImageLayout)m_Specification.PreviousImageLayout;
+            colorAttachment.finalLayout = (VkImageLayout)m_Specification.FinalImageLayout;
 
             VkAttachmentReference& colorAttachmentRef = attachmentRefs.emplace_back();
             colorAttachmentRef.attachment = 0;
@@ -184,39 +180,10 @@ namespace Lavender
             depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         }
 
-        if (m_Attachment)
-        {
-            VkAttachmentDescription& colorAttachment = attachments.emplace_back();
-            colorAttachment.format = m_Attachment->GetFormat();
-            colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            colorAttachment.loadOp = (VkAttachmentLoadOp)((int)m_Specification.ColourLoadOp);
-            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            colorAttachment.initialLayout = (VkImageLayout)((int)m_Specification.PreviousImageLayout);
-            colorAttachment.finalLayout = (VkImageLayout)((int)m_Specification.FinalImageLayout);
-
-            VkAttachmentReference& colorAttachmentRef = attachmentRefs.emplace_back();
-            colorAttachmentRef.attachment = 2;
-            colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        }
-
         VkSubpassDescription subpass = {};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = m_Attachment ? 2 : 1;
-        if (m_Attachment)
-        {
-            std::array<VkAttachmentReference, 2> references = { attachmentRefs[0] };
-            if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
-                references[1] = attachmentRefs[2];
-            else
-                references[1] = attachmentRefs[1];
-
-            subpass.pColorAttachments = references.data();
-        }
-        else
-            subpass.pColorAttachments = &attachmentRefs[0];
-
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &attachmentRefs[0];
 
         if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             subpass.pDepthStencilAttachment = &attachmentRefs[1];
@@ -254,15 +221,20 @@ namespace Lavender
 
         for (size_t i = 0; i < imageViews.size(); i++)
         {
-            std::vector<VkImageView> attachments = { context->GetSwapChain()->GetImageViews()[i] };
+            std::vector<VkImageView> attachments = { };
+            if (!m_Image)
+            {
+                attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+            }
+            else
+            {
+                attachments.push_back(m_Image->GetImageView());
+            }
+
             if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             {
                 auto depthImageView = context->GetSwapChain()->GetDepthImageView();
                 attachments.push_back(depthImageView);
-            }
-            if (m_Attachment)
-            {
-                attachments.push_back(m_Attachment->GetImageView());
             }
 
             VkFramebufferCreateInfo framebufferInfo = {};

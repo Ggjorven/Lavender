@@ -23,6 +23,17 @@ constexpr Type operator ^ (Type lhs, Type rhs) \
     return static_cast<Type>(static_cast<int>(lhs) ^ static_cast<int>(rhs)); \
 } \
 
+#define LV_MAX_UINT8 255
+#define LV_MAX_UINT16 65535 
+#define LV_MAX_UINT32 4294967295 
+#define LV_MAX_UINT64 18446744073709551615ULL 
+#define LV_MAX_INT8 127 
+#define LV_MAX_INT16 32767
+#define LV_MAX_INT32 2147483647
+#define LV_MAX_INT64 9223372036854775807LL
+#define LV_MAX_FLOAT FLT_MAX 
+#define LV_MAX_DOUBLE DBL_MAX
+
 namespace Lavender::Utils
 {
 

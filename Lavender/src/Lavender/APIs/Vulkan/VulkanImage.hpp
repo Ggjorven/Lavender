@@ -25,6 +25,7 @@ namespace Lavender
 		VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
 
 		VkImageView GetImageView() { return m_ImageView; }
+		VkSampler GetSampler() { return m_Sampler; }
 
 	private:
 		void Upload();

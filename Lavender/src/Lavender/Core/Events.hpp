@@ -11,7 +11,7 @@
 namespace Lavender
 {
 
-	enum class EventType
+	enum class EventType : uint8_t
 	{
 		None = 0,
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
@@ -19,7 +19,7 @@ namespace Lavender
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
-	enum class EventCategory
+	enum class EventCategory : uint8_t
 	{
 		None = 0,
 		Application = BIT(0),

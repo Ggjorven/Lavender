@@ -20,13 +20,12 @@ namespace Lavender
 	public:
 		VulkanRenderPass(RenderPassSpecification specs);
 		VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
+		VulkanRenderPass(RenderPassSpecification specs, Ref<Image2D> image);
 		virtual ~VulkanRenderPass();
 
 		void Begin() override;
 		void End() override;
 		void Submit() override;
-
-		void AddAttachment(Ref<Image2D> attachment) override;
 
 		void Resize(uint32_t width, uint32_t height) override;
 
@@ -46,6 +45,7 @@ namespace Lavender
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 		std::vector<VkFramebuffer> m_Framebuffers = { };
 
-		Ref<VulkanImage2D> m_Attachment = nullptr;
+		Ref<VulkanImage2D> m_Image = nullptr;
 	};
+
 }

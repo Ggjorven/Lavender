@@ -40,7 +40,7 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<Image2D> Image2D::CreateAsAttachment(uint32_t width, uint32_t height)
+	Ref<Image2D> Image2D::Create(uint32_t width, uint32_t height)
 	{
 		switch (Renderer::GetAPI())
 		{

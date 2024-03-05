@@ -40,5 +40,5 @@ private:
 
 	Ref<Image2D> m_Image = nullptr;
 
-	std::vector<ImTextureID> m_ImGuiTextures = { };
+	ImTextureID m_ImGuiTexture = {};
 };
