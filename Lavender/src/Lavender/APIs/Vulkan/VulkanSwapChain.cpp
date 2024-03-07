@@ -146,7 +146,13 @@ namespace Lavender
 		swapchainCI.imageFormat = m_ColourFormat;
 		swapchainCI.imageColorSpace = m_ColourSpace;
 		swapchainCI.imageExtent = { swapchainExtent.width, swapchainExtent.height };
+
 		swapchainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		if (surfCaps.supportedTransforms & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
+			swapchainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		if (surfCaps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+			swapchainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
 		swapchainCI.preTransform = (VkSurfaceTransformFlagBitsKHR)preTransform;
 		swapchainCI.imageArrayLayers = 1;
 		swapchainCI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;

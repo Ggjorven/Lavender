@@ -61,8 +61,6 @@ namespace Lavender
 		inline Ref<VulkanViewportImage> GetImage() { return m_Image; }
 
 	private:
-		RenderPassSpecification m_Specification = {};
-
 		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;
 		Ref<VulkanViewportImage> m_Image = VK_NULL_HANDLE;
 

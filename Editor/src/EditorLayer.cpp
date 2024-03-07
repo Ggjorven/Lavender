@@ -98,7 +98,7 @@ void EditorLayer::OnImGuiRender()
 		LV_LOG_TRACE("BUTTON");
 	}
 
-	//ImGui::Image(m_Viewport->GetCurrentImGuiTexture(), ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight()));
+	ImGui::Image(m_Viewport->GetCurrentImGuiTexture(), ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight()));
 
 	ImGui::End();
 }
