@@ -3,9 +3,12 @@
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Logging.hpp>
 #include <Lavender/Utils/Utils.hpp>
-#include <Lavender/Renderer/Renderer.hpp>
-#include <Lavender/APIs/Vulkan/VulkanImage.hpp>
 
+#include <Lavender/APIs/Vulkan/VulkanContext.hpp>
+#include <Lavender/APIs/Vulkan/VulkanImage.hpp>
+#include <Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp>
+
+#include <Lavender/Renderer/Renderer.hpp>
 #include <Lavender/Renderer/Shader.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -28,15 +31,7 @@ static uint32_t indices[] = {
 
 void EditorLayer::OnAttach()
 {
-	Ref<Image2D> image = Image2D::Create(1280, 720);
-
-	RenderPassSpecification specs = {};
-	specs.UsedAttachments = RenderPassSpecification::Attachments::Depth;
-	specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Undefined;
-	specs.FinalImageLayout = RenderPassSpecification::ImageLayout::Presentation;
-
-	//m_RenderPass = RenderPass::Create(specs);
-	m_RenderPass = RenderPass::CreateFromImage(specs, image);
+	m_Viewport = Viewport::Create(Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
 
 	ShaderCode code = {};
 	code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
@@ -63,14 +58,10 @@ void EditorLayer::OnAttach()
 	pipelineSpecs.LineWidth = 1.0f;
 	pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Front;
 
-	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_RenderPass);
+	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_Viewport->GetRenderPass()->GetRenderPass());
 	m_Pipeline->Initialize();
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
-
-	// ImGui
-	//auto vkImage = RefHelper::RefAs<VulkanImage2D>(image);
-	//m_ImGuiTexture = ImGui_ImplVulkan_AddTexture(vkImage->GetSampler(), vkImage->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void EditorLayer::OnDetach()
@@ -83,19 +74,18 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 void EditorLayer::OnRender()
 {
-	m_RenderPass->Begin();
+	m_Viewport->BeginFrame();
 
-	m_Pipeline->Use(m_RenderPass->GetCommandBuffer());
+	m_Pipeline->Use(m_Viewport->GetRenderPass()->GetCommandBuffer());
 
-	m_VertexBuffer->Bind(m_RenderPass->GetCommandBuffer());
-	m_IndexBuffer->Bind(m_RenderPass->GetCommandBuffer());
+	m_VertexBuffer->Bind(m_Viewport->GetRenderPass()->GetCommandBuffer());
+	m_IndexBuffer->Bind(m_Viewport->GetRenderPass()->GetCommandBuffer());
 
-	Renderer::DrawIndexed(m_RenderPass->GetCommandBuffer(), m_IndexBuffer);
+	Renderer::DrawIndexed(m_Viewport->GetRenderPass()->GetCommandBuffer(), m_IndexBuffer);
 
-	m_RenderPass->End();
-	m_RenderPass->Submit();
+	m_Viewport->EndFrame();
 
-	Renderer::WaitFor(m_RenderPass->GetCommandBuffer());
+	Renderer::WaitFor(m_Viewport->GetRenderPass()->GetCommandBuffer());
 }
 
 void EditorLayer::OnImGuiRender()
@@ -108,7 +98,7 @@ void EditorLayer::OnImGuiRender()
 		LV_LOG_TRACE("BUTTON");
 	}
 
-	//ImGui::Image(m_ImGuiTexture, ImVec2(200.0f, 200.0f));
+	//ImGui::Image(m_Viewport->GetCurrentImGuiTexture(), ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight()));
 
 	ImGui::End();
 }
@@ -122,7 +112,7 @@ void EditorLayer::OnEvent(Event& e)
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 {
-	m_RenderPass->Resize(e.GetWidth(), e.GetHeight());
+	m_Viewport->GetRenderPass()->Resize(e.GetWidth(), e.GetHeight());
 
 	return false;
 }

@@ -51,7 +51,6 @@ namespace Lavender
 
 		static Ref<RenderPass> Create(RenderPassSpecification specs = RenderPassSpecification());
 		static Ref<RenderPass> CreateFromCommandBuffer(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
-		static Ref<RenderPass> CreateFromImage(RenderPassSpecification specs, Ref<Image2D> image);
 	};
 
 }

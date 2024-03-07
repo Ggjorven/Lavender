@@ -29,24 +29,25 @@ namespace Lavender
 		{
 			std::vector<VkDescriptorPoolSize> poolSizes =
 			{
-				{ VK_DESCRIPTOR_TYPE_SAMPLER, 100 },
-				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 100 }, // Important for ImGui
-				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 100 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 100 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 100 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 100 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 100 },
-				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 100 }
+				{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
 			};
 
 			VkDescriptorPoolCreateInfo poolInfo = {};
 			poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+			poolInfo.poolSizeCount = (uint32_t)poolSizes.size();
 			poolInfo.pPoolSizes = poolSizes.data();
-			poolInfo.maxSets = static_cast<uint32_t>(Renderer::GetSpecification().FramesInFlight);
+			poolInfo.maxSets = 1000 * Renderer::GetSpecification().FramesInFlight;
+			poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 			if (vkCreateDescriptorPool(context->GetLogicalDevice()->GetVulkanDevice(), &poolInfo, nullptr, &s_ImGuiPool) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to create descriptor pool!");
@@ -89,8 +90,8 @@ namespace Lavender
 		//initInfo.PipelineCache = vkPipelineCache;
 		initInfo.DescriptorPool = s_ImGuiPool;
 		initInfo.Allocator = nullptr; // Optional, use nullptr to use the default allocator
-		initInfo.MinImageCount = static_cast<uint32_t>(context->GetSwapChain()->GetImageViews().size());
-		initInfo.ImageCount = static_cast<uint32_t>(context->GetSwapChain()->GetImageViews().size());
+		initInfo.MinImageCount = (uint32_t)context->GetSwapChain()->GetImageViews().size();
+		initInfo.ImageCount = (uint32_t)context->GetSwapChain()->GetImageViews().size();
 		initInfo.CheckVkResultFn = nullptr; // Optional, a callback function for Vulkan errors
 		//init_info.MSAASamples = vkMSAASamples; // The number of samples per pixel in case of MSAA
 		//init_info.Subpass = 0; // The index of the subpass where ImGui will be drawn
@@ -99,7 +100,8 @@ namespace Lavender
 		RenderPassSpecification specs = {};
 		specs.UsedAttachments = RenderPassSpecification::Attachments::None;
 
-		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Load; // To not overwrite previous drawn things
+		// TODO: Change back to Load to not overwrite
+		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Clear; // To not overwrite previous drawn things
 		// TODO: Change back to presentation
 		specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 
@@ -162,6 +164,11 @@ namespace Lavender
 		m_Renderpass->Submit();
 
 		Renderer::WaitFor(m_Renderpass->GetCommandBuffer());
+	}
+
+	VkDescriptorPool VulkanImGuiLayer::GetVulkanDescriptorPool()
+	{
+		return s_ImGuiPool;
 	}
 
 	void VulkanImGuiLayer::Resize(uint32_t width, uint32_t height)

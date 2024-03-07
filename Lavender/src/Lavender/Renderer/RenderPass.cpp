@@ -40,19 +40,4 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<RenderPass> RenderPass::CreateFromImage(RenderPassSpecification specs, Ref<Image2D> image)
-	{
-		switch (Renderer::GetAPI())
-		{
-		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanRenderPass>(specs, image);
-
-		default:
-			LV_LOG_ERROR("Invalid API selected.");
-			break;
-		}
-
-		return nullptr;
-	}
-
 }

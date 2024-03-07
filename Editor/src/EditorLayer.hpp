@@ -11,6 +11,7 @@
 #include <Lavender/Renderer/IndexBuffer.hpp>
 #include <Lavender/Renderer/UniformBuffer.hpp>
 #include <Lavender/Renderer/Image.hpp>
+#include <Lavender/Renderer/Viewport.hpp>
 
 #include <imgui.h>
 
@@ -32,13 +33,12 @@ private:
 	bool OnResizeEvent(WindowResizeEvent& e);
 
 private:
+	Ref<Viewport> m_Viewport = nullptr;
+
 	Ref<Pipeline> m_Pipeline = nullptr;
-	Ref<RenderPass> m_RenderPass = nullptr;
 
 	Ref<VertexBuffer> m_VertexBuffer = nullptr;
 	Ref<IndexBuffer> m_IndexBuffer = nullptr;
 
 	Ref<Image2D> m_Image = nullptr;
-
-	ImTextureID m_ImGuiTexture = {};
 };

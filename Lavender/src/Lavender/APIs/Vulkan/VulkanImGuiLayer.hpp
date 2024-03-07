@@ -23,6 +23,8 @@ namespace Lavender
 		void Begin() override;
 		void End() override;
 
+		VkDescriptorPool GetVulkanDescriptorPool();
+
 	private:
 		void Resize(uint32_t width, uint32_t height) override;
 

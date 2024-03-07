@@ -13,7 +13,12 @@
 namespace Lavender
 {
 
-	VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs)
+    VulkanRenderPass::VulkanRenderPass(VkRenderPass renderPass)
+        : m_RenderPass(renderPass)
+    {
+    }
+
+    VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs)
         : VulkanRenderPass(specs, RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
     {
 	}
@@ -24,11 +29,6 @@ namespace Lavender
         Create();
 	}
 
-    VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs, Ref<Image2D> image)
-        : m_Specification(specs), m_Image(RefHelper::RefAs<VulkanImage2D>(image)), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
-    {
-        Create();
-    }
 
 	VulkanRenderPass::~VulkanRenderPass()
 	{
@@ -108,14 +108,7 @@ namespace Lavender
         for (size_t i = 0; i < imageViews.size(); i++)
         {
             std::vector<VkImageView> attachments = { };
-            if (!m_Image)
-            {
-                attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
-            }
-            else
-            {
-                attachments.push_back(m_Image->GetImageView());
-            }
+            attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
 
             if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             {
@@ -149,7 +142,7 @@ namespace Lavender
 
         {
             VkAttachmentDescription& colorAttachment = attachments.emplace_back();
-            colorAttachment.format = m_Image ? m_Image->GetFormat() : context->GetSwapChain()->GetColourFormat();
+            colorAttachment.format = context->GetSwapChain()->GetColourFormat();
             colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
             colorAttachment.loadOp = (VkAttachmentLoadOp)m_Specification.ColourLoadOp;
             colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -222,14 +215,7 @@ namespace Lavender
         for (size_t i = 0; i < imageViews.size(); i++)
         {
             std::vector<VkImageView> attachments = { };
-            if (!m_Image)
-            {
-                attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
-            }
-            else
-            {
-                attachments.push_back(m_Image->GetImageView());
-            }
+            attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
 
             if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             {
