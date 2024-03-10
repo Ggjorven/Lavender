@@ -41,4 +41,5 @@ private:
 	Ref<IndexBuffer> m_IndexBuffer = nullptr;
 
 	Ref<Image2D> m_Image = nullptr;
+	Ref<UniformBuffer> m_CameraBuffer = nullptr;
 };

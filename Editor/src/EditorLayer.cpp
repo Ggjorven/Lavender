@@ -12,6 +12,7 @@
 #include <Lavender/Renderer/Shader.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -27,6 +28,14 @@ static float vertices[] = {
 static uint32_t indices[] = {
 	0, 1, 2,
 	2, 3, 0
+};
+
+struct Camera
+{
+public:
+	glm::mat4 Model = {};
+	glm::mat4 View = {};
+	glm::mat4 Projection = {};
 };
 
 void EditorLayer::OnAttach()
@@ -47,7 +56,8 @@ void EditorLayer::OnAttach()
 	};
 
 	UniformLayout uniformLayout = {
-		{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment }
+		{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
+		{ UniformDataType::UniformBuffer, 0, 1, "u_Camera", UniformElement::ShaderStage::Vertex }
 	};
 
 	PipelineSpecification pipelineSpecs = {};
@@ -56,12 +66,13 @@ void EditorLayer::OnAttach()
 
 	pipelineSpecs.Polygonmode = PipelineSpecification::PolygonMode::Fill;
 	pipelineSpecs.LineWidth = 1.0f;
-	pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Front;
+	pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Back;
 
 	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_Viewport->GetRenderPass()->GetRenderPass());
 	m_Pipeline->Initialize();
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
+	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
 }
 
 void EditorLayer::OnDetach()
@@ -70,6 +81,21 @@ void EditorLayer::OnDetach()
 
 void EditorLayer::OnUpdate(float deltaTime)
 {
+	auto& window = Application::Get().GetWindow();
+	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetWidth() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
+	{
+		auto& window = Application::Get().GetWindow();
+
+		Camera camera = {};
+		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Viewport->GetWidth() / (float)m_Viewport->GetHeight(), 0.1f, 10.0f);
+
+		if (Renderer::GetAPI() == RenderingAPI::Vulkan)
+			camera.Projection[1][1] *= -1;
+
+		m_CameraBuffer->SetData((void*)&camera, sizeof(Camera));
+	}
 }
 
 void EditorLayer::OnRender()
