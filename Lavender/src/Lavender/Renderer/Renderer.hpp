@@ -1,64 +1,45 @@
 #pragma once
 
+#include <stdint.h>
 #include <memory>
-#include <queue>
 
-#include <glm/glm.hpp>
+#include "Lavender/Core/Application.hpp"
 
-#include "Lavender/Renderer/RenderingAPI.hpp"
-#include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
+#include "Lavender/Renderer/RenderConfig.hpp"
 
 namespace Lavender
 {
 
-	class Application;
-	class VertexBuffer;
+	class RenderCommandBuffer;
+	class RenderInstance;
 	class IndexBuffer;
 
-	typedef std::function<void()> RenderFunction;
-	typedef std::function<void()> UIFunction;
-
+	// TODO: Add more functionality
 	class Renderer
 	{
 	public:
-		static void Init(const APISpecifications& specs);
+		static void Init(const RendererSpecification& specs);
 		static void Destroy();
 
-		static void Wait();
+		static void BeginFrame();
+		static void EndFrame();
 
-		static void SetClearColour(const glm::vec4& colour);
+		static void Submit(RenderFunction function);
+		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer); // TODO: Remove this and replace with something else
 
-		// Note(Jorben): Make sure you have a RenderController bound
-		static void DrawIndexed(std::shared_ptr<IndexBuffer>& indexBuffer);
-
-		static void AddToQueue(RenderFunction function);
-		static void AddToUIQueue(UIFunction function);
-
-		static APISpecifications& GetAPISpecs() { return s_APISpecs; }
+		static void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer);
 
 		static void OnResize(uint32_t width, uint32_t height);
 
-		static uint32_t GetCurrentFrame() { return s_Instance->m_CurrentFrame; }
+		inline static Ref<RenderingContext> GetContext() { return Application::Get().GetWindow().GetRenderingContext(); }
+		static RenderInstance* GetInstance();
 
+		inline constexpr static const RenderingAPI GetAPI() { return s_API; }
+		inline static RendererSpecification GetSpecification() { return s_Specifications; }
+		
 	private:
-		void QueuePresent();
-		void RecordCommandBuffer(VkCommandBuffer& commandBuffer, uint32_t imageIndex);
-
-		static void Display();
-
-	private:
-		uint32_t m_CurrentFrame = 0;
-
-		VulkanRenderPass* m_DefaultRenderPass = nullptr;
-
-		std::queue<RenderFunction> m_RenderQueue = { };
-		std::queue<UIFunction> m_UIQueue = { };
-
-	private:
-		static Renderer* s_Instance;
-		static APISpecifications s_APISpecs;
-
-		friend class Application;
+		inline constexpr static const RenderingAPI s_API = RenderingAPI::Vulkan;
+		static RendererSpecification s_Specifications;
 	};
 
 }

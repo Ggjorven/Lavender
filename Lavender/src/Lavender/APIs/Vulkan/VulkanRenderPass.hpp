@@ -1,64 +1,50 @@
 #pragma once
 
-#include <memory>
-
-#include <vulkan/vulkan.h>
-
-#include <glm/glm.hpp>
-
-#include "Lavender/Renderer/RenderingAPI.hpp"
+#include <vector>
 
 #include "Lavender/Utils/Utils.hpp"
+
+#include "Lavender/Renderer/RenderPass.hpp"
+#include "Lavender/Renderer/RenderCommandBuffer.hpp"
+
+#include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanImage.hpp"
+
+#include <vulkan/vulkan.h>
 
 namespace Lavender
 {
 
-	class Renderer;
-	class BaseImGuiLayer;
-
-	enum Attachments
-	{
-		AttachmentNone = 0,
-		ColourAttachment = BIT(0),
-		DepthAttachment = BIT(1)
-	};
-
-	class VulkanRenderPass
+	class VulkanRenderPass : public RenderPass
 	{
 	public:
-		enum class ColourSpace
-		{
-			None = 0,
-			Unorm = 44,
-			sRGB = 50
-		};
-
-	public:
-		VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments);
-		VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, int attachments);
-
-		VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments, std::vector<VkFramebuffer>& framebuffers);
-		VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, int attachments, std::vector<VkFramebuffer>& framebuffers);
+		VulkanRenderPass(VkRenderPass renderPass);
+		VulkanRenderPass(RenderPassSpecification specs);
+		VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
 		virtual ~VulkanRenderPass();
 
-		void RecreateFrameBuffers();
+		void Begin() override;
+		void End() override;
+		void Submit() override;
 
-		bool HasDepth() const { return m_Attachments & DepthAttachment; }
-		VkRenderPass& GetVkRenderPass() { return m_RenderPass; }
+		void Resize(uint32_t width, uint32_t height) override;
+
+		Ref<RenderCommandBuffer> GetCommandBuffer() override { return m_CommandBuffer; }
+		VkRenderPass& GetVulkanRenderPass() { return m_RenderPass; }
 
 	private:
-		void CreateRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments);
-		void CreateFrameBuffers(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments);
+		void Create();
+
+		void Destroy();
 
 	private:
-		ColourSpace m_ColourSpace = ColourSpace::None;
-		Attachments m_Attachments = AttachmentNone;
+		RenderPassSpecification m_Specification = {};
+		bool m_Destroy = true;
+
+		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;
 
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
-		std::vector<VkFramebuffer> m_SwapChainFramebuffers = { };
-
-		friend class Renderer;
-		friend class BaseImGuiLayer;
+		std::vector<VkFramebuffer> m_Framebuffers = { };
 	};
 
 }

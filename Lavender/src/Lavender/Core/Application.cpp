@@ -13,7 +13,7 @@ namespace Lavender
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const AppInfo& appInfo)
+	Application::Application(const ApplicationSpecification& appInfo)
 		: m_AppInfo(appInfo)
 	{
 		Init(appInfo);
@@ -21,8 +21,6 @@ namespace Lavender
 
 	Application::~Application()
 	{
-		Renderer::Wait();
-
 		for (Layer* layer : m_LayerStack)
 		{
 			layer->OnDetach();
@@ -30,21 +28,12 @@ namespace Lavender
 		}
 
 		Renderer::Destroy();
+		m_Window->Shutdown();
 	}
 
-	void Application::OnEvent(Event& e)
+	void Application::OnEvent(Ref<Event>& e)
 	{
-		EventHandler handler(e);
-
-		handler.Handle<WindowCloseEvent>(LV_BIND_EVENT_FN(Application::OnWindowClose));
-		handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(Application::OnWindowResize));
-
-		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
-		{
-			if (e.Handled)
-				break;
-			(*it)->OnEvent(e);
-		}
+		m_EventQueue.push(e);
 	}
 
 	void Application::Run()
@@ -60,15 +49,19 @@ namespace Lavender
 
 			// Update & Render
 			m_Window->OnUpdate();
+			HandleEvents();
+
+			Renderer::BeginFrame();
 			{
 				LV_PROFILE_SCOPE("Update & Render");
 				for (Layer* layer : m_LayerStack)
 				{
 					layer->OnUpdate(deltaTime);
-					layer->OnRender();
+					if (!m_Minimized) layer->OnRender();
 				}
 			}
 
+			if (!m_Minimized) // TODO: Remove once Viewport uses ImGui window size instead of main window size
 			{
 				LV_PROFILE_SCOPE("ImGui Submission");
 				{
@@ -83,8 +76,7 @@ namespace Lavender
 				}
 			}
 
-			Renderer::Display();
-
+			Renderer::EndFrame();
 			m_Window->OnRender();
 		}
 	}
@@ -99,18 +91,19 @@ namespace Lavender
 		m_LayerStack.AddOverlay(layer);
 	}
 
-	void Application::Init(const AppInfo& appInfo)
+	void Application::Init(const ApplicationSpecification& appInfo)
 	{
 		s_Instance = this;
 
 		Log::Init();
 		
-		m_Window = Window::Create(appInfo.WindowProperties);
+		m_Window = Window::Create();
+		m_Window->Init(appInfo.WindowSpecs);
 		m_Window->SetEventCallBack(LV_BIND_EVENT_FN(Application::OnEvent));
 
-		Renderer::Init(appInfo.APISpecs);
+		Renderer::Init(appInfo.RenderSpecs);
 
-		m_ImGuiLayer = new BaseImGuiLayer();
+		m_ImGuiLayer = BaseImGuiLayer::Create();
 		AddOverlay(m_ImGuiLayer);
 	}
 
@@ -129,8 +122,33 @@ namespace Lavender
 		}
 
 		Renderer::OnResize(e.GetWidth(), e.GetHeight());
+		m_ImGuiLayer->Resize(e.GetWidth(), e.GetHeight());
+
 		m_Minimized = false;
 		return false;
+	}
+
+	void Application::HandleEvents()
+	{
+		while (!m_EventQueue.empty())
+		{
+			Ref<Event> rawEvent = m_EventQueue.front();
+			Event& e = *rawEvent;
+
+			EventHandler handler(e);
+
+			handler.Handle<WindowCloseEvent>(LV_BIND_EVENT_FN(Application::OnWindowClose));
+			handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(Application::OnWindowResize));
+
+			for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+			{
+				if (e.Handled)
+					break;
+				(*it)->OnEvent(e);
+			}
+
+			m_EventQueue.pop();
+		}
 	}
 
 }

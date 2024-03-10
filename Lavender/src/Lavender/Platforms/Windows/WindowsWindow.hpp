@@ -2,8 +2,6 @@
 
 #include "Lavender/Core/Window.hpp"
 
-#include "Lavender/Renderer/GraphicsContext.hpp"
-
 #include <GLFW/glfw3.h>
 
 namespace Lavender
@@ -12,7 +10,7 @@ namespace Lavender
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowProperties properties);
+		WindowsWindow();
 		virtual ~WindowsWindow();
 
 		void SetEventCallBack(EventCallBackFunction func) override { m_Data.CallBack = func; }
@@ -30,10 +28,12 @@ namespace Lavender
 
 		void* GetNativeWindow() const override { return (void*)m_Window; }
 
-	private:
-		bool Init(WindowProperties properties);
-		void Shutdown();
+		bool Init(const WindowSpecification& properties) override;
+		void Shutdown() override;
 
+		Ref<RenderingContext> GetRenderingContext() override { return m_RenderingContext; }
+
+	private:
 		static void ErrorCallBack(int errorCode, const char* description);
 
 	private:
@@ -41,7 +41,7 @@ namespace Lavender
 		static uint32_t s_Instances;
 
 		GLFWwindow* m_Window = nullptr;
-		std::unique_ptr<GraphicsContext> m_GraphicsContext = nullptr;
+		Ref<RenderingContext> m_RenderingContext = nullptr;
 		WindowData m_Data = {};
 
 	};

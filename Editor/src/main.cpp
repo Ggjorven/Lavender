@@ -6,7 +6,7 @@
 class Sandbox : public Lavender::Application
 {
 public:
-	Sandbox(const Lavender::AppInfo& appInfo)
+	Sandbox(const Lavender::ApplicationSpecification& appInfo)
 		: Lavender::Application(appInfo)
 	{
 		AddLayer(new EditorLayer());
@@ -20,10 +20,11 @@ public:
 // ----------------------------------------------------------------
 Lavender::Application* Lavender::CreateApplication(int argc, char* argv[])
 {
-	AppInfo appInfo(argc, argv);
+	ApplicationSpecification appInfo = {};
+	appInfo.WindowSpecs.Name = "Custom";
+	appInfo.WindowSpecs.VSync = true;
 
-	appInfo.WindowProperties.Name = "Custom";
-	appInfo.WindowProperties.VSync = false;
+	appInfo.RenderSpecs.FramesInFlight = 3;
 
 	return new Sandbox(appInfo);
 }

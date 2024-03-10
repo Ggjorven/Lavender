@@ -14,15 +14,14 @@ namespace Lavender
 	bool WindowsWindow::s_GLFWinitialized = false;
 	uint32_t WindowsWindow::s_Instances = 0u;
 
-	WindowsWindow::WindowsWindow(const WindowProperties properties)
+	static void SetupAPIWindowHints();
+
+	WindowsWindow::WindowsWindow()
 	{
-		if (Init(properties))
-			LV_LOG_ERROR("{0}", "WindowsWindow failed to initialize.");
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
-		Shutdown();
 	}
 
 	void WindowsWindow::OnUpdate()
@@ -33,13 +32,12 @@ namespace Lavender
 
 	void WindowsWindow::OnRender()
 	{
-		FrameMark;
+		LV_MARK_FRAME;
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
-		// Note(Jorben): We resize cause resize recreates the swapchain
-		Renderer::OnResize(GetWidth(), GetHeight());
+		// TODO: Recreate Vulkan swapchain
 
 		m_Data.Vsync = enabled;
 	}
@@ -49,7 +47,7 @@ namespace Lavender
 		glfwSetWindowTitle(m_Window, title.c_str());
 	}
 	
-	bool WindowsWindow::Init(WindowProperties properties)
+	bool WindowsWindow::Init(const WindowSpecification& properties)
 	{
 		if (!s_GLFWinitialized)
 		{
@@ -64,12 +62,12 @@ namespace Lavender
 		}
 		m_Data.Vsync = properties.VSync;
 
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		SetupAPIWindowHints();
 		m_Window = glfwCreateWindow((int)properties.Width, (int)properties.Height, properties.Name.c_str(), nullptr, nullptr);
 		s_Instances++;
 
-		m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window, properties.VSync);
-		m_GraphicsContext->Init();
+		m_RenderingContext = RenderingContext::Create();
+		m_RenderingContext->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data); //So we can access/get to the data in lambda functions
 		if (properties.CustomPos) glfwSetWindowPos(m_Window, properties.X, properties.Y);
@@ -81,14 +79,15 @@ namespace Lavender
 				data.Width = width;
 				data.Height = height;
 
-				WindowResizeEvent event(width, height);
+				Ref<Event> event = RefHelper::Create<WindowResizeEvent>(width, height);
 				data.CallBack(event);
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				WindowCloseEvent event;
+				
+				Ref<Event> event = RefHelper::Create<WindowCloseEvent>();
 				data.CallBack(event);
 			});
 
@@ -101,19 +100,19 @@ namespace Lavender
 				{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(key, 0);
+					Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 0);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent event(key);
+					Ref<Event> event = RefHelper::Create<KeyReleasedEvent>(key);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(key, 1);
+					Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 1);
 					data.CallBack(event);
 					break;
 				}
@@ -124,7 +123,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				KeyTypedEvent event(keycode);
+				Ref<Event> event = RefHelper::Create<KeyTypedEvent>(keycode);
 				data.CallBack(event);
 			});
 
@@ -136,13 +135,13 @@ namespace Lavender
 				{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent event(button);
+					Ref<Event> event = RefHelper::Create<MouseButtonPressedEvent>(button);
 					data.CallBack(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent event(button);
+					Ref<Event> event = RefHelper::Create<MouseButtonReleasedEvent>(button);
 					data.CallBack(event);
 					break;
 				}
@@ -153,7 +152,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				MouseScrolledEvent event((float)xOffset, (float)yOffset);
+				Ref<Event> event = RefHelper::Create<MouseScrolledEvent>((float)xOffset, (float)yOffset);
 				data.CallBack(event);
 			});
 
@@ -161,7 +160,7 @@ namespace Lavender
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				MouseMovedEvent event((float)xPos, (float)yPos);
+				Ref<Event> event = RefHelper::Create<MouseMovedEvent>((float)xPos, (float)yPos);
 				data.CallBack(event);
 			});
 
@@ -171,7 +170,7 @@ namespace Lavender
 
 	void WindowsWindow::Shutdown()
 	{
-		m_GraphicsContext->Destroy();
+		m_RenderingContext->Destroy();
 
 		glfwDestroyWindow(m_Window);
 		s_Instances--;
@@ -183,6 +182,20 @@ namespace Lavender
 	void WindowsWindow::ErrorCallBack(int errorCode, const char* description)
 	{
 		LV_LOG_ERROR("[GLFW]: ({0}), {1}", errorCode, description);
+	}
+
+	void SetupAPIWindowHints()
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderingAPI::Vulkan:
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			break;
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
+		}
 	}
 
 }

@@ -2,10 +2,10 @@
 
 #include "Lavender/Core/Layer.hpp"
 
-#include <vulkan/vulkan.h>
-
 namespace Lavender
 {
+
+	class Application;
 
 	class BaseImGuiLayer : public Layer
 	{
@@ -13,17 +13,14 @@ namespace Lavender
 		BaseImGuiLayer() = default;
 		virtual ~BaseImGuiLayer() = default;
 
-		void OnAttach() override;
-		void OnDetach() override;
+		virtual void Begin() = 0;
+		virtual void End() = 0;
 
-		void Begin();
-		void End();
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
-	private:
-		void CreateDescriptorPool();
+		static BaseImGuiLayer* Create();
 
-	private:
-		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
+		friend class Application;
 	};
 
 }

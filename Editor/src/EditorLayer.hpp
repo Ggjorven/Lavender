@@ -1,17 +1,19 @@
 #pragma once
 
-#include <memory>
+#include <vector>
 
 #include <Lavender/Core/Layer.hpp>
+#include <Lavender/Utils/Utils.hpp>
+
+#include <Lavender/Renderer/RenderPass.hpp>
+#include <Lavender/Renderer/Pipeline.hpp>
 #include <Lavender/Renderer/VertexBuffer.hpp>
 #include <Lavender/Renderer/IndexBuffer.hpp>
-#include <Lavender/Renderer/RenderController.hpp>
 #include <Lavender/Renderer/UniformBuffer.hpp>
 #include <Lavender/Renderer/Image.hpp>
-#include <Lavender/Utils/Mesh.hpp>
+#include <Lavender/Renderer/Viewport.hpp>
 
-#include <Lavender/UI/UIPreferences.hpp>
-#include <Lavender/FileSystem/PreferencesSerializer.hpp>
+#include <imgui.h>
 
 using namespace Lavender;
 
@@ -28,13 +30,16 @@ public:
 	void OnEvent(Event& e);
 
 private:
-	float m_Timer = 0.0f; // For FPS updates
+	bool OnResizeEvent(WindowResizeEvent& e);
 
-	std::shared_ptr<RenderController> m_Controller = nullptr;
-	std::shared_ptr<Mesh> m_Mesh = nullptr;
+private:
+	Ref<Viewport> m_Viewport = nullptr;
 
-	std::shared_ptr<Image> m_Texture = nullptr;
-	std::shared_ptr<UniformBuffer> m_CameraBuffer = nullptr;
+	Ref<Pipeline> m_Pipeline = nullptr;
 
-	std::shared_ptr<UIPreferences> m_UIPreferences = nullptr;
+	Ref<VertexBuffer> m_VertexBuffer = nullptr;
+	Ref<IndexBuffer> m_IndexBuffer = nullptr;
+
+	Ref<Image2D> m_Image = nullptr;
+	Ref<UniformBuffer> m_CameraBuffer = nullptr;
 };

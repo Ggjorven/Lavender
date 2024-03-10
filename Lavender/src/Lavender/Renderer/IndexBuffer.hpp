@@ -1,28 +1,23 @@
 #pragma once
 
-#include <memory>
-
-#include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
+#include "Lavender/Utils/Utils.hpp"
 
 namespace Lavender
 {
 
+	class RenderCommandBuffer;
+
 	class IndexBuffer
 	{
 	public:
-		IndexBuffer(uint32_t* data, uint32_t count);
-		virtual ~IndexBuffer();
+		IndexBuffer() = default;
+		virtual ~IndexBuffer() = default;
 
-		void Bind() const;
+		virtual void Bind(Ref<RenderCommandBuffer> commandBuffer) const = 0;
 
-		uint32_t GetCount() const { return m_Count; }
+		virtual uint32_t GetCount() const = 0;
 
-	private:
-		VkBuffer m_Buffer = VK_NULL_HANDLE;
-		VmaAllocation m_BufferAllocation = VK_NULL_HANDLE;
-
-		uint32_t m_Count = 0;
+		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
 	};
 
 }

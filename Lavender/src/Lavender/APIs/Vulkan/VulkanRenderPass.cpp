@@ -4,160 +4,262 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Core/Application.hpp"
 
-#include "Lavender/APIs/Vulkan/VulkanManager.hpp"
-#include "Lavender/APIs/Vulkan/Setup/VulkanHelper.hpp"
+#include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+#include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
+#include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
 namespace Lavender
 {
 
-	VulkanRenderPass::VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments)
-		: m_ColourSpace(colourSpace), m_Attachments(attachments)
-	{
-		CreateRenderPass(extent, colourSpace, attachments);
-		CreateFrameBuffers(extent, colourSpace, attachments);
+    VulkanRenderPass::VulkanRenderPass(VkRenderPass renderPass) // Note(Jorben): Since this constructor is only used for the Viewport we need to not destroy
+        : m_RenderPass(renderPass), m_Destroy(false)
+    {
+    }
+
+    VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs)
+        : VulkanRenderPass(specs, RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
+    {
 	}
 
-	VulkanRenderPass::VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, int attachments)
-		: VulkanRenderPass(extent, colourSpace, (Attachments)attachments)
+	VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer)
+        : m_Specification(specs), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer))
 	{
+        Create();
 	}
 
-	VulkanRenderPass::VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments, std::vector<VkFramebuffer>& framebuffers)
-		: m_ColourSpace(colourSpace), m_Attachments(attachments)
-	{
-		CreateRenderPass(extent, colourSpace, attachments);
-		m_SwapChainFramebuffers = framebuffers;
-	}
-
-	VulkanRenderPass::VulkanRenderPass(const glm::vec2& extent, ColourSpace colourSpace, int attachments, std::vector<VkFramebuffer>& framebuffers)
-		: VulkanRenderPass(extent, colourSpace, (Attachments)attachments, framebuffers)
-	{
-	}
 
 	VulkanRenderPass::~VulkanRenderPass()
 	{
-		VulkanDeviceInfo& info = VulkanManager::GetDeviceInfo();
-
-		vkDeviceWaitIdle(info.Device);
-
-		for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
-			vkDestroyFramebuffer(info.Device, m_SwapChainFramebuffers[i], nullptr);
-
-		vkDestroyRenderPass(info.Device, m_RenderPass, nullptr);
+        Destroy();
 	}
 
-	void VulkanRenderPass::RecreateFrameBuffers()
+	void VulkanRenderPass::Begin()
 	{
-		VulkanDeviceInfo& info = VulkanManager::GetDeviceInfo();
+        m_CommandBuffer->Begin();
 
-		for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
-			vkDestroyFramebuffer(info.Device, m_SwapChainFramebuffers[i], nullptr);
+        VkExtent2D swapChainExtent = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
 
-		auto& window = Application::Get().GetWindow();
+        VkRenderPassBeginInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = m_RenderPass;
+        renderPassInfo.framebuffer = m_Framebuffers[RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage()];
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = swapChainExtent;
 
-		CreateFrameBuffers({ window.GetWidth(), window.GetHeight() }, m_ColourSpace, m_Attachments);
+        std::vector<VkClearValue> clearValues = {};
+
+        VkClearValue colourClear = { { {0.0f, 0.0f, 0.0f, 1.0f} } };
+        clearValues.push_back(colourClear);
+
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+        {
+            VkClearValue depthClear = { { { 1.0f, 0 } } };
+            clearValues.push_back(depthClear);
+        }
+
+        renderPassInfo.clearValueCount = (uint32_t)clearValues.size();
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(m_CommandBuffer->GetVulkanCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        // TODO: Maybe move this?
+        VkViewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)swapChainExtent.width;
+        viewport.height = (float)swapChainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(m_CommandBuffer->GetVulkanCommandBuffer(), 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset = { 0, 0 };
+        scissor.extent = swapChainExtent;
+        vkCmdSetScissor(m_CommandBuffer->GetVulkanCommandBuffer(), 0, 1, &scissor);
 	}
 
-	void VulkanRenderPass::CreateRenderPass(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments)
+	void VulkanRenderPass::End()
 	{
-		VkFormat format = VK_FORMAT_UNDEFINED;
-		if (colourSpace == ColourSpace::Unorm) format = VK_FORMAT_B8G8R8A8_UNORM;
-		else if (colourSpace == ColourSpace::sRGB) format = VK_FORMAT_B8G8R8A8_SRGB;
-		
-		// Colour
-		VkAttachmentDescription colorAttachment = {};
-		colorAttachment.format = format;
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        vkCmdEndRenderPass(m_CommandBuffer->GetVulkanCommandBuffer());
 
-		VkAttachmentReference colorAttachmentRef = {};
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		// Depth
-		VkAttachmentDescription depthAttachment = {};
-		depthAttachment.format = VulkanHelper::FindDepthFormat();
-		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkAttachmentReference depthAttachmentRef = {};
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		// Subpass
-		VkSubpassDescription subpass = {};
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		if (attachments & DepthAttachment) subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-		VkSubpassDependency dependency = {};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		if (attachments & DepthAttachment) dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		else dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		std::vector<VkAttachmentDescription> attachmentsDes = {};
-
-		if (attachments & DepthAttachment)
-			attachmentsDes = { colorAttachment, depthAttachment };
-		else
-			attachmentsDes = { colorAttachment };
-
-		VkRenderPassCreateInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentsDes.size());
-		renderPassInfo.pAttachments = attachmentsDes.data();
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
-
-		if (vkCreateRenderPass(VulkanManager::GetDeviceInfo().Device, &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
-			LV_LOG_ERROR("Failed to create render pass!");
+        m_CommandBuffer->End();
 	}
 
-	void VulkanRenderPass::CreateFrameBuffers(const glm::vec2& extent, ColourSpace colourSpace, Attachments attachments)
+	void VulkanRenderPass::Submit()
 	{
-		std::vector<VkImageView> swapChainImageViews = VulkanManager::GetSwapChainInfo().SwapChainImageViews;
-		VkImageView depthImageView = VulkanManager::GetResourceInfo().DepthImageView;
-
-		m_SwapChainFramebuffers.resize(swapChainImageViews.size());
-
-		for (size_t i = 0; i < swapChainImageViews.size(); i++)
-		{
-			std::vector<VkImageView> attachmentViews = { };
-
-			if (attachments & DepthAttachment)
-				attachmentViews = { swapChainImageViews[i], depthImageView };
-			else
-				attachmentViews = { swapChainImageViews[i] };
-
-			VkFramebufferCreateInfo framebufferInfo = {};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = m_RenderPass;
-			framebufferInfo.attachmentCount = static_cast<uint32_t>(attachmentViews.size());
-			framebufferInfo.pAttachments = attachmentViews.data();
-			framebufferInfo.width = (uint32_t)extent.x;
-			framebufferInfo.height = (uint32_t)extent.y;
-			framebufferInfo.layers = 1;
-
-			if (vkCreateFramebuffer(VulkanManager::GetDeviceInfo().Device, &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to create framebuffer!");
-		}
+        m_CommandBuffer->Submit();
 	}
+
+    void VulkanRenderPass::Resize(uint32_t width, uint32_t height)
+    {
+        auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+        auto device = context->GetLogicalDevice();
+
+        // Destroy
+        for (auto& framebuffer : m_Framebuffers)
+            vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+
+        auto imageViews = context->GetSwapChain()->GetImageViews();
+
+        m_Framebuffers.resize(imageViews.size());
+        
+        for (size_t i = 0; i < imageViews.size(); i++)
+        {
+            std::vector<VkImageView> attachments = { };
+            attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+
+            if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            {
+                auto depthImageView = context->GetSwapChain()->GetDepthImageView();
+                attachments.push_back(depthImageView);
+            }
+
+            VkFramebufferCreateInfo framebufferInfo = {};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = m_RenderPass;
+            framebufferInfo.attachmentCount = (uint32_t)attachments.size();
+            framebufferInfo.pAttachments = attachments.data();
+            framebufferInfo.width = width;
+            framebufferInfo.height = height;
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
+                LV_LOG_ERROR("Failed to create framebuffer!");
+        }
+    }
+
+    void VulkanRenderPass::Create()
+    {
+        auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Renderpass
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        std::vector<VkAttachmentDescription> attachments = { };
+        std::vector<VkAttachmentReference> attachmentRefs = { };
+
+        {
+            VkAttachmentDescription& colorAttachment = attachments.emplace_back();
+            colorAttachment.format = context->GetSwapChain()->GetColourFormat();
+            colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            colorAttachment.loadOp = (VkAttachmentLoadOp)m_Specification.ColourLoadOp;
+            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            colorAttachment.initialLayout = (VkImageLayout)m_Specification.PreviousImageLayout;
+            colorAttachment.finalLayout = (VkImageLayout)m_Specification.FinalImageLayout;
+
+            VkAttachmentReference& colorAttachmentRef = attachmentRefs.emplace_back();
+            colorAttachmentRef.attachment = 0;
+            colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
+
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+        {
+            VkAttachmentDescription& depthAttachment = attachments.emplace_back();
+            depthAttachment.format = VulkanAllocator::FindDepthFormat();
+            depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            VkAttachmentReference& depthAttachmentRef = attachmentRefs.emplace_back();
+            depthAttachmentRef.attachment = 1;
+            depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        }
+
+        VkSubpassDescription subpass = {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &attachmentRefs[0];
+
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            subpass.pDepthStencilAttachment = &attachmentRefs[1];
+
+        std::array<VkSubpassDependency, 2> dependencies = { };
+
+        dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependencies[0].dstSubpass = 0;
+        dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            dependencies[0].dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        dependencies[1].srcSubpass = 0;
+        dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+        dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            dependencies[0].srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        VkRenderPassCreateInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = (uint32_t)attachments.size();
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = (uint32_t)dependencies.size();
+        renderPassInfo.pDependencies = dependencies.data();
+
+        if (vkCreateRenderPass(context->GetLogicalDevice()->GetVulkanDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
+            LV_LOG_ERROR("Failed to create render pass!");
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Framebuffers // TODO: Framebuffer class
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        auto imageViews = context->GetSwapChain()->GetImageViews();
+
+        m_Framebuffers.resize(imageViews.size());
+
+        for (size_t i = 0; i < imageViews.size(); i++)
+        {
+            std::vector<VkImageView> attachments = { };
+            attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+
+            if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+            {
+                auto depthImageView = context->GetSwapChain()->GetDepthImageView();
+                attachments.push_back(depthImageView);
+            }
+
+            VkFramebufferCreateInfo framebufferInfo = {};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = m_RenderPass;
+            framebufferInfo.attachmentCount = (uint32_t)attachments.size();
+            framebufferInfo.pAttachments = attachments.data();
+            framebufferInfo.width = Application::Get().GetWindow().GetWidth();
+            framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
+                LV_LOG_ERROR("Failed to create framebuffer!");
+        }
+    }
+
+    void VulkanRenderPass::Destroy()
+    {
+        auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
+
+        vkDeviceWaitIdle(device->GetVulkanDevice());
+
+        for (auto& framebuffer : m_Framebuffers)
+            vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+
+        if (m_Destroy)
+            vkDestroyRenderPass(device->GetVulkanDevice(), m_RenderPass, nullptr);
+    }
 
 }

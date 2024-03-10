@@ -4,28 +4,20 @@
 #include "Lavender/Core/Logging.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
-#include "Lavender/APIs/Vulkan/VulkanManager.hpp"
+
+#include "Lavender/APIs/Vulkan/VulkanShader.hpp"
 
 namespace Lavender
 {
 
-	Shader::Shader(const std::vector<char>& vertex, const std::vector<char>& fragment)
+	ShaderCode::ShaderCode(const std::vector<char>& fragment, const std::vector<char>& vertex)
+		: FragmentSPIRV(fragment), VertexSPIRV(vertex)
 	{
-		m_VertexShader = CreateShaderModule(vertex);
-		m_FragmentShader = CreateShaderModule(fragment);
 	}
 
-	Shader::~Shader()
+	std::vector<char> Shader::ReadSPIRVFile(const std::filesystem::path& path)
 	{
-		auto& info = VulkanManager::GetDeviceInfo();
-
-		vkDestroyShaderModule(info.Device, m_FragmentShader, nullptr);
-		vkDestroyShaderModule(info.Device, m_VertexShader, nullptr);
-	}
-
-	std::vector<char> Shader::ReadSPIRVFile(const std::filesystem::path& filepath)
-	{
-		std::ifstream file(filepath, std::ios::ate | std::ios::binary);
+		std::ifstream file(path, std::ios::ate | std::ios::binary);
 
 		if (!file.is_open() || !file.good())
 			LV_LOG_ERROR("Failed to open file!");
@@ -40,39 +32,19 @@ namespace Lavender
 		return buffer;
 	}
 
-	std::string Shader::ReadGLSLFile(const std::filesystem::path& filepath)
+	Ref<Shader> Shader::Create(ShaderCode code)
 	{
-		std::ifstream file(filepath);
-
-		if (!file.is_open() || !file.good())
+		switch (Renderer::GetAPI())
 		{
-			LV_LOG_ERROR("Failed to open file!");
-			return std::string();
+		case RenderingAPI::Vulkan:
+			return RefHelper::Create<VulkanShader>(code);
+
+		default:
+			LV_LOG_ERROR("Invalid API selected.");
+			break;
 		}
 
-		std::string line;
-		std::stringstream ss;
-
-		while (std::getline(file, line))
-			ss << line << "\n";
-
-		return ss.str();
-	}
-
-	VkShaderModule Shader::CreateShaderModule(const std::vector<char>& data)
-	{
-		auto& info = VulkanManager::GetDeviceInfo();
-
-		VkShaderModuleCreateInfo createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = data.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(data.data());
-
-		VkShaderModule shaderModule = {};
-		if (vkCreateShaderModule(info.Device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-			LV_LOG_ERROR("Failed to create shader module!");
-
-		return shaderModule;
+		return nullptr;
 	}
 
 }
