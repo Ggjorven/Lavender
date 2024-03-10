@@ -57,10 +57,11 @@ namespace Lavender
 				for (Layer* layer : m_LayerStack)
 				{
 					layer->OnUpdate(deltaTime);
-					layer->OnRender();
+					if (!m_Minimized) layer->OnRender();
 				}
 			}
 
+			if (!m_Minimized) // TODO: Remove once Viewport uses ImGui window size instead of main window size
 			{
 				LV_PROFILE_SCOPE("ImGui Submission");
 				{

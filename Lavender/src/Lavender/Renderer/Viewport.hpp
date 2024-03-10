@@ -51,6 +51,12 @@ namespace Lavender
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
+		virtual void BeginRender() = 0;
+		virtual void EndRender() = 0;
+
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
+
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Ref<ViewportRenderPass> GetRenderPass() = 0;

@@ -1,6 +1,7 @@
 #include "lvpch.h"
 #include "VulkanViewport.hpp"
 
+#include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
@@ -8,6 +9,7 @@
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
+#include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
 #include <imgui_internal.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -16,7 +18,7 @@ namespace Lavender
 {
 
 	VulkanViewportImage::VulkanViewportImage(uint32_t width, uint32_t height)
-		: m_Miplevels(1)
+		: m_Width(width), m_Height(height), m_Miplevels(1)
 	{
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 
@@ -50,10 +52,13 @@ namespace Lavender
 
 	void VulkanViewportImage::Resize(uint32_t width, uint32_t height)
 	{
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
-		
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		auto device = context->GetLogicalDevice()->GetVulkanDevice();
+		
+		vkDeviceWaitIdle(device);
+
+		m_Width = width;
+		m_Height = height;
 
 		for (auto& image : m_Images)
 		{
@@ -62,12 +67,15 @@ namespace Lavender
 		}
 
 		auto imageViews = context->GetSwapChain()->GetImageViews();
+		m_Images.clear();
 		m_Images.resize(imageViews.size());
 		for (size_t i = 0; i < imageViews.size(); i++)
 		{
 			m_Images[i].Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Images[i].Image);
 
 			m_Images[i].ImageView = VulkanAllocator::CreateImageView(m_Images[i].Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+
+			VulkanAllocator::TransitionImageLayout(m_Images[i].Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 		}
 	}
 
@@ -121,7 +129,7 @@ namespace Lavender
 		subpassDescription.pResolveAttachments = nullptr;
 
 		// Subpass dependencies for layout transitions
-		std::array<VkSubpassDependency, 2> dependencies;
+		std::array<VkSubpassDependency, 2> dependencies = { };
 
 		dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependencies[0].dstSubpass = 0;
@@ -167,8 +175,8 @@ namespace Lavender
 			framebufferInfo.renderPass = m_RenderPass;
 			framebufferInfo.attachmentCount = (uint32_t)attachments.size();
 			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = Application::Get().GetWindow().GetWidth();
-			framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+			framebufferInfo.width = m_Image->GetWidth();
+			framebufferInfo.height = m_Image->GetHeight();
 			framebufferInfo.layers = 1;
 
 			if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
@@ -184,6 +192,7 @@ namespace Lavender
 		for (auto& framebuffer : m_Framebuffers)
 			vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
 
+
 		vkDestroyRenderPass(device->GetVulkanDevice(), m_RenderPass, nullptr);
 	}
 
@@ -191,7 +200,7 @@ namespace Lavender
 	{
 		m_CommandBuffer->Begin();
 
-		VkExtent2D swapChainExtent = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
+		VkExtent2D swapChainExtent = { m_Image->GetWidth(), m_Image->GetHeight() };
 
 		VkRenderPassBeginInfo renderPassInfo = {};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -246,16 +255,20 @@ namespace Lavender
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		auto device = context->GetLogicalDevice();
 
+		vkDeviceWaitIdle(device->GetVulkanDevice());
+
 		// Destroy
 		for (auto& framebuffer : m_Framebuffers)
 			vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+
+		vkDeviceWaitIdle(device->GetVulkanDevice());
 
 		auto imageViews = context->GetSwapChain()->GetImageViews();
 		m_Framebuffers.resize(imageViews.size());
 		for (size_t i = 0; i < imageViews.size(); i++)
 		{
 			std::vector<VkImageView> attachments = { };
-			attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+			attachments.push_back(m_Image->GetImages()[RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage()].ImageView);
 
 			auto depthImageView = context->GetSwapChain()->GetDepthImageView();
 			attachments.push_back(depthImageView);
@@ -265,8 +278,8 @@ namespace Lavender
 			framebufferInfo.renderPass = m_RenderPass;
 			framebufferInfo.attachmentCount = (uint32_t)attachments.size();
 			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = Application::Get().GetWindow().GetWidth();
-			framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+			framebufferInfo.width = width;	
+			framebufferInfo.height = height;
 			framebufferInfo.layers = 1;
 
 			if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
@@ -295,11 +308,18 @@ namespace Lavender
 
 	VulkanViewport::~VulkanViewport()
 	{
-		// TODO: Destroy ImGui Textures
+		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+		vkDeviceWaitIdle(device);
+		auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
+		vkFreeDescriptorSets(device, pool, (uint32_t)m_ImGuiImages.size(), (VkDescriptorSet*)m_ImGuiImages.data());
 	}
 
 	void VulkanViewport::BeginFrame()
 	{
+		// TODO: Add a better way to prevent tearing
+		Resize(m_Width, m_Height);
+
 		m_Renderpass->Begin();
 	}
 
@@ -307,19 +327,46 @@ namespace Lavender
 	{
 		m_Renderpass->End();
 		m_Renderpass->Submit();
+
+		Renderer::WaitFor(m_Renderpass->GetCommandBuffer());
+	}
+
+	void VulkanViewport::BeginRender()
+	{
+		ImGui::Begin("Viewport");
+
+		auto size = ImGui::GetWindowSize();
+		m_Width = (uint32_t)size.x;
+		m_Height = (uint32_t)size.y;
+		
+		auto region = ImGui::GetContentRegionAvail();
+		ImGui::Image(GetCurrentImGuiTexture(), ImVec2(region.x, region.y));
+	}
+
+	void VulkanViewport::EndRender()
+	{
+		ImGui::End();
 	}
 
 	void VulkanViewport::Resize(uint32_t width, uint32_t height)
 	{
-		// TODO: Destroy ImGui Textures
-		//auto image = m_Renderpass->GetImage();
-		//for (auto& i : image->GetImages())
-		//{
-		//	auto img = ImGui_ImplVulkan_AddTexture(image->GetSampler(), i.ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		//	m_ImGuiImages.push_back((ImTextureID)img);
-		//}
+		if (width != 0 && height != 0)
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		m_Renderpass->Resize(width, height);
+			auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
+			vkFreeDescriptorSets(device, pool, (uint32_t)m_ImGuiImages.size(), (VkDescriptorSet*)m_ImGuiImages.data());
+
+			m_Renderpass->Resize(width, height);
+
+			m_ImGuiImages.clear();
+			auto image = m_Renderpass->GetImage();
+			for (auto& i : image->GetImages())
+			{
+				auto img = ImGui_ImplVulkan_AddTexture(image->GetSampler(), i.ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+				m_ImGuiImages.push_back((ImTextureID)img);
+			}
+		}
 	}
 
 	ImTextureID VulkanViewport::GetCurrentImGuiTexture()

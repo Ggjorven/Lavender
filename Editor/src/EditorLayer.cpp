@@ -90,17 +90,10 @@ void EditorLayer::OnRender()
 
 void EditorLayer::OnImGuiRender()
 {
-	ImGui::Begin("A");
+	ImGui::DockSpaceOverViewport();
 
-	ImGui::Text("TEXT");
-	if (ImGui::Button("BUTTON"))
-	{
-		LV_LOG_TRACE("BUTTON");
-	}
-
-	ImGui::Image(m_Viewport->GetCurrentImGuiTexture(), ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight()));
-
-	ImGui::End();
+	m_Viewport->BeginRender();
+	m_Viewport->EndRender();
 }
 
 void EditorLayer::OnEvent(Event& e)
@@ -112,7 +105,7 @@ void EditorLayer::OnEvent(Event& e)
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 {
-	m_Viewport->GetRenderPass()->Resize(e.GetWidth(), e.GetHeight());
+	m_Viewport->Resize(e.GetWidth(), e.GetHeight());
 
 	return false;
 }

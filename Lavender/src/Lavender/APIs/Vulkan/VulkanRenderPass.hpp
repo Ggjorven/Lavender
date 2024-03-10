@@ -39,6 +39,7 @@ namespace Lavender
 
 	private:
 		RenderPassSpecification m_Specification = {};
+		bool m_Destroy = true;
 
 		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;
 

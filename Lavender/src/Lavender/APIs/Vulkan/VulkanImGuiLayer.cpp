@@ -102,7 +102,6 @@ namespace Lavender
 
 		// TODO: Change back to Load to not overwrite
 		specs.ColourLoadOp = RenderPassSpecification::ColourLoadOperation::Clear; // To not overwrite previous drawn things
-		// TODO: Change back to presentation
 		specs.PreviousImageLayout = RenderPassSpecification::ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 
 		m_Renderpass = RefHelper::Create<VulkanRenderPass>(specs);
@@ -166,14 +165,14 @@ namespace Lavender
 		Renderer::WaitFor(m_Renderpass->GetCommandBuffer());
 	}
 
-	VkDescriptorPool VulkanImGuiLayer::GetVulkanDescriptorPool()
-	{
-		return s_ImGuiPool;
-	}
-
 	void VulkanImGuiLayer::Resize(uint32_t width, uint32_t height)
 	{
 		m_Renderpass->Resize(width, height);
+	}
+
+	VkDescriptorPool VulkanImGuiLayer::GetVulkanDescriptorPool()
+	{
+		return s_ImGuiPool;
 	}
 
 }
