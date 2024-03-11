@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <Lavender/Core/Layer.hpp>
+#include <Lavender/UI/UIPreferences.hpp>
 #include <Lavender/Utils/Utils.hpp>
 
 #include <Lavender/Renderer/RenderPass.hpp>
@@ -33,6 +34,8 @@ private:
 	bool OnResizeEvent(WindowResizeEvent& e);
 
 private:
+	Ref<UIPreferences> m_Preferences = nullptr;
+
 	Ref<Viewport> m_Viewport = nullptr;
 
 	Ref<Pipeline> m_Pipeline = nullptr;

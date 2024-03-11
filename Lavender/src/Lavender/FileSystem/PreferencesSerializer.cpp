@@ -59,6 +59,10 @@ namespace Lavender
 		catch (YAML::BadFile e)
 		{
 			LV_LOG_WARN("Failed to load {0} (Code: {1})\n\tLoading empty preferences.", file.string(), e.what());
+
+			std::string defaultPreferences = "[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Abc]\nPos=15,25\nSize=285,130\nCollapsed=0\n\n[Window][DockSpaceViewport_11111111]\nPos=0,0\nSize=1920,1017\nCollapsed=0\n\n[Window][Viewport]\nPos=0,0\nSize=1920,1017\nCollapsed=0\nDockId=0x8B93E3BD,0\n\n[Docking][Data]\nDockSpace ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,23 Size=1920,1017 CentralNode=1 Selected=0x13926F0B\n\n";
+			m_Preferences->m_ImGuiIni = defaultPreferences;
+			m_Preferences->Initialize();
 			return;
 		}
 

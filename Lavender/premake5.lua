@@ -39,6 +39,7 @@ project "Lavender"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.entt}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.tracy}",

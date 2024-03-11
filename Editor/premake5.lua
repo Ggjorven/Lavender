@@ -35,6 +35,7 @@ project "Editor"
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.entt}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.tracy}",

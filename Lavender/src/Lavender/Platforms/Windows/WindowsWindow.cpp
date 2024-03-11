@@ -78,9 +78,10 @@ namespace Lavender
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.Width = width;
 				data.Height = height;
-
+				
 				Ref<Event> event = RefHelper::Create<WindowResizeEvent>(width, height);
 				data.CallBack(event);
+				Application::Get().HandleEvents();
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)

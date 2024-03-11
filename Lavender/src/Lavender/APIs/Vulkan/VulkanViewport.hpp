@@ -88,6 +88,7 @@ namespace Lavender
 		inline uint32_t GetWidth() const override { return m_Width; }
 		inline uint32_t GetHeight() const override { return m_Height; }
 
+		inline void SetShouldResize(bool shouldResize) override { m_ShouldResize = shouldResize; }
 		void Resize(uint32_t width, uint32_t height) override;
 
 		inline Ref<ViewportRenderPass> GetRenderPass() override { return m_Renderpass; }
@@ -98,6 +99,7 @@ namespace Lavender
 
 		std::vector<ImTextureID> m_ImGuiImages = { };
 
+		bool m_ShouldResize = false;
 		uint32_t m_Width = 0, m_Height = 0;
 	};
 

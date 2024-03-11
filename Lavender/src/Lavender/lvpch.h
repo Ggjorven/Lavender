@@ -24,6 +24,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#ifdef LV_PLATFORM_WINDOWS
+#if defined(LV_PLATFORM_WINDOWS)
 	#include <Windows.h>
+#endif
+
+// TODO: Change the way we do this?
+#if defined(LV_DIST)
+	#define LV_DISABLE_IMGUI
 #endif

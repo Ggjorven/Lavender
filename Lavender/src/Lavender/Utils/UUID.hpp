@@ -301,6 +301,11 @@ namespace Lavender
 
         inline uint64_t Get() const { return m_UUID; }
 
+        bool operator==(const UUID& other) const
+        {
+            return m_UUID == other.Get();
+        }
+
     private:
         uint64_t m_UUID = 0ull;
     };
@@ -320,4 +325,17 @@ namespace Lavender
         uint128_t m_UUID = 0ull;
     };
 
+}
+
+namespace std 
+{
+    template<>
+    struct hash<Lavender::UUID> 
+    {
+        // Define the operator() to generate the hash
+        uint64_t operator()(const Lavender::UUID& uuid) const 
+        {
+            return uuid.Get();
+        }
+    };
 }

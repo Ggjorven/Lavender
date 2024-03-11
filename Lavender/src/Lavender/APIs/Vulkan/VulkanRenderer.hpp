@@ -15,7 +15,7 @@ namespace Lavender
 	class VulkanRenderer : public RenderInstance
 	{
 	public:
-		VulkanRenderer(const RendererSpecification& specs);
+		VulkanRenderer();
 		virtual ~VulkanRenderer();
 
 		void BeginFrame() override;

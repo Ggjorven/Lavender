@@ -309,8 +309,8 @@ namespace Lavender
 	VulkanViewport::~VulkanViewport()
 	{
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-
 		vkDeviceWaitIdle(device);
+		
 		auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
 		vkFreeDescriptorSets(device, pool, (uint32_t)m_ImGuiImages.size(), (VkDescriptorSet*)m_ImGuiImages.data());
 	}
@@ -318,7 +318,19 @@ namespace Lavender
 	void VulkanViewport::BeginFrame()
 	{
 		// TODO: Add a better way to prevent tearing
-		Resize(m_Width, m_Height);
+		static uint8_t resizeCounter = 10;
+		if (m_ShouldResize)
+		{
+			Resize(m_Width, m_Height);
+		
+			m_ShouldResize = false;
+			resizeCounter = 0;
+		}
+		else if (resizeCounter < 10)
+		{
+			Resize(m_Width, m_Height);
+			resizeCounter++;
+		}
 
 		m_Renderpass->Begin();
 	}
@@ -336,6 +348,10 @@ namespace Lavender
 		ImGui::Begin("Viewport");
 
 		auto size = ImGui::GetWindowSize();
+		if ((uint32_t)size.x != m_Width || (uint32_t)size.y != m_Height)
+		{
+			m_ShouldResize = true;
+		}
 		m_Width = (uint32_t)size.x;
 		m_Height = (uint32_t)size.y;
 		

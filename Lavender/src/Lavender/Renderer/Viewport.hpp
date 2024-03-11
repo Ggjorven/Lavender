@@ -42,6 +42,7 @@ namespace Lavender
 		static Ref<ViewportRenderPass> Create(Ref<ViewportImage> image);
 	};
 
+	// Note(Jorben): This class should only be used in a non-Dist build aka only in non shipped games
 	class Viewport
 	{
 	public:
@@ -57,6 +58,7 @@ namespace Lavender
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
+		virtual void SetShouldResize(bool shouldResize) = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Ref<ViewportRenderPass> GetRenderPass() = 0;

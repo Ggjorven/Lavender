@@ -22,7 +22,7 @@ namespace Lavender
 	
 	VulkanRenderData* s_RenderData = nullptr;
 
-	VulkanRenderer::VulkanRenderer(const RendererSpecification& specs)
+	VulkanRenderer::VulkanRenderer()
 	{
 		s_RenderData = new VulkanRenderData();
 	}

@@ -3,6 +3,7 @@
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Logging.hpp>
 #include <Lavender/Utils/Utils.hpp>
+#include <Lavender/FileSystem/PreferencesSerializer.hpp>
 
 #include <Lavender/APIs/Vulkan/VulkanContext.hpp>
 #include <Lavender/APIs/Vulkan/VulkanImage.hpp>
@@ -10,6 +11,10 @@
 
 #include <Lavender/Renderer/Renderer.hpp>
 #include <Lavender/Renderer/Shader.hpp>
+
+#include <Lavender/ECS/Registry.hpp>
+#include <Lavender/ECS/Entity.hpp>
+#include <Lavender/ECS/Components.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -40,6 +45,10 @@ public:
 
 void EditorLayer::OnAttach()
 {
+	m_Preferences = RefHelper::Create<UIPreferences>();
+	PreferencesSerializer serializer(m_Preferences);
+	serializer.Deserialize("EditorPreferences.lvepref");
+
 	m_Viewport = Viewport::Create(Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
 
 	ShaderCode code = {};
@@ -73,16 +82,37 @@ void EditorLayer::OnAttach()
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Test area
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	Ref<RegistryCollection> collection = RegistryCollection::Create();
+	Entity entity = Entity::Create(collection);
+
+	entity.AddComponent<TagComponent>(TagComponent("AAA"));
+	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
+
+	collection->SwitchRegistry();
+	entity.AddOrReplaceComponent<TagComponent>(TagComponent("BBB"));
+	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
+
+	collection->SwitchRegistry();
+	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
+
+	collection->SwitchRegistry();
+	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
 }
 
 void EditorLayer::OnDetach()
 {
+	PreferencesSerializer serializer(m_Preferences);
+	serializer.Serialize("EditorPreferences.lvepref");
 }
 
 void EditorLayer::OnUpdate(float deltaTime)
 {
 	auto& window = Application::Get().GetWindow();
-	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetWidth() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
+	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
 	{
 		auto& window = Application::Get().GetWindow();
 
@@ -120,6 +150,10 @@ void EditorLayer::OnImGuiRender()
 
 	m_Viewport->BeginRender();
 	m_Viewport->EndRender();
+
+	ImGui::Begin("A");
+	ImGui::Text((std::string("FPS: ") + std::to_string((int)ImGui::GetIO().Framerate)).c_str());
+	ImGui::End();
 }
 
 void EditorLayer::OnEvent(Event& e)
@@ -131,7 +165,7 @@ void EditorLayer::OnEvent(Event& e)
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 {
-	m_Viewport->Resize(e.GetWidth(), e.GetHeight());
+	m_Viewport->SetShouldResize(true);
 
 	return false;
 }
