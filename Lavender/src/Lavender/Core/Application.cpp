@@ -21,6 +21,8 @@ namespace Lavender
 
 	Application::~Application()
 	{
+		Renderer::Wait();
+
 		for (Layer* layer : m_LayerStack)
 		{
 			layer->OnDetach();
@@ -51,7 +53,10 @@ namespace Lavender
 			m_Window->OnUpdate();
 			HandleEvents();
 
-			Renderer::BeginFrame();
+			{
+				LV_PROFILE_SCOPE("Renderer::Begin");
+				Renderer::BeginFrame();
+			}
 			{
 				LV_PROFILE_SCOPE("Update & Render");
 				for (Layer* layer : m_LayerStack)
@@ -78,8 +83,11 @@ namespace Lavender
 			}
 			#endif
 
-			Renderer::EndFrame();
-			m_Window->OnRender();
+			{
+				LV_PROFILE_SCOPE("Renderer::End");
+				Renderer::EndFrame();
+				m_Window->OnRender();
+			}
 		}
 	}
 

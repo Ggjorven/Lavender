@@ -13,8 +13,8 @@
 namespace Lavender
 {
 
-    VulkanRenderPass::VulkanRenderPass(VkRenderPass renderPass) // Note(Jorben): Since this constructor is only used for the Viewport we need to not destroy
-        : m_RenderPass(renderPass), m_Destroy(false)
+    VulkanRenderPass::VulkanRenderPass(VkRenderPass renderPass, Ref<VulkanRenderCommandBuffer> commandBuffer) // Note(Jorben): Since this constructor is only used for the Viewport we need to not destroy
+        : m_RenderPass(renderPass), m_CommandBuffer(commandBuffer), m_Destroy(false)
     {
     }
 

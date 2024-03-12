@@ -42,6 +42,11 @@ namespace Lavender
 		s_RenderInstance->WaitFor(commandBuffer);
 	}
 
+	void Renderer::Wait()
+	{
+		s_RenderInstance->Wait();
+	}
+
 	void Renderer::DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer)
 	{
 		s_RenderInstance->DrawIndexed(commandBuffer, indexBuffer);
@@ -55,6 +60,11 @@ namespace Lavender
 	RenderInstance* Renderer::GetInstance()
 	{
 		return s_RenderInstance;
+	}
+
+	inline RenderData Renderer::GetRenderData()
+	{
+		s_RenderInstance->GetRenderData();
 	}
 
 }

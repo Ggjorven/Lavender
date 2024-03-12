@@ -76,14 +76,13 @@ namespace Lavender
 		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
 		VkCommandBuffer commandBuffer = m_CommandBuffers[currentFrame];
 
-		vkWaitForFences(device, 1, &m_InFlightFences[currentFrame], VK_TRUE, UINT64_MAX); // TODO: Maybe check if this is correct and is not supposed to be in the renderer
-		vkResetFences(device, 1, &m_InFlightFences[currentFrame]);
+		vkResetFences(device, 1, &m_InFlightFences[currentFrame]); // Note(Jorben): This technically only needs to happen for the first frame since afterwards we submit Renderer::WaitFor // TODO: Change this?
 		vkResetCommandBuffer(commandBuffer, 0);
 
 		VkCommandBufferBeginInfo beginInfo = {};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		{
-			LV_PROFILE_SCOPE("BeginCmdBuf");
+			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::Begin::Begin");
 			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to begin recording command buffer!");
 		}
@@ -95,7 +94,7 @@ namespace Lavender
 		VkCommandBuffer commandBuffer = m_CommandBuffers[currentFrame];
 
 		{
-			LV_PROFILE_SCOPE("EndCmdBuf");
+			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::End::End");
 			if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to record command buffer!");
 		}
@@ -131,7 +130,7 @@ namespace Lavender
 		submitInfo.pSignalSemaphores = &m_RenderFinishedSemaphores[currentFrame];
 
 		{
-			LV_PROFILE_SCOPE("Submit Graphics Queue");
+			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::Submit::Queue");
 			if (vkQueueSubmit(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[currentFrame]) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to submit draw command buffer!");
 		}

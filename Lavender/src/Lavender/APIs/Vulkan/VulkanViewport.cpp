@@ -3,6 +3,7 @@
 
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 
@@ -81,8 +82,8 @@ namespace Lavender
 
 
 
-	VulkanViewportRenderPass::VulkanViewportRenderPass(Ref<ViewportImage> image)
-		: m_Image(RefHelper::RefAs<VulkanViewportImage>(image)), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential)))
+	VulkanViewportRenderPass::VulkanViewportRenderPass(Ref<VulkanViewportImage> image)
+		: m_Image(image), m_CommandBuffer(RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential)))
 	{
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 
@@ -289,7 +290,7 @@ namespace Lavender
 
 	Ref<RenderPass> VulkanViewportRenderPass::GetRenderPass()
 	{
-		return RefHelper::Create<VulkanRenderPass>(m_RenderPass);
+		return RefHelper::Create<VulkanRenderPass>(m_RenderPass, m_CommandBuffer);
 	}
 
 
@@ -317,6 +318,7 @@ namespace Lavender
 
 	void VulkanViewport::BeginFrame()
 	{
+		LV_PROFILE_SCOPE("VulkanViewport::BeginFrame");
 		// TODO: Add a better way to prevent tearing
 		static uint8_t resizeCounter = 10;
 		if (m_ShouldResize)
@@ -337,6 +339,7 @@ namespace Lavender
 
 	void VulkanViewport::EndFrame()
 	{
+		LV_PROFILE_SCOPE("VulkanViewport::EndFrame");
 		m_Renderpass->End();
 		m_Renderpass->Submit();
 
@@ -345,6 +348,7 @@ namespace Lavender
 
 	void VulkanViewport::BeginRender()
 	{
+		LV_PROFILE_SCOPE("VulkanViewport::BeginRender");
 		ImGui::Begin("Viewport");
 
 		auto size = ImGui::GetWindowSize();
@@ -361,6 +365,7 @@ namespace Lavender
 
 	void VulkanViewport::EndRender()
 	{
+		LV_PROFILE_SCOPE("VulkanViewport::EndRender");
 		ImGui::End();
 	}
 
@@ -369,6 +374,7 @@ namespace Lavender
 		if (width != 0 && height != 0)
 		{
 			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+			vkDeviceWaitIdle(device);
 
 			auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
 			vkFreeDescriptorSets(device, pool, (uint32_t)m_ImGuiImages.size(), (VkDescriptorSet*)m_ImGuiImages.data());

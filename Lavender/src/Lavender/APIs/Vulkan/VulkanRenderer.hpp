@@ -21,12 +21,15 @@ namespace Lavender
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		void Submit(RenderFunction function);
-		void WaitFor(Ref<RenderCommandBuffer> commandBuffer);
+		void Submit(RenderFunction function) override;
+		void WaitFor(Ref<RenderCommandBuffer> commandBuffer) override;
+		void Wait() override;
 
-		void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer);
+		void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer) override;
 
 		void OnResize(uint32_t width, uint32_t height) override;
+
+		RenderData GetRenderData() override;
 
 		std::vector<Ref<VulkanRenderCommandBuffer>> GetCommandBuffers() { return m_WaitForCommandBuffers; }
 

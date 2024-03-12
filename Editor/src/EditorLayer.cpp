@@ -3,6 +3,7 @@
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Logging.hpp>
 #include <Lavender/Utils/Utils.hpp>
+#include <Lavender/Utils/Profiler.hpp>
 #include <Lavender/FileSystem/PreferencesSerializer.hpp>
 
 #include <Lavender/APIs/Vulkan/VulkanContext.hpp>
@@ -77,30 +78,11 @@ void EditorLayer::OnAttach()
 	pipelineSpecs.LineWidth = 1.0f;
 	pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Back;
 
-	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_Viewport->GetRenderPass()->GetRenderPass());
+	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_Viewport->GetRenderPass());
 	m_Pipeline->Initialize();
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Test area
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	Ref<RegistryCollection> collection = RegistryCollection::Create();
-	Entity entity = Entity::Create(collection);
-
-	entity.AddComponent<TagComponent>(TagComponent("AAA"));
-	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
-
-	collection->SwitchRegistry();
-	entity.AddOrReplaceComponent<TagComponent>(TagComponent("BBB"));
-	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
-
-	collection->SwitchRegistry();
-	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
-
-	collection->SwitchRegistry();
-	LV_LOG_TRACE("Tag: {0}", entity.GetComponent<TagComponent>().Tag);
 }
 
 void EditorLayer::OnDetach()
@@ -111,6 +93,7 @@ void EditorLayer::OnDetach()
 
 void EditorLayer::OnUpdate(float deltaTime)
 {
+	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
 	auto& window = Application::Get().GetWindow();
 	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
 	{
@@ -130,6 +113,7 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 void EditorLayer::OnRender()
 {
+	LV_PROFILE_SCOPE("EditorLayer::OnRender");
 	m_Viewport->BeginFrame();
 
 	m_Pipeline->Use(m_Viewport->GetRenderPass()->GetCommandBuffer());
@@ -140,8 +124,6 @@ void EditorLayer::OnRender()
 	Renderer::DrawIndexed(m_Viewport->GetRenderPass()->GetCommandBuffer(), m_IndexBuffer);
 
 	m_Viewport->EndFrame();
-
-	Renderer::WaitFor(m_Viewport->GetRenderPass()->GetCommandBuffer());
 }
 
 void EditorLayer::OnImGuiRender()

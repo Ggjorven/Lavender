@@ -18,7 +18,7 @@ namespace Lavender
 	class VulkanRenderPass : public RenderPass
 	{
 	public:
-		VulkanRenderPass(VkRenderPass renderPass);
+		VulkanRenderPass(VkRenderPass renderPass, Ref<VulkanRenderCommandBuffer> commandBuffer);
 		VulkanRenderPass(RenderPassSpecification specs);
 		VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
 		virtual ~VulkanRenderPass();

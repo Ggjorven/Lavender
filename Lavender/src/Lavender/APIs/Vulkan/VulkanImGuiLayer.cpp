@@ -7,6 +7,7 @@
 
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
@@ -136,9 +137,12 @@ namespace Lavender
 	{
 		m_Renderpass->Begin();
 
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		{
+			LV_PROFILE_SCOPE("VulkanImGuiLayer::Begin::NewFrame");
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
 	}
 
 	void VulkanImGuiLayer::End()

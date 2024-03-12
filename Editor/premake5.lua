@@ -62,18 +62,30 @@ project "Editor"
 		{
 			"LV_PLATFORM_WINDOWS",
 			"GLFW_INCLUDE_NONE",
-			"TRACY_ENABLE"
 		}
 
 	filter "configurations:Debug"
 		defines "LV_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		editandcontinue "Off"
+
+		defines
+		{
+			"TRACY_ENABLE",
+			"NOMINMAX"
+		}
 
 	filter "configurations:Release"
 		defines "LV_RELEASE"
 		runtime "Release"
 		optimize "on"
+
+		defines
+		{
+			"TRACY_ENABLE",
+			"NOMINMAX"
+		}
 
 	filter "configurations:Dist"
 		defines "LV_DIST"
@@ -92,8 +104,8 @@ project "Editor"
 			'{COPYFILE} "%{wks.location}/vendor/assimp/bin/windows/Release/assimp-vc143-mt.dll" "%{cfg.targetdir}"',
 		}
 
-	-- Dist filter for Windows for Windowed Applications
 	filter { "system:windows", "configurations:Dist" }
+		-- Dist filter for Windows for Windowed Applications
 		kind "WindowedApp"
 
 		postbuildcommands
