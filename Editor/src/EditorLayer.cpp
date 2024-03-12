@@ -17,12 +17,17 @@
 #include <Lavender/ECS/Entity.hpp>
 #include <Lavender/ECS/Components.hpp>
 
+#include <Lavender/Scripting/ScriptLoader.hpp>
+#include <Lavender/Scripting/EntityInterface.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_vulkan.h>
+
+#include <iostream> // TODO: Remove
 
 static float vertices[] = {
 	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -83,6 +88,13 @@ void EditorLayer::OnAttach()
 
 	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
+
+	// Test area
+	Ref<ScriptLoader> loader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
+	Ref<EntityInterface> interface = EntityInterface::Create(loader, "MyEntity");
+
+	interface->InvokeOnCreate();
+	interface->InvokeOnUpdate(1.0f);
 }
 
 void EditorLayer::OnDetach()

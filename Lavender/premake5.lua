@@ -34,6 +34,8 @@ project "Lavender"
 		"src",
 		"src/Lavender",
 
+		"%{wks.location}/Scripting/src",
+
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
@@ -55,7 +57,9 @@ project "Lavender"
 		"ImGui",
 		"yaml-cpp",
 		"Tracy",
-		"VMA"
+		"VMA",
+
+		"Scripting"
 	}
 
 	disablewarnings

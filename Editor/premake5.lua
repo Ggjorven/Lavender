@@ -28,7 +28,8 @@ project "Editor"
 		"vendor",
 
 		"%{wks.location}/Lavender/src",
-		"%{wks.location}vendor",
+		"%{wks.location}/Scripting/src",
+		"%{wks.location}/vendor",
 
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
