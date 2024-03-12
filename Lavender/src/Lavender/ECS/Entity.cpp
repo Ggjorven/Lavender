@@ -13,6 +13,11 @@ namespace Lavender
 
 	Entity::~Entity()
 	{
+		//m_Registry->DeleteEntity(m_UUID);
+	}
+
+	void Entity::Destroy()
+	{
 		m_Registry->DeleteEntity(m_UUID);
 	}
 

@@ -28,7 +28,7 @@ group ""
 
 group "Lavender"
 	include "Lavender"
-	include "Scripting"
+--	include "Scripting"
 group ""
 
 include "Editor"

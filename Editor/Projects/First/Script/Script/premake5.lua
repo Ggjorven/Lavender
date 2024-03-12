@@ -23,7 +23,12 @@ project "Script"
 	includedirs
 	{
 		"Script/src",
+		"%{wks.location}/../../../../Lavender/src",
+		"%{wks.location}/../../../../Lavender/src/Lavender",
 		"%{wks.location}/../../../../Scripting/src",
+
+		"%{wks.location}/../../../../vendor/glm",
+		"%{wks.location}/../../../../vendor/spdlog/include"
 	}
 
 	links

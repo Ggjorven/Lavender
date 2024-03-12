@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "Lavender/Utils/Utils.hpp"
-
 #include <glm/glm.hpp>
 
 namespace Lavender
@@ -33,6 +31,21 @@ namespace Lavender
 		TransformComponent(const TransformComponent& tag) = default;
 	};
 
+	enum class Component
+	{
+		None = 0, Tag, Transform
+	};
+
+	template<typename TComponent>
+	static Component GetComponentType()
+	{
+		if (typeid(TComponent) == typeid(TagComponent))
+			return Component::Tag;
+		else if (typeid(TComponent) == typeid(TransformComponent))
+			return Component::Transform;
+
+		return Component::None;
+	}
 
 	template<typename... Component>
 	struct ComponentGroup

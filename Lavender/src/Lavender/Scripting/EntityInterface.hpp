@@ -5,6 +5,7 @@
 
 #include "Lavender/Utils/Utils.hpp"
 
+#include "Lavender/ECS/Entity.hpp"
 #include "Lavender/Scripting/ScriptableEntity.hpp"
 #include "Lavender/Scripting/ScriptLoader.hpp"
 
@@ -18,6 +19,9 @@ namespace Lavender
 	typedef void (*OnUpdateFn)(ScriptableEntity*, float);
 
 	typedef VariableList* (*GetVariableListFn)();
+
+	typedef uint64_t (*GetUUIDFn)(ScriptableEntity*);
+	typedef void (*SetUUIDFn)(ScriptableEntity*, uint64_t);
 
 	typedef float (*GetFloatFn)(ScriptableEntity*);
 	typedef void (*SetFloatFn)(ScriptableEntity*, float);
@@ -34,10 +38,13 @@ namespace Lavender
 
 		GetVariableListFn GetVariableList = nullptr;
 
+		GetUUIDFn GetUUID = nullptr;
+		SetUUIDFn SetUUID = nullptr;
+
 		// TODO: Variable list with function pointers
 
 	public:
-		bool Validate();
+		bool Validate() const;
 	};
 
 	class EntityInterface
@@ -49,7 +56,7 @@ namespace Lavender
 		virtual void InvokeOnCreate() = 0;
 		virtual void InvokeOnUpdate(float deltaTime) = 0;
 
-		static Ref<EntityInterface> Create(Ref<ScriptLoader> loader, const std::string& classname);
+		static Ref<EntityInterface> Create(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname);
 	};
 
 }

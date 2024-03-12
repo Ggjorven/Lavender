@@ -57,9 +57,9 @@ project "Lavender"
 		"ImGui",
 		"yaml-cpp",
 		"Tracy",
-		"VMA",
+		"VMA"
 
-		"Scripting"
+--		"Scripting"
 	}
 
 	disablewarnings

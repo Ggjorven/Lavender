@@ -13,8 +13,12 @@ namespace Lavender
 	class Entity
 	{
 	public:
+		Entity() = default;
 		Entity(Ref<RegistryCollection> registry, UUID uuid);
+		Entity(const Entity& entity) = default;
 		virtual ~Entity();
+
+		void Destroy();
 
 		template<typename TComponent>
 		TComponent& AddComponent(TComponent component = TComponent())

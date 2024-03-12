@@ -1,8 +1,6 @@
 #include "lvpch.h"
 #include "Components.hpp"
 
-#include "Lavender/Core/Logging.hpp"
-
 namespace Lavender
 {
 

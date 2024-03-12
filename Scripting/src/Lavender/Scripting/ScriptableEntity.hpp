@@ -8,14 +8,73 @@
 
 #define EXPORT __declspec(dllexport)
 
+#include "Lavender/Scripting/Components.hpp"
+
 namespace Lavender
 {
+
+    typedef void* (*AddComponentFn)(Component, uint64_t, void*);
+    typedef void* (*AddOrReplaceComponentFn)(Component, uint64_t, void*);
+    typedef bool (*HasComponentFn)(Component, uint64_t);
+    typedef void* (*GetComponentFn)(Component, uint64_t);
+    typedef void (*RemoveComponentFn)(Component, uint64_t);
+
+    struct EntityFunctions
+    {
+    public:
+        inline static AddComponentFn AddComponentFP = nullptr;
+        inline static AddOrReplaceComponentFn AddOrReplaceComponentFP = nullptr;
+        inline static HasComponentFn HasComponentFP = nullptr;
+        inline static GetComponentFn GetComponentFP = nullptr;
+        inline static RemoveComponentFn RemoveComponentFP = nullptr;
+    };
 
     class ScriptableEntity
     {
     public:
         virtual void OnCreate() = 0;
         virtual void OnUpdate(float deltaTime) = 0;
+
+        template<typename TComponent>
+        TComponent& AddComponent(TComponent component = TComponent())
+        {
+            TComponent tempComp = component;
+            TComponent* newComp = (TComponent*)EntityFunctions::AddComponentFP(GetComponentType<TComponent>(), m_UUID, (void*)&tempComp);
+            return *newComp;
+        }
+
+        template<typename TComponent>
+        TComponent& AddOrReplaceComponent(TComponent component = TComponent())
+        {
+            TComponent tempComp = component;
+            TComponent* newComp = (TComponent*)EntityFunctions::AddOrReplaceComponentFP(GetComponentType<TComponent>(), m_UUID, (void*)&tempComp);
+            return *newComp;
+        }
+
+        template<typename TComponent>
+        bool HasComponent()
+        {
+            return EntityFunctions::HasComponentFP(GetComponentType<TComponent>(), m_UUID);
+        }
+
+        template<typename TComponent>
+        TComponent& GetComponent()
+        {
+            TComponent* newComp = (TComponent*)EntityFunctions::GetComponentFP(GetComponentType<TComponent>(), m_UUID);
+            return *newComp;
+        }
+
+        template<typename TComponent>
+        void RemoveComponent()
+        {
+            EntityFunctions::RemoveComponentFP(GetComponentType<TComponent>(), m_UUID);
+        }
+
+        inline void SetUUID(uint64_t uuid) { m_UUID = uuid; }
+        inline uint64_t GetUUID() const { return m_UUID; }
+
+    protected:
+        uint64_t m_UUID = 0ull;
     };
 
     enum class VariableType
@@ -81,6 +140,14 @@ EXPORT void Script_OnUpdateEntity##name(name* instance, float deltaTime) \
 EXPORT Lavender::VariableList* Script_GetVariables##name() \
 { \
     return &name##Variables; \
+} \
+EXPORT uint64_t Script_GetUUID##name(name* instance) \
+{ \
+    return instance->GetUUID(); \
+} \
+EXPORT void Script_SetUUID##name(name* instance, uint64_t uuid) \
+{ \
+    return instance->SetUUID(uuid); \
 } \
 }
 

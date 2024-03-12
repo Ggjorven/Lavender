@@ -13,8 +13,8 @@
 namespace Lavender
 {
 
-	WindowsEntityInterface::WindowsEntityInterface(Ref<ScriptLoader> loader, const std::string& classname)
-		: m_Loader(RefHelper::RefAs<WindowsScriptLoader>(loader))
+	WindowsEntityInterface::WindowsEntityInterface(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname)
+		: m_Entity(entity), m_Loader(RefHelper::RefAs<WindowsScriptLoader>(loader))
 	{
 		std::string fnName = std::string("Script_CreateEntity") + classname;
 		m_Functions.Create = (CreateFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
@@ -31,8 +31,21 @@ namespace Lavender
 		fnName = std::string("Script_GetVariables") + classname;
 		m_Functions.GetVariableList = (GetVariableListFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
 
+		fnName = std::string("Script_GetUUID") + classname;
+		m_Functions.GetUUID = (GetUUIDFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
+
+		fnName = std::string("Script_SetUUID") + classname;
+		m_Functions.SetUUID = (SetUUIDFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
+
+		if (!m_Functions.Validate())
+		{
+			LV_LOG_ERROR("Failed to initialize \"{0}\"\'s script.", classname);
+			return;
+		}
+
 		// Create instance
 		m_Instance = m_Functions.Create();
+		m_Functions.SetUUID(m_Instance, m_Entity.GetUUID().Get());
 	}
 
 	WindowsEntityInterface::~WindowsEntityInterface()

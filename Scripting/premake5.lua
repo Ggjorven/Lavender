@@ -1,3 +1,5 @@
+include "../Dependencies.lua"
+
 project "Scripting"
 	kind "StaticLib"
 	language "C++"
@@ -23,7 +25,11 @@ project "Scripting"
 	includedirs
 	{
 		"src",
-		"%{wks.location}/Lavender/src",
+		"%{wks.location}/../../../../Lavender/src",
+		"%{wks.location}/../../../../Lavender/src/Lavender",
+
+		"%{wks.location}/../../../../vendor/glm",
+		"%{wks.location}/../../../../vendor/spdlog/include"
 	}
 
 	links

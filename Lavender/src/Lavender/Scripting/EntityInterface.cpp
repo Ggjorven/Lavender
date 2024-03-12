@@ -8,14 +8,14 @@
 namespace Lavender
 {
 
-	Ref<EntityInterface> EntityInterface::Create(Ref<ScriptLoader> loader, const std::string& classname)
+	Ref<EntityInterface> EntityInterface::Create(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname)
 	{
 		#if defined(LV_PLATFORM_WINDOWS)
-		return RefHelper::Create<WindowsEntityInterface>(loader, classname);
+		return RefHelper::Create<WindowsEntityInterface>(entity, loader, classname);
 		#endif
 	}
 
-	bool ScriptableEntityFunctions::Validate()
+	bool ScriptableEntityFunctions::Validate() const
 	{
 		if (Create == nullptr)
 		{
@@ -44,6 +44,18 @@ namespace Lavender
 		if (GetVariableList == nullptr)
 		{
 			LV_LOG_WARN("GetVariableList function has invalid handle.");
+			return false;
+		}
+
+		if (GetUUID == nullptr)
+		{
+			LV_LOG_WARN("GetUUID function has invalid handle.");
+			return false;
+		}
+
+		if (SetUUID == nullptr)
+		{
+			LV_LOG_WARN("SetUUID function has invalid handle.");
 			return false;
 		}
 

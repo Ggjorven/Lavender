@@ -81,7 +81,6 @@ namespace Lavender
 		TComponent& AddOrReplaceComponent(UUID entity, TComponent component = TComponent())
 		{
 			return m_MainRegistry->AddOrReplaceComponent<TComponent>(entity, component);
-
 		}
 
 		template<typename TComponent>

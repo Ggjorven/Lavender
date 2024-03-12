@@ -19,6 +19,7 @@
 
 #include <Lavender/Scripting/ScriptLoader.hpp>
 #include <Lavender/Scripting/EntityInterface.hpp>
+#include <Lavender/Scripting/RegistryInterface.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -90,11 +91,18 @@ void EditorLayer::OnAttach()
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
 
 	// Test area
-	Ref<ScriptLoader> loader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
-	Ref<EntityInterface> interface = EntityInterface::Create(loader, "MyEntity");
+	Ref<RegistryCollection> collection = RegistryCollection::Create();
+	Entity entity = Entity::Create(collection);
 
-	interface->InvokeOnCreate();
-	interface->InvokeOnUpdate(1.0f);
+	Ref<ScriptLoader> loader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
+	Ref<EntityInterface> entityInterface = EntityInterface::Create(entity, loader, "MyEntity");
+	Ref<RegistryInterface> registryInterface = RegistryInterface::Create(collection, loader);
+
+	entityInterface->InvokeOnCreate();
+
+	LV_LOG_TRACE("{0}", entity.GetComponent<TagComponent>().Tag);
+
+	entityInterface->InvokeOnUpdate(1.0f);
 }
 
 void EditorLayer::OnDetach()

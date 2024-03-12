@@ -16,5 +16,8 @@ workspace "First"
         "MultiProcessorCompile"
     }
 
-include "../../../../Scripting"
+group "Lavender"
+    include "../../../../Scripting"
+group ""
+
 include "Script"

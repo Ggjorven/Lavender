@@ -295,6 +295,7 @@ namespace Lavender
     {
     public:
         UUID() = default;
+        UUID(uint64_t uuid);
         virtual ~UUID() = default;
 
         static UUID Create();

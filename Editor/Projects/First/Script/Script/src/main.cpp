@@ -7,7 +7,13 @@ class MyEntity : public Lavender::ScriptableEntity
 public:
 	void OnCreate() override
 	{
-		std::cout << "OnCreate MyEntity" << std::endl;
+		std::cout << "OnCreate MyEntity, UUID: " << m_UUID << std::endl;
+		AddOrReplaceComponent<Lavender::TagComponent>(Lavender::TagComponent("New Tag"));
+
+		if (HasComponent<Lavender::TagComponent>())
+		{
+			std::cout << "Has Tag Component." << std::endl;
+		}
 	}
 
 	void OnUpdate(float deltaTime) override

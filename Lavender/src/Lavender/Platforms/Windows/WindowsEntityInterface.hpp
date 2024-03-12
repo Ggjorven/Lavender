@@ -2,6 +2,7 @@
 
 #include "Lavender/Utils/Utils.hpp"
 
+#include "Lavender/ECS/Entity.hpp"
 #include "Lavender/Scripting/EntityInterface.hpp"
 #include "Lavender/Platforms/Windows/WindowsScriptLoader.hpp"
 
@@ -13,7 +14,7 @@ namespace Lavender
 	class WindowsEntityInterface : public EntityInterface
 	{
 	public:
-		WindowsEntityInterface(Ref<ScriptLoader> loader, const std::string& classname);
+		WindowsEntityInterface(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname);
 		virtual ~WindowsEntityInterface();
 
 		void InvokeOnCreate() override;
@@ -22,6 +23,8 @@ namespace Lavender
 	private:
 		Ref<WindowsScriptLoader> m_Loader = nullptr;
 		std::string m_ClassName = "Unset Class";
+
+		Entity m_Entity = {};
 
 		ScriptableEntity* m_Instance = nullptr;
 		ScriptableEntityFunctions m_Functions = {};

@@ -17,10 +17,14 @@ namespace Lavender
 
 		inline bool IsValid() const { return m_Handle != nullptr; }
 
+		#ifdef LV_PLATFORM_WINDOWS
 		inline HMODULE GetHandle() { return m_Handle; }
+		#endif
 
 	private:
+		#ifdef LV_PLATFORM_WINDOWS
 		HMODULE m_Handle = {};
+		#endif
 	};
 
 }
