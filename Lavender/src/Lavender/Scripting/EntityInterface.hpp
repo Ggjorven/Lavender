@@ -45,6 +45,7 @@ namespace Lavender
 
 	public:
 		bool Validate() const;
+		void Clear();
 	};
 
 	class EntityInterface
@@ -52,6 +53,8 @@ namespace Lavender
 	public:
 		EntityInterface() = default;
 		virtual ~EntityInterface() = default;
+
+		virtual void Reload() = 0;
 
 		virtual void InvokeOnCreate() = 0;
 		virtual void InvokeOnUpdate(float deltaTime) = 0;

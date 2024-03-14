@@ -22,6 +22,11 @@ namespace Lavender
 	{
 	}
 
+	void RegistryInterface::Reload()
+	{
+		m_Interface->Initialize();
+	}
+
 	Ref<RegistryInterface> RegistryInterface::Create(Ref<RegistryCollection> collection, Ref<ScriptLoader> loader)
 	{
 		return RefHelper::Create<RegistryInterface>(collection, loader);

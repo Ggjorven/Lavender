@@ -6,8 +6,7 @@
 #include <typeinfo>
 #include <type_traits>
 
-#define EXPORT __declspec(dllexport)
-
+#include "Lavender/Scripting/Core.hpp"
 #include "Lavender/Scripting/Components.hpp"
 
 namespace Lavender

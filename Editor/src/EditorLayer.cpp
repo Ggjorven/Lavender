@@ -13,14 +13,6 @@
 #include <Lavender/Renderer/Renderer.hpp>
 #include <Lavender/Renderer/Shader.hpp>
 
-#include <Lavender/ECS/Registry.hpp>
-#include <Lavender/ECS/Entity.hpp>
-#include <Lavender/ECS/Components.hpp>
-
-#include <Lavender/Scripting/ScriptLoader.hpp>
-#include <Lavender/Scripting/EntityInterface.hpp>
-#include <Lavender/Scripting/RegistryInterface.hpp>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -91,18 +83,14 @@ void EditorLayer::OnAttach()
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
 
 	// Test area
-	Ref<RegistryCollection> collection = RegistryCollection::Create();
-	Entity entity = Entity::Create(collection);
+	m_Collection = RegistryCollection::Create();
+	m_Entity = Entity::Create(m_Collection);
 
-	Ref<ScriptLoader> loader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
-	Ref<EntityInterface> entityInterface = EntityInterface::Create(entity, loader, "MyEntity");
-	Ref<RegistryInterface> registryInterface = RegistryInterface::Create(collection, loader);
+	m_Loader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
+	m_EntityInterface = EntityInterface::Create(m_Entity, m_Loader, "MyEntity");
+	m_RegistryInterface = RegistryInterface::Create(m_Collection, m_Loader);
 
-	entityInterface->InvokeOnCreate();
-
-	LV_LOG_TRACE("{0}", entity.GetComponent<TagComponent>().Tag);
-
-	entityInterface->InvokeOnUpdate(1.0f);
+	m_EntityInterface->InvokeOnCreate(); // Note(Jorben): Never call this on script reload but on runtime start // TODO: For the future
 }
 
 void EditorLayer::OnDetach()
@@ -114,6 +102,12 @@ void EditorLayer::OnDetach()
 void EditorLayer::OnUpdate(float deltaTime)
 {
 	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
+
+	if (!m_Loader->IsDetached())
+	{
+		m_EntityInterface->InvokeOnUpdate(deltaTime);
+	}
+
 	auto& window = Application::Get().GetWindow();
 	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
 	{
@@ -134,6 +128,7 @@ void EditorLayer::OnUpdate(float deltaTime)
 void EditorLayer::OnRender()
 {
 	LV_PROFILE_SCOPE("EditorLayer::OnRender");
+
 	m_Viewport->BeginFrame();
 
 	m_Pipeline->Use(m_Viewport->GetRenderPass()->GetCommandBuffer());
@@ -162,7 +157,29 @@ void EditorLayer::OnEvent(Event& e)
 {
 	EventHandler handler(e);
 
+	handler.Handle<KeyPressedEvent>(LV_BIND_EVENT_FN(EditorLayer::OnKeyPressEvent));
 	handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(EditorLayer::OnResizeEvent));
+}
+
+bool EditorLayer::OnKeyPressEvent(KeyPressedEvent& e)
+{
+	if (e.GetKeyCode() == Key::F4)
+	{
+		m_Loader->Detach();
+		LV_LOG_TRACE("F4 Pressed. Detaching...");
+	}
+
+	if (e.GetKeyCode() == Key::F5)
+	{
+		m_Loader->Reload();
+		m_RegistryInterface->Reload();
+		m_EntityInterface->Reload();
+		LV_LOG_TRACE("F5 Pressed. Reloading...");
+
+		m_EntityInterface->InvokeOnCreate(); // Note(Jorben): Never call this on script reload but on runtime start // TODO: For the future
+	}
+
+	return false;
 }
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)

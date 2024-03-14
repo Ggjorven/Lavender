@@ -14,7 +14,13 @@
 #include <Lavender/Renderer/Image.hpp>
 #include <Lavender/Renderer/Viewport.hpp>
 
-#include <imgui.h>
+#include <Lavender/ECS/Registry.hpp>
+#include <Lavender/ECS/Entity.hpp>
+#include <Lavender/ECS/Components.hpp>
+
+#include <Lavender/Scripting/ScriptLoader.hpp>
+#include <Lavender/Scripting/EntityInterface.hpp>
+#include <Lavender/Scripting/RegistryInterface.hpp>
 
 using namespace Lavender;
 
@@ -31,6 +37,7 @@ public:
 	void OnEvent(Event& e);
 
 private:
+	bool OnKeyPressEvent(KeyPressedEvent& e);
 	bool OnResizeEvent(WindowResizeEvent& e);
 
 private:
@@ -45,4 +52,12 @@ private:
 
 	Ref<Image2D> m_Image = nullptr;
 	Ref<UniformBuffer> m_CameraBuffer = nullptr;
+
+	// Scripting
+	Ref<RegistryCollection> m_Collection = nullptr;
+	Entity m_Entity = {};
+
+	Ref<ScriptLoader> m_Loader = nullptr;
+	Ref<EntityInterface> m_EntityInterface = nullptr;
+	Ref<RegistryInterface> m_RegistryInterface = nullptr;
 };

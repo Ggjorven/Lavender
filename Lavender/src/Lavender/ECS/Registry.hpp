@@ -22,6 +22,12 @@ namespace Lavender
 		template<typename TComponent>
 		TComponent& AddComponent(UUID entity, TComponent component = TComponent())
 		{
+			if (HasComponent<TComponent>(entity))
+			{
+				LV_LOG_WARN("Tried to add component using AddComponent<T>, when the T component already exists. If you meant to overwrite existing components use AddOrReplaceComponent<T>.");
+				return m_Registry.get<TComponent>(m_Entities[entity]);
+			}
+
 			m_Registry.emplace<TComponent>(m_Entities[entity], component);
 			return m_Registry.get<TComponent>(m_Entities[entity]);
 		}

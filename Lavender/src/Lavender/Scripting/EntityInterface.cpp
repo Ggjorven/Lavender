@@ -62,4 +62,15 @@ namespace Lavender
 		return true;
 	}
 
+	void ScriptableEntityFunctions::Clear()
+	{
+		Create = nullptr;
+		Destroy = nullptr;
+		OnCreate = nullptr;
+		OnUpdate = nullptr;
+		GetVariableList = nullptr;
+		GetUUID = nullptr;
+		SetUUID = nullptr;
+	}
+
 }

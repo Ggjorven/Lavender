@@ -17,6 +17,8 @@ namespace Lavender
 		WindowsEntityInterface(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname);
 		virtual ~WindowsEntityInterface();
 
+		void Reload() override;
+
 		void InvokeOnCreate() override;
 		void InvokeOnUpdate(float deltaTime) override;
 

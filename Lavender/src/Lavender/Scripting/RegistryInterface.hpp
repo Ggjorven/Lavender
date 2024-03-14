@@ -37,6 +37,8 @@ namespace Lavender
 		RegistryInterface(Ref<RegistryCollection> collection, Ref<ScriptLoader> loader);
 		virtual ~RegistryInterface();
 
+		void Reload();
+
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// AddComponent
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +80,7 @@ namespace Lavender
 		template<typename TComponent>
 		TComponent* AddOrReplaceComponent(uint64_t entity, TComponent* component)
 		{
-			return m_Interface->AddComponent<TComponent>(entity, *component);
+			return m_Interface->AddOrReplaceComponent<TComponent>(entity, *component);
 		}
 
 		static void* Native_AddOrReplaceComponent(Component type, uint64_t entity, void* component)

@@ -36,6 +36,8 @@ namespace Lavender
 		#define LV_LOG_FATAL(...)
 		#endif
 
+		static std::shared_ptr<spdlog::logger>& GetLogger();
+
 	private:
 		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_Sink;
 		static std::shared_ptr<spdlog::logger> s_Logger;

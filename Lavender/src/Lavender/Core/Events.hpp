@@ -6,6 +6,9 @@
 
 #include "Lavender/Utils/Utils.hpp"
 
+#include "Lavender/Core/Input/KeyCodes.hpp"
+#include "Lavender/Core/Input/MouseCodes.hpp"
+
 #define LV_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
 namespace Lavender
@@ -132,14 +135,14 @@ namespace Lavender
 	class KeyEvent : public Event
 	{
 	public:
-		inline int GetKeyCode() const { return m_KeyCode; }
+		inline Key GetKeyCode() const { return m_KeyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategory::Keyboard | EventCategory::Input)
 	protected:
 		KeyEvent(int keycode)
-			: m_KeyCode(keycode) {}
+			: m_KeyCode((Key)keycode) {}
 
-		int m_KeyCode;
+		Key m_KeyCode;
 	};
 
 	class KeyPressedEvent : public KeyEvent
@@ -153,7 +156,7 @@ namespace Lavender
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyPressedEvent: " << m_KeyCode << " (" << m_RepeatCount << " repeats)";
+			ss << "KeyPressedEvent: " << (int)m_KeyCode << " (" << m_RepeatCount << " repeats)";
 			return ss.str();
 		}
 
@@ -171,7 +174,7 @@ namespace Lavender
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyReleasedEvent: " << m_KeyCode;
+			ss << "KeyReleasedEvent: " << (int)m_KeyCode;
 			return ss.str();
 		}
 
@@ -187,7 +190,7 @@ namespace Lavender
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyTypedEvent: " << m_KeyCode;
+			ss << "KeyTypedEvent: " << (int)m_KeyCode;
 			return ss.str();
 		}
 
@@ -246,14 +249,14 @@ namespace Lavender
 	class MouseButtonEvent : public Event
 	{
 	public:
-		inline int GetMouseButton() const { return m_Button; }
+		inline MouseButton GetMouseButton() const { return m_Button; }
 
 		EVENT_CLASS_CATEGORY(EventCategory::Mouse | EventCategory::Input)
 	protected:
 		MouseButtonEvent(int button)
-			: m_Button(button) {}
+			: m_Button((MouseButton)button) {}
 
-		int m_Button;
+		MouseButton m_Button;
 	};
 
 	class MouseButtonPressedEvent : public MouseButtonEvent
@@ -265,7 +268,7 @@ namespace Lavender
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonPressedEvent: " << m_Button;
+			ss << "MouseButtonPressedEvent: " << (int)m_Button;
 			return ss.str();
 		}
 
@@ -281,7 +284,7 @@ namespace Lavender
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonReleasedEvent: " << m_Button;
+			ss << "MouseButtonReleasedEvent: " << (int)m_Button;
 			return ss.str();
 		}
 

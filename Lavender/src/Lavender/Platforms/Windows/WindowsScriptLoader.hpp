@@ -15,6 +15,11 @@ namespace Lavender
 		WindowsScriptLoader(const std::filesystem::path& filepath);
 		virtual ~WindowsScriptLoader();
 
+		void Reload() override;
+
+		void Detach();
+
+		inline bool IsDetached() override { return m_Detached; }
 		inline bool IsValid() const { return m_Handle != nullptr; }
 
 		#ifdef LV_PLATFORM_WINDOWS
@@ -22,9 +27,17 @@ namespace Lavender
 		#endif
 
 	private:
+		void Load();
+		void CopyOver();
+
+	private:
 		#ifdef LV_PLATFORM_WINDOWS
 		HMODULE m_Handle = {};
 		#endif
+		std::filesystem::path m_Path = {};
+		std::filesystem::path m_NewPath = {};
+
+		bool m_Detached = false;
 	};
 
 }

@@ -1,30 +1,37 @@
+#include <Lavender/Scripting/Logger.hpp>
+#include <Lavender/Scripting/Input.hpp>
 #include <Lavender/Scripting/ScriptableEntity.hpp>
 
-#include <iostream>
 
-class MyEntity : public Lavender::ScriptableEntity
+using namespace Lavender;
+
+class MyEntity : public ScriptableEntity
 {
 public:
 	void OnCreate() override
 	{
-		std::cout << "OnCreate MyEntity, UUID: " << m_UUID << std::endl;
-		AddOrReplaceComponent<Lavender::TagComponent>(Lavender::TagComponent("New Tag"));
+		m_Tag = &AddComponent<TagComponent>(TagComponent("New Tag"));
+		m_Tranform = &AddComponent<TransformComponent>(TransformComponent());
 
-		if (HasComponent<Lavender::TagComponent>())
-		{
-			std::cout << "Has Tag Component." << std::endl;
-		}
+		ScriptLogger::LogMessage(ScriptLogger::Level::Trace, "Wagwan G");
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
-		std::cout << "OnUpdate MyEntity, Time: " << deltaTime << std::endl;
+		if (Input::IsKeyPressed(Key::W))
+		{
+			ScriptLogger::LogMessage(ScriptLogger::Level::Trace, "W was pressed OIFHJoeifajeoijfeoiajfoeajifoie");
+		}
 	}
 
+private:
+	TagComponent* m_Tag = {};
+	TransformComponent* m_Tranform = {};
+
 public:
-	int A = 9;
+	float A = 9;
 };
 
 LV_ENTITY(MyEntity)
 
-LV_VARIABLE(MyEntity, int, A)
+LV_VARIABLE(MyEntity, float, A)

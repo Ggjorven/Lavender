@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Core/Input/Input.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/Utils/Profiler.hpp"
@@ -21,6 +23,8 @@ namespace Lavender
 
 	Application::~Application()
 	{
+		Input::Destroy();
+
 		Renderer::Wait();
 
 		for (Layer* layer : m_LayerStack)
@@ -105,6 +109,7 @@ namespace Lavender
 	{
 		s_Instance = this;
 
+		Input::Init();
 		Log::Init();
 		Renderer::SetSpecification(appInfo.RenderSpecs);
 
