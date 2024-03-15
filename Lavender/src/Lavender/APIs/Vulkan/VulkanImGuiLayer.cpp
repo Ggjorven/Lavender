@@ -152,6 +152,8 @@ namespace Lavender
 		io.DisplaySize = ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight());
 
 		// Rendering
+		vkDeviceWaitIdle(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice());
+
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), RefHelper::RefAs<VulkanRenderCommandBuffer>(m_Renderpass->GetCommandBuffer())->GetVulkanCommandBuffer());
 

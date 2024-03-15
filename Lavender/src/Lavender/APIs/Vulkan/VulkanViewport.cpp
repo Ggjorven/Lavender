@@ -23,18 +23,13 @@ namespace Lavender
 	{
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 
-		auto imageViews = context->GetSwapChain()->GetImageViews();
-		m_Images.resize(imageViews.size());
-		for (size_t i = 0; i < imageViews.size(); i++)
-		{
-			m_Images[i].Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Images[i].Image);
+		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
 
-			m_Images[i].ImageView = VulkanAllocator::CreateImageView(m_Images[i].Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 
-			VulkanAllocator::TransitionImageLayout(m_Images[i].Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
-		}
+		VulkanAllocator::TransitionImageLayout(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 
-		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels); // TODO: Change to 0?
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
 	}
 
 	VulkanViewportImage::~VulkanViewportImage()
@@ -42,11 +37,8 @@ namespace Lavender
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		vkDeviceWaitIdle(device);
 
-		for (auto& image : m_Images)
-		{
-			VulkanAllocator::DestroyImage(image.Image, image.Allocation);
-			vkDestroyImageView(device, image.ImageView, nullptr);
-		}
+		VulkanAllocator::DestroyImage(m_Image.Image, m_Image.Allocation);
+		vkDestroyImageView(device, m_Image.ImageView, nullptr);
 
 		vkDestroySampler(device, m_Sampler, nullptr);
 	}
@@ -61,23 +53,14 @@ namespace Lavender
 		m_Width = width;
 		m_Height = height;
 
-		for (auto& image : m_Images)
-		{
-			VulkanAllocator::DestroyImage(image.Image, image.Allocation);
-			vkDestroyImageView(device, image.ImageView, nullptr);
-		}
+		VulkanAllocator::DestroyImage(m_Image.Image, m_Image.Allocation);
+		vkDestroyImageView(device, m_Image.ImageView, nullptr);
 
-		auto imageViews = context->GetSwapChain()->GetImageViews();
-		m_Images.clear();
-		m_Images.resize(imageViews.size());
-		for (size_t i = 0; i < imageViews.size(); i++)
-		{
-			m_Images[i].Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Images[i].Image);
+		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
 
-			m_Images[i].ImageView = VulkanAllocator::CreateImageView(m_Images[i].Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 
-			VulkanAllocator::TransitionImageLayout(m_Images[i].Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
-		}
+		VulkanAllocator::TransitionImageLayout(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 	}
 
 
@@ -163,26 +146,21 @@ namespace Lavender
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Framebuffers // TODO: Framebuffer class
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		auto images = m_Image->GetImages();
-		m_Framebuffers.resize(images.size());
-		for (size_t i = 0; i < images.size(); i++)
-		{
-			std::vector<VkImageView> attachments = { };
-			attachments.push_back(images[i].ImageView);
-			attachments.push_back(context->GetSwapChain()->GetDepthImageView());
+		std::vector<VkImageView> imageViews = { };
+		imageViews.push_back(m_Image->GetImage().ImageView);
+		imageViews.push_back(context->GetSwapChain()->GetDepthImageView());
 
-			VkFramebufferCreateInfo framebufferInfo = {};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = m_RenderPass;
-			framebufferInfo.attachmentCount = (uint32_t)attachments.size();
-			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = m_Image->GetWidth();
-			framebufferInfo.height = m_Image->GetHeight();
-			framebufferInfo.layers = 1;
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = m_RenderPass;
+		framebufferInfo.attachmentCount = (uint32_t)imageViews.size();
+		framebufferInfo.pAttachments = imageViews.data();
+		framebufferInfo.width = m_Image->GetWidth();
+		framebufferInfo.height = m_Image->GetHeight();
+		framebufferInfo.layers = 1;
 
-			if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to create framebuffer!");
-		}
+		if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffer) != VK_SUCCESS)
+			LV_LOG_ERROR("Failed to create framebuffer!");
 	}
 
 	VulkanViewportRenderPass::~VulkanViewportRenderPass()
@@ -190,9 +168,7 @@ namespace Lavender
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
 		vkDeviceWaitIdle(device->GetVulkanDevice());
 
-		for (auto& framebuffer : m_Framebuffers)
-			vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
-
+		vkDestroyFramebuffer(device->GetVulkanDevice(), m_Framebuffer, nullptr);
 
 		vkDestroyRenderPass(device->GetVulkanDevice(), m_RenderPass, nullptr);
 	}
@@ -206,7 +182,7 @@ namespace Lavender
 		VkRenderPassBeginInfo renderPassInfo = {};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = m_RenderPass;
-		renderPassInfo.framebuffer = m_Framebuffers[RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage()];
+		renderPassInfo.framebuffer = m_Framebuffer;
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = swapChainExtent;
 
@@ -256,36 +232,24 @@ namespace Lavender
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		auto device = context->GetLogicalDevice();
 
-		vkDeviceWaitIdle(device->GetVulkanDevice());
+		vkDestroyFramebuffer(device->GetVulkanDevice(), m_Framebuffer, nullptr);
 
-		// Destroy
-		for (auto& framebuffer : m_Framebuffers)
-			vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+		std::vector<VkImageView> attachments = { };
+		attachments.push_back(m_Image->GetImage().ImageView);
+		auto depthImageView = context->GetSwapChain()->GetDepthImageView();
+		attachments.push_back(depthImageView);
 
-		vkDeviceWaitIdle(device->GetVulkanDevice());
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = m_RenderPass;
+		framebufferInfo.attachmentCount = (uint32_t)attachments.size();
+		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.width = width;	
+		framebufferInfo.height = height;
+		framebufferInfo.layers = 1;
 
-		auto imageViews = context->GetSwapChain()->GetImageViews();
-		m_Framebuffers.resize(imageViews.size());
-		for (size_t i = 0; i < imageViews.size(); i++)
-		{
-			std::vector<VkImageView> attachments = { };
-			attachments.push_back(m_Image->GetImages()[RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage()].ImageView);
-
-			auto depthImageView = context->GetSwapChain()->GetDepthImageView();
-			attachments.push_back(depthImageView);
-
-			VkFramebufferCreateInfo framebufferInfo = {};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = m_RenderPass;
-			framebufferInfo.attachmentCount = (uint32_t)attachments.size();
-			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = width;	
-			framebufferInfo.height = height;
-			framebufferInfo.layers = 1;
-
-			if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to create framebuffer!");
-		}
+		if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffer) != VK_SUCCESS)
+			LV_LOG_ERROR("Failed to create framebuffer!");
 	}
 
 	Ref<RenderPass> VulkanViewportRenderPass::GetRenderPass()
@@ -300,11 +264,7 @@ namespace Lavender
 		auto image = RefHelper::Create<VulkanViewportImage>(width, height);
 		m_Renderpass = RefHelper::Create<VulkanViewportRenderPass>(image);
 
-		for (auto& i : image->GetImages())
-		{
-			auto img = ImGui_ImplVulkan_AddTexture(image->GetSampler(), i.ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			m_ImGuiImages.push_back((ImTextureID)img);
-		}
+		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	VulkanViewport::~VulkanViewport()
@@ -313,25 +273,16 @@ namespace Lavender
 		vkDeviceWaitIdle(device);
 		
 		auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
-		vkFreeDescriptorSets(device, pool, (uint32_t)m_ImGuiImages.size(), (VkDescriptorSet*)m_ImGuiImages.data());
+		vkFreeDescriptorSets(device, pool, 1, (VkDescriptorSet*)&m_ImGuiImage);
 	}
 
 	void VulkanViewport::BeginFrame()
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginFrame");
-		// TODO: Add a better way to prevent tearing
-		static uint8_t resizeCounter = 10;
 		if (m_ShouldResize)
 		{
 			Resize(m_Width, m_Height);
-		
 			m_ShouldResize = false;
-			resizeCounter = 0;
-		}
-		else if (resizeCounter < 10)
-		{
-			Resize(m_Width, m_Height);
-			resizeCounter++;
 		}
 
 		m_Renderpass->Begin();
@@ -377,24 +328,17 @@ namespace Lavender
 			vkDeviceWaitIdle(device);
 
 			auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
-			vkFreeDescriptorSets(device, pool, (uint32_t)m_ImGuiImages.size(), (VkDescriptorSet*)m_ImGuiImages.data());
+			vkFreeDescriptorSets(device, pool, 1, (VkDescriptorSet*)&m_ImGuiImage);
 
 			m_Renderpass->Resize(width, height);
 
-			m_ImGuiImages.clear();
-			auto image = m_Renderpass->GetImage();
-			for (auto& i : image->GetImages())
-			{
-				auto img = ImGui_ImplVulkan_AddTexture(image->GetSampler(), i.ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-				m_ImGuiImages.push_back((ImTextureID)img);
-			}
+			m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(m_Renderpass->GetImage()->GetSampler(), m_Renderpass->GetImage()->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 	}
 
 	ImTextureID VulkanViewport::GetCurrentImGuiTexture()
 	{
-		auto acquiredImage = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage();
-		return m_ImGuiImages[acquiredImage];
+		return m_ImGuiImage;
 	}
 
 }

@@ -34,11 +34,11 @@ namespace Lavender
 		inline uint32_t GetWidth() const { return m_Width; }
 		inline uint32_t GetHeight() const { return m_Height; }
 
-		inline std::vector<ViewportImageGroup> GetImages() { return m_Images; }
+		inline ViewportImageGroup GetImage() { return m_Image; }
 		inline VkSampler GetSampler() { return m_Sampler; }
 
 	private:
-		std::vector<ViewportImageGroup> m_Images = { };
+		ViewportImageGroup m_Image = {};
 
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
@@ -68,7 +68,7 @@ namespace Lavender
 		Ref<VulkanViewportImage> m_Image = VK_NULL_HANDLE;
 
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
-		std::vector<VkFramebuffer> m_Framebuffers = { };
+		VkFramebuffer m_Framebuffer = VK_NULL_HANDLE;
 	};
 
 
@@ -97,7 +97,7 @@ namespace Lavender
 	private:
 		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
 
-		std::vector<ImTextureID> m_ImGuiImages = { };
+		ImTextureID m_ImGuiImage = {};
 
 		bool m_ShouldResize = false;
 		uint32_t m_Width = 0, m_Height = 0;

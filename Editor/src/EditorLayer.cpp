@@ -108,13 +108,11 @@ void EditorLayer::OnUpdate(float deltaTime)
 	auto& window = Application::Get().GetWindow();
 	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesn't allow the aspectratio to be 0
 	{
-		auto& window = Application::Get().GetWindow();
-
 		static float timer = 0.0f;
 		timer += deltaTime;
 
 		Camera camera = {};
-		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(timer * 4.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Viewport->GetWidth() / (float)m_Viewport->GetHeight(), 0.1f, 10.0f);
 
@@ -144,7 +142,7 @@ void EditorLayer::OnRender()
 void EditorLayer::OnImGuiRender()
 {
 	ImGui::DockSpaceOverViewport();
-
+	
 	m_Viewport->BeginRender();
 	m_Viewport->EndRender();
 
