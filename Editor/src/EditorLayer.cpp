@@ -83,14 +83,14 @@ void EditorLayer::OnAttach()
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
 
 	// Test area
-	m_Collection = RegistryCollection::Create();
-	m_Entity = Entity::Create(m_Collection);
+	m_Scene = Scene::Create();
 
-	m_Loader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
-	m_EntityInterface = EntityInterface::Create(m_Entity, m_Loader, "MyEntity");
-	m_RegistryInterface = RegistryInterface::Create(m_Collection, m_Loader);
+	auto scriptLoader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
+	m_Scene->SetScript(scriptLoader);
 
-	m_EntityInterface->InvokeOnCreate(); // Note(Jorben): Never call this on script reload but on runtime start // TODO: For the future
+	Entity entity = m_Scene->CreateEntity();
+	m_EntityInterface = EntityInterface::Create(entity, scriptLoader, "MyEntity");
+	m_Scene->AddScriptedEntity(m_EntityInterface);
 }
 
 void EditorLayer::OnDetach()
@@ -103,15 +103,15 @@ void EditorLayer::OnUpdate(float deltaTime)
 {
 	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
 
-	if (!m_Loader->IsDetached())
-	{
-		m_EntityInterface->InvokeOnUpdate(deltaTime);
-	}
+	m_Scene->OnUpdate(deltaTime);
 
 	auto& window = Application::Get().GetWindow();
-	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
+	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesn't allow the aspectratio to be 0
 	{
 		auto& window = Application::Get().GetWindow();
+
+		static float timer = 0.0f;
+		timer += deltaTime;
 
 		Camera camera = {};
 		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -163,20 +163,9 @@ void EditorLayer::OnEvent(Event& e)
 
 bool EditorLayer::OnKeyPressEvent(KeyPressedEvent& e)
 {
-	if (e.GetKeyCode() == Key::F4)
-	{
-		m_Loader->Detach();
-		LV_LOG_TRACE("F4 Pressed. Detaching...");
-	}
-
 	if (e.GetKeyCode() == Key::F5)
 	{
-		m_Loader->Reload();
-		m_RegistryInterface->Reload();
-		m_EntityInterface->Reload();
-		LV_LOG_TRACE("F5 Pressed. Reloading...");
-
-		m_EntityInterface->InvokeOnCreate(); // Note(Jorben): Never call this on script reload but on runtime start // TODO: For the future
+		m_Scene->ReloadScript();
 	}
 
 	return false;

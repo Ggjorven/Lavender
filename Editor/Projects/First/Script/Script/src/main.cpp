@@ -20,7 +20,7 @@ public:
 	{
 		if (Input::IsKeyPressed(Key::W))
 		{
-			ScriptLogger::LogMessage(ScriptLogger::Level::Trace, "W was pressed OIFHJoeifajeoijfeoiajfoeajifoie");
+			ScriptLogger::LogMessage(ScriptLogger::Level::Trace, "W was pressed {0}", A);
 		}
 	}
 
@@ -28,10 +28,12 @@ private:
 	TagComponent* m_Tag = {};
 	TransformComponent* m_Tranform = {};
 
+	float A = 1.0f;
+
 public:
-	float A = 9;
+	LV_DEFINE_PRIVATE_VARIABLE(float, A)
 };
 
 LV_ENTITY(MyEntity)
 
-LV_VARIABLE(MyEntity, float, A)
+LV_PRIVATE_VARIABLE(MyEntity, float, A)

@@ -2,6 +2,8 @@
 
 #include "Lavender/Utils/Utils.hpp"
 
+#include "Lavender/Workspace/Scene.hpp"
+
 namespace Lavender
 {
 

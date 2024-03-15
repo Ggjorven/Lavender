@@ -23,6 +23,24 @@ namespace Lavender
 	typedef uint64_t (*GetUUIDFn)(ScriptableEntity*);
 	typedef void (*SetUUIDFn)(ScriptableEntity*, uint64_t);
 
+	/*
+    Char,
+    SChar,
+    UChar,
+    Short,
+    UShort,
+    Int,
+    UInt,
+    Long,
+    ULong,
+    LongLong,
+    ULongLong,
+    Float,
+    Double,
+    LongDouble,
+    Bool
+	*/
+
 	typedef float (*GetFloatFn)(ScriptableEntity*);
 	typedef void (*SetFloatFn)(ScriptableEntity*, float);
 	// TODO: Add more variable types
@@ -41,11 +59,17 @@ namespace Lavender
 		GetUUIDFn GetUUID = nullptr;
 		SetUUIDFn SetUUID = nullptr;
 
-		// TODO: Variable list with function pointers
-
 	public:
 		bool Validate() const;
 		void Clear();
+	};
+
+	// Note(Jorben): The functions are void* so they can be used for any type, but under the hood they are only for one type
+	struct EntityVariableFunctions
+	{
+	public:
+		void* Get = nullptr;
+		void* Set = nullptr;
 	};
 
 	class EntityInterface

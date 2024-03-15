@@ -150,7 +150,7 @@ EXPORT void Script_SetUUID##name(name* instance, uint64_t uuid) \
 } \
 }
 
-// Note(Jorben): At the moment the variable has to be public and this is declared outside the class
+// Note(Jorben): This is only for public variables use LV_DEFINE_PRIVATE_VARIABLE in a public scope and use LV_PRIVATE_VARIABLE for a private variable.
 #define LV_VARIABLE(classname, type, varname) \
 extern "C" \
 { \
@@ -161,6 +161,39 @@ EXPORT void Script_SetValueOf##varname##classname(classname* instance, type valu
 EXPORT type Script_GetValueOf##varname##classname(classname* instance) \
 { \
 	return instance->varname; \
+} \
+} \
+namespace \
+{ \
+inline void Add##varname##ToVariableList() \
+{ \
+    classname##Variables.Add(Lavender::VariableInfo::GetVariableType(typeid(type)), #varname); \
+} \
+\
+static int dummy##varname = (Add##varname##ToVariableList(), 0); \
+}
+
+// Note(Jorben): This macro has to be used in a public scope
+#define LV_DEFINE_PRIVATE_VARIABLE(type, varname) \
+void Script_SetVar##varname##Value(type value) \
+{ \
+    varname = value; \
+} \
+type Script_GetVar##varname##Value() \
+{ \
+    return varname; \
+} 
+
+#define LV_PRIVATE_VARIABLE(classname, type, varname) \
+extern "C" \
+{ \
+EXPORT void Script_SetValueOf##varname##classname(classname* instance, type value) \
+{ \
+	instance->Script_SetVar##varname##Value(value); \
+} \
+EXPORT type Script_GetValueOf##varname##classname(classname* instance) \
+{ \
+	return instance->Script_GetVar##varname##Value(); \
 } \
 } \
 namespace \

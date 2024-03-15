@@ -67,6 +67,8 @@ namespace Lavender
 		// Create instance
 		m_Instance = m_Functions.Create();
 		m_Functions.SetUUID(m_Instance, m_Entity.GetUUID().Get());
+
+		InitVariableFunctions();
 	}
 
 	void WindowsEntityInterface::InvokeOnCreate()
@@ -79,6 +81,93 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("WindowsEntityInterface::OnUpdate");
 		m_Functions.OnUpdate(m_Instance, deltaTime);
+	}
+
+	void WindowsEntityInterface::InitVariableFunctions()
+	{
+		VariableList list = *m_Functions.GetVariableList();
+
+		for (auto& var : list.Variables)
+		{
+			EntityVariableFunctions functions = { };
+
+			switch (var.Type)
+			{
+			case VariableType::Float:
+			{
+				std::string fnName = "Script_GetValueOf" + var.Name + m_ClassName;
+				GetFloatFn getter = (GetFloatFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
+				functions.Get = (void*)getter;
+
+				fnName = "Script_SetValueOf" + var.Name + m_ClassName;
+				SetFloatFn setter = (SetFloatFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
+				functions.Set = (void*)setter;
+				break;
+			}
+			case VariableType::Double:
+			{
+				break;
+			}
+			case VariableType::Int:
+			{
+				break;
+			}
+			case VariableType::UInt:
+			{
+				break;
+			}
+			case VariableType::Bool:
+			{
+				break;
+			}
+			case VariableType::Char:
+			{
+				break;
+			}
+			case VariableType::SChar:
+			{
+				break;
+			}
+			case VariableType::UChar:
+			{
+				break;
+			}
+			case VariableType::Short:
+			{
+				break;
+			}
+			case VariableType::UShort:
+			{
+				break;
+			}
+			case VariableType::Long:
+			{
+				break;
+			}
+			case VariableType::ULong:
+			{
+				break;
+			}
+			case VariableType::LongLong:
+			{
+				break;
+			}
+			case VariableType::ULongLong:
+			{
+				break;
+			}
+			case VariableType::LongDouble:
+			{
+				break;
+			}
+
+			default:
+				LV_LOG_WARN("(WindowsEntityInterface::InitVariableFunctions) Variable type is not supported.");
+				break;
+			}
+
+			m_Variables[var.Name] = functions;
+		}
 	}
 
 }

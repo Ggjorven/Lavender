@@ -14,13 +14,7 @@
 #include <Lavender/Renderer/Image.hpp>
 #include <Lavender/Renderer/Viewport.hpp>
 
-#include <Lavender/ECS/Registry.hpp>
-#include <Lavender/ECS/Entity.hpp>
-#include <Lavender/ECS/Components.hpp>
-
-#include <Lavender/Scripting/ScriptLoader.hpp>
-#include <Lavender/Scripting/EntityInterface.hpp>
-#include <Lavender/Scripting/RegistryInterface.hpp>
+#include <Lavender/Workspace/Scene.hpp>
 
 using namespace Lavender;
 
@@ -45,6 +39,8 @@ private:
 
 	Ref<Viewport> m_Viewport = nullptr;
 
+	Ref<Scene> m_Scene = nullptr;
+
 	Ref<Pipeline> m_Pipeline = nullptr;
 
 	Ref<VertexBuffer> m_VertexBuffer = nullptr;
@@ -53,11 +49,5 @@ private:
 	Ref<Image2D> m_Image = nullptr;
 	Ref<UniformBuffer> m_CameraBuffer = nullptr;
 
-	// Scripting
-	Ref<RegistryCollection> m_Collection = nullptr;
-	Entity m_Entity = {};
-
-	Ref<ScriptLoader> m_Loader = nullptr;
 	Ref<EntityInterface> m_EntityInterface = nullptr;
-	Ref<RegistryInterface> m_RegistryInterface = nullptr;
 };

@@ -22,6 +22,19 @@ namespace Lavender
 		void InvokeOnCreate() override;
 		void InvokeOnUpdate(float deltaTime) override;
 
+		template<typename T>
+		void Set(const std::string& name, T value);
+		template<>
+		void Set<float>(const std::string& name, float value);
+
+		template<typename T>
+		T Get(const std::string& name);
+		template<>
+		float Get<float>(const std::string& name);
+
+	private:
+		void InitVariableFunctions();
+
 	private:
 		Ref<WindowsScriptLoader> m_Loader = nullptr;
 		std::string m_ClassName = "Unset Class";
@@ -30,6 +43,41 @@ namespace Lavender
 
 		ScriptableEntity* m_Instance = nullptr;
 		ScriptableEntityFunctions m_Functions = {};
+
+		std::unordered_map<std::string, EntityVariableFunctions> m_Variables = { };
 	};
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Setters
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	template<typename T>
+	inline void WindowsEntityInterface::Set(const std::string& name, T value)
+	{
+		LV_LOG_WARN("(WindowsEntityInterface::Set) Variable type not supported.");
+	}
+
+	template<>
+	inline void WindowsEntityInterface::Set(const std::string& name, float value)
+	{
+		SetFloatFn SetFP = (SetFloatFn)m_Variables[name].Set;
+		SetFP(m_Instance, value);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Getters
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	template<typename T>
+	inline T WindowsEntityInterface::Get(const std::string& name)
+	{
+		LV_LOG_WARN("(WindowsEntityInterface::Get) Variable type not supported.");
+		return T();
+	}
+
+	template<>
+	inline float WindowsEntityInterface::Get(const std::string& name)
+	{
+		GetFloatFn GetFP = (GetFloatFn)m_Variables[name].Get;
+		return GetFP(m_Instance);
+	}
 
 }
