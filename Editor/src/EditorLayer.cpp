@@ -171,7 +171,7 @@ bool EditorLayer::OnKeyPressEvent(KeyPressedEvent& e)
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 {
-	m_Viewport->SetShouldResize(true);
+	m_Viewport->Resize(e.GetWidth(), e.GetHeight());
 
 	return false;
 }

@@ -279,12 +279,6 @@ namespace Lavender
 	void VulkanViewport::BeginFrame()
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginFrame");
-		if (m_ShouldResize)
-		{
-			Resize(m_Width, m_Height);
-			m_ShouldResize = false;
-		}
-
 		m_Renderpass->Begin();
 	}
 
@@ -305,7 +299,7 @@ namespace Lavender
 		auto size = ImGui::GetWindowSize();
 		if ((uint32_t)size.x != m_Width || (uint32_t)size.y != m_Height)
 		{
-			m_ShouldResize = true;
+			Resize((uint32_t)size.x, (uint32_t)size.y);
 		}
 		m_Width = (uint32_t)size.x;
 		m_Height = (uint32_t)size.y;
