@@ -12,6 +12,8 @@
 
 #include <stb_image.h>
 
+#include <backends/imgui_impl_vulkan.h>
+
 namespace Lavender
 {
 

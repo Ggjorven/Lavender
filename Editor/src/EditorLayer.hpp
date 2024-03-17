@@ -14,7 +14,7 @@
 #include <Lavender/Renderer/Image.hpp>
 #include <Lavender/Renderer/Viewport.hpp>
 
-#include <Lavender/Workspace/Scene.hpp>
+#include <Lavender/Workspace/Project.hpp>
 
 using namespace Lavender;
 
@@ -39,7 +39,7 @@ private:
 
 	Ref<Viewport> m_Viewport = nullptr;
 
-	Ref<Scene> m_Scene = nullptr;
+	Ref<Project> m_Project = nullptr;
 
 	Ref<Pipeline> m_Pipeline = nullptr;
 
@@ -49,5 +49,5 @@ private:
 	Ref<Image2D> m_Image = nullptr;
 	Ref<UniformBuffer> m_CameraBuffer = nullptr;
 
-	Ref<EntityInterface> m_EntityInterface = nullptr;
+	Entity m_Entity = {};
 };

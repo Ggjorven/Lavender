@@ -13,6 +13,8 @@
 #include <Lavender/Renderer/Renderer.hpp>
 #include <Lavender/Renderer/Shader.hpp>
 
+#include <Lavender/UI/UI.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -83,14 +85,17 @@ void EditorLayer::OnAttach()
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
 
 	// Test area
-	m_Scene = Scene::Create();
+	auto scene = Scene::Create();
 
 	auto scriptLoader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
-	m_Scene->SetScript(scriptLoader);
+	scene->SetScript(scriptLoader);
 
-	Entity entity = m_Scene->CreateEntity();
-	m_EntityInterface = EntityInterface::Create(entity, scriptLoader, "MyEntity");
-	m_Scene->AddScriptedEntity(m_EntityInterface);
+	m_Entity = scene->CreateEntity();
+	auto entityInterface = EntityInterface::Create(m_Entity, scriptLoader, "MyEntity");
+	scene->AddScriptedEntity(entityInterface);
+
+	m_Project = Project::Create();
+	m_Project->AddScene(scene, "Main", true);
 }
 
 void EditorLayer::OnDetach()
@@ -103,7 +108,10 @@ void EditorLayer::OnUpdate(float deltaTime)
 {
 	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
 
-	m_Scene->OnUpdate(deltaTime);
+	m_Project->OnUpdate(deltaTime);
+
+	auto mainScene = m_Project->GetSceneCollection().GetActive();
+	mainScene->SetScriptVariable(mainScene->GetEntityInterface(m_Entity.GetUUID()), "A", 69.0f);
 
 	auto& window = Application::Get().GetWindow();
 	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesn't allow the aspectratio to be 0
@@ -112,7 +120,7 @@ void EditorLayer::OnUpdate(float deltaTime)
 		timer += deltaTime;
 
 		Camera camera = {};
-		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(timer * 4.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(timer * 6.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Viewport->GetWidth() / (float)m_Viewport->GetHeight(), 0.1f, 10.0f);
 
@@ -146,9 +154,9 @@ void EditorLayer::OnImGuiRender()
 	m_Viewport->BeginRender();
 	m_Viewport->EndRender();
 
-	ImGui::Begin("A");
-	ImGui::Text((std::string("FPS: ") + std::to_string((int)ImGui::GetIO().Framerate)).c_str());
-	ImGui::End();
+	UI::BeginWindow("A");
+	UI::Text(std::string("FPS: ") + std::to_string((int)ImGui::GetIO().Framerate));
+	UI::EndWindow();
 }
 
 void EditorLayer::OnEvent(Event& e)
@@ -163,7 +171,7 @@ bool EditorLayer::OnKeyPressEvent(KeyPressedEvent& e)
 {
 	if (e.GetKeyCode() == Key::F5)
 	{
-		m_Scene->ReloadScript();
+		m_Project->GetSceneCollection().GetActive()->ReloadScript();
 	}
 
 	return false;

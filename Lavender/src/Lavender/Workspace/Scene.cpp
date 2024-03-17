@@ -21,7 +21,7 @@ namespace Lavender
 		m_RegistryInterface->Reload();
 		
 		for (auto& e : m_EntityInterfaces)
-			e->Reload();
+			e.second->Reload();
 	}
 
 	void Scene::StartRuntime()
@@ -40,14 +40,20 @@ namespace Lavender
 		{
 		case Scene::State::Editor:
 		{
-			for (auto& e : m_EntityInterfaces)
-				e->InvokeOnUpdate(deltaTime);
+			if (!m_Script->IsDetached())
+			{
+				for (auto& e : m_EntityInterfaces)
+					e.second->InvokeOnUpdate(deltaTime);
+			}
 			break;
 		}
 		case Scene::State::Runtime:
 		{
-			for (auto& e : m_EntityInterfaces)
-				e->InvokeOnUpdate(deltaTime);
+			if (!m_Script->IsDetached())
+			{
+				for (auto& e : m_EntityInterfaces)
+					e.second->InvokeOnUpdate(deltaTime);
+			}
 			break;
 		}
 
@@ -58,25 +64,6 @@ namespace Lavender
 	}
 
 	void Scene::OnRender()
-	{
-		switch (m_State)
-		{
-		case Scene::State::Editor:
-		{
-			break;
-		}
-		case Scene::State::Runtime:
-		{
-			break;
-		}
-
-		default:
-			LV_LOG_FATAL("No proper state specified.");
-			break;
-		}
-	}
-
-	void Scene::OnImGuiRender()
 	{
 		switch (m_State)
 		{
@@ -113,9 +100,12 @@ namespace Lavender
 		m_Scenes.clear();
 	}
 
-	void SceneCollection::Add(Ref<Scene> scene, const std::string& name)
+	void SceneCollection::Add(Ref<Scene> scene, const std::string& name, bool active)
 	{
 		m_Scenes[name] = scene;
+
+		if (active)
+			m_ActiveScene = std::make_pair(name, scene);
 	}
 
 	void SceneCollection::Remove(const std::string& name)
@@ -131,6 +121,12 @@ namespace Lavender
 
 		LV_LOG_WARN("Failed to find scene by name: '{0}'...", name);
 		return nullptr;
+	}
+
+	void SceneCollection::Each(SceneCollection::EachSceneFn function)
+	{
+		for (auto& scene : m_Scenes)
+			function(scene.second);
 	}
 
 }

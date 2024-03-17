@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <utility>
+#include <functional>
 #include <unordered_map>
 
 #include "Lavender/Utils/Utils.hpp"
@@ -40,10 +42,11 @@ namespace Lavender
 
 		void OnUpdate(float deltaTime);
 		void OnRender();
-		void OnImGuiRender();
 
 		void SetScript(Ref<ScriptLoader> script);
-		void AddScriptedEntity(Ref<EntityInterface> entityInterface) { m_EntityInterfaces.push_back(entityInterface); }
+		void AddScriptedEntity(Ref<EntityInterface> entityInterface) { m_EntityInterfaces[entityInterface->GetEntity().GetUUID()] = entityInterface; }
+
+		inline Ref<EntityInterface> GetEntityInterface(UUID uuid) { return m_EntityInterfaces[uuid]; }
 
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
@@ -55,8 +58,14 @@ namespace Lavender
 		{
 			#ifdef LV_PLATFORM_WINDOWS
 			Ref<WindowsEntityInterface> i = RefHelper::RefAs<WindowsEntityInterface>(entityInterface);
-			i->Set<T>(name, value);
+			if (i->HasVariable(name))
+			{
+				i->Set<T>(name, value);
+				return;
+			}
 			#endif
+
+			LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
 		}
 
 		template<typename T>
@@ -64,8 +73,13 @@ namespace Lavender
 		{
 			#ifdef LV_PLATFORM_WINDOWS
 			Ref<WindowsEntityInterface> i = RefHelper::RefAs<WindowsEntityInterface>(entityInterface);
-			return i->Get<T>(name);
+			if (i->HasVariable(name))
+			{
+				return i->Get<T>(name);
+			}
 			#endif
+
+			LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
 		}
 
 	private:
@@ -75,7 +89,7 @@ namespace Lavender
 
 		Ref<ScriptLoader> m_Script = nullptr;
 		Ref<RegistryInterface> m_RegistryInterface = nullptr;
-		std::vector<Ref<EntityInterface>> m_EntityInterfaces = { };
+		std::unordered_map<UUID, Ref<EntityInterface>> m_EntityInterfaces = { };
 
 		friend class SceneSerializer;
 	};
@@ -88,12 +102,17 @@ namespace Lavender
 		virtual ~SceneCollection() = default;
 
 		void Clear();
-		void Add(Ref<Scene> scene, const std::string& name = "Unnamed Scene");
+		void Add(Ref<Scene> scene, const std::string& name = "Unnamed Scene", bool active = false);
 		void Remove(const std::string& name);
 		Ref<Scene> Get(const std::string& name);
+		inline Ref<Scene> GetActive() { return m_ActiveScene.second; }
+
+		typedef std::function<void(Ref<Scene>)> EachSceneFn;
+		void Each(EachSceneFn function);
 
 	private:
 		std::unordered_map<std::string, Ref<Scene>> m_Scenes = { };
+		std::pair<std::string, Ref<Scene>> m_ActiveScene = {};
 	};
 
 }

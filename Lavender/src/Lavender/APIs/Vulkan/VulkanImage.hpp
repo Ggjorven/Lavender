@@ -9,6 +9,8 @@
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
+#include <imgui.h>
+
 namespace Lavender
 {
 

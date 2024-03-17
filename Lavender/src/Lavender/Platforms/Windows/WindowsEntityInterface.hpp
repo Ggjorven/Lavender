@@ -22,6 +22,8 @@ namespace Lavender
 		void InvokeOnCreate() override;
 		void InvokeOnUpdate(float deltaTime) override;
 
+		bool HasVariable(const std::string& name);
+
 		template<typename T>
 		void Set(const std::string& name, T value);
 		template<>
@@ -31,6 +33,8 @@ namespace Lavender
 		T Get(const std::string& name);
 		template<>
 		float Get<float>(const std::string& name);
+
+		inline Entity& GetEntity() { return m_Entity; }
 
 	private:
 		void InitVariableFunctions();

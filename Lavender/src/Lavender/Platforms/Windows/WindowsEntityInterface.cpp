@@ -83,6 +83,12 @@ namespace Lavender
 		m_Functions.OnUpdate(m_Instance, deltaTime);
 	}
 
+	bool WindowsEntityInterface::HasVariable(const std::string& name)
+	{
+		auto i = m_Variables.find(name);
+		return i != m_Variables.end();
+	}
+
 	void WindowsEntityInterface::InitVariableFunctions()
 	{
 		VariableList list = *m_Functions.GetVariableList();

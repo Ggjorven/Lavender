@@ -12,6 +12,8 @@
 #include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
 #include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
+#include "Lavender/UI/UI.hpp"
+
 #include <imgui_internal.h>
 #include <backends/imgui_impl_vulkan.h>
 
@@ -294,7 +296,7 @@ namespace Lavender
 	void VulkanViewport::BeginRender()
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginRender");
-		ImGui::Begin("Viewport");
+		UI::BeginWindow("Viewport");
 
 		auto size = ImGui::GetWindowSize();
 		if ((uint32_t)size.x != m_Width || (uint32_t)size.y != m_Height)
@@ -305,13 +307,13 @@ namespace Lavender
 		m_Height = (uint32_t)size.y;
 		
 		auto region = ImGui::GetContentRegionAvail();
-		ImGui::Image(GetCurrentImGuiTexture(), ImVec2(region.x, region.y));
+		ImGui::Image(GetCurrentImGuiTexture(), ImVec2(region.x, region.y), ImVec2(1.0f, 0.0f), ImVec2(0.0f, 1.0f)); // TODO: Replace with UI Image
 	}
 
 	void VulkanViewport::EndRender()
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::EndRender");
-		ImGui::End();
+		UI::EndWindow();
 	}
 
 	void VulkanViewport::Resize(uint32_t width, uint32_t height)

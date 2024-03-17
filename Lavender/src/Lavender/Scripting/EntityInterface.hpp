@@ -83,6 +83,8 @@ namespace Lavender
 		virtual void InvokeOnCreate() = 0;
 		virtual void InvokeOnUpdate(float deltaTime) = 0;
 
+		virtual Entity& GetEntity() = 0;
+
 		static Ref<EntityInterface> Create(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname);
 	};
 
