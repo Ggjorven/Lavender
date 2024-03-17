@@ -105,6 +105,8 @@ namespace Lavender
 		void Add(Ref<Scene> scene, const std::string& name = "Unnamed Scene", bool active = false);
 		void Remove(const std::string& name);
 		Ref<Scene> Get(const std::string& name);
+
+		inline std::string GetActiveName() { return m_ActiveScene.first; }
 		inline Ref<Scene> GetActive() { return m_ActiveScene.second; }
 
 		typedef std::function<void(Ref<Scene>)> EachSceneFn;

@@ -16,6 +16,8 @@
 
 #include <Lavender/Workspace/Project.hpp>
 
+#include "Panels/EntitiesPanel.hpp"
+
 using namespace Lavender;
 
 class EditorLayer : public Layer
@@ -40,6 +42,7 @@ private:
 	Ref<Viewport> m_Viewport = nullptr;
 
 	Ref<Project> m_Project = nullptr;
+	Ref<EntitiesPanel> m_EntityPanel = nullptr;
 
 	Ref<Pipeline> m_Pipeline = nullptr;
 

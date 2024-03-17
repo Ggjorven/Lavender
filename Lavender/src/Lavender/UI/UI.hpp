@@ -9,6 +9,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <spdlog/formatter.h>
+
 namespace Lavender::UI
 {
 
@@ -44,13 +46,54 @@ namespace Lavender::UI
     };
     DEFINE_BITWISE_OPS(WindowFlags)
 
-	void BeginWindow(const std::string& name = "Unnamed Window", WindowFlags flags = WindowFlags::None);
-	void EndWindow();
+    void BeginWindow(const std::string& name = "Unnamed Window", WindowFlags flags = WindowFlags::None);
+    void EndWindow();
 
-	template<typename ... Args>
-	static void Text(const std::string& fmt, Args&& ...args)
-	{
-		ImGui::Text(fmt.c_str(), std::forward<Args>(args)...);
-	}
+    template<typename ... Args>
+    static void Text(const std::string& fmt, Args&& ...args)
+    {
+        auto fmtStr = fmt::format(fmt.c_str(), std::forward<Args>(args)...);
+        ImGui::Text(fmtStr.c_str());
+    }
+
+    bool Button(const std::string& name, const glm::vec2& size = { 0.0f, 0.0f });
+
+    enum class TreeNodeFlags : uint16_t
+    {
+        None = 0,
+        Selected = BIT(0),
+        Framed = BIT(1),
+        AllowItemOverlap = BIT(2),
+        NoTreePushOnOpen = BIT(3),
+        NoAutoOpenOnLog = BIT(4),
+        DefaultOpen = BIT(5),
+        OpenOnDoubleClick = BIT(6),
+        OpenOnArrow = BIT(7),
+        Leaf = BIT(8),
+        Bullet = BIT(9),
+        FramePadding = BIT(10),
+        SpanAvailWidth = BIT(11),
+        SpanFullWidth = BIT(12),
+        NavLeftJumpsBackHere = BIT(13),
+
+        CollapsingHeader = Framed | NoTreePushOnOpen | NoAutoOpenOnLog
+    };
+    DEFINE_BITWISE_OPS(TreeNodeFlags)
+
+    bool TreeNode(const std::string& name, TreeNodeFlags flags);
+    void TreeNodePop();
+
+    enum class SelectableFlags
+    {
+        None = 0,
+        DontClosePopups = BIT(0),
+        SpanAllColumns = BIT(1),
+        AllowDoubleClick = BIT(2),
+        Disabled = BIT(3),
+        AllowItemOverlap = BIT(4)
+    };
+    DEFINE_BITWISE_OPS(SelectableFlags)
+
+    void Selectable(const std::string& name, bool* selected, const glm::vec2& size = { 0.0f, 0.0f }, SelectableFlags flags = SelectableFlags::None);
 
 }

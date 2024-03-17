@@ -87,15 +87,18 @@ void EditorLayer::OnAttach()
 	// Test area
 	auto scene = Scene::Create();
 
-	auto scriptLoader = ScriptLoader::Create("E:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
+	auto scriptLoader = ScriptLoader::Create("D:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
 	scene->SetScript(scriptLoader);
 
 	m_Entity = scene->CreateEntity();
+	m_Entity.AddComponent<TagComponent>({ "MYTAG" });
 	auto entityInterface = EntityInterface::Create(m_Entity, scriptLoader, "MyEntity");
 	scene->AddScriptedEntity(entityInterface);
 
 	m_Project = Project::Create();
 	m_Project->AddScene(scene, "Main", true);
+
+	m_EntityPanel = EntitiesPanel::Create(m_Project);
 }
 
 void EditorLayer::OnDetach()
@@ -154,9 +157,11 @@ void EditorLayer::OnImGuiRender()
 	m_Viewport->BeginRender();
 	m_Viewport->EndRender();
 
-	UI::BeginWindow("A");
-	UI::Text(std::string("FPS: ") + std::to_string((int)ImGui::GetIO().Framerate));
-	UI::EndWindow();
+	m_EntityPanel->RenderUI();
+
+	//UI::BeginWindow("A");
+	//UI::Text(std::string("FPS: ") + std::to_string((int)ImGui::GetIO().Framerate));
+	//UI::EndWindow();
 }
 
 void EditorLayer::OnEvent(Event& e)

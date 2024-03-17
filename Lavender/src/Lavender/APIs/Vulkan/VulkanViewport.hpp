@@ -9,6 +9,8 @@
 
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
+#include "Lavender/UI/Style.hpp"
+
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
@@ -97,6 +99,7 @@ namespace Lavender
 		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
 
 		ImTextureID m_ImGuiImage = {};
+		UI::StyleList m_WindowStyle = {};
 
 		uint32_t m_Width = 0, m_Height = 0;
 	};

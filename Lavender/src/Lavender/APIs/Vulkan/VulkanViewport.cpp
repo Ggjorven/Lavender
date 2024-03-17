@@ -267,6 +267,10 @@ namespace Lavender
 		m_Renderpass = RefHelper::Create<VulkanViewportRenderPass>(image);
 
 		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		m_WindowStyle = UI::StyleList({
+			{ UI::StyleType::WindowPadding, glm::vec2(0.0f, 0.0f) },
+		});
 	}
 
 	VulkanViewport::~VulkanViewport()
@@ -296,7 +300,14 @@ namespace Lavender
 	void VulkanViewport::BeginRender()
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginRender");
-		UI::BeginWindow("Viewport");
+		m_WindowStyle.Push();
+
+		// To remove the tab bar.
+		ImGuiWindowClass window = {};
+		window.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+		ImGui::SetNextWindowClass(&window);
+
+		UI::BeginWindow("Viewport", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoBackground | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);
 
 		auto size = ImGui::GetWindowSize();
 		if ((uint32_t)size.x != m_Width || (uint32_t)size.y != m_Height)
@@ -314,6 +325,8 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::EndRender");
 		UI::EndWindow();
+
+		m_WindowStyle.Pop();
 	}
 
 	void VulkanViewport::Resize(uint32_t width, uint32_t height)
