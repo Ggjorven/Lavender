@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include <Lavender/UI/Colours.hpp>
+
 namespace Lavender::UI
 {
 
@@ -29,6 +31,11 @@ namespace Lavender::UI
 		ImGui::PopStyleVar();
 	}
 
+	void Style::PopStyles(uint32_t count)
+	{
+		ImGui::PopStyleVar((int)count);
+	}
+
 	StyleList::StyleList(std::initializer_list<Style> elements)
 		: m_Styles(elements)
 	{
@@ -53,6 +60,12 @@ namespace Lavender::UI
 	StyleColour::StyleColour(StyleColourType type, glm::vec4 value)
 		: Type(type), Value(value)
 	{
+	}
+
+	StyleColour::StyleColour(StyleColourType type, uint32_t value)
+		: Type(type), Value(UI::Colours::ConvertU32Colour(value))
+	{
+
 	}
 
 	void StyleColour::Push()

@@ -47,6 +47,17 @@ namespace Lavender
 		return Component::None;
 	}
 
+	template<typename TComponent>
+	static std::string ComponentToString()
+	{
+		if (typeid(TComponent) == typeid(TagComponent))
+			return "TagComponent";
+		else if (typeid(TComponent) == typeid(TransformComponent))
+			return "TransformComponent";
+
+		return "Undefined Component";
+	}
+
 	template<typename... Component>
 	struct ComponentGroup
 	{

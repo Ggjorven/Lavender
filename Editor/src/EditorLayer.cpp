@@ -14,6 +14,8 @@
 #include <Lavender/Renderer/Shader.hpp>
 
 #include <Lavender/UI/UI.hpp>
+#include <Lavender/UI/Style.hpp>
+#include <Lavender/UI/Colours.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -21,8 +23,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_vulkan.h>
-
-#include <iostream> // TODO: Remove
 
 static float vertices[] = {
 	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -85,20 +85,7 @@ void EditorLayer::OnAttach()
 	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
 
 	// Test area
-	auto scene = Scene::Create();
-
-	auto scriptLoader = ScriptLoader::Create("D:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
-	scene->SetScript(scriptLoader);
-
-	m_Entity = scene->CreateEntity();
-	m_Entity.AddComponent<TagComponent>({ "MYTAG" });
-	auto entityInterface = EntityInterface::Create(m_Entity, scriptLoader, "MyEntity");
-	scene->AddScriptedEntity(entityInterface);
-
-	m_Project = Project::Create();
-	m_Project->AddScene(scene, "Main", true);
-
-	m_EntityPanel = EntitiesPanel::Create(m_Project);
+	TEMP();
 }
 
 void EditorLayer::OnDetach()
@@ -152,16 +139,17 @@ void EditorLayer::OnRender()
 
 void EditorLayer::OnImGuiRender()
 {
+	ImGui::ShowStyleEditor();
+
 	ImGui::DockSpaceOverViewport();
+	ImGui::ShowDemoWindow();
+
+	RenderMenuBar();
 	
 	m_Viewport->BeginRender();
 	m_Viewport->EndRender();
 
 	m_EntityPanel->RenderUI();
-
-	//UI::BeginWindow("A");
-	//UI::Text(std::string("FPS: ") + std::to_string((int)ImGui::GetIO().Framerate));
-	//UI::EndWindow();
 }
 
 void EditorLayer::OnEvent(Event& e)
@@ -187,4 +175,48 @@ bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 	m_Viewport->Resize(e.GetWidth(), e.GetHeight());
 
 	return false;
+}
+
+void EditorLayer::RenderMenuBar()
+{	
+	if (UI::BeginMainMenuBar())
+	{
+		if (UI::BeginMenu("File##LavenderUI"))
+		{
+			if (UI::MenuItem("New File##LavenderUI", "Ctrl+N"))
+			{
+				LV_LOG_TRACE("New");
+			}
+
+			UI::EndMenu();
+		}
+
+		UI::Dummy({ 1.0f, 0.0f });
+		if (UI::MenuItem("Edit##LavenderUI"))
+		{
+			LV_LOG_TRACE("Edit");
+		}
+
+		UI::EndMainMenuBar();
+	}
+}
+
+void EditorLayer::TEMP() // TODO: Remove
+{
+	auto scene = Scene::Create();
+
+	auto scriptLoader = ScriptLoader::Create("D:\\Code\\C++\\VS\\Lavender\\Editor\\Projects\\First\\Script\\bin\\Debug-windows-x86_64\\Script\\Script.dll");
+	scene->SetScript(scriptLoader);
+
+	m_Entity = scene->CreateEntity();
+	m_Entity.AddComponent<TagComponent>({ "MYTAG" });
+	m_Entity.AddComponent<TransformComponent>({ { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } });
+
+	auto entityInterface = EntityInterface::Create(m_Entity, scriptLoader, "MyEntity");
+	scene->AddScriptedEntity(entityInterface);
+
+	m_Project = Project::Create();
+	m_Project->AddScene(scene, "Main", true);
+
+	m_EntityPanel = EntitiesPanel::Create(m_Project);
 }

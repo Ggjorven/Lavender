@@ -10,6 +10,8 @@ IncludeDir["yaml_cpp"] = "%{wks.location}/vendor/yaml-cpp/include"
 IncludeDir["entt"] = "%{wks.location}/vendor/entt/include"
 IncludeDir["assimp"] = "%{wks.location}/vendor/assimp/include"
 IncludeDir["tracy"] = "%{wks.location}/vendor/tracy/tracy/public"
+IncludeDir["Python"] = "%{pythonLocation}include"
+IncludeDir["pybind11"] = "%{wks.location}/vendor/pybind11/include"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 IncludeDir["VMA"] = "%{wks.location}/vendor/VulkanMemoryAllocator/include"
 

@@ -59,6 +59,8 @@ namespace Lavender::UI
 
         void Push();
         void Pop();
+
+        static void PopStyles(uint32_t count);
     };
 
     struct StyleList
@@ -149,6 +151,7 @@ namespace Lavender::UI
     public:
         StyleColour() = default;
         StyleColour(StyleColourType type, glm::vec4 value);
+        StyleColour(StyleColourType type, uint32_t value);
         virtual ~StyleColour() = default;
 
         void Push();
@@ -195,6 +198,15 @@ namespace Lavender::UI
         ScopedStyleList(const StyleList& style);
         ScopedStyleList(const StyleColourList& colour);
         virtual ~ScopedStyleList();
+
+        ScopedStyleList& operator = (const StyleList& list)
+        {
+            m_Style = std::make_optional(list);
+        }
+        ScopedStyleList& operator = (const StyleColourList& list)
+        {
+            m_Colour = std::make_optional(list);
+        }
 
     private:
         std::optional<StyleList> m_Style = {};

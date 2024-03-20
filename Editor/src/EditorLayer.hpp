@@ -36,6 +36,10 @@ private:
 	bool OnKeyPressEvent(KeyPressedEvent& e);
 	bool OnResizeEvent(WindowResizeEvent& e);
 
+	void RenderMenuBar();
+
+	void TEMP(); // TODO: Remove
+
 private:
 	Ref<UIPreferences> m_Preferences = nullptr;
 

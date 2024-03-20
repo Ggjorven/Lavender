@@ -52,7 +52,7 @@ project "Lavender"
 	links
 	{
 		"%{Library.Vulkan}",
-
+		
 		"GLFW",
 		"ImGui",
 		"yaml-cpp",

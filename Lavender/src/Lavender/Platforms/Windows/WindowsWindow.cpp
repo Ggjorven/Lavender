@@ -35,6 +35,20 @@ namespace Lavender
 		LV_MARK_FRAME;
 	}
 
+	uint32_t WindowsWindow::GetPositionX() const
+	{
+		int xPos = 0, yPos = 0;
+		glfwGetWindowPos(m_Window, &xPos, &yPos);
+		return (uint32_t)xPos;
+	}
+
+	uint32_t WindowsWindow::GetPositionY() const
+	{
+		int xPos = 0, yPos = 0;
+		glfwGetWindowPos(m_Window, &xPos, &yPos);
+		return (uint32_t)yPos;
+	}
+
 	void WindowsWindow::SetVSync(bool enabled)
 	{
 		// TODO: Recreate Vulkan swapchain

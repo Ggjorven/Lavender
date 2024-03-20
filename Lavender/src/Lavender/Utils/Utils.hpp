@@ -8,6 +8,7 @@
 #include "Lavender/Core/Logging.hpp"
 
 #define BIT(x) (1 << x)
+#define BIT_X(x, y) (x << y)
 
 #define DEFINE_BITWISE_OPS(Type) \
 constexpr Type operator | (Type lhs, Type rhs) \
