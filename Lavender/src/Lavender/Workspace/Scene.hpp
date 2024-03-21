@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Lavender/Utils/Utils.hpp"
+#include "Lavender/Utils/UUID.hpp"
 
 #include "Lavender/ECS/Entity.hpp"
 #include "Lavender/ECS/Registry.hpp"
@@ -13,6 +14,9 @@
 #include "Lavender/Scripting/ScriptLoader.hpp"
 #include "Lavender/Scripting/EntityInterface.hpp"
 #include "Lavender/Scripting/RegistryInterface.hpp"
+
+#include "Lavender/Renderer/AssetManager.hpp"
+#include "Lavender/Renderer/UniformBuffer.hpp"
 
 #ifdef LV_PLATFORM_WINDOWS
 #include "Lavender/Platforms/Windows/WindowsEntityInterface.hpp"
@@ -22,6 +26,7 @@ namespace Lavender
 {
 
 	class SceneSerializer;
+	class RenderCommandBuffer;
 
 	class Scene
 	{
@@ -41,10 +46,12 @@ namespace Lavender
 		void StopRuntime();
 
 		void OnUpdate(float deltaTime);
-		void OnRender();
+		void OnRender(Ref<RenderCommandBuffer> cmdBuffer); // TODO: SceneRenderer
 
 		void SetScript(Ref<ScriptLoader> script);
 		void AddScriptedEntity(Ref<EntityInterface> entityInterface) { m_EntityInterfaces[entityInterface->GetEntity().GetUUID()] = entityInterface; }
+
+		void InitializeAssets(Ref<RenderPass> renderPass);
 
 		inline Ref<EntityInterface> GetEntityInterface(UUID uuid) { return m_EntityInterfaces[uuid]; }
 
@@ -80,16 +87,22 @@ namespace Lavender
 			#endif
 
 			LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
+			return T();
 		}
 
 	private:
 		State m_State = State::Editor;
+
+		Ref<AssetManager> m_Assets = nullptr;
 
 		Ref<RegistryCollection> m_Collection = nullptr;
 
 		Ref<ScriptLoader> m_Script = nullptr;
 		Ref<RegistryInterface> m_RegistryInterface = nullptr;
 		std::unordered_map<UUID, Ref<EntityInterface>> m_EntityInterfaces = { };
+
+		// TODO: Move to SceneRenderer
+		Ref<UniformBuffer> m_CameraBuffer = nullptr;
 
 		friend class SceneSerializer;
 	};

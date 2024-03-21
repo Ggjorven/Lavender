@@ -57,7 +57,8 @@ namespace Lavender
 			m_Registry.remove<TComponent>(m_Entities[entity]);
 		}
 
-		std::unordered_map<UUID, entt::entity>& GetEntityMap() { return m_Entities; }
+		inline entt::registry& GetRegistry() { return m_Registry; }
+		inline std::unordered_map<UUID, entt::entity>& GetEntityMap() { return m_Entities; }
 
 		Ref<Registry> DeepCopy();
 

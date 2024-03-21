@@ -2,6 +2,8 @@
 
 #include "Lavender/Utils/Utils.hpp"
 
+#include "Lavender/Renderer/Viewport.hpp"
+
 #include "Lavender/Workspace/Scene.hpp"
 
 namespace Lavender
@@ -20,14 +22,18 @@ namespace Lavender
 
 		void OnUpdate(float deltaTime);
 		void OnRender();
+		void OnImGuiRender();
 
-		inline void AddScene(Ref<Scene> scene, const std::string& name = "Unnamed scene", bool active = false) { m_Scenes.Add(scene, name, active); }
+		void AddScene(Ref<Scene> scene, const std::string& name = "Unnamed scene", bool active = false);
 
 		inline SceneCollection& GetSceneCollection() { return m_Scenes; }
+		inline Ref<Viewport> GetViewport() { return m_Viewport; }
 
 		static Ref<Project> Create();
 
 	private:
+		Ref<Viewport> m_Viewport = nullptr;
+
 		SceneCollection m_Scenes = {};
 
 		friend class ProjectSerializer;

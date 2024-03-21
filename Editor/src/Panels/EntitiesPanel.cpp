@@ -106,6 +106,7 @@ namespace Lavender
 					//UI::TableSetupColumn("Label", UI::TableColumnFlags::None, 100.0f);
 					//UI::TableSetupColumn("Value", UI::TableColumnFlags::IndentEnable | UI::TableColumnFlags::NoClip, UI::GetContentRegionAvail().x - 100.0f);
 
+					// TODO: Look into ImGui tables, so the user doesn't have to move the column line every time.
 					UI::BeginPropertyGrid(2);
 
 					UI::ScopedStyle colour = UI::StyleColour(UI::StyleColourType::FrameBg, UI::Colours::NearBlack);
@@ -149,6 +150,19 @@ namespace Lavender
 
 					//UI::EndTable();
 					UI::EndPropertyGrid();
+				}
+			}
+
+			// MeshComponent
+			if (registry->HasComponent<MeshComponent>(m_SelectedUUID))
+			{
+				MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
+
+				ComponentUsage usage = BeginECSComponent<MeshComponent>();
+				if (usage & ComponentUsage::Opened)
+				{
+					// TODO: Make nice
+					UI::Text("Has mesh :O");
 				}
 			}
 

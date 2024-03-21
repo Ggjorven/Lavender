@@ -23,6 +23,9 @@ namespace Lavender
 
 		void SetData(void* data, size_t size) override;
 
+		void Upload() override;
+		void Upload(Ref<Pipeline> pipeline, UniformElement element) override;
+
 		VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
 
 		VkImage GetVulkanImage() { return m_Image; }
@@ -30,8 +33,6 @@ namespace Lavender
 		VkSampler GetSampler() { return m_Sampler; }
 
 	private:
-		void Upload();
-
 		void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 	private:

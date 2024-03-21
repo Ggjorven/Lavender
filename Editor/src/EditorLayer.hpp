@@ -13,6 +13,7 @@
 #include <Lavender/Renderer/UniformBuffer.hpp>
 #include <Lavender/Renderer/Image.hpp>
 #include <Lavender/Renderer/Viewport.hpp>
+#include <Lavender/Renderer/Mesh.hpp>
 
 #include <Lavender/Workspace/Project.hpp>
 
@@ -43,18 +44,11 @@ private:
 private:
 	Ref<UIPreferences> m_Preferences = nullptr;
 
-	Ref<Viewport> m_Viewport = nullptr;
-
 	Ref<Project> m_Project = nullptr;
 	Ref<EntitiesPanel> m_EntityPanel = nullptr;
 
-	Ref<Pipeline> m_Pipeline = nullptr;
-
-	Ref<VertexBuffer> m_VertexBuffer = nullptr;
-	Ref<IndexBuffer> m_IndexBuffer = nullptr;
-
 	Ref<Image2D> m_Image = nullptr;
-	Ref<UniformBuffer> m_CameraBuffer = nullptr;
 
 	Entity m_Entity = {};
+	Mesh m_Mesh = {};
 };

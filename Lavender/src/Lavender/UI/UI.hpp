@@ -229,7 +229,6 @@ namespace Lavender::UI
     void BeginPropertyGrid(uint32_t columns);
     void EndPropertyGrid();
 
-
 	void BeginCustomProperty(const std::string& label, const std::string& helpText = "");
 	void EndCustomProperty();
 

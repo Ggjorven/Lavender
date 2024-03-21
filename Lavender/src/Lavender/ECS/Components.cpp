@@ -14,4 +14,9 @@ namespace Lavender
 	{
 	}
 
+	MeshComponent::MeshComponent(Mesh& mesh)
+		: MeshObject(mesh)
+	{
+	}
+
 }

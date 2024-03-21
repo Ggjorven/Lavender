@@ -4,6 +4,9 @@
 
 #include <glm/glm.hpp>
 
+#include "Lavender/Renderer/Mesh.hpp"
+#include "Lavender/Renderer/Image.hpp"
+
 namespace Lavender
 {
 
@@ -15,7 +18,7 @@ namespace Lavender
 	public:
 		TagComponent() = default;
 		TagComponent(const std::string& str);
-		TagComponent(const TagComponent& tag) = default;
+		TagComponent(const TagComponent& other) = default;
 	};
 
 	struct TransformComponent
@@ -28,12 +31,24 @@ namespace Lavender
 	public:
 		TransformComponent() = default;
 		TransformComponent(const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotation);
-		TransformComponent(const TransformComponent& tag) = default;
+		TransformComponent(const TransformComponent& other) = default;
+	};
+
+	struct MeshComponent // TODO: Implement for scripting
+	{
+	public:
+		Mesh MeshObject = {};
+		Ref<Image2D> Image = nullptr; // TODO: Copy on MeshComponent copy
+
+	public:
+		MeshComponent() = default;
+		MeshComponent(Mesh& mesh);
+		MeshComponent(const MeshComponent& other) = default; // TODO: ^
 	};
 
 	enum class Component
 	{
-		None = 0, Tag, Transform
+		None = 0, Tag, Transform, Mesh
 	};
 
 	template<typename TComponent>
@@ -43,6 +58,8 @@ namespace Lavender
 			return Component::Tag;
 		else if (typeid(TComponent) == typeid(TransformComponent))
 			return Component::Transform;
+		else if (typeid(TComponent) == typeid(MeshComponent))
+			return Component::Mesh;
 
 		return Component::None;
 	}
@@ -54,6 +71,8 @@ namespace Lavender
 			return "TagComponent";
 		else if (typeid(TComponent) == typeid(TransformComponent))
 			return "TransformComponent";
+		else if (typeid(TComponent) == typeid(MeshComponent))
+			return "MeshComponent";
 
 		return "Undefined Component";
 	}
@@ -63,6 +82,6 @@ namespace Lavender
 	{
 	};
 
-	using AllComponents = ComponentGroup<TagComponent, TransformComponent>;
+	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent>;
 
 }

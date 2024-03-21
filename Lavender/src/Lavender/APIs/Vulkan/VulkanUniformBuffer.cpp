@@ -51,7 +51,12 @@ namespace Lavender
 
 	void VulkanUniformBuffer::Upload()
 	{
-		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(m_Pipeline);
+		Upload(m_Pipeline, m_Element);
+	}
+
+	void VulkanUniformBuffer::Upload(Ref<Pipeline> pipeline, UniformElement element)
+	{
+		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(pipeline);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
@@ -62,11 +67,11 @@ namespace Lavender
 
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[m_Element.Set][i];
-			descriptorWrite.dstBinding = m_Element.Binding;
+			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[element.Set][i];
+			descriptorWrite.dstBinding = element.Binding;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = m_Element.Count;
+			descriptorWrite.descriptorCount = element.Count;
 			descriptorWrite.pBufferInfo = &bufferInfo;
 
 			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);

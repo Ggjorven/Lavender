@@ -24,12 +24,13 @@ namespace Lavender
 		: m_Width(width), m_Height(height), m_Miplevels(1)
 	{
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+		VkFormat format = context->GetSwapChain()->GetColourFormat();
 
-		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
+		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
 
-		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, format, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 
-		VulkanAllocator::TransitionImageLayout(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
+		VulkanAllocator::TransitionImageLayout(m_Image.Image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
 	}
@@ -49,7 +50,9 @@ namespace Lavender
 	{
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		auto device = context->GetLogicalDevice()->GetVulkanDevice();
-		
+
+		VkFormat format = context->GetSwapChain()->GetColourFormat();
+
 		vkDeviceWaitIdle(device);
 
 		m_Width = width;
@@ -58,11 +61,11 @@ namespace Lavender
 		VulkanAllocator::DestroyImage(m_Image.Image, m_Image.Allocation);
 		vkDestroyImageView(device, m_Image.ImageView, nullptr);
 
-		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
+		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
 
-		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, format, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 
-		VulkanAllocator::TransitionImageLayout(m_Image.Image, context->GetSwapChain()->GetColourFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
+		VulkanAllocator::TransitionImageLayout(m_Image.Image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 	}
 
 

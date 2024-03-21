@@ -3,8 +3,24 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/RenderCommandBuffer.hpp"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+// TODO: Remove ^^
+
 namespace Lavender
 {
+
+	// TODO: Move/remove
+	struct TempCamera
+	{
+	public:
+		glm::mat4 Model = {};
+		glm::mat4 View = {};
+		glm::mat4 Projection = {};
+	};
 
 	Scene::Scene()
 		: m_Collection(RegistryCollection::Create())
@@ -40,16 +56,36 @@ namespace Lavender
 		{
 		case Scene::State::Editor:
 		{
-			if (!m_Script->IsDetached())
+			if (m_Script && !m_Script->IsDetached())
 			{
 				for (auto& e : m_EntityInterfaces)
 					e.second->InvokeOnUpdate(deltaTime);
+			}
+			{
+				/*
+				auto& window = Application::Get().GetWindow();
+				if (m_Project->GetViewport()->GetWidth() != 0 && m_Project->GetViewport()->GetHeight() != 0) //Note(Jorben): This if state is because glm::perspective doesn't allow the aspectratio to be 0
+				{
+					static float timer = 0.0f;
+					timer += deltaTime;
+				
+					Camera camera = {};
+					camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(timer * 6.0f), glm::vec3(0.0f, 0.0f 1.0f));
+					camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec(0.0f, 0.0f, 1.0f));
+					camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Project->GetViewport()>GetWidth() / (float)m_Project->GetViewport()->GetHeight(), 0.1f, 10.0f);
+				
+					if (Renderer::GetAPI() == RenderingAPI::Vulkan)
+						camera.Projection[1][1] *= -1;
+				
+					m_CameraBuffer->SetData((void*)&camera, sizeof(Camera));
+				}
+				*/
 			}
 			break;
 		}
 		case Scene::State::Runtime:
 		{
-			if (!m_Script->IsDetached())
+			if (m_Script && !m_Script->IsDetached())
 			{
 				for (auto& e : m_EntityInterfaces)
 					e.second->InvokeOnUpdate(deltaTime);
@@ -63,12 +99,28 @@ namespace Lavender
 		}
 	}
 
-	void Scene::OnRender()
+	void Scene::OnRender(Ref<RenderCommandBuffer> cmdBuffer)
 	{
 		switch (m_State)
 		{
 		case Scene::State::Editor:
 		{
+			auto view = m_Collection->GetMainRegistry()->GetRegistry().view<MeshComponent>();
+			for (auto& entity : view)
+			{
+				if ((uint32_t)entity == 0)
+					break;
+
+				MeshComponent& mesh = view.get<MeshComponent>(entity);
+
+				m_Assets->GetPipeline(AssetManager::PipelineType::MeshAndImage)->Use(cmdBuffer);
+			
+				mesh.MeshObject.GetVertexBuffer()->Bind(cmdBuffer);
+				mesh.MeshObject.GetIndexBuffer()->Bind(cmdBuffer);
+
+				Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject.GetIndexBuffer());
+			}
+
 			break;
 		}
 		case Scene::State::Runtime:
@@ -88,6 +140,17 @@ namespace Lavender
 		m_RegistryInterface = RegistryInterface::Create(m_Collection, m_Script);
 
 		// TODO: Reinitialize everything
+	}
+
+	void Scene::InitializeAssets(Ref<RenderPass> renderPass)
+	{
+		m_Assets = AssetManager::Create(renderPass);
+
+		// TODO: Move to SceneRenderer and change how this works
+		Ref<Pipeline> meshPipeline = m_Assets->GetPipeline(AssetManager::PipelineType::MeshAndImage); // Default pipeline?
+
+		auto& layout = meshPipeline->GetSpecification().Uniformlayout;
+		m_CameraBuffer = UniformBuffer::Create(meshPipeline, layout.GetElementByName(0, "u_Camera"), sizeof(TempCamera));
 	}
 
 	Ref<Scene> Scene::Create()

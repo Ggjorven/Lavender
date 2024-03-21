@@ -22,12 +22,13 @@ namespace Lavender
 
 		virtual void SetShader(Ref<Shader> shader) = 0;
 
-		// TODO: Make some arguments = nullptr to remove the clutter of constructors
+		virtual PipelineSpecification& GetSpecification() = 0;
+
 		static Ref<Pipeline> Create();
 		static Ref<Pipeline> Create(PipelineSpecification specs);
 		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader);
 		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<RenderPass> renderpass);
-		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass);  
 	};
 
 }

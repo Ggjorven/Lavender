@@ -21,8 +21,8 @@ namespace Lavender
 
 		void SetData(void* data, size_t size) override;
 
-	private:
-		void Upload();
+		void Upload() override;
+		void Upload(Ref<Pipeline> pipeline, UniformElement element) override;
 
 	private:
 		Ref<Pipeline> m_Pipeline = nullptr;

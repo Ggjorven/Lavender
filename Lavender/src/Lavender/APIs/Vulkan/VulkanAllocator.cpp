@@ -4,8 +4,10 @@
 #include "Lavender/Core/Logging.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
+
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanCommands.hpp"
+#include "Lavender/APIs/Vulkan/VulkanUtils.hpp"
 
 namespace Lavender
 {
@@ -67,7 +69,11 @@ namespace Lavender
 		allocCreateInfo.usage = memUsage;
 
 		VmaAllocation allocation = VK_NULL_HANDLE;
-		vmaCreateImage(s_Allocator, &imageInfo, &allocCreateInfo, &image, &allocation, nullptr);
+		VkResult result = vmaCreateImage(s_Allocator, &imageInfo, &allocCreateInfo, &image, &allocation, nullptr);
+		if (result != VK_SUCCESS)
+		{
+			LV_LOG_ERROR("Failed to create Vulkan image. Code: {0}", VKResultToString(result));
+		}
 
 		return allocation;
 	}
@@ -94,7 +100,11 @@ namespace Lavender
 		allocCreateInfo.requiredFlags = requiredFlags;
 
 		VmaAllocation allocation = VK_NULL_HANDLE;
-		vmaCreateImage(s_Allocator, &imageInfo, &allocCreateInfo, &image, &allocation, nullptr);
+		VkResult result = vmaCreateImage(s_Allocator, &imageInfo, &allocCreateInfo, &image, &allocation, nullptr);
+		if (result != VK_SUCCESS)
+		{
+			LV_LOG_ERROR("Failed to create Vulkan image. Code: {0}", VKResultToString(result));
+		}
 
 		return allocation;
 	}

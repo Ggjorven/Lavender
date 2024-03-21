@@ -82,7 +82,12 @@ namespace Lavender
 
 	void VulkanImage2D::Upload()
 	{
-		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(m_Pipeline);
+		Upload(m_Pipeline, m_Element);
+	}
+
+	void VulkanImage2D::Upload(Ref<Pipeline> pipeline, UniformElement element)
+	{
+		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(pipeline);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
@@ -93,11 +98,11 @@ namespace Lavender
 
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[m_Element.Set][i];
-			descriptorWrite.dstBinding = m_Element.Binding;
+			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[element.Set][i];
+			descriptorWrite.dstBinding = element.Binding;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite.descriptorCount = m_Element.Count;
+			descriptorWrite.descriptorCount = element.Count;
 			descriptorWrite.pImageInfo = &imageInfo;
 
 			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);

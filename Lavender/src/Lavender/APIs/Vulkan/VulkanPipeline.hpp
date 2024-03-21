@@ -32,6 +32,8 @@ namespace Lavender
 
 		inline void SetShader(Ref<Shader> shader) override { m_Shader = shader; }
 
+		inline PipelineSpecification& GetSpecification() override { return m_Specification; };
+
 	private:
 		void CreateDescriptorSetLayout();
 		void CreateGraphicsPipeline();
