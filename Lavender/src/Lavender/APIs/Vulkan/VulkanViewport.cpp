@@ -5,6 +5,8 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/Renderer/Mesh.hpp"
+#include "Lavender/Renderer/Shader.hpp"
 #include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
@@ -269,11 +271,33 @@ namespace Lavender
 		auto image = RefHelper::Create<VulkanViewportImage>(width, height);
 		m_Renderpass = RefHelper::Create<VulkanViewportRenderPass>(image);
 
-		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		// Create pipeline
+		ShaderCode code = {};
+		code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
+		code.FragmentSPIRV = Shader::ReadSPIRVFile("assets/shaders/frag.spv");
+		Ref<Shader> shader = Shader::Create(code);
+
+		UniformLayout uniformLayout = {
+			{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
+			{ UniformDataType::UniformBuffer, 0, 1, "u_Camera", UniformElement::ShaderStage::Vertex }
+		};
+
+		PipelineSpecification pipelineSpecs = {};
+		pipelineSpecs.Bufferlayout = MeshVertex::GetLayout();
+		pipelineSpecs.Uniformlayout = uniformLayout;
+
+		pipelineSpecs.Polygonmode = PipelineSpecification::PolygonMode::Fill;
+		pipelineSpecs.LineWidth = 1.0f;
+		pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Back;
+
+		m_Pipeline = RefHelper::Create<VulkanPipeline>(pipelineSpecs, shader, m_Renderpass->GetRenderPass());
+		m_Pipeline->Initialize();
 
 		m_WindowStyle = UI::StyleList({
-			{ UI::StyleType::WindowPadding, glm::vec2(0.0f, 0.0f) },
+			{ UI::StyleType::WindowPadding, { 0.0f, 0.0f} }
 		});
+
+		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	VulkanViewport::~VulkanViewport()
@@ -289,6 +313,8 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginFrame");
 		m_Renderpass->Begin();
+
+		m_Pipeline->Use(m_Renderpass->GetCommandBuffer());
 	}
 
 	void VulkanViewport::EndFrame()

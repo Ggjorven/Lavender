@@ -44,23 +44,21 @@ void EditorLayer::OnAttach()
 
 	m_Project = Project::Create();
 	
-	auto scene = Scene::Create();
+	auto scene = m_Project->CreateAndAddScene();
 
 	m_Entity = scene->CreateEntity();
 	m_Entity.AddComponent<TagComponent>({ "Viking room" });
 	m_Entity.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
-	m_Entity.AddComponent<MeshComponent>(MeshComponent(m_Mesh));
+	
+	m_Mesh = Mesh("assets/objects/viking_room.obj");
+	m_Image = Image2D::Create("assets/objects/viking_room.png");
+	m_Entity.AddComponent<MeshComponent>(MeshComponent(m_Mesh, m_Image));
 
 	m_Project->AddScene(scene, "Main", true);
 
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
 
-	m_Mesh = Mesh("assets/objects/viking_room.obj");
-
-	//m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/objects/viking_room.png");
-	//m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
-
-	// Test area
+	// Test area // TODO: Remove
 	TEMP();
 }
 
@@ -75,23 +73,6 @@ void EditorLayer::OnUpdate(float deltaTime)
 	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
 
 	m_Project->OnUpdate(deltaTime);
-
-	//auto& window = Application::Get().GetWindow();
-	//if (m_Project->GetViewport()->GetWidth() != 0 && m_Project->GetViewport()->GetHeight() != 0) // Note(Jorben): This if state is because glm::perspective doesn't allow the aspectratio to be 0
-	//{
-	//	static float timer = 0.0f;
-	//	timer += deltaTime;
-	//
-	//	Camera camera = {};
-	//	camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(timer * 6.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//	camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//	camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Project->GetViewport()->GetWidth() / (float)m_Project->GetViewport()->GetHeight(), 0.1f, 10.0f);
-	//
-	//	if (Renderer::GetAPI() == RenderingAPI::Vulkan)
-	//		camera.Projection[1][1] *= -1;
-	//
-	//	m_CameraBuffer->SetData((void*)&camera, sizeof(Camera));
-	//}
 }
 
 void EditorLayer::OnRender()
@@ -99,12 +80,6 @@ void EditorLayer::OnRender()
 	LV_PROFILE_SCOPE("EditorLayer::OnRender");
 
 	m_Project->OnRender();
-
-	//m_Pipeline->Use(m_Viewport->GetRenderPass()->GetCommandBuffer());
-	//m_Mesh.GetVertexBuffer()->Bind(m_Viewport->GetRenderPass()->GetCommandBuffer());
-	//m_Mesh.GetIndexBuffer()->Bind(m_Viewport->GetRenderPass()->GetCommandBuffer());
-	
-	//Renderer::DrawIndexed(m_Viewport->GetRenderPass()->GetCommandBuffer(), m_Mesh.GetIndexBuffer());
 }
 
 void EditorLayer::OnImGuiRender()

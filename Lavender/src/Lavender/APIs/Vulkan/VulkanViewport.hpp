@@ -7,6 +7,7 @@
 #include "Lavender/Renderer/Viewport.hpp"
 #include "Lavender/Renderer/RenderPass.hpp"
 
+#include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
 #include "Lavender/UI/Style.hpp"
@@ -41,7 +42,6 @@ namespace Lavender
 
 	private:
 		ViewportImageGroup m_Image = {};
-
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
 		uint32_t m_Width = 0, m_Height = 0, m_Miplevels = 0;
@@ -93,14 +93,16 @@ namespace Lavender
 		void Resize(uint32_t width, uint32_t height) override;
 
 		inline Ref<RenderPass> GetRenderPass() override { return m_Renderpass->GetRenderPass(); }
+		inline Ref<Pipeline> GetPipeline() override { return m_Pipeline; }
 		ImTextureID GetCurrentImGuiTexture() override;
 
 	private:
+		Ref<VulkanPipeline> m_Pipeline = VK_NULL_HANDLE;
 		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
 
-		ImTextureID m_ImGuiImage = {};
 		UI::StyleList m_WindowStyle = {};
 
+		ImTextureID m_ImGuiImage = {};
 		uint32_t m_Width = 0, m_Height = 0;
 	};
 

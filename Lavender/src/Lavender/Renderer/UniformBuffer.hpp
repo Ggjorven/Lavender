@@ -20,6 +20,7 @@ namespace Lavender
 		virtual void Upload() = 0;
 		virtual void Upload(Ref<Pipeline> pipeline, UniformElement element) = 0;
 
+		static Ref<UniformBuffer> Create(size_t dataSize);
 		static Ref<UniformBuffer> Create(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize);
 	};
 

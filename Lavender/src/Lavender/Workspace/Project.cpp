@@ -45,10 +45,17 @@ namespace Lavender
         m_Viewport->EndRender();
     }
 
+    Ref<Scene> Project::CreateAndAddScene()
+    {
+        return Scene::Create(m_Viewport);
+    }
+
     void Project::AddScene(Ref<Scene> scene, const std::string& name, bool active)
     {
         m_Scenes.Add(scene, name, active);
-        scene->InitializeAssets(m_Viewport->GetRenderPass());
+        
+        auto& camera = scene->GetCamera();
+        camera = EditorCamera::Create(m_Viewport);
     }
 
     Ref<Project> Project::Create()

@@ -24,6 +24,7 @@ namespace Lavender
 		void OnRender();
 		void OnImGuiRender();
 
+		Ref<Scene> CreateAndAddScene();
 		void AddScene(Ref<Scene> scene, const std::string& name = "Unnamed scene", bool active = false);
 
 		inline SceneCollection& GetSceneCollection() { return m_Scenes; }

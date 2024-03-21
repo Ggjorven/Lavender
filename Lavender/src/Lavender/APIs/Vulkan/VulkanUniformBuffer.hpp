@@ -16,6 +16,7 @@ namespace Lavender
 	class VulkanUniformBuffer : public UniformBuffer
 	{
 	public:
+		VulkanUniformBuffer(size_t dataSize);
 		VulkanUniformBuffer(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize);
 		virtual ~VulkanUniformBuffer();
 

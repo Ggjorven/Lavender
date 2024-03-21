@@ -6,38 +6,21 @@
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-// TODO: Remove ^^
+#include "Lavender/Workspace/SceneRenderer.hpp"
 
 namespace Lavender
 {
 
-	// TODO: Move/remove
-	struct TempCamera
-	{
-	public:
-		glm::mat4 Model = {};
-		glm::mat4 View = {};
-		glm::mat4 Projection = {};
-	};
-
-	Scene::Scene()
-		: m_Collection(RegistryCollection::Create())
+	///////////////////////////////////////////////////////////////////////////
+	// SceneCollection
+	///////////////////////////////////////////////////////////////////////////
+	Scene::Scene(Ref<Viewport> viewport)
+		: m_Viewport(viewport), m_Collection(RegistryCollection::Create())
 	{
 	}
 
 	Scene::~Scene()
 	{
-	}
-
-	void Scene::ReloadScript()
-	{
-		m_Script->Reload();
-		m_RegistryInterface->Reload();
-		
-		for (auto& e : m_EntityInterfaces)
-			e.second->Reload();
 	}
 
 	void Scene::StartRuntime()
@@ -55,43 +38,11 @@ namespace Lavender
 		switch (m_State)
 		{
 		case Scene::State::Editor:
-		{
-			if (m_Script && !m_Script->IsDetached())
-			{
-				for (auto& e : m_EntityInterfaces)
-					e.second->InvokeOnUpdate(deltaTime);
-			}
-			{
-				/*
-				auto& window = Application::Get().GetWindow();
-				if (m_Project->GetViewport()->GetWidth() != 0 && m_Project->GetViewport()->GetHeight() != 0) //Note(Jorben): This if state is because glm::perspective doesn't allow the aspectratio to be 0
-				{
-					static float timer = 0.0f;
-					timer += deltaTime;
-				
-					Camera camera = {};
-					camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(timer * 6.0f), glm::vec3(0.0f, 0.0f 1.0f));
-					camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec(0.0f, 0.0f, 1.0f));
-					camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Project->GetViewport()>GetWidth() / (float)m_Project->GetViewport()->GetHeight(), 0.1f, 10.0f);
-				
-					if (Renderer::GetAPI() == RenderingAPI::Vulkan)
-						camera.Projection[1][1] *= -1;
-				
-					m_CameraBuffer->SetData((void*)&camera, sizeof(Camera));
-				}
-				*/
-			}
+			UpdateEditor(deltaTime);
 			break;
-		}
 		case Scene::State::Runtime:
-		{
-			if (m_Script && !m_Script->IsDetached())
-			{
-				for (auto& e : m_EntityInterfaces)
-					e.second->InvokeOnUpdate(deltaTime);
-			}
+			UpdateRuntime(deltaTime);
 			break;
-		}
 
 		default:
 			LV_LOG_FATAL("No proper state specified.");
@@ -104,29 +55,11 @@ namespace Lavender
 		switch (m_State)
 		{
 		case Scene::State::Editor:
-		{
-			auto view = m_Collection->GetMainRegistry()->GetRegistry().view<MeshComponent>();
-			for (auto& entity : view)
-			{
-				if ((uint32_t)entity == 0)
-					break;
-
-				MeshComponent& mesh = view.get<MeshComponent>(entity);
-
-				m_Assets->GetPipeline(AssetManager::PipelineType::MeshAndImage)->Use(cmdBuffer);
-			
-				mesh.MeshObject.GetVertexBuffer()->Bind(cmdBuffer);
-				mesh.MeshObject.GetIndexBuffer()->Bind(cmdBuffer);
-
-				Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject.GetIndexBuffer());
-			}
-
+			RenderEditor(cmdBuffer);
 			break;
-		}
 		case Scene::State::Runtime:
-		{
+			RenderRuntime(cmdBuffer);
 			break;
-		}
 
 		default:
 			LV_LOG_FATAL("No proper state specified.");
@@ -138,26 +71,45 @@ namespace Lavender
 	{
 		m_Script = script;
 		m_RegistryInterface = RegistryInterface::Create(m_Collection, m_Script);
-
-		// TODO: Reinitialize everything
+		m_EntityInterfaces.clear();
 	}
 
-	void Scene::InitializeAssets(Ref<RenderPass> renderPass)
+	void Scene::ReloadScript()
 	{
-		m_Assets = AssetManager::Create(renderPass);
+		m_Script->Reload();
+		m_RegistryInterface->Reload();
 
-		// TODO: Move to SceneRenderer and change how this works
-		Ref<Pipeline> meshPipeline = m_Assets->GetPipeline(AssetManager::PipelineType::MeshAndImage); // Default pipeline?
-
-		auto& layout = meshPipeline->GetSpecification().Uniformlayout;
-		m_CameraBuffer = UniformBuffer::Create(meshPipeline, layout.GetElementByName(0, "u_Camera"), sizeof(TempCamera));
+		for (auto& e : m_EntityInterfaces)
+			e.second->Reload();
 	}
 
-	Ref<Scene> Scene::Create()
+	Ref<Scene> Scene::Create(Ref<Viewport> viewport)
 	{
-		return RefHelper::Create<Scene>();
+		return RefHelper::Create<Scene>(viewport);
 	}
 
+	void Scene::UpdateEditor(float deltaTime)
+	{
+		m_EditorCamera->OnUpdate(deltaTime);
+	}
+
+	void Scene::RenderEditor(Ref<RenderCommandBuffer> cmdBuffer)
+	{
+		SceneRenderer renderer(this);
+		renderer.Render(m_EditorCamera->GetCamera(), cmdBuffer);
+	}
+
+	void Scene::UpdateRuntime(float deltaTime)
+	{
+	}
+
+	void Scene::RenderRuntime(Ref<RenderCommandBuffer> cmdBuffer)
+	{
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	// SceneCollection
+	///////////////////////////////////////////////////////////////////////////
 	void SceneCollection::Clear()
 	{
 		m_Scenes.clear();

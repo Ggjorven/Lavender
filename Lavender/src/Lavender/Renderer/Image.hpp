@@ -23,6 +23,7 @@ namespace Lavender
 		virtual void Upload() = 0;
 		virtual void Upload(Ref<Pipeline> pipeline, UniformElement element) = 0;
 
+		static Ref<Image2D> Create(const std::filesystem::path& path);
 		static Ref<Image2D> Create(Ref<Pipeline> pipeline, UniformElement element, uint32_t width, uint32_t height);
 		static Ref<Image2D> Create(Ref<Pipeline> pipeline, UniformElement element, const std::filesystem::path& path);
 	};

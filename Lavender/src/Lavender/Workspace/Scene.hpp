@@ -15,8 +15,11 @@
 #include "Lavender/Scripting/EntityInterface.hpp"
 #include "Lavender/Scripting/RegistryInterface.hpp"
 
-#include "Lavender/Renderer/AssetManager.hpp"
+#include "Lavender/Renderer/Viewport.hpp"
+#include "Lavender/Renderer/Camera.hpp"
 #include "Lavender/Renderer/UniformBuffer.hpp"
+
+#include "Lavender/Workspace/AssetManager.hpp"
 
 #ifdef LV_PLATFORM_WINDOWS
 #include "Lavender/Platforms/Windows/WindowsEntityInterface.hpp"
@@ -28,6 +31,11 @@ namespace Lavender
 	class SceneSerializer;
 	class RenderCommandBuffer;
 
+	template<typename T>
+	void SetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name, T value);
+	template<typename T>
+	T GetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name);
+
 	class Scene
 	{
 	public:
@@ -37,72 +45,47 @@ namespace Lavender
 		};
 
 	public:
-		Scene();
+		Scene(Ref<Viewport> viewport);
 		virtual ~Scene();
-
-		void ReloadScript();
 
 		void StartRuntime();
 		void StopRuntime();
 
 		void OnUpdate(float deltaTime);
-		void OnRender(Ref<RenderCommandBuffer> cmdBuffer); // TODO: SceneRenderer
+		void OnRender(Ref<RenderCommandBuffer> cmdBuffer);
 
 		void SetScript(Ref<ScriptLoader> script);
+		void ReloadScript();
 		void AddScriptedEntity(Ref<EntityInterface> entityInterface) { m_EntityInterfaces[entityInterface->GetEntity().GetUUID()] = entityInterface; }
-
-		void InitializeAssets(Ref<RenderPass> renderPass);
 
 		inline Ref<EntityInterface> GetEntityInterface(UUID uuid) { return m_EntityInterfaces[uuid]; }
 
+		inline Ref<EditorCamera>& GetCamera() { return m_EditorCamera; }
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
+		inline Ref<Viewport> GetViewport() { return m_Viewport; }
+
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
-
-		static Ref<Scene> Create();
-
-		template<typename T>
-		inline void SetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name, T value)
-		{
-			#ifdef LV_PLATFORM_WINDOWS
-			Ref<WindowsEntityInterface> i = RefHelper::RefAs<WindowsEntityInterface>(entityInterface);
-			if (i->HasVariable(name))
-			{
-				i->Set<T>(name, value);
-				return;
-			}
-			#endif
-
-			LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
-		}
-
-		template<typename T>
-		inline T GetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name)
-		{
-			#ifdef LV_PLATFORM_WINDOWS
-			Ref<WindowsEntityInterface> i = RefHelper::RefAs<WindowsEntityInterface>(entityInterface);
-			if (i->HasVariable(name))
-			{
-				return i->Get<T>(name);
-			}
-			#endif
-
-			LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
-			return T();
-		}
+		static Ref<Scene> Create(Ref<Viewport> viewport);
 
 	private:
-		State m_State = State::Editor;
+		void UpdateEditor(float deltaTime);
+		void UpdateRuntime(float deltaTime);
 
+		void RenderEditor(Ref<RenderCommandBuffer> cmdBuffer);
+		void RenderRuntime(Ref<RenderCommandBuffer> cmdBuffer);
+
+	private:
 		Ref<AssetManager> m_Assets = nullptr;
 
 		Ref<RegistryCollection> m_Collection = nullptr;
-
 		Ref<ScriptLoader> m_Script = nullptr;
 		Ref<RegistryInterface> m_RegistryInterface = nullptr;
-		std::unordered_map<UUID, Ref<EntityInterface>> m_EntityInterfaces = { };
+		Dict<UUID, Ref<EntityInterface>> m_EntityInterfaces = { };
 
-		// TODO: Move to SceneRenderer
-		Ref<UniformBuffer> m_CameraBuffer = nullptr;
+		Ref<Viewport> m_Viewport = nullptr;
+		Ref<EditorCamera> m_EditorCamera = nullptr;
+
+		State m_State = State::Editor;
 
 		friend class SceneSerializer;
 	};
@@ -126,8 +109,42 @@ namespace Lavender
 		void Each(EachSceneFn function);
 
 	private:
-		std::unordered_map<std::string, Ref<Scene>> m_Scenes = { };
+		Dict<std::string, Ref<Scene>> m_Scenes = { };
 		std::pair<std::string, Ref<Scene>> m_ActiveScene = {};
 	};
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Helper functions for scripts
+	////////////////////////////////////////////////////////////////////////////////
+	template<typename T>
+	inline void SetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name, T value)
+	{
+		#ifdef LV_PLATFORM_WINDOWS
+		Ref<WindowsEntityInterface> i = RefHelper::RefAs<WindowsEntityInterface>(entityInterface);
+		if (i->HasVariable(name))
+		{
+			i->Set<T>(name, value);
+			return;
+		}
+		#endif
+
+		LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
+		return;
+	}
+
+	template<typename T>
+	inline T GetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name)
+	{
+		#ifdef LV_PLATFORM_WINDOWS
+		Ref<WindowsEntityInterface> i = RefHelper::RefAs<WindowsEntityInterface>(entityInterface);
+		if (i->HasVariable(name))
+		{
+			return i->Get<T>(name);
+		}
+		#endif
+
+		LV_LOG_WARN("Variable by name '{0}' doesn't exist.", name);
+		return T();
+	}
 
 }

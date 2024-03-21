@@ -1,9 +1,11 @@
 #pragma once
 
 #include <stdint.h>
+
 #include <memory>
 #include <queue>
 #include <type_traits>
+#include <unordered_map>
 
 #include "Lavender/Core/Logging.hpp"
 
@@ -101,5 +103,8 @@ namespace Lavender
             return newPtr;
         }
     };
+
+    template<typename Key, typename Value>
+    using Dict = std::unordered_map<Key, Value>;
 
 }

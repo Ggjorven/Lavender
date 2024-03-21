@@ -52,11 +52,11 @@ namespace Lavender
 		VkPipeline m_GraphicsPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
 
-		std::unordered_map<SetID, VkDescriptorSetLayout> m_DescriptorLayouts = { };
-		std::unordered_map<SetID, VkDescriptorPool> m_DescriptorPools = { };
+		Dict<SetID, VkDescriptorSetLayout> m_DescriptorLayouts = { };
+		Dict<SetID, VkDescriptorPool> m_DescriptorPools = { };
 
 		// Note(Jorben): The first index is the index of the set and the second are RenderConfig::FramesInFlight of sets.
-		std::unordered_map<SetID, std::vector<VkDescriptorSet>> m_DescriptorSets = { };
+		Dict<SetID, std::vector<VkDescriptorSet>> m_DescriptorSets = { };
 
 		friend class VulkanUniformBuffer;
 		friend class VulkanImage2D;

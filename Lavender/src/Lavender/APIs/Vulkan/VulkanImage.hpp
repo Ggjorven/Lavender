@@ -17,6 +17,7 @@ namespace Lavender
 	class VulkanImage2D : public Image2D
 	{
 	public:
+		VulkanImage2D(const std::filesystem::path& path);
 		VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, uint32_t width, uint32_t height);
 		VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, const std::filesystem::path& path);
 		virtual ~VulkanImage2D();

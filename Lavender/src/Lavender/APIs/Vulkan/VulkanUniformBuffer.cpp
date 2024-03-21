@@ -12,6 +12,17 @@
 namespace Lavender
 {
 
+	VulkanUniformBuffer::VulkanUniformBuffer(size_t dataSize)
+		: m_Size(dataSize)
+	{
+		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
+		m_Buffers.resize((size_t)framesInFlight);
+		m_Allocations.resize((size_t)framesInFlight);
+
+		for (size_t i = 0; i < framesInFlight; i++)
+			m_Allocations[i] = VulkanAllocator::AllocateBuffer((VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, m_Buffers[i]);
+	}
+
 	VulkanUniformBuffer::VulkanUniformBuffer(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize)
 		: m_Pipeline(pipeline), m_Element(element), m_Size(dataSize)
 	{
