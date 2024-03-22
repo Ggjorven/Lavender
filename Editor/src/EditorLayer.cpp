@@ -73,6 +73,15 @@ void EditorLayer::OnUpdate(float deltaTime)
 	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
 
 	m_Project->OnUpdate(deltaTime);
+
+	// TODO: Remove
+	static float timer = 0.0f;
+	timer += deltaTime;
+	if (timer > 1.0f)
+	{
+		Application::Get().GetWindow().SetTitle(fmt::format("Custom | FPS: {0}", (int)ImGui::GetIO().Framerate));
+		timer = 0.0f;
+	}
 }
 
 void EditorLayer::OnRender()

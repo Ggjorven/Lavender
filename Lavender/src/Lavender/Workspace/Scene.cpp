@@ -96,7 +96,7 @@ namespace Lavender
 	void Scene::RenderEditor(Ref<RenderCommandBuffer> cmdBuffer)
 	{
 		SceneRenderer renderer(this);
-		renderer.Render(m_EditorCamera->GetCamera(), cmdBuffer);
+		renderer.Render(m_EditorCamera, cmdBuffer);
 	}
 
 	void Scene::UpdateRuntime(float deltaTime)

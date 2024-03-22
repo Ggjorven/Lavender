@@ -18,7 +18,8 @@ namespace Lavender
 		SceneRenderer(Ref<Scene> scene);
 		virtual ~SceneRenderer();
 
-		void Render(const Camera& camera, Ref<RenderCommandBuffer> cmdBuffer);
+		// TODO: Add some kind of custom/runtime camera as well
+		void Render(Ref<EditorCamera>& camera, Ref<RenderCommandBuffer> cmdBuffer);
 
 	private:
 		Scene* m_Scene;

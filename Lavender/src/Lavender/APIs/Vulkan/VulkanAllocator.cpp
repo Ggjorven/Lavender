@@ -269,7 +269,7 @@ namespace Lavender
 		viewInfo.subresourceRange.layerCount = 1;
 		viewInfo.subresourceRange.aspectMask = aspectFlags;
 
-		VkImageView imageView;
+		VkImageView imageView = VK_NULL_HANDLE;
 		if (vkCreateImageView(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
 			LV_LOG_ERROR("Failed to create texture image view!");
 

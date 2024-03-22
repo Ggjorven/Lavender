@@ -25,7 +25,7 @@ namespace Lavender
 	{
 	}
 
-	void SceneRenderer::Render(const Camera& camera, Ref<RenderCommandBuffer> cmdBuffer)
+	void SceneRenderer::Render(Ref<EditorCamera>& camera, Ref<RenderCommandBuffer> cmdBuffer)
 	{
 		auto& registry = m_Scene->GetCollection()->GetMainRegistry()->GetRegistry();
 
@@ -45,6 +45,20 @@ namespace Lavender
 				Renderer::Wait();
 			}
 
+			// Change Model matrix based on transformation
+			Camera& cam = camera->GetCamera();
+			cam.Model = glm::mat4(1.0f); // Reset
+
+			auto transformView = registry.view<TransformComponent>();
+			if (transformView.contains(entity))
+			{
+				TransformComponent& transform = transformView.get<TransformComponent>(entity);
+
+				
+			}
+
+			camera->UpdateAndUpload();
+			Renderer::Wait();
 			Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject.GetIndexBuffer());
 		}
 	}

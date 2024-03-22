@@ -36,10 +36,15 @@ namespace Lavender
 
 				if (Renderer::GetAPI() == RenderingAPI::Vulkan)
 					m_Camera.Projection[1][1] *= -1;
-
-				m_CameraUniform->SetData((void*)&m_Camera, sizeof(Camera));
 			}
 		}
+
+		UpdateAndUpload();
+	}
+
+	void EditorCamera::UpdateAndUpload()
+	{
+		m_CameraUniform->SetData((void*)&m_Camera, sizeof(Camera));
 
 		auto pipeline = m_Viewport->GetPipeline();
 		auto element = pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Camera");

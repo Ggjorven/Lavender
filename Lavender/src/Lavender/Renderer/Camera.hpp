@@ -19,13 +19,15 @@ namespace Lavender
 
 	};
 
-	class EditorCamera : public Camera
+	class EditorCamera
 	{
 	public:
 		EditorCamera(Ref<Viewport> viewport);
 		virtual ~EditorCamera();
 
 		void OnUpdate(float deltaTime);
+
+		void UpdateAndUpload();
 
 		Camera& GetCamera() { return m_Camera; }
 		inline Ref<UniformBuffer> GetBuffer() { return m_CameraUniform; }
