@@ -95,7 +95,7 @@ namespace Lavender
 		UniformLayout(const std::initializer_list<UniformElement>& elements);
 		virtual ~UniformLayout() = default;
 
-		inline const Dict<uint32_t, std::vector<UniformElement>>& GetElements() const { return m_Elements; }
+		inline const Dict<SetID, std::vector<UniformElement>>& GetElements() const { return m_Elements; }
 
 		UniformElement GetElementByName(SetID set, const std::string& name);
 

@@ -25,12 +25,12 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<UniformBuffer> UniformBuffer::Create(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize)
+	Ref<UniformBuffer> UniformBuffer::Create(Ref<DescriptorSet> set, UniformElement element, size_t dataSize)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return RefHelper::Create<VulkanUniformBuffer>(pipeline, element, dataSize);
+			return RefHelper::Create<VulkanUniformBuffer>(set, element, dataSize);
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");

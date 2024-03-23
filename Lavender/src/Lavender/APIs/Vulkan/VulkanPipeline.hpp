@@ -14,17 +14,18 @@
 namespace Lavender
 {
 
-	class VulkanUniformBuffer;
 	class VulkanImage2D;
+	class VulkanUniformBuffer;
+	class VulkanDescriptorSetGroup;
 
 	class VulkanPipeline : public Pipeline
 	{
 	public:
 		VulkanPipeline();
-		VulkanPipeline(PipelineSpecification specs);
-		VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader);
-		VulkanPipeline(PipelineSpecification specs, Ref<RenderPass> renderpass);
-		VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass);
+		VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets);
+		VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<Shader> shader);
+		VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<RenderPass> renderpass);
+		VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<Shader> shader, Ref<RenderPass> renderpass);
 		virtual ~VulkanPipeline();
 
 		void Initialize() override;
@@ -33,12 +34,12 @@ namespace Lavender
 		inline void SetShader(Ref<Shader> shader) override { m_Shader = shader; }
 
 		inline PipelineSpecification& GetSpecification() override { return m_Specification; };
+		inline Ref<DescriptorSetGroup> GetDescriptorSets() override { return m_Sets; }
+
+		inline VkPipelineLayout GetVulkanLayout() { return m_PipelineLayout; }
 
 	private:
-		void CreateDescriptorSetLayout();
 		void CreateGraphicsPipeline();
-		void CreateDescriptorPool();
-		void CreateDescriptorSets();
 
 		VkVertexInputBindingDescription GetBindingDescription();
 		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
@@ -48,18 +49,14 @@ namespace Lavender
 		Ref<RenderPass> m_RenderPass = nullptr;
 
 		PipelineSpecification m_Specification = {};
+		Ref<DescriptorSetGroup> m_Sets = nullptr;
 
 		VkPipeline m_GraphicsPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
 
-		Dict<SetID, VkDescriptorSetLayout> m_DescriptorLayouts = { };
-		Dict<SetID, VkDescriptorPool> m_DescriptorPools = { };
-
-		// Note(Jorben): The first index is the index of the set and the second are RenderConfig::FramesInFlight of sets.
-		Dict<SetID, std::vector<VkDescriptorSet>> m_DescriptorSets = { };
-
-		friend class VulkanUniformBuffer;
 		friend class VulkanImage2D;
+		friend class VulkanUniformBuffer;
+		friend class VulkanDescriptorSetGroup;
 	};
 
 }

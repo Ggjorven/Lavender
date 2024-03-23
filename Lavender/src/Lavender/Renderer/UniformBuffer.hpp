@@ -7,6 +7,7 @@ namespace Lavender
 
 	struct UniformElement;
 	class Pipeline;
+	class DescriptorSet;
 
 	// Note(Jorben): Needs to be created after the pipeline
 	class UniformBuffer
@@ -18,10 +19,10 @@ namespace Lavender
 		virtual void SetData(void* data, size_t size) = 0;
 
 		virtual void Upload() = 0;
-		virtual void Upload(Ref<Pipeline> pipeline, UniformElement element) = 0;
+		virtual void Upload(Ref<DescriptorSet> set, UniformElement element) = 0;
 
 		static Ref<UniformBuffer> Create(size_t dataSize);
-		static Ref<UniformBuffer> Create(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize);
+		static Ref<UniformBuffer> Create(Ref<DescriptorSet> set, UniformElement element, size_t dataSize);
 	};
 
 }

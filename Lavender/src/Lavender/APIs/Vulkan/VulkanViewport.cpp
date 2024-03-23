@@ -8,6 +8,8 @@
 #include "Lavender/Renderer/Mesh.hpp"
 #include "Lavender/Renderer/Shader.hpp"
 #include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/UniformBuffer.hpp"
+#include "Lavender/Renderer/FrameResources.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
@@ -15,6 +17,8 @@
 #include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
 #include "Lavender/UI/UI.hpp"
+
+#include <glm/glm.hpp>
 
 #include <imgui_internal.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -271,28 +275,6 @@ namespace Lavender
 		auto image = RefHelper::Create<VulkanViewportImage>(width, height);
 		m_Renderpass = RefHelper::Create<VulkanViewportRenderPass>(image);
 
-		// Create pipeline
-		ShaderCode code = {};
-		code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
-		code.FragmentSPIRV = Shader::ReadSPIRVFile("assets/shaders/frag.spv");
-		Ref<Shader> shader = Shader::Create(code);
-
-		UniformLayout uniformLayout = {
-			{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
-			{ UniformDataType::UniformBuffer, 0, 1, "u_Camera", UniformElement::ShaderStage::Vertex }
-		};
-
-		PipelineSpecification pipelineSpecs = {};
-		pipelineSpecs.Bufferlayout = MeshVertex::GetLayout();
-		pipelineSpecs.Uniformlayout = uniformLayout;
-
-		pipelineSpecs.Polygonmode = PipelineSpecification::PolygonMode::Fill;
-		pipelineSpecs.LineWidth = 1.0f;
-		pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Back;
-
-		m_Pipeline = RefHelper::Create<VulkanPipeline>(pipelineSpecs, shader, m_Renderpass->GetRenderPass());
-		m_Pipeline->Initialize();
-
 		m_WindowStyle = UI::StyleList({
 			{ UI::StyleType::WindowPadding, { 0.0f, 0.0f} }
 		});
@@ -314,7 +296,7 @@ namespace Lavender
 		LV_PROFILE_SCOPE("VulkanViewport::BeginFrame");
 		m_Renderpass->Begin();
 
-		m_Pipeline->Use(m_Renderpass->GetCommandBuffer());
+		FrameResources::GetPipeline()->Use(m_Renderpass->GetCommandBuffer());
 	}
 
 	void VulkanViewport::EndFrame()

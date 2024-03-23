@@ -9,6 +9,7 @@ namespace Lavender
 	
 	class Shader;
 	class RenderPass;
+	class DescriptorSetGroup;
 	class RenderCommandBuffer;
 
 	class Pipeline
@@ -23,12 +24,13 @@ namespace Lavender
 		virtual void SetShader(Ref<Shader> shader) = 0;
 
 		virtual PipelineSpecification& GetSpecification() = 0;
+		virtual Ref<DescriptorSetGroup> GetDescriptorSets() = 0;
 
 		static Ref<Pipeline> Create();
-		static Ref<Pipeline> Create(PipelineSpecification specs);
-		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader);
-		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<RenderPass> renderpass);
-		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass);  
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<DescriptorSetGroup> sets);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<Shader> shader);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<RenderPass> renderpass);
+		static Ref<Pipeline> Create(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<Shader> shader, Ref<RenderPass> renderpass);  
 	};
 
 }

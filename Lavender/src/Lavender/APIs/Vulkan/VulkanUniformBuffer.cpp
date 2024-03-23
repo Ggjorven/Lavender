@@ -8,6 +8,7 @@
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+#include "Lavender/APIs/Vulkan/VulkanDescriptorSet.hpp"
 
 namespace Lavender
 {
@@ -23,8 +24,8 @@ namespace Lavender
 			m_Allocations[i] = VulkanAllocator::AllocateBuffer((VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, m_Buffers[i]);
 	}
 
-	VulkanUniformBuffer::VulkanUniformBuffer(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize)
-		: m_Pipeline(pipeline), m_Element(element), m_Size(dataSize)
+	VulkanUniformBuffer::VulkanUniformBuffer(Ref<DescriptorSet> set, UniformElement element, size_t dataSize)
+		: m_Set(set), m_Element(element), m_Size(dataSize)
 	{
 		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
 		m_Buffers.resize((size_t)framesInFlight);
@@ -62,12 +63,12 @@ namespace Lavender
 
 	void VulkanUniformBuffer::Upload()
 	{
-		Upload(m_Pipeline, m_Element);
+		Upload(m_Set, m_Element);
 	}
 
-	void VulkanUniformBuffer::Upload(Ref<Pipeline> pipeline, UniformElement element)
+	void VulkanUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element)
 	{
-		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(pipeline);
+		auto vkSet = RefHelper::RefAs<VulkanDescriptorSet>(set);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
@@ -78,7 +79,7 @@ namespace Lavender
 
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[element.Set][i];
+			descriptorWrite.dstSet = vkSet->GetVulkanSet((uint32_t)i);
 			descriptorWrite.dstBinding = element.Binding;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

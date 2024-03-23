@@ -93,11 +93,9 @@ namespace Lavender
 		void Resize(uint32_t width, uint32_t height) override;
 
 		inline Ref<RenderPass> GetRenderPass() override { return m_Renderpass->GetRenderPass(); }
-		inline Ref<Pipeline> GetPipeline() override { return m_Pipeline; }
 		ImTextureID GetCurrentImGuiTexture() override;
 
 	private:
-		Ref<VulkanPipeline> m_Pipeline = VK_NULL_HANDLE;
 		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
 
 		UI::StyleList m_WindowStyle = {};

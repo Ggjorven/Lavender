@@ -4,6 +4,8 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Core/Application.hpp"
 
+#include "Lavender/Renderer/FrameResources.hpp"
+
 namespace Lavender
 {
 
@@ -11,10 +13,13 @@ namespace Lavender
     {
         auto& window = Application::Get().GetWindow();
         m_Viewport = Viewport::Create(window.GetWidth(), window.GetHeight());
+
+        FrameResources::Init(this);
     }
 
     Project::~Project()
     {
+        FrameResources::Destroy();
     }
 
     void Project::StartRuntime()

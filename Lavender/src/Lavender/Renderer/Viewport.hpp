@@ -11,6 +11,7 @@ namespace Lavender
 {
 
 	class Pipeline;
+	class UniformBuffer;
 
 	// TODO: Fix for runtime with removing ImGui
 	class Viewport
@@ -31,7 +32,6 @@ namespace Lavender
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Ref<RenderPass> GetRenderPass() = 0;
-		virtual Ref<Pipeline> GetPipeline() = 0;
 		virtual ImTextureID GetCurrentImGuiTexture() = 0;
 
 		static Ref<Viewport> Create(uint32_t width, uint32_t height);

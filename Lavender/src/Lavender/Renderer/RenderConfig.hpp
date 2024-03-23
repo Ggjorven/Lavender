@@ -14,21 +14,18 @@ namespace Lavender
 	struct RendererSpecification
 	{
 		uint32_t FramesInFlight = 3;
-
-		// TODO: Add more 
+		uint32_t PreAllocatedDescriptorSets = 100; // For updating a model matrix // TODO: Change back to 100
 	};
 
 	struct RenderData
 	{
 	public:
 		uint32_t DrawCalls = 0;
-		// TODO: Add more...
 
 	public:
 		void Reset()
 		{
 			DrawCalls = 0;
-			// TODO: Add more...
 		}
 	};
 

@@ -46,13 +46,18 @@ void EditorLayer::OnAttach()
 	
 	auto scene = m_Project->CreateAndAddScene();
 
+	m_Image = Image2D::Create("assets/objects/viking_room.png");
+	m_Mesh = Mesh("assets/objects/viking_room.obj");
+
 	m_Entity = scene->CreateEntity();
 	m_Entity.AddComponent<TagComponent>({ "Viking room" });
 	m_Entity.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
-	
-	m_Mesh = Mesh("assets/objects/viking_room.obj");
-	m_Image = Image2D::Create("assets/objects/viking_room.png");
 	m_Entity.AddComponent<MeshComponent>(MeshComponent(m_Mesh, m_Image));
+
+	auto entity2 = scene->CreateEntity();
+	entity2.AddComponent<TagComponent>({ "Viking room2" });
+	entity2.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
+	entity2.AddComponent<MeshComponent>(MeshComponent(m_Mesh, m_Image));
 
 	m_Project->AddScene(scene, "Main", true);
 

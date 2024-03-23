@@ -5,6 +5,7 @@
 
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
+#include "Lavender/Renderer/FrameResources.hpp"
 
 #include "Lavender/Workspace/SceneRenderer.hpp"
 
@@ -17,10 +18,12 @@ namespace Lavender
 	Scene::Scene(Ref<Viewport> viewport)
 		: m_Viewport(viewport), m_Collection(RegistryCollection::Create())
 	{
+		SceneRenderer::Init();
 	}
 
 	Scene::~Scene()
 	{
+		SceneRenderer::Destroy();
 	}
 
 	void Scene::StartRuntime()
@@ -95,8 +98,8 @@ namespace Lavender
 
 	void Scene::RenderEditor(Ref<RenderCommandBuffer> cmdBuffer)
 	{
-		SceneRenderer renderer(this);
-		renderer.Render(m_EditorCamera, cmdBuffer);
+		m_EditorCamera->BindDescriptorSet(FrameResources::GetPipeline(), cmdBuffer);
+		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
 	}
 
 	void Scene::UpdateRuntime(float deltaTime)

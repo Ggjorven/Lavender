@@ -3,8 +3,8 @@
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/Renderer/Image.hpp"
-
 #include "Lavender/Renderer/Pipeline.hpp"
+#include "Lavender/Renderer/DescriptorSet.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
@@ -18,14 +18,14 @@ namespace Lavender
 	{
 	public:
 		VulkanImage2D(const std::filesystem::path& path);
-		VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, uint32_t width, uint32_t height);
-		VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, const std::filesystem::path& path);
+		VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, uint32_t width, uint32_t height);
+		VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, const std::filesystem::path& path);
 		virtual ~VulkanImage2D();
 
 		void SetData(void* data, size_t size) override;
 
 		void Upload() override;
-		void Upload(Ref<Pipeline> pipeline, UniformElement element) override;
+		void Upload(Ref<DescriptorSet> set, UniformElement element) override;
 
 		VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
 
@@ -37,7 +37,7 @@ namespace Lavender
 		void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 	private:
-		Ref<Pipeline> m_Pipeline = nullptr;
+		Ref<DescriptorSet> m_Set = nullptr;
 		UniformElement m_Element = {};
 
 		VkImage m_Image = VK_NULL_HANDLE;
