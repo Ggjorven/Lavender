@@ -42,7 +42,7 @@ namespace Lavender
 
 	public:
 		MeshComponent() = default;
-		MeshComponent(Mesh& mesh);
+		MeshComponent(Mesh& mesh, Ref<Image2D> image = nullptr);
 		MeshComponent(const MeshComponent& other) = default; // TODO: ^
 	};
 

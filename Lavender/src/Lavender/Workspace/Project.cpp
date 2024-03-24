@@ -4,6 +4,8 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Core/Application.hpp"
 
+#include "Lavender/Renderer/FrameResources.hpp"
+
 namespace Lavender
 {
 
@@ -11,10 +13,13 @@ namespace Lavender
     {
         auto& window = Application::Get().GetWindow();
         m_Viewport = Viewport::Create(window.GetWidth(), window.GetHeight());
+
+        FrameResources::Init(this);
     }
 
     Project::~Project()
     {
+        FrameResources::Destroy();
     }
 
     void Project::StartRuntime()
@@ -45,10 +50,17 @@ namespace Lavender
         m_Viewport->EndRender();
     }
 
+    Ref<Scene> Project::CreateAndAddScene()
+    {
+        return Scene::Create(m_Viewport);
+    }
+
     void Project::AddScene(Ref<Scene> scene, const std::string& name, bool active)
     {
         m_Scenes.Add(scene, name, active);
-        scene->InitializeAssets(m_Viewport->GetRenderPass());
+        
+        auto& camera = scene->GetCamera();
+        camera = EditorCamera::Create(m_Viewport);
     }
 
     Ref<Project> Project::Create()

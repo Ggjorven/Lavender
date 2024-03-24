@@ -10,7 +10,10 @@
 namespace Lavender
 {
 
-	// Note(Jorben): This class should only be used in a non-Dist build aka only in non shipped games
+	class Pipeline;
+	class UniformBuffer;
+
+	// TODO: Fix for runtime with removing ImGui
 	class Viewport
 	{
 	public:

@@ -38,6 +38,8 @@ namespace Lavender
 		Ref<VertexBuffer>& GetVertexBuffer() { return m_VertexBuffer; }
 		Ref<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
 
+		static Ref<Mesh> Create(const std::filesystem::path& path);
+
 	private:
 		void LoadModel(const std::filesystem::path& path, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices);
 		void ProcessNode(aiNode* node, const aiScene* scene, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices);

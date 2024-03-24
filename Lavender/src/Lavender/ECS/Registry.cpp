@@ -12,7 +12,7 @@ namespace Lavender
 	// Helper functions
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	template<typename TComponent>
-	void CopyComponent(entt::registry& src, entt::registry& dst, std::unordered_map<UUID, entt::entity>& entityMap)
+	void CopyComponent(entt::registry& src, entt::registry& dst, Dict<UUID, entt::entity>& entityMap)
 	{
 		auto view = src.view<TComponent>();
 
@@ -30,18 +30,37 @@ namespace Lavender
 	}
 
 	template<typename... TComponents>
-	void CopyComponents(ComponentGroup<TComponents...> group, entt::registry& src, entt::registry& dst, std::unordered_map<UUID, entt::entity>& entityMap)
+	void CopyComponents(ComponentGroup<TComponents...> group, entt::registry& src, entt::registry& dst, Dict<UUID, entt::entity>& entityMap)
 	{
 		// Note(Jorben): Empty function for when there are no components
 	}
 
 	template<typename FirstComponent, typename ... RestComponents>
-	void CopyComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& src, entt::registry& dst, std::unordered_map<UUID, entt::entity>& entityMap)
+	void CopyComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& src, entt::registry& dst, Dict<UUID, entt::entity>& entityMap)
 	{
 		CopyComponent<FirstComponent>(src, dst, entityMap);
 		CopyComponents<RestComponents...>(ComponentGroup<RestComponents...>(), src, dst, entityMap);
 	}
 
+	/*
+	template<typename TComponent>
+	void PrepareComponent(entt::registry& registry)
+	{
+	}
+
+	template<typename... TComponents>
+	void PrepareComponents(ComponentGroup<TComponents...> group, entt::registry& registry)
+	{
+		// Note(Jorben): Empty function for when there are no components
+	}
+
+	template<typename FirstComponent, typename ... RestComponents>
+	void PrepareComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& registry)
+	{
+		PrepareComponent<FirstComponent>(registry);
+		PrepareComponents<RestComponents...>(ComponentGroup<RestComponents...>(), registry);
+	}
+	*/
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Main functions
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

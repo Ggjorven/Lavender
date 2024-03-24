@@ -37,15 +37,18 @@ namespace Lavender
 
 			UI::BeginWindow("Entities", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);
 
-			for (auto& entity : m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry()->GetEntityMap())
+			auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
+			for (auto& entity : registry->GetEntityMap())
 			{
 				// Break on faulty UUID's
 				if (entity.first == 0)
 					break;
 
+				TagComponent& tag = registry->GetComponent<TagComponent>(entity.first);
+
 				bool wasSelected = entity.first == m_SelectedUUID;
 				bool newSelected = entity.first == m_SelectedUUID;
-				bool pressed = UI::Selectable(std::to_string(entity.first.Get()), &newSelected);
+				bool pressed = UI::Selectable(tag.Tag, &newSelected);
 
 				if (pressed && !wasSelected)
 					m_SelectedUUID = entity.first;
@@ -102,10 +105,6 @@ namespace Lavender
 				ComponentUsage usage = BeginECSComponent<TransformComponent>();
 				if (usage & ComponentUsage::Opened)
 				{
-					//UI::BeginTable("##LavenderUI", 2, UI::TableFlags::SizingFixedFit | UI::TableFlags::BordersInnerV | UI::TableFlags::NoClip);
-					//UI::TableSetupColumn("Label", UI::TableColumnFlags::None, 100.0f);
-					//UI::TableSetupColumn("Value", UI::TableColumnFlags::IndentEnable | UI::TableColumnFlags::NoClip, UI::GetContentRegionAvail().x - 100.0f);
-
 					// TODO: Look into ImGui tables, so the user doesn't have to move the column line every time.
 					UI::BeginPropertyGrid(2);
 
@@ -116,22 +115,6 @@ namespace Lavender
 							{ UI::StyleColourType::FrameBgActive, LV_U32_COLOUR(255, 0, 0, 172) }
 						}};
 						UI::Property("Position", transform.Position);
-						//UI::TableNextRow();
-						//
-						//UI::BeginChild("PositionChild", {});
-						//
-						//UI::TableSetColumnIndex(0);
-						//UI::ShiftCursor(17.0f, 7.0f);
-						//
-						//UI::Text("Position");
-						//UI::Draw::Underline(false, 0.0f, 2.0f);
-						//
-						//UI::TableSetColumnIndex(1);
-						//UI::ShiftCursor(7.0f, 0.0f);
-						//
-						//UI::DragFloat3("##Position_LavenderUI", transform.Position);
-						//
-						//UI::EndChild();
 					}
 					{
 						UI::ScopedStyleList blue = { {
@@ -148,7 +131,6 @@ namespace Lavender
 						UI::Property("Rotation", transform.Rotation);
 					}
 
-					//UI::EndTable();
 					UI::EndPropertyGrid();
 				}
 			}

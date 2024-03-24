@@ -5,7 +5,11 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/Renderer/Mesh.hpp"
+#include "Lavender/Renderer/Shader.hpp"
 #include "Lavender/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/UniformBuffer.hpp"
+#include "Lavender/Renderer/FrameResources.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
@@ -13,6 +17,8 @@
 #include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
 #include "Lavender/UI/UI.hpp"
+
+#include <glm/glm.hpp>
 
 #include <imgui_internal.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -26,7 +32,7 @@ namespace Lavender
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		VkFormat format = context->GetSwapChain()->GetColourFormat();
 
-		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
+		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY/*, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT*/, m_Image.Image);
 
 		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, format, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 
@@ -61,7 +67,7 @@ namespace Lavender
 		VulkanAllocator::DestroyImage(m_Image.Image, m_Image.Allocation);
 		vkDestroyImageView(device, m_Image.ImageView, nullptr);
 
-		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image.Image);
+		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY/*, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT*/, m_Image.Image);
 
 		m_Image.ImageView = VulkanAllocator::CreateImageView(m_Image.Image, format, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 
@@ -269,11 +275,11 @@ namespace Lavender
 		auto image = RefHelper::Create<VulkanViewportImage>(width, height);
 		m_Renderpass = RefHelper::Create<VulkanViewportRenderPass>(image);
 
-		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
 		m_WindowStyle = UI::StyleList({
-			{ UI::StyleType::WindowPadding, glm::vec2(0.0f, 0.0f) },
+			{ UI::StyleType::WindowPadding, { 0.0f, 0.0f} }
 		});
+
+		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	VulkanViewport::~VulkanViewport()
@@ -289,6 +295,8 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginFrame");
 		m_Renderpass->Begin();
+
+		FrameResources::GetPipeline()->Use(m_Renderpass->GetCommandBuffer());
 	}
 
 	void VulkanViewport::EndFrame()

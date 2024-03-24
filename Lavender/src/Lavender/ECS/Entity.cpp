@@ -3,12 +3,15 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/ECS/Components.hpp"
+
 namespace Lavender
 {
 
 	Entity::Entity(Ref<RegistryCollection> registry, UUID uuid)
 		: m_Registry(registry), m_UUID(uuid)
 	{
+		AddComponent<TagComponent>(TagComponent("Unnamed Entity"));
 	}
 
 	Entity::~Entity()

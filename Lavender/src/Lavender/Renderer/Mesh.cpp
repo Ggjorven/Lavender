@@ -36,6 +36,11 @@ namespace Lavender
 	{
 	}
 
+	Ref<Mesh> Mesh::Create(const std::filesystem::path& path)
+	{
+		return RefHelper::Create<Mesh>(path);
+	}
+
 	void Mesh::LoadModel(const std::filesystem::path& path, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices)
 	{
 		Assimp::Importer importer = {};

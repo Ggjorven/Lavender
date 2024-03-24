@@ -58,7 +58,7 @@ namespace Lavender
 		}
 
 		inline entt::registry& GetRegistry() { return m_Registry; }
-		inline std::unordered_map<UUID, entt::entity>& GetEntityMap() { return m_Entities; }
+		inline Dict<UUID, entt::entity>& GetEntityMap() { return m_Entities; }
 
 		Ref<Registry> DeepCopy();
 
@@ -67,7 +67,7 @@ namespace Lavender
 	private:
 		entt::registry m_Registry = {};
 
-		std::unordered_map<UUID, entt::entity> m_Entities = { };
+		Dict<UUID, entt::entity> m_Entities = { };
 	};
 
 
