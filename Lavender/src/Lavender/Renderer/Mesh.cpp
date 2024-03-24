@@ -30,7 +30,10 @@ namespace Lavender
 	}
 
 	// TODO: Copy to new vertexBuffer and indexBuffer
-	Mesh::Mesh(const Mesh& other) = default;
+	Mesh::Mesh(const Mesh& other)
+	{
+
+	}
 
 	Mesh::~Mesh()
 	{

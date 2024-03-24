@@ -106,7 +106,7 @@ namespace Lavender::UI
     };
     DEFINE_BITWISE_OPS(TreeNodeFlags)
 
-    bool TreeNode(const std::string& name, TreeNodeFlags flags);
+    bool TreeNode(const std::string& name, TreeNodeFlags flags = TreeNodeFlags::None);
     void TreeNodePop();
 
     enum class SelectableFlags : uint8_t
@@ -133,9 +133,9 @@ namespace Lavender::UI
     };
 	DEFINE_BITWISE_OPS(SliderFlags)
 
-	bool DragFloat2(const std::string& name, glm::vec2& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.3f", SliderFlags flags = SliderFlags::None);
-    bool DragFloat3(const std::string& name, glm::vec3& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.3f", SliderFlags flags = SliderFlags::None);
-	bool DragFloat4(const std::string& name, glm::vec4& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.3f", SliderFlags flags = SliderFlags::None);
+	bool DragFloat2(const std::string& name, glm::vec2& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
+    bool DragFloat3(const std::string& name, glm::vec3& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
+	bool DragFloat4(const std::string& name, glm::vec4& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
 
 	enum class TableFlags : uint32_t
 	{

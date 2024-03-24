@@ -16,10 +16,6 @@ namespace Lavender
 	{
 		auto view = src.view<TComponent>();
 
-		// TODO: Remove
-		//std::type_info const& info = typeid(TComponent);
-		//LV_LOG_TRACE("Copying: {0}", info.name());
-
 		for (auto& entity : view)
 		{
 			UUID uuid = src.get<UUID>(entity);
@@ -41,26 +37,6 @@ namespace Lavender
 		CopyComponent<FirstComponent>(src, dst, entityMap);
 		CopyComponents<RestComponents...>(ComponentGroup<RestComponents...>(), src, dst, entityMap);
 	}
-
-	/*
-	template<typename TComponent>
-	void PrepareComponent(entt::registry& registry)
-	{
-	}
-
-	template<typename... TComponents>
-	void PrepareComponents(ComponentGroup<TComponents...> group, entt::registry& registry)
-	{
-		// Note(Jorben): Empty function for when there are no components
-	}
-
-	template<typename FirstComponent, typename ... RestComponents>
-	void PrepareComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& registry)
-	{
-		PrepareComponent<FirstComponent>(registry);
-		PrepareComponents<RestComponents...>(ComponentGroup<RestComponents...>(), registry);
-	}
-	*/
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Main functions
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

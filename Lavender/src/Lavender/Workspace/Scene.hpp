@@ -63,6 +63,7 @@ namespace Lavender
 		inline Ref<EditorCamera>& GetCamera() { return m_EditorCamera; }
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
 		inline Ref<Viewport> GetViewport() { return m_Viewport; }
+		inline Ref<AssetManager> GetAssetManager() { return m_Assets; }
 
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
 		static Ref<Scene> Create(Ref<Viewport> viewport);

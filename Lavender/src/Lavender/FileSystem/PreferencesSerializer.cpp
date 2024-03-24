@@ -3,11 +3,12 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/FileSystem/YAMLUtils.hpp"
+
 #include <fstream>
 #include <string>
 
 #include <glm/glm.hpp>
-#include "YAMLUtils.hpp"
 
 namespace Lavender
 {
@@ -23,7 +24,7 @@ namespace Lavender
 
 	void PreferencesSerializer::Serialize(const std::filesystem::path& file)
 	{
-		YAML::Emitter data;
+		YAML::Emitter data = {};
 
 		data << YAML::BeginMap;
 		data << YAML::Key << "Preferences";
@@ -51,7 +52,7 @@ namespace Lavender
 
 	void PreferencesSerializer::Deserialize(const std::filesystem::path& file)
 	{
-		YAML::Node data;
+		YAML::Node data = {};
 		try
 		{
 			data = YAML::LoadFile(file.string());

@@ -14,7 +14,7 @@ namespace Lavender
 	{
 	}
 
-	MeshComponent::MeshComponent(Mesh& mesh, Ref<Image2D> image)
+	MeshComponent::MeshComponent(Ref<MeshAsset> mesh, Ref<Image2D> image)
 		: MeshObject(mesh), Image(image)
 	{
 	}

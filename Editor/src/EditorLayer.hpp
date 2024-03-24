@@ -18,6 +18,7 @@
 #include <Lavender/Workspace/Project.hpp>
 
 #include "Panels/EntitiesPanel.hpp"
+#include "Panels/DebugPanel.hpp"
 
 using namespace Lavender;
 
@@ -45,10 +46,11 @@ private:
 	Ref<UIPreferences> m_Preferences = nullptr;
 
 	Ref<Project> m_Project = nullptr;
+
 	Ref<EntitiesPanel> m_EntityPanel = nullptr;
+	Ref<DebugPanel> m_DebugPanel = nullptr;
 
 	Ref<Image2D> m_Image = nullptr;
 
 	Entity m_Entity = {};
-	Mesh m_Mesh = {};
 };

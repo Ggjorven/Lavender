@@ -3,15 +3,85 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Workspace/Assets/MeshAsset.hpp"
+
 namespace Lavender
 {
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Helper functions
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	static std::vector<std::filesystem::path> GetPathsFromExtension(const std::filesystem::path& directory, const std::string& extension)
+	{
+		std::vector<std::filesystem::path> result = { };
+
+		if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory)) 
+		{
+			LV_LOG_ERROR("Directory '{0}' does not exist...", directory.string());
+			return result;
+		}
+
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) 
+		{
+			if (entry.is_regular_file() && entry.path().extension() == extension)
+				result.push_back(entry.path());
+		}
+
+		return result;
+	}
+
+	template<typename TAsset>
+	void DeserializeAsset(AssetManager* instance, const std::filesystem::path& assetPath)
+	{
+		for (auto path : GetPathsFromExtension(assetPath, TAsset::GetExtension())) // If this doesn't work make sure all asset paths are included
+		{
+			Ref<TAsset> asset = TAsset::Create(path);
+			instance->AddAsset(asset);
+		}
+	}
+
+	template<typename... TAsset>
+	void DeserializeAssets(AssetGroup<TAsset...> group, AssetManager* instance, const std::filesystem::path& assetPath)
+	{
+		// Note(Jorben): Empty function for when there are no assets
+	}
+
+	template<typename FirstAsset, typename ... RestAssets>
+	void DeserializeAssets(AssetGroup<FirstAsset, RestAssets...> group, AssetManager* instance, const std::filesystem::path& assetPath)
+	{
+		DeserializeAsset<FirstAsset>(instance, assetPath);
+		DeserializeAssets<RestAssets...>(AssetGroup<RestAssets...>(), instance, assetPath);
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Main functions
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	AssetManager::AssetManager()
 	{
 	}
 
 	AssetManager::~AssetManager()
 	{
+	}
+
+	void AssetManager::Serialize()
+	{
+		for (auto& asset : m_Assets)
+			asset.second->Serialize();
+	}
+
+	void AssetManager::GetAssetsFromDirectory(const std::filesystem::path& directory)
+	{
+		DeserializeAssets(AllAssets(), this, directory);
+	}
+
+	void AssetManager::AddAsset(Ref<Asset> asset)
+	{
+		m_Assets[asset->GetHandle()] = asset;
+	}
+
+	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
+	{
+		return m_Assets[handle];
 	}
 
 	Ref<AssetManager> AssetManager::Create()

@@ -17,6 +17,8 @@
 #include <Lavender/UI/Style.hpp>
 #include <Lavender/UI/Colours.hpp>
 
+#include <Lavender/Workspace/Assets/MeshAsset.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -47,21 +49,24 @@ void EditorLayer::OnAttach()
 	auto scene = m_Project->CreateAndAddScene();
 
 	m_Image = Image2D::Create("assets/objects/viking_room.png");
-	m_Mesh = Mesh("assets/objects/viking_room.obj");
+
+	auto baseAsset = scene->GetAssetManager()->GetAsset(6516009052361294990);
+	auto meshAsset = RefHelper::RefAs<MeshAsset>(baseAsset);
 
 	m_Entity = scene->CreateEntity();
 	m_Entity.AddOrReplaceComponent<TagComponent>({ "Viking room" });
 	m_Entity.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
-	m_Entity.AddComponent<MeshComponent>(MeshComponent(m_Mesh, m_Image));
+	m_Entity.AddComponent<MeshComponent>(MeshComponent(meshAsset, m_Image));
 
 	auto entity2 = scene->CreateEntity();
 	entity2.AddOrReplaceComponent<TagComponent>({ "Viking room2" });
 	entity2.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
-	entity2.AddComponent<MeshComponent>(MeshComponent(m_Mesh, m_Image));
+	entity2.AddComponent<MeshComponent>(MeshComponent(meshAsset, m_Image));
 
 	m_Project->AddScene(scene, "Main", true);
 
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
+	m_DebugPanel = DebugPanel::Create(m_Project);
 
 	// Test area // TODO: Remove
 	TEMP();
@@ -79,14 +84,7 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 	m_Project->OnUpdate(deltaTime);
 
-	// TODO: Remove
-	static float timer = 0.0f;
-	timer += deltaTime;
-	if (timer > 1.0f)
-	{
-		Application::Get().GetWindow().SetTitle(fmt::format("Custom | FPS: {0}", (int)ImGui::GetIO().Framerate));
-		timer = 0.0f;
-	}
+	m_DebugPanel->OnUpdate(deltaTime);
 }
 
 void EditorLayer::OnRender()
@@ -104,6 +102,7 @@ void EditorLayer::OnImGuiRender()
 	m_Project->OnImGuiRender();
 
 	m_EntityPanel->RenderUI();
+	m_DebugPanel->RenderUI();
 }
 
 void EditorLayer::OnEvent(Event& e)

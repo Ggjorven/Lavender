@@ -62,9 +62,9 @@ namespace Lavender
 		return s_RenderInstance;
 	}
 
-	inline RenderData Renderer::GetRenderData()
+	RenderData Renderer::GetRenderData()
 	{
-		s_RenderInstance->GetRenderData();
+		return s_RenderInstance->GetRenderData();
 	}
 
 }

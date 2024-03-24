@@ -16,13 +16,15 @@ namespace Lavender
 	// SceneCollection
 	///////////////////////////////////////////////////////////////////////////
 	Scene::Scene(Ref<Viewport> viewport)
-		: m_Viewport(viewport), m_Collection(RegistryCollection::Create())
+		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_Assets(AssetManager::Create())
 	{
+		m_Assets->GetAssetsFromDirectory("Projects/First/Assets"); // TODO: Replace with actual scene path
 		SceneRenderer::Init();
 	}
 
 	Scene::~Scene()
 	{
+		m_Assets->Serialize();
 		SceneRenderer::Destroy();
 	}
 

@@ -61,8 +61,8 @@ namespace Lavender
 
 			MeshComponent& mesh = view.get<MeshComponent>(entity);
 
-			mesh.MeshObject.GetVertexBuffer()->Bind(cmdBuffer);
-			mesh.MeshObject.GetIndexBuffer()->Bind(cmdBuffer);
+			mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
+			mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
 
 			if (mesh.Image)
 			{
@@ -90,7 +90,7 @@ namespace Lavender
 
 			Renderer::Wait();
 			set->Bind(pipeline, cmdBuffer);
-			Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject.GetIndexBuffer());
+			Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
 			index++;
 		}
 	}

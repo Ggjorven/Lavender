@@ -4,7 +4,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Lavender/Renderer/Mesh.hpp"
+#include "Lavender/Workspace/Assets/MeshAsset.hpp"
+
 #include "Lavender/Renderer/Image.hpp"
 
 namespace Lavender
@@ -37,12 +38,12 @@ namespace Lavender
 	struct MeshComponent // TODO: Implement for scripting
 	{
 	public:
-		Mesh MeshObject = {};
+		Ref<MeshAsset> MeshObject = {}; // TODO: Copy on MeshComponent copy
 		Ref<Image2D> Image = nullptr; // TODO: Copy on MeshComponent copy
 
 	public:
 		MeshComponent() = default;
-		MeshComponent(Mesh& mesh, Ref<Image2D> image = nullptr);
+		MeshComponent(Ref<MeshAsset> mesh, Ref<Image2D> image = nullptr);
 		MeshComponent(const MeshComponent& other) = default; // TODO: ^
 	};
 
@@ -77,7 +78,7 @@ namespace Lavender
 		return "Undefined Component";
 	}
 
-	template<typename... Component>
+	template<typename... Components>
 	struct ComponentGroup
 	{
 	};
