@@ -14,7 +14,7 @@ namespace Lavender
 	struct RendererSpecification
 	{
 		uint32_t FramesInFlight = 3;
-		uint32_t PreAllocatedDescriptorSets = 100; // For updating a model matrix // TODO: Change back to 100
+		uint32_t PreAllocatedDescriptorSets = 100; // For updating a model matrix
 	};
 
 	struct RenderData

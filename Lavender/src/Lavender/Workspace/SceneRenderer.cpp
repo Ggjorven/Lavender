@@ -39,24 +39,26 @@ namespace Lavender
 		uint32_t index = 0;
 		auto pipeline = FrameResources::GetPipeline();
 		auto group = pipeline->GetDescriptorSets();
-		auto& sets = group->GetSets(0);
+		auto sets = group->GetSets(0);
 
 		auto view = registry.view<MeshComponent>();
 		// Check if we need to resize
-		//if (view.size() > sets.size())
-		//{
-		//	group->AddMoreSetsTo(0, (uint32_t)(view.size() - (sets.size())));
-		//
-		//	s_ModelBuffers.resize(view.size());
-		//	for (size_t i = sets.size(); i < view.size(); i++)
-		//	{
-		//		s_ModelBuffers[i] = UniformBuffer::Create(sizeof(glm::mat4));
-		//	}
-		//}
+		if (view.size() > sets.size())
+		{
+			group->AddMoreSetsTo(0, (uint32_t)(view.size() - (sets.size())));
+			sets = group->GetSets(0);
+		
+			s_ModelBuffers.resize(view.size());
+			for (size_t i = sets.size() - 1; i < view.size(); i++)
+			{
+				s_ModelBuffers[i] = UniformBuffer::Create(sizeof(glm::mat4));
+			}
+		}
 
-		auto& set = sets[index];
 		for (auto& entity : view)
 		{
+			auto& set = sets[index];
+
 			MeshComponent& mesh = view.get<MeshComponent>(entity);
 
 			mesh.MeshObject.GetVertexBuffer()->Bind(cmdBuffer);
@@ -86,11 +88,9 @@ namespace Lavender
 			s_ModelBuffers[index]->SetData((void*)&modelMatrix, sizeof(glm::mat4));
 			s_ModelBuffers[index]->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"));
 
-			set->Bind(pipeline, cmdBuffer);
-
 			Renderer::Wait();
+			set->Bind(pipeline, cmdBuffer);
 			Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject.GetIndexBuffer());
-
 			index++;
 		}
 	}

@@ -16,7 +16,7 @@ namespace Lavender
 	{
 	public:
 		VulkanDescriptorSet(SetID id, std::vector<VkDescriptorSet> sets);
-		virtual ~VulkanDescriptorSet() = default;
+		virtual ~VulkanDescriptorSet();
 
 		void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer) override;
 		inline SetID GetSetID() override { return m_ID; }
@@ -41,7 +41,7 @@ namespace Lavender
 		inline UniformLayout& GetLayout() override { return m_Layout; }
 		inline const DescriptorCount& GetCount() override { return m_Count; }
 
-		inline std::vector<Ref<DescriptorSet>>& GetSets(SetID id) override { return m_Sets[id]; }
+		std::vector<Ref<DescriptorSet>> GetSets(SetID id) override;
 
 	private:
 		void CreateDescriptorSetLayout();

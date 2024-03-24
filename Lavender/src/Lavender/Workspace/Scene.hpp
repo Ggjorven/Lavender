@@ -19,7 +19,7 @@
 #include "Lavender/Renderer/Camera.hpp"
 #include "Lavender/Renderer/UniformBuffer.hpp"
 
-#include "Lavender/Workspace/AssetManager.hpp"
+#include "Lavender/Workspace/Assets/AssetManager.hpp"
 
 #ifdef LV_PLATFORM_WINDOWS
 #include "Lavender/Platforms/Windows/WindowsEntityInterface.hpp"

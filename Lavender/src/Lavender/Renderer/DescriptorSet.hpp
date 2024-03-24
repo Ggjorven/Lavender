@@ -47,7 +47,7 @@ namespace Lavender
 		virtual UniformLayout& GetLayout() = 0;
 		virtual const DescriptorCount& GetCount() = 0;
 
-		virtual std::vector<Ref<DescriptorSet>>& GetSets(SetID id) = 0;
+		virtual std::vector<Ref<DescriptorSet>> GetSets(SetID id) = 0;
 
 		static Ref<DescriptorSetGroup> Create(const UniformLayout& layout, DescriptorCount count = {});
 	};

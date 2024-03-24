@@ -23,6 +23,10 @@ namespace Lavender
 	{
 	}
 
+	VulkanDescriptorSet::~VulkanDescriptorSet()
+	{
+	}
+
 	void VulkanDescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer)
 	{
 		auto vkPipelineLayout = RefHelper::RefAs<VulkanPipeline>(pipeline)->GetVulkanLayout();
@@ -57,15 +61,10 @@ namespace Lavender
 
 	void VulkanDescriptorSetGroup::AddMoreSetsTo(SetID id, uint32_t amount)
 	{
-		LV_LOG_TRACE("Adding more sets.");
-		LV_LOG_TRACE("Get: {0}, Set: {1}, Amount: {2}", id, m_Count.GetCount(id), amount);
 		m_Count.SetCount(id, m_Count.GetCount(id) + amount);
 		
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-		for (auto& pool : m_DescriptorPools)
-		{
-			vkDestroyDescriptorPool(device, pool.second, nullptr);
-		}
+		vkDestroyDescriptorPool(device, m_DescriptorPools[id], nullptr);
 
 		// Note(Jorben): Just for myself, the poolSizes is just the amount of elements of a certain type to able to allocate per pool
 		std::vector<VkDescriptorPoolSize> poolSizes = { };
@@ -108,7 +107,13 @@ namespace Lavender
 		if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets[id].data()) != VK_SUCCESS)
 			LV_LOG_ERROR("Failed to allocate descriptor sets!");
 
+		m_Sets[id].clear();
 		ConvertToVulkanDescriptorSets(descriptorSets);
+	}
+
+	std::vector<Ref<DescriptorSet>> VulkanDescriptorSetGroup::GetSets(SetID id)
+	{
+		return m_Sets[id];
 	}
 
 	// Note(Jorben): Just for myself, this specifies all the different types that are gonna be in a descriptor set
