@@ -17,6 +17,7 @@ namespace Lavender
 		virtual ~Registry();
 
 		UUID CreateEntity();
+		void CreateEntity(UUID uuid);
 		void DeleteEntity(UUID entity);
 
 		template<typename TComponent>
@@ -58,7 +59,7 @@ namespace Lavender
 		}
 
 		inline entt::registry& GetRegistry() { return m_Registry; }
-		inline Dict<UUID, entt::entity>& GetEntityMap() { return m_Entities; }
+		inline SortedDict<UUID, entt::entity>& GetEntityMap() { return m_Entities; }
 
 		Ref<Registry> DeepCopy();
 
@@ -67,7 +68,7 @@ namespace Lavender
 	private:
 		entt::registry m_Registry = {};
 
-		Dict<UUID, entt::entity> m_Entities = { };
+		SortedDict<UUID, entt::entity> m_Entities = { };
 	};
 
 
@@ -78,6 +79,7 @@ namespace Lavender
 		virtual ~RegistryCollection();
 
 		UUID CreateEntity();
+		void CreateEntity(UUID uuid);
 		void DeleteEntity(UUID entity);
 
 		template<typename TComponent>

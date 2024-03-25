@@ -32,9 +32,14 @@ namespace Lavender
 		data << YAML::BeginMap;
 		data << YAML::Key << "MeshAsset";
 		data << YAML::Value << m_Handle.Get();
+		
+		data << YAML::Key << "MetaData";
+		data << YAML::Value << YAML::BeginMap;
 
 		data << YAML::Key << "Path";
 		data << YAML::Value << m_MeshPath.string();
+
+		data << YAML::EndMap;
 
 		data << YAML::EndMap;
 
@@ -68,11 +73,15 @@ namespace Lavender
 		if (handle)
 			m_Handle = UUID(handle.as<uint64_t>());
 
-		auto meshPath = data["Path"];
-		if (meshPath)
+		auto metadata = data["MetaData"];
+		if (metadata)
 		{
-			m_MeshPath = std::filesystem::path(meshPath.as<std::string>());
-			m_Mesh = Mesh::Create(m_MeshPath);
+			auto meshPath = metadata["Path"];
+			if (meshPath)
+			{
+				m_MeshPath = std::filesystem::path(meshPath.as<std::string>());
+				m_Mesh = Mesh::Create(m_MeshPath);
+			}
 		}
 	}
 

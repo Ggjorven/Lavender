@@ -4,6 +4,7 @@
 #include "Lavender/Core/Logging.hpp"
 
 #include "Lavender/Workspace/Assets/MeshAsset.hpp"
+#include "Lavender/Workspace/Assets/MaterialAsset.hpp"
 
 namespace Lavender
 {
@@ -24,7 +25,11 @@ namespace Lavender
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) 
 		{
 			if (entry.is_regular_file() && entry.path().extension() == extension)
+			{
 				result.push_back(entry.path());
+				LV_LOG_TRACE("Loaded asset: {0}", entry.path().string());
+			}
+
 		}
 
 		return result;
@@ -43,7 +48,7 @@ namespace Lavender
 	template<typename... TAsset>
 	void DeserializeAssets(AssetGroup<TAsset...> group, AssetManager* instance, const std::filesystem::path& assetPath)
 	{
-		// Note(Jorben): Empty function for when there are no assets
+		// Note(Jorben): Empty function for when there are no asset types
 	}
 
 	template<typename FirstAsset, typename ... RestAssets>

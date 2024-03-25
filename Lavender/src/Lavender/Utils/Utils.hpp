@@ -2,8 +2,10 @@
 
 #include <stdint.h>
 
+#include <map>
 #include <memory>
 #include <queue>
+#include <vector>
 #include <type_traits>
 #include <unordered_map>
 
@@ -106,5 +108,59 @@ namespace Lavender
 
     template<typename Key, typename Value>
     using Dict = std::unordered_map<Key, Value>;
+
+    //template<typename Key, typename Value>
+    //using SortedDict = std::map<Key, Value>;
+
+    template<typename Key, typename Value>
+    class SortedDict
+    {
+    public:
+        SortedDict() = default;
+        SortedDict(const SortedDict<Key, Value>& other) = default;
+        virtual ~SortedDict() = default;
+
+        Value& operator [] (const Key& key)
+        {
+            auto it = m_Indices.find(key);
+            if (it == m_Indices.end())
+            {
+                m_Items.push_back(std::make_pair(key, Value()));
+                m_Indices[key] = m_Items.size() - 1;
+            }
+            return m_Items[m_Indices[key]].second;
+        }
+
+        void insert(const Key& key, const Value& value)
+        {
+            if (m_Indices.find(key) == m_Indices.end())
+            {
+                m_Items.push_back(std::make_pair(key, value));
+                m_Indices[key] = m_Items.size() - 1;
+            }
+            else
+            {
+                m_Items[m_Indices[key]].second = value;
+            }
+        }
+
+        void erase(const Key& key)
+        {
+            if (m_Indices.find(key) != m_Indices.end())
+            {
+                m_Items.erase(m_Items.begin() + m_Indices[key]);
+                m_Indices.erase(key);
+            }
+        }
+
+        auto begin() { return m_Items.begin(); }
+        const auto begin() const { return m_Items.begin(); }
+        auto end() { return m_Items.end(); }
+        const auto end() const { return m_Items.end(); }
+
+    public:
+        std::unordered_map<Key, size_t> m_Indices = { };
+        std::vector<std::pair<Key, Value>> m_Items = { };
+    };
 
 }

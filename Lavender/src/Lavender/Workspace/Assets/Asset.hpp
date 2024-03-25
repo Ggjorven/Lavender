@@ -31,12 +31,13 @@ namespace Lavender
 	};
 	
 	class MeshAsset;
+	class MaterialAsset;
 
 	template<typename... Assets>
 	struct AssetGroup
 	{
 	};
 
-	using AllAssets = AssetGroup<MeshAsset>;
+	using AllAssets = AssetGroup<MeshAsset, MaterialAsset>;
 
 }

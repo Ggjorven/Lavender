@@ -16,9 +16,13 @@ namespace Lavender
 	// SceneCollection
 	///////////////////////////////////////////////////////////////////////////
 	Scene::Scene(Ref<Viewport> viewport)
-		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_Assets(AssetManager::Create())
+		: Scene(viewport, UUID::Create())
 	{
-		m_Assets->GetAssetsFromDirectory("Projects/First/Assets"); // TODO: Replace with actual scene path
+	}
+
+	Scene::Scene(Ref<Viewport> viewport, const UUID& uuid)
+		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_Assets(AssetManager::Create()), m_UUID(uuid)
+	{
 		SceneRenderer::Init();
 	}
 
@@ -91,6 +95,11 @@ namespace Lavender
 	Ref<Scene> Scene::Create(Ref<Viewport> viewport)
 	{
 		return RefHelper::Create<Scene>(viewport);
+	}
+
+	Ref<Scene> Scene::Create(Ref<Viewport> viewport, const UUID& uuid)
+	{
+		return RefHelper::Create<Scene>(viewport, uuid);
 	}
 
 	void Scene::UpdateEditor(float deltaTime)

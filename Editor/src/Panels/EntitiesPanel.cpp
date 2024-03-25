@@ -44,11 +44,13 @@ namespace Lavender
 				if (entity.first == 0)
 					break;
 
+				if (!registry->HasComponent<TagComponent>(entity.first))
+					registry->AddComponent<TagComponent>(entity.first);
 				TagComponent& tag = registry->GetComponent<TagComponent>(entity.first);
 
 				bool wasSelected = entity.first == m_SelectedUUID;
 				bool newSelected = entity.first == m_SelectedUUID;
-				bool pressed = UI::Selectable(tag.Tag, &newSelected);
+				bool pressed = UI::Selectable(tag.Tag + std::string("##") + std::to_string(entity.first.Get()), &newSelected);
 
 				if (pressed && !wasSelected)
 					m_SelectedUUID = entity.first;

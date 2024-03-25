@@ -1,0 +1,23 @@
+Scene: 13365788165013281543
+SceneData:
+  Entities:
+    - Entity: 5988639549476990475
+      TagComponent:
+        Tag: ABC
+      TransformComponent:
+        Position: [0.600000024, 0, 0]
+        Size: [1, 1, 1]
+        Rotation: [0, 0, 0]
+      MeshComponent:
+        AssetHandle: 6516009052361294990
+        Material: 8468309108205782655
+    - Entity: 7325713287001512595
+      TagComponent:
+        Tag: DEF
+      TransformComponent:
+        Position: [-0.300000012, 0, 0]
+        Size: [1, 1, 1]
+        Rotation: [0, 0, 0]
+      MeshComponent:
+        AssetHandle: 6516009052361294990
+        Material: 8468309108205782655

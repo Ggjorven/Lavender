@@ -19,6 +19,9 @@
 
 #include <Lavender/Workspace/Assets/MeshAsset.hpp>
 
+#include <Lavender/FileSystem/ProjectSerializer.hpp>
+#include <Lavender/FileSystem/SceneSerializer.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -45,23 +48,16 @@ void EditorLayer::OnAttach()
 	serializer.Deserialize("EditorPreferences.lvepref");
 
 	m_Project = Project::Create();
-	
+	ProjectSerializer projSerializer(m_Project);
+	projSerializer.Deserialize("Projects/First/Project.lvproject");
+
+	// TODO: Serialize all scenes
 	auto scene = m_Project->CreateAndAddScene();
+	auto assetManager = scene->GetAssetManager();
+	assetManager->GetAssetsFromDirectory(m_Project->GetDirectories().ProjectDir / m_Project->GetDirectories().Assets);
 
-	m_Image = Image2D::Create("assets/objects/viking_room.png");
-
-	auto baseAsset = scene->GetAssetManager()->GetAsset(6516009052361294990);
-	auto meshAsset = RefHelper::RefAs<MeshAsset>(baseAsset);
-
-	m_Entity = scene->CreateEntity();
-	m_Entity.AddOrReplaceComponent<TagComponent>({ "Viking room" });
-	m_Entity.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
-	m_Entity.AddComponent<MeshComponent>(MeshComponent(meshAsset, m_Image));
-
-	auto entity2 = scene->CreateEntity();
-	entity2.AddOrReplaceComponent<TagComponent>({ "Viking room2" });
-	entity2.AddComponent<TransformComponent>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } });
-	entity2.AddComponent<MeshComponent>(MeshComponent(meshAsset, m_Image));
+	SceneSerializer sceneSerializer(scene);
+	sceneSerializer.Deserialize("Projects/First/Scenes/first.lvscene");
 
 	m_Project->AddScene(scene, "Main", true);
 
@@ -74,8 +70,15 @@ void EditorLayer::OnAttach()
 
 void EditorLayer::OnDetach()
 {
-	PreferencesSerializer serializer(m_Preferences);
-	serializer.Serialize("EditorPreferences.lvepref");
+	ProjectSerializer projSerializer(m_Project);
+	projSerializer.Serialize();
+
+	// TODO: Serialize all scenes
+	SceneSerializer sceneSerializer(m_Project->GetSceneCollection().GetActive());
+	sceneSerializer.Serialize();
+
+	PreferencesSerializer prefSerializer(m_Preferences);
+	prefSerializer.Serialize("EditorPreferences.lvepref");
 }
 
 void EditorLayer::OnUpdate(float deltaTime)

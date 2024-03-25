@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <functional>
+#include <filesystem>
 #include <unordered_map>
 
 #include "Lavender/Utils/Utils.hpp"
@@ -46,6 +47,7 @@ namespace Lavender
 
 	public:
 		Scene(Ref<Viewport> viewport);
+		Scene(Ref<Viewport> viewport, const UUID& uuid);
 		virtual ~Scene();
 
 		void StartRuntime();
@@ -66,7 +68,10 @@ namespace Lavender
 		inline Ref<AssetManager> GetAssetManager() { return m_Assets; }
 
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
+		inline Entity CreateEntityWithUUID(const UUID& uuid) { return Entity::Create(m_Collection, uuid); }
+
 		static Ref<Scene> Create(Ref<Viewport> viewport);
+		static Ref<Scene> Create(Ref<Viewport> viewport, const UUID& uuid);
 
 	private:
 		void UpdateEditor(float deltaTime);
@@ -76,6 +81,8 @@ namespace Lavender
 		void RenderRuntime(Ref<RenderCommandBuffer> cmdBuffer);
 
 	private:
+		UUID m_UUID = {};
+
 		Ref<AssetManager> m_Assets = nullptr;
 
 		Ref<RegistryCollection> m_Collection = nullptr;
@@ -85,6 +92,8 @@ namespace Lavender
 
 		Ref<Viewport> m_Viewport = nullptr;
 		Ref<EditorCamera> m_EditorCamera = nullptr;
+
+		std::filesystem::path m_Path = "Projects/First/Scenes/first.lvscene";
 
 		State m_State = State::Editor;
 

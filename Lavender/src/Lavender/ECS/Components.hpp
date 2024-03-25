@@ -5,8 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "Lavender/Workspace/Assets/MeshAsset.hpp"
-
-#include "Lavender/Renderer/Image.hpp"
+#include "Lavender/Workspace/Assets/MaterialAsset.hpp"
 
 namespace Lavender
 {
@@ -14,7 +13,7 @@ namespace Lavender
 	struct TagComponent
 	{
 	public:
-		std::string Tag = "Empty Tag";
+		std::string Tag = "Unnamed Entity";
 
 	public:
 		TagComponent() = default;
@@ -38,12 +37,12 @@ namespace Lavender
 	struct MeshComponent // TODO: Implement for scripting
 	{
 	public:
-		Ref<MeshAsset> MeshObject = {}; // TODO: Copy on MeshComponent copy
-		Ref<Image2D> Image = nullptr; // TODO: Copy on MeshComponent copy
+		Ref<MeshAsset> MeshObject = nullptr; // TODO: Copy on MeshComponent copy
+		Ref<MaterialAsset> Material = nullptr; // TODO: Copy on MeshComponent copy
 
 	public:
 		MeshComponent() = default;
-		MeshComponent(Ref<MeshAsset> mesh, Ref<Image2D> image = nullptr);
+		MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material = nullptr);
 		MeshComponent(const MeshComponent& other) = default; // TODO: ^
 	};
 

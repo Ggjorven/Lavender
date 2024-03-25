@@ -10,7 +10,14 @@ namespace Lavender
 {
 
     Project::Project()
+        : Project("")
     {
+    }
+
+    Project::Project(const std::filesystem::path& path)
+    {
+        m_Directories.Project = path;
+
         auto& window = Application::Get().GetWindow();
         m_Viewport = Viewport::Create(window.GetWidth(), window.GetHeight());
 
@@ -66,6 +73,11 @@ namespace Lavender
     Ref<Project> Project::Create()
     {
         return RefHelper::Create<Project>();
+    }
+
+    Ref<Project> Project::Create(const std::filesystem::path& path)
+    {
+        return RefHelper::Create<Project>(path);
     }
 
 }

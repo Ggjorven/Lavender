@@ -64,9 +64,9 @@ namespace Lavender
 			mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
 			mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
 
-			if (mesh.Image)
+			if (mesh.Material)
 			{
-				mesh.Image->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
+				mesh.Material->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
 			}
 
 			// Change Model matrix based on transformation

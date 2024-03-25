@@ -11,7 +11,8 @@ namespace Lavender
 	Entity::Entity(Ref<RegistryCollection> registry, UUID uuid)
 		: m_Registry(registry), m_UUID(uuid)
 	{
-		AddComponent<TagComponent>(TagComponent("Unnamed Entity"));
+		if (!HasComponent<TagComponent>())
+			AddComponent<TagComponent>(TagComponent("Unnamed Entity"));
 	}
 
 	Entity::~Entity()
@@ -27,6 +28,12 @@ namespace Lavender
 	Entity Entity::Create(Ref<RegistryCollection> registry)
 	{
 		UUID uuid = registry->CreateEntity();
+		return Entity(registry, uuid);
+	}
+
+	Entity Entity::Create(Ref<RegistryCollection> registry, const UUID& uuid)
+	{
+		registry->CreateEntity(uuid);
 		return Entity(registry, uuid);
 	}
 

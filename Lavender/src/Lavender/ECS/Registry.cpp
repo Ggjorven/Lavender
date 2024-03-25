@@ -12,7 +12,7 @@ namespace Lavender
 	// Helper functions
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	template<typename TComponent>
-	void CopyComponent(entt::registry& src, entt::registry& dst, Dict<UUID, entt::entity>& entityMap)
+	void CopyComponent(entt::registry& src, entt::registry& dst, SortedDict<UUID, entt::entity>& entityMap)
 	{
 		auto view = src.view<TComponent>();
 
@@ -26,13 +26,13 @@ namespace Lavender
 	}
 
 	template<typename... TComponents>
-	void CopyComponents(ComponentGroup<TComponents...> group, entt::registry& src, entt::registry& dst, Dict<UUID, entt::entity>& entityMap)
+	void CopyComponents(ComponentGroup<TComponents...> group, entt::registry& src, entt::registry& dst, SortedDict<UUID, entt::entity>& entityMap)
 	{
 		// Note(Jorben): Empty function for when there are no components
 	}
 
 	template<typename FirstComponent, typename ... RestComponents>
-	void CopyComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& src, entt::registry& dst, Dict<UUID, entt::entity>& entityMap)
+	void CopyComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& src, entt::registry& dst, SortedDict<UUID, entt::entity>& entityMap)
 	{
 		CopyComponent<FirstComponent>(src, dst, entityMap);
 		CopyComponents<RestComponents...>(ComponentGroup<RestComponents...>(), src, dst, entityMap);
@@ -52,12 +52,17 @@ namespace Lavender
 	UUID Registry::CreateEntity()
 	{
 		UUID uuid = UUID::Create();
+		CreateEntity(uuid);
+
+		return uuid;
+	}
+
+	void Registry::CreateEntity(UUID uuid)
+	{
 		entt::entity entity = m_Registry.create();
 
 		m_Registry.emplace<UUID>(entity, uuid); // TODO: Maybe only set the UUID component when copying
 		m_Entities[uuid] = entity;
-
-		return uuid;
 	}
 
 	void Registry::DeleteEntity(UUID entity)
@@ -101,6 +106,11 @@ namespace Lavender
 	UUID RegistryCollection::CreateEntity()
 	{
 		return m_MainRegistry->CreateEntity();
+	}
+
+	void RegistryCollection::CreateEntity(UUID uuid)
+	{
+		m_MainRegistry->CreateEntity(uuid);
 	}
 
 	void RegistryCollection::DeleteEntity(UUID entity)

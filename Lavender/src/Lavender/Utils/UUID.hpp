@@ -302,9 +302,14 @@ namespace Lavender
 
         inline uint64_t Get() const { return m_UUID; }
 
-        bool operator==(const UUID& other) const
+        bool operator == (const UUID& other) const
         {
-            return m_UUID == other.Get();
+            return m_UUID == other.m_UUID;
+        }
+
+        bool operator < (const UUID& rhs) const
+        {
+            return m_UUID < rhs.m_UUID;
         }
 
     private:
