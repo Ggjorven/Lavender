@@ -35,6 +35,34 @@ namespace Lavender
 		LV_MARK_FRAME;
 	}
 
+	uint32_t WindowsWindow::GetPositionX() const
+	{
+		int xPos = 0, yPos = 0;
+		glfwGetWindowPos(m_Window, &xPos, &yPos);
+		return (uint32_t)xPos;
+	}
+
+	uint32_t WindowsWindow::GetPositionY() const
+	{
+		int xPos = 0, yPos = 0;
+		glfwGetWindowPos(m_Window, &xPos, &yPos);
+		return (uint32_t)yPos;
+	}
+
+	uint32_t WindowsWindow::GetMonitorWidth() const
+	{
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		return mode->height;
+	}
+
+	uint32_t WindowsWindow::GetMonitorHeight() const
+	{
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		return mode->width;
+	}
+
 	void WindowsWindow::SetVSync(bool enabled)
 	{
 		// TODO: Recreate Vulkan swapchain
@@ -78,9 +106,10 @@ namespace Lavender
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.Width = width;
 				data.Height = height;
-
+				
 				Ref<Event> event = RefHelper::Create<WindowResizeEvent>(width, height);
 				data.CallBack(event);
+				Application::Get().HandleEvents();
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)

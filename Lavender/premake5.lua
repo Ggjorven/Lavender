@@ -34,11 +34,14 @@ project "Lavender"
 		"src",
 		"src/Lavender",
 
+		"%{wks.location}/Scripting/src",
+
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.entt}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.tracy}",
@@ -49,12 +52,14 @@ project "Lavender"
 	links
 	{
 		"%{Library.Vulkan}",
-
+		
 		"GLFW",
 		"ImGui",
 		"yaml-cpp",
 		"Tracy",
 		"VMA"
+
+--		"Scripting"
 	}
 
 	disablewarnings

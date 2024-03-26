@@ -7,7 +7,10 @@
 #include "Lavender/Renderer/Viewport.hpp"
 #include "Lavender/Renderer/RenderPass.hpp"
 
+#include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
+
+#include "Lavender/UI/Style.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
@@ -15,7 +18,7 @@
 namespace Lavender
 {
 
-	class VulkanViewportImage : public ViewportImage
+	class VulkanViewportImage
 	{
 	public:
 		struct ViewportImageGroup
@@ -29,17 +32,16 @@ namespace Lavender
 		VulkanViewportImage(uint32_t width, uint32_t height);
 		virtual ~VulkanViewportImage();
 
-		void Resize(uint32_t width, uint32_t height) override;
+		void Resize(uint32_t width, uint32_t height);
 
 		inline uint32_t GetWidth() const { return m_Width; }
 		inline uint32_t GetHeight() const { return m_Height; }
 
-		inline std::vector<ViewportImageGroup> GetImages() { return m_Images; }
+		inline ViewportImageGroup GetImage() { return m_Image; }
 		inline VkSampler GetSampler() { return m_Sampler; }
 
 	private:
-		std::vector<ViewportImageGroup> m_Images = { };
-
+		ViewportImageGroup m_Image = {};
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
 		uint32_t m_Width = 0, m_Height = 0, m_Miplevels = 0;
@@ -47,20 +49,20 @@ namespace Lavender
 
 
 
-	class VulkanViewportRenderPass : public ViewportRenderPass
+	class VulkanViewportRenderPass
 	{
 	public:
-		VulkanViewportRenderPass(Ref<ViewportImage> image);
+		VulkanViewportRenderPass(Ref<VulkanViewportImage> image);
 		virtual ~VulkanViewportRenderPass();
 
-		void Begin() override;
-		void End() override;
-		void Submit() override;
+		void Begin();
+		void End();
+		void Submit();
 
-		void Resize(uint32_t width, uint32_t height) override;
+		void Resize(uint32_t width, uint32_t height);
 
-		Ref<RenderPass> GetRenderPass() override;
-		inline Ref<RenderCommandBuffer> GetCommandBuffer() override { return m_CommandBuffer; }
+		Ref<RenderPass> GetRenderPass();
+		inline Ref<RenderCommandBuffer> GetCommandBuffer() { return m_CommandBuffer; }
 		inline Ref<VulkanViewportImage> GetImage() { return m_Image; }
 
 	private:
@@ -68,7 +70,7 @@ namespace Lavender
 		Ref<VulkanViewportImage> m_Image = VK_NULL_HANDLE;
 
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
-		std::vector<VkFramebuffer> m_Framebuffers = { };
+		VkFramebuffer m_Framebuffer = VK_NULL_HANDLE;
 	};
 
 
@@ -87,18 +89,24 @@ namespace Lavender
 
 		inline uint32_t GetWidth() const override { return m_Width; }
 		inline uint32_t GetHeight() const override { return m_Height; }
+		inline glm::vec2 GetPosition() const override { return { m_XPos, m_YPos }; }
+
+		bool InView(const glm::vec2& mainWindowPosition) const override;
 
 		void Resize(uint32_t width, uint32_t height) override;
+		glm::vec2 ConvertMousePosition(const glm::vec2& mainWindowPosition) const override;
 
-		inline Ref<ViewportRenderPass> GetRenderPass() override { return m_Renderpass; }
+		inline Ref<RenderPass> GetRenderPass() override { return m_Renderpass->GetRenderPass(); }
 		ImTextureID GetCurrentImGuiTexture() override;
 
 	private:
 		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
 
-		std::vector<ImTextureID> m_ImGuiImages = { };
+		UI::StyleList m_WindowStyle = {};
 
+		ImTextureID m_ImGuiImage = {};
 		uint32_t m_Width = 0, m_Height = 0;
+		uint32_t m_XPos = 0, m_YPos = 0;
 	};
 
 }

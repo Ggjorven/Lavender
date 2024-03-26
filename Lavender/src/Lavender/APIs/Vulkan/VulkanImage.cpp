@@ -9,14 +9,46 @@
 #include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanCommands.hpp"
+#include "Lavender/APIs/Vulkan/VulkanDescriptorSet.hpp"
 
 #include <stb_image.h>
+
+#include <backends/imgui_impl_vulkan.h>
 
 namespace Lavender
 {
 
-	VulkanImage2D::VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, uint32_t width, uint32_t height)
-		: m_Pipeline(pipeline), m_Element(element), m_Width(width), m_Height(height), m_Miplevels(1)
+	VulkanImage2D::VulkanImage2D(uint32_t width, uint32_t height)
+		: m_Width(width), m_Height(height), m_Miplevels(1)
+	{
+		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+	}
+
+	VulkanImage2D::VulkanImage2D(const std::filesystem::path& path)
+	{
+		int width, height, texChannels;
+		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
+		m_Width = width;
+		m_Height = height;
+		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		size_t imageSize = m_Width * m_Height * 4;
+
+		m_Allocation = VulkanAllocator::CreateImage(m_Width, m_Height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		SetData((void*)pixels, imageSize);
+	}
+
+	VulkanImage2D::VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, uint32_t width, uint32_t height)
+		: m_Set(set), m_Element(element), m_Width(width), m_Height(height), m_Miplevels(1)
 	{
 		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
@@ -28,8 +60,8 @@ namespace Lavender
 		Upload();
 	}
 
-	VulkanImage2D::VulkanImage2D(Ref<Pipeline> pipeline, UniformElement element, const std::filesystem::path& path)
-		: m_Pipeline(pipeline), m_Element(element)
+	VulkanImage2D::VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, const std::filesystem::path& path)
+		: m_Set(set), m_Element(element)
 	{
 		int width, height, texChannels;
 		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
@@ -80,7 +112,12 @@ namespace Lavender
 
 	void VulkanImage2D::Upload()
 	{
-		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(m_Pipeline);
+		Upload(m_Set, m_Element);
+	}
+
+	void VulkanImage2D::Upload(Ref<DescriptorSet> set, UniformElement element)
+	{
+		auto vkSet = RefHelper::RefAs<VulkanDescriptorSet>(set);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
@@ -91,11 +128,11 @@ namespace Lavender
 
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[m_Element.Set][i];
-			descriptorWrite.dstBinding = m_Element.Binding;
+			descriptorWrite.dstSet = vkSet->GetVulkanSet((uint32_t)i);
+			descriptorWrite.dstBinding = element.Binding;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite.descriptorCount = m_Element.Count;
+			descriptorWrite.descriptorCount = element.Count;
 			descriptorWrite.pImageInfo = &imageInfo;
 
 			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);

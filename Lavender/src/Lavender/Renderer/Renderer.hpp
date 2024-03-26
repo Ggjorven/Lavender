@@ -18,7 +18,7 @@ namespace Lavender
 	class Renderer
 	{
 	public:
-		static void Init(const RendererSpecification& specs);
+		static void Init();
 		static void Destroy();
 
 		static void BeginFrame();
@@ -26,6 +26,7 @@ namespace Lavender
 
 		static void Submit(RenderFunction function);
 		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer); // TODO: Remove this and replace with something else
+		static void Wait();
 
 		static void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer);
 
@@ -35,11 +36,14 @@ namespace Lavender
 		static RenderInstance* GetInstance();
 
 		inline constexpr static const RenderingAPI GetAPI() { return s_API; }
-		inline static RendererSpecification GetSpecification() { return s_Specifications; }
+
+		inline static void SetSpecification(const RendererSpecification& specs) { s_Specification = specs; }
+		inline static RendererSpecification GetSpecification() { return s_Specification; }
+		static RenderData GetRenderData();
 		
 	private:
 		inline constexpr static const RenderingAPI s_API = RenderingAPI::Vulkan;
-		static RendererSpecification s_Specifications;
+		static RendererSpecification s_Specification;
 	};
 
 }

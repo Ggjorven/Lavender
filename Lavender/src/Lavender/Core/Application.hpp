@@ -47,13 +47,13 @@ namespace Lavender
 
 		inline bool IsMinimized() const { return m_Minimized; }
 
+		void HandleEvents();
+	
 	private:
 		void Init(const ApplicationSpecification& appInfo);
 
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
-
-		void HandleEvents();
 
 	private:
 		ApplicationSpecification m_AppInfo;

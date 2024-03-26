@@ -5,20 +5,30 @@ layout(location = 1) in vec2 a_TexCoord;
 
 layout(location = 0) out vec2 v_TexCoord;
 
-struct Camera
+struct CameraSpecification
 {
-    mat4 Model;
     mat4 View;
     mat4 Projection;
 };
 
-layout(binding = 1) uniform CameraSettings
+struct ModelSpecification
 {
-    Camera u_Camera;
+    mat4 Model;
 };
+
+layout(set = 1, binding = 0) uniform CameraSettings
+{
+    CameraSpecification u_Camera;
+};
+
+layout(set = 0, binding = 1) uniform ModelSettings
+{
+    ModelSpecification u_Model;
+};
+
 
 void main()
 {
-	gl_Position = u_Camera.Projection * u_Camera.View * u_Camera.Model * vec4(a_Position, 1.0);
+	gl_Position = u_Camera.Projection * u_Camera.View * u_Model.Model * vec4(a_Position, 1.0);
 	v_TexCoord = a_TexCoord;
 }

@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Core/Input/Input.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/Utils/Profiler.hpp"
@@ -21,6 +23,10 @@ namespace Lavender
 
 	Application::~Application()
 	{
+		Input::Destroy();
+
+		Renderer::Wait();
+
 		for (Layer* layer : m_LayerStack)
 		{
 			layer->OnDetach();
@@ -51,7 +57,10 @@ namespace Lavender
 			m_Window->OnUpdate();
 			HandleEvents();
 
-			Renderer::BeginFrame();
+			{
+				LV_PROFILE_SCOPE("Renderer::Begin");
+				Renderer::BeginFrame();
+			}
 			{
 				LV_PROFILE_SCOPE("Update & Render");
 				for (Layer* layer : m_LayerStack)
@@ -61,6 +70,7 @@ namespace Lavender
 				}
 			}
 
+			#if !defined(LV_DISABLE_IMGUI)
 			if (!m_Minimized) // TODO: Remove once Viewport uses ImGui window size instead of main window size
 			{
 				LV_PROFILE_SCOPE("ImGui Submission");
@@ -75,9 +85,13 @@ namespace Lavender
 					m_ImGuiLayer->End();
 				}
 			}
+			#endif
 
-			Renderer::EndFrame();
-			m_Window->OnRender();
+			{
+				LV_PROFILE_SCOPE("Renderer::End");
+				Renderer::EndFrame();
+				m_Window->OnRender();
+			}
 		}
 	}
 
@@ -95,16 +109,20 @@ namespace Lavender
 	{
 		s_Instance = this;
 
+		Input::Init();
 		Log::Init();
-		
+		Renderer::SetSpecification(appInfo.RenderSpecs);
+
 		m_Window = Window::Create();
 		m_Window->Init(appInfo.WindowSpecs);
 		m_Window->SetEventCallBack(LV_BIND_EVENT_FN(Application::OnEvent));
 
-		Renderer::Init(appInfo.RenderSpecs);
+		Renderer::Init();
 
+		#if !defined(LV_DISABLE_IMGUI)
 		m_ImGuiLayer = BaseImGuiLayer::Create();
 		AddOverlay(m_ImGuiLayer);
+		#endif
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -122,7 +140,10 @@ namespace Lavender
 		}
 
 		Renderer::OnResize(e.GetWidth(), e.GetHeight());
+
+		#if !defined(LV_DISABLE_IMGUI)
 		m_ImGuiLayer->Resize(e.GetWidth(), e.GetHeight());
+		#endif
 
 		m_Minimized = false;
 		return false;

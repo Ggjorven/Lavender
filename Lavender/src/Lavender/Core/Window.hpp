@@ -71,6 +71,12 @@ namespace Lavender
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
+		virtual uint32_t GetPositionX() const = 0;
+		virtual uint32_t GetPositionY() const = 0;
+
+		virtual uint32_t GetMonitorWidth() const = 0;
+		virtual uint32_t GetMonitorHeight() const = 0;
+
 		// Extra
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;

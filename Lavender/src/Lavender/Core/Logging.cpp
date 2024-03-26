@@ -17,4 +17,9 @@ namespace Lavender
 		spdlog::set_level(spdlog::level::trace); 
 	}
 
+	std::shared_ptr<spdlog::logger>& Log::GetLogger()
+	{
+		return s_Logger;
+	}
+
 }

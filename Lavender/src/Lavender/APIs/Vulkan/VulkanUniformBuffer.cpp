@@ -8,12 +8,24 @@
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
+#include "Lavender/APIs/Vulkan/VulkanDescriptorSet.hpp"
 
 namespace Lavender
 {
 
-	VulkanUniformBuffer::VulkanUniformBuffer(Ref<Pipeline> pipeline, UniformElement element, size_t dataSize)
-		: m_Pipeline(pipeline), m_Element(element), m_Size(dataSize)
+	VulkanUniformBuffer::VulkanUniformBuffer(size_t dataSize)
+		: m_Size(dataSize)
+	{
+		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
+		m_Buffers.resize((size_t)framesInFlight);
+		m_Allocations.resize((size_t)framesInFlight);
+
+		for (size_t i = 0; i < framesInFlight; i++)
+			m_Allocations[i] = VulkanAllocator::AllocateBuffer((VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, m_Buffers[i]);
+	}
+
+	VulkanUniformBuffer::VulkanUniformBuffer(Ref<DescriptorSet> set, UniformElement element, size_t dataSize)
+		: m_Set(set), m_Element(element), m_Size(dataSize)
 	{
 		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
 		m_Buffers.resize((size_t)framesInFlight);
@@ -51,7 +63,12 @@ namespace Lavender
 
 	void VulkanUniformBuffer::Upload()
 	{
-		auto vkPipeline = RefHelper::RefAs<VulkanPipeline>(m_Pipeline);
+		Upload(m_Set, m_Element);
+	}
+
+	void VulkanUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element)
+	{
+		auto vkSet = RefHelper::RefAs<VulkanDescriptorSet>(set);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
@@ -62,11 +79,11 @@ namespace Lavender
 
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkPipeline->m_DescriptorSets[m_Element.Set][i];
-			descriptorWrite.dstBinding = m_Element.Binding;
+			descriptorWrite.dstSet = vkSet->GetVulkanSet((uint32_t)i);
+			descriptorWrite.dstBinding = element.Binding;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = m_Element.Count;
+			descriptorWrite.descriptorCount = element.Count;
 			descriptorWrite.pBufferInfo = &bufferInfo;
 
 			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);

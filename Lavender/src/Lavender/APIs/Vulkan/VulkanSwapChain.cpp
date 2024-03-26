@@ -46,7 +46,7 @@ namespace Lavender
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// SwapChain
+		// SwapChain // TODO: Clean up this section
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkSwapchainKHR oldSwapchain = m_SwapChain;
 
@@ -201,7 +201,10 @@ namespace Lavender
 
 		// Copy over the images to the swapchain images
 		for (size_t i = 0; i < imageCount; i++)
+		{
 			m_Images[i].Image = imageCopies[i];
+			VulkanAllocator::TransitionImageLayout(m_Images[i].Image, m_ColourFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
+		}
 
 		for (uint32_t i = 0; i < imageCount; i++)
 		{
@@ -320,8 +323,6 @@ namespace Lavender
 		}
 
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetSpecification().FramesInFlight;
-
-		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height, const bool vsync)

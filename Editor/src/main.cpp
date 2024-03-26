@@ -22,7 +22,7 @@ Lavender::Application* Lavender::CreateApplication(int argc, char* argv[])
 {
 	ApplicationSpecification appInfo = {};
 	appInfo.WindowSpecs.Name = "Custom";
-	appInfo.WindowSpecs.VSync = true;
+	appInfo.WindowSpecs.VSync = false;
 
 	appInfo.RenderSpecs.FramesInFlight = 3;
 
