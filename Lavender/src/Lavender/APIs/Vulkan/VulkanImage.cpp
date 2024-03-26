@@ -18,6 +18,17 @@
 namespace Lavender
 {
 
+	VulkanImage2D::VulkanImage2D(uint32_t width, uint32_t height)
+		: m_Width(width), m_Height(height), m_Miplevels(1)
+	{
+		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+	}
+
 	VulkanImage2D::VulkanImage2D(const std::filesystem::path& path)
 	{
 		int width, height, texChannels;

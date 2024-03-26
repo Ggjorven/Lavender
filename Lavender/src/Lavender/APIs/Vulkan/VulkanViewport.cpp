@@ -320,14 +320,20 @@ namespace Lavender
 
 		UI::BeginWindow("Viewport", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoBackground | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);
 
-		auto size = ImGui::GetWindowSize();
+		auto imWindow = ImGui::GetCurrentWindow();
+		auto position = imWindow->Pos;
+		auto size = imWindow->Size;
 		if ((uint32_t)size.x != m_Width || (uint32_t)size.y != m_Height)
 		{
 			Resize((uint32_t)size.x, (uint32_t)size.y);
 		}
 		m_Width = (uint32_t)size.x;
 		m_Height = (uint32_t)size.y;
-		
+
+		auto& mainWindow = Application::Get().GetWindow();
+		m_XPos = (uint32_t)position.x - mainWindow.GetPositionX();
+		m_YPos = (uint32_t)position.y - mainWindow.GetPositionY();
+
 		auto region = ImGui::GetContentRegionAvail();
 		ImGui::Image(GetCurrentImGuiTexture(), ImVec2(region.x, region.y), ImVec2(1.0f, 0.0f), ImVec2(0.0f, 1.0f)); // TODO: Replace with UI Image
 	}
@@ -338,6 +344,17 @@ namespace Lavender
 		UI::EndWindow();
 
 		m_WindowStyle.Pop();
+	}
+
+	bool VulkanViewport::InView(const glm::vec2& mainWindowPosition) const
+	{
+		if (mainWindowPosition.x >= m_XPos && mainWindowPosition.x <= m_XPos + m_Width &&
+			mainWindowPosition.y >= m_YPos && mainWindowPosition.y <= m_YPos + m_Height)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	void VulkanViewport::Resize(uint32_t width, uint32_t height)
@@ -354,6 +371,11 @@ namespace Lavender
 
 			m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(m_Renderpass->GetImage()->GetSampler(), m_Renderpass->GetImage()->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
+	}
+
+	glm::vec2 VulkanViewport::ConvertMousePosition(const glm::vec2& mainWindowPosition) const
+	{
+		return glm::vec2(mainWindowPosition.x - m_XPos, mainWindowPosition.y - m_YPos);
 	}
 
 	ImTextureID VulkanViewport::GetCurrentImGuiTexture()

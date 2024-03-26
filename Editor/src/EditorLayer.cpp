@@ -2,9 +2,10 @@
 
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Logging.hpp>
+#include <Lavender/Core/Input/Input.hpp>
+
 #include <Lavender/Utils/Utils.hpp>
 #include <Lavender/Utils/Profiler.hpp>
-#include <Lavender/FileSystem/PreferencesSerializer.hpp>
 
 #include <Lavender/APIs/Vulkan/VulkanContext.hpp>
 #include <Lavender/APIs/Vulkan/VulkanImage.hpp>
@@ -19,6 +20,7 @@
 
 #include <Lavender/Workspace/Assets/MeshAsset.hpp>
 
+#include <Lavender/FileSystem/PreferencesSerializer.hpp>
 #include <Lavender/FileSystem/ProjectSerializer.hpp>
 #include <Lavender/FileSystem/SceneSerializer.hpp>
 
@@ -51,16 +53,7 @@ void EditorLayer::OnAttach()
 	ProjectSerializer projSerializer(m_Project);
 	projSerializer.Deserialize("Projects/First/Project.lvproject");
 
-	// TODO: Serialize all scenes
-	auto scene = m_Project->CreateAndAddScene();
-	auto assetManager = scene->GetAssetManager();
-	assetManager->GetAssetsFromDirectory(m_Project->GetDirectories().ProjectDir / m_Project->GetDirectories().Assets);
-
-	SceneSerializer sceneSerializer(scene);
-	sceneSerializer.Deserialize("Projects/First/Scenes/first.lvscene");
-
-	m_Project->AddScene(scene, "Main", true);
-
+	m_ContentBrowserPanel = ContentBrowserPanel::Create(m_Project);
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
 	m_DebugPanel = DebugPanel::Create(m_Project);
 
@@ -87,6 +80,7 @@ void EditorLayer::OnUpdate(float deltaTime)
 
 	m_Project->OnUpdate(deltaTime);
 
+	m_ContentBrowserPanel->OnUpdate(deltaTime);
 	m_DebugPanel->OnUpdate(deltaTime);
 }
 
@@ -101,9 +95,11 @@ void EditorLayer::OnImGuiRender()
 {
 	ImGui::DockSpaceOverViewport();
 	RenderMenuBar();
+	//ImGui::ShowDemoWindow(); // TODO: Remove
 	
 	m_Project->OnImGuiRender();
 
+	m_ContentBrowserPanel->RenderUI();
 	m_EntityPanel->RenderUI();
 	m_DebugPanel->RenderUI();
 }
@@ -111,6 +107,8 @@ void EditorLayer::OnImGuiRender()
 void EditorLayer::OnEvent(Event& e)
 {
 	EventHandler handler(e);
+
+	m_Project->OnEvent(e);
 
 	handler.Handle<KeyPressedEvent>(LV_BIND_EVENT_FN(EditorLayer::OnKeyPressEvent));
 	handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(EditorLayer::OnResizeEvent));

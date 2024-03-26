@@ -145,8 +145,54 @@ namespace Lavender
 				ComponentUsage usage = BeginECSComponent<MeshComponent>();
 				if (usage & ComponentUsage::Opened)
 				{
-					// TODO: Make nice
-					UI::Text("Has mesh :O");
+					{
+						UI::Text("Mesh: ");
+						UI::SameLine();
+
+						if (UI::BeginCombo("##MeshAsset_LavenderUI", "Select Mesh"))
+						{
+							// TODO: Improve system
+							for (auto& asset : m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAssets())
+							{
+								if (asset.second->GetStaticType() != AssetType::MeshAsset)
+									continue;
+
+								bool selected = false;
+								if (mesh.MeshObject)
+									selected = asset.second->GetAssetPath().filename() == mesh.MeshObject->GetAssetPath().filename();
+
+								if (UI::Selectable(asset.second->GetAssetPath().filename().string(), &selected))
+								{
+									mesh.MeshObject = RefHelper::RefAs<MeshAsset>(asset.second);
+								}
+							}
+							UI::EndCombo();
+						}
+					}
+					{
+						UI::Text("Material: ");
+						UI::SameLine();
+
+						if (UI::BeginCombo("##MaterialAsset_LavenderUI", "Select Material"))
+						{
+							// TODO: Improve system
+							for (auto& asset : m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAssets())
+							{
+								if (asset.second->GetStaticType() != AssetType::MaterialAsset)
+									continue;
+
+								bool selected = false;
+								if (mesh.Material)
+									selected = asset.second->GetAssetPath().filename() == mesh.Material->GetAssetPath().filename();
+
+								if (UI::Selectable(asset.second->GetAssetPath().filename().string(), &selected))
+								{
+									mesh.Material = RefHelper::RefAs<MaterialAsset>(asset.second);
+								}
+							}
+							UI::EndCombo();
+						}
+					}
 				}
 			}
 

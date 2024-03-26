@@ -5,6 +5,8 @@
 #include "Lavender/Renderer/RenderPass.hpp"
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
 
+#include <glm/glm.hpp>
+
 #include <imgui.h>
 
 namespace Lavender
@@ -28,6 +30,10 @@ namespace Lavender
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
+		virtual glm::vec2 GetPosition() const = 0;
+
+		virtual bool InView(const glm::vec2& mainWindowPosition) const = 0;
+		virtual glm::vec2 ConvertMousePosition(const glm::vec2& mainWindowPosition) const = 0;
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 

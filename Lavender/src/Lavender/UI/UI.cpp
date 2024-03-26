@@ -122,6 +122,16 @@ namespace Lavender::UI
 		ImGui::TableNextRow((ImGuiTableRowFlags)flags, minHeight);
 	}
 
+	bool BeginCombo(const std::string& name, const std::string& previewValue, ComboFlags flags)
+	{
+		return ImGui::BeginCombo(name.c_str(), previewValue.c_str(), (ImGuiComboFlags)flags);
+	}
+
+	void EndCombo()
+	{
+		ImGui::EndCombo();
+	}
+
 	void TableSetupColumn(const std::string& name, TableColumnFlags flags, float widthOrWeight)
 	{
 		ImGui::TableSetupColumn(name.c_str(), (ImGuiTableColumnFlags)flags, widthOrWeight);

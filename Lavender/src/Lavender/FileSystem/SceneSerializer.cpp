@@ -137,7 +137,7 @@ namespace Lavender
 		UUID uuid = node["Entity"].as<uint64_t>();
 		Entity entity = m_Scene->CreateEntityWithUUID(uuid);
 
-		//TagComponent
+		// TagComponent
 		auto tagComponent = node["TagComponent"];
 		if (tagComponent)
 		{
@@ -145,7 +145,7 @@ namespace Lavender
 			tag.Tag = tagComponent["Tag"].as<std::string>();
 		}
 
-		//TransformComponent
+		// TransformComponent
 		auto transformComponent = node["TransformComponent"];
 		if (transformComponent)
 		{
@@ -155,15 +155,34 @@ namespace Lavender
 			transform.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 		}
 
-		//MeshComponent
+		// MeshComponent
 		auto meshComponent = node["MeshComponent"];
 		if (meshComponent)
 		{
 			MeshComponent& mesh = entity.AddOrReplaceComponent<MeshComponent>();
+			auto assets = m_Scene->GetAssetManager();
+			
+			// Mesh
 			auto meshHandle = meshComponent["AssetHandle"];
-			if (meshHandle) mesh.MeshObject = RefHelper::RefAs<MeshAsset>(m_Scene->GetAssetManager()->GetAsset(meshHandle.as<uint64_t>()));
+			if (meshHandle)
+			{
+				AssetHandle meshAssetHandle = meshHandle.as<uint64_t>();
+				if (assets->Exists(meshAssetHandle))
+					mesh.MeshObject = RefHelper::RefAs<MeshAsset>(assets->GetAsset(meshAssetHandle));
+				else
+					LV_LOG_ERROR("(Entity[{0}]) Asset by handle {1} doesn't exist.", uuid.Get(), meshAssetHandle.Get());
+			}
+			
+			// Material
 			auto materialHandle = meshComponent["Material"];
-			if (materialHandle) mesh.Material = RefHelper::RefAs<MaterialAsset>(m_Scene->GetAssetManager()->GetAsset(materialHandle.as<uint64_t>()));
+			if (materialHandle)
+			{
+				AssetHandle materialAssetHandle = materialHandle.as<uint64_t>();
+				if (assets->Exists(materialAssetHandle))
+					mesh.Material = RefHelper::RefAs<MaterialAsset>(assets->GetAsset(materialAssetHandle));
+				else
+					LV_LOG_ERROR("(Entity[{0}]) Asset by handle {1} doesn't exist.", uuid.Get(), materialAssetHandle.Get());
+			}
 		}
 	}
 

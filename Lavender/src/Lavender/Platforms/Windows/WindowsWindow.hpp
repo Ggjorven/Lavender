@@ -24,6 +24,9 @@ namespace Lavender
 		uint32_t GetPositionX() const override;
 		uint32_t GetPositionY() const override;
 
+		uint32_t GetMonitorWidth() const override;
+		uint32_t GetMonitorHeight() const override;
+
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override { return m_Data.Vsync; }
 

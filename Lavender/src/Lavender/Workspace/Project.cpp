@@ -6,6 +6,8 @@
 
 #include "Lavender/Renderer/FrameResources.hpp"
 
+#include "Lavender/FileSystem/SceneSerializer.hpp"
+
 namespace Lavender
 {
 
@@ -57,17 +59,33 @@ namespace Lavender
         m_Viewport->EndRender();
     }
 
-    Ref<Scene> Project::CreateAndAddScene()
+    void Project::OnEvent(Event& e)
     {
-        return Scene::Create(m_Viewport);
+        m_Scenes.GetActive()->OnEvent(e);
     }
 
-    void Project::AddScene(Ref<Scene> scene, const std::string& name, bool active)
+    Ref<Scene> Project::CreateAndAddScene(bool active)
     {
-        m_Scenes.Add(scene, name, active);
+        auto scene = Scene::Create(m_Viewport);
+        AddScene(scene, active);
+        return scene;
+    }
+
+    void Project::AddScene(Ref<Scene> scene, bool active)
+    {
+        m_Scenes.Add(scene, active);
         
         auto& camera = scene->GetCamera();
         camera = EditorCamera::Create(m_Viewport);
+    }
+
+    void Project::InitializeStartScene()
+    {
+        Ref<Scene> scene = CreateAndAddScene(true);
+        scene->GetAssetManager()->GetAssetsFromDirectory(m_Directories.ProjectDir / m_Directories.Assets);
+
+        SceneSerializer serializer(scene);
+        serializer.Deserialize(m_StartScenePath);
     }
 
     Ref<Project> Project::Create()

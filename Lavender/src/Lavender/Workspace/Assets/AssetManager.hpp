@@ -20,7 +20,9 @@ namespace Lavender
 
 		void AddAsset(Ref<Asset> asset);
 
+		bool Exists(AssetHandle handle) const;
 		Ref<Asset> GetAsset(AssetHandle handle);
+		inline Dict<AssetHandle, Ref<Asset>> GetAssets() { return m_Assets; }
 
 		static Ref<AssetManager> Create();
 

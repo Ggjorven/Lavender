@@ -117,12 +117,12 @@ namespace Lavender
 	public:
 		enum class CullingMode : uint8_t
 		{
-			None = LV_MAX_UINT8, Front = 1, Back, FrontAndBack
+			None = 0, Front = 1, Back, FrontAndBack
 		};
 
 		enum class PolygonMode : uint8_t
 		{
-			None = LV_MAX_UINT8, Fill = 0, Line = 1
+			None = 0, Fill = 0, Line = 1
 		};
 
 	public:

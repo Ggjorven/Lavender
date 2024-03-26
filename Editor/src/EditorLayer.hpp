@@ -17,6 +17,7 @@
 
 #include <Lavender/Workspace/Project.hpp>
 
+#include "Panels/ContentBrowserPanel.hpp"
 #include "Panels/EntitiesPanel.hpp"
 #include "Panels/DebugPanel.hpp"
 
@@ -47,6 +48,7 @@ private:
 
 	Ref<Project> m_Project = nullptr;
 
+	Ref<ContentBrowserPanel> m_ContentBrowserPanel = nullptr;
 	Ref<EntitiesPanel> m_EntityPanel = nullptr;
 	Ref<DebugPanel> m_DebugPanel = nullptr;
 

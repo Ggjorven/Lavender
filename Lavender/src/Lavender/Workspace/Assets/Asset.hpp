@@ -1,5 +1,7 @@
 #pragma once
 
+#include <typeinfo>
+#include <type_traits>
 #include <filesystem>
 
 #include "Lavender/Utils/Utils.hpp"
@@ -8,6 +10,11 @@
 
 namespace Lavender
 {
+
+	enum class AssetType
+	{
+		None = 0, MeshAsset, MaterialAsset
+	};
 
 	typedef UUID AssetHandle;
 
@@ -26,12 +33,27 @@ namespace Lavender
 		inline AssetHandle GetHandle() { return m_Handle; }
 		inline void SetHandle(AssetHandle handle) { m_Handle = handle; }
 
+		virtual AssetType GetStaticType() const = 0;
+
 	protected:
 		AssetHandle m_Handle = {};
 	};
 	
 	class MeshAsset;
 	class MaterialAsset;
+
+	static std::string AssetTypeToString(AssetType type)
+	{
+		switch (type)
+		{
+		case AssetType::MeshAsset:
+			return "MeshAsset";
+		case AssetType::MaterialAsset:
+			return "MaterialAsset";
+		}
+
+		return "Undefined Asset";
+	}
 
 	template<typename... Assets>
 	struct AssetGroup

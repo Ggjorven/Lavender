@@ -55,6 +55,7 @@ namespace Lavender
 
 		void OnUpdate(float deltaTime);
 		void OnRender(Ref<RenderCommandBuffer> cmdBuffer);
+		void OnEvent(Event& e);
 
 		void SetScript(Ref<ScriptLoader> script);
 		void ReloadScript();
@@ -65,7 +66,9 @@ namespace Lavender
 		inline Ref<EditorCamera>& GetCamera() { return m_EditorCamera; }
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
 		inline Ref<Viewport> GetViewport() { return m_Viewport; }
+		inline Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 		inline Ref<AssetManager> GetAssetManager() { return m_Assets; }
+		inline UUID GetSceneID() { return m_UUID; }
 
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
 		inline Entity CreateEntityWithUUID(const UUID& uuid) { return Entity::Create(m_Collection, uuid); }
@@ -108,19 +111,19 @@ namespace Lavender
 		virtual ~SceneCollection() = default;
 
 		void Clear();
-		void Add(Ref<Scene> scene, const std::string& name = "Unnamed Scene", bool active = false);
-		void Remove(const std::string& name);
-		Ref<Scene> Get(const std::string& name);
+		void Add(Ref<Scene> scene, bool active = false);
+		void Remove(UUID uuid);
+		Ref<Scene> Get(UUID uuid);
 
-		inline std::string GetActiveName() { return m_ActiveScene.first; }
+		inline UUID GetActiveUUID() { return m_ActiveScene.first; }
 		inline Ref<Scene> GetActive() { return m_ActiveScene.second; }
 
 		typedef std::function<void(Ref<Scene>)> EachSceneFn;
 		void Each(EachSceneFn function);
 
 	private:
-		Dict<std::string, Ref<Scene>> m_Scenes = { };
-		std::pair<std::string, Ref<Scene>> m_ActiveScene = {};
+		Dict<UUID, Ref<Scene>> m_Scenes = { };
+		std::pair<UUID, Ref<Scene>> m_ActiveScene = {};
 	};
 
 	////////////////////////////////////////////////////////////////////////////////

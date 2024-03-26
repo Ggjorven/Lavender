@@ -16,6 +16,7 @@ namespace Lavender
 {
 
 	std::vector<Ref<UniformBuffer>> SceneRenderer::s_ModelBuffers = { };
+	Ref<Image2D> SceneRenderer::s_EmptyImage = nullptr;
 
 	void SceneRenderer::Init()
 	{
@@ -24,11 +25,14 @@ namespace Lavender
 		{
 			s_ModelBuffers[i] = UniformBuffer::Create(sizeof(glm::mat4));
 		}
+
+		s_EmptyImage = Image2D::Create(1, 1);
 	}
 
 	void SceneRenderer::Destroy()
 	{
 		s_ModelBuffers.clear();
+		s_EmptyImage.reset();
 	}
 
 	void SceneRenderer::RenderScene(Scene* scene, Ref<EditorCamera>& camera, Ref<RenderCommandBuffer> cmdBuffer)
@@ -60,13 +64,20 @@ namespace Lavender
 			auto& set = sets[index];
 
 			MeshComponent& mesh = view.get<MeshComponent>(entity);
-
-			mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
-			mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
+			if (mesh.MeshObject)
+			{
+				mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
+				mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
+			}
 
 			if (mesh.Material)
 			{
 				mesh.Material->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
+			}
+			else
+			{
+				LV_LOG_WARN("Mesh of entity[{0}] has no material. This is not critical, but not recommended.", registry.get<UUID>(entity).Get());
+				s_EmptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
 			}
 
 			// Change Model matrix based on transformation
@@ -90,7 +101,7 @@ namespace Lavender
 
 			Renderer::Wait();
 			set->Bind(pipeline, cmdBuffer);
-			Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
+			if (mesh.MeshObject) Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
 			index++;
 		}
 	}

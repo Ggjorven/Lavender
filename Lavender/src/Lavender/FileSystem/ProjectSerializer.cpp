@@ -39,6 +39,15 @@ namespace Lavender
 
 			data << YAML::EndMap;
 		}
+		{
+			data << YAML::Key << "Scenes";
+			data << YAML::Value << YAML::BeginMap;
+
+			data << YAML::Key << "Start";
+			data << YAML::Value << m_Project->m_StartScenePath.string();
+
+			data << YAML::EndMap;
+		}
 
 		data << YAML::EndMap;
 
@@ -68,7 +77,6 @@ namespace Lavender
 			return;
 		}
 
-		// TODO: Add more
 		auto project = data["Project"];
 		if (project)
 		{
@@ -77,8 +85,18 @@ namespace Lavender
 			{
 				m_Project->m_Directories.Project = path;
 				m_Project->m_Directories.ProjectDir = path.parent_path();
-				m_Project->m_Directories.Assets = std::filesystem::path(directories["Assets"].as<std::string>());
-				m_Project->m_Directories.Scripts = std::filesystem::path(directories["Scripts"].as<std::string>());
+				if (directories["Assets"]) m_Project->m_Directories.Assets = std::filesystem::path(directories["Assets"].as<std::string>());
+				if (directories["Scripts"]) m_Project->m_Directories.Scripts = std::filesystem::path(directories["Scripts"].as<std::string>());
+			}
+
+			auto scenes = project["Scenes"];
+			if (scenes)
+			{
+				if (scenes["Start"])
+				{
+					m_Project->m_StartScenePath = std::filesystem::path(scenes["Start"].as<std::string>());
+					m_Project->InitializeStartScene();
+				}
 			}
 		}
 	}

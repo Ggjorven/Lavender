@@ -74,6 +74,15 @@ namespace Lavender
 		if (UI::TreeNode("Rendering", treenodeFlags))
 		{
 			UI::Text("Draw calls: {0}", Renderer::GetRenderData().DrawCalls);
+
+			auto camera = m_Project->GetSceneCollection().GetActive()->GetEditorCamera();
+			UI::Text("Camera: ");
+			UI::SameLine();
+			if (UI::Button("Switch State"))
+			{
+				camera->SwitchState();
+			}
+
 			UI::TreeNodePop();
 		}
 

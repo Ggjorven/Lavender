@@ -84,6 +84,11 @@ namespace Lavender
 		m_Assets[asset->GetHandle()] = asset;
 	}
 
+	bool AssetManager::Exists(AssetHandle handle) const
+	{
+		return m_Assets.find(handle) != m_Assets.end();
+	}
+
 	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
 	{
 		return m_Assets[handle];

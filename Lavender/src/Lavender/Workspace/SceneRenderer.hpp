@@ -5,6 +5,7 @@
 #include "Lavender/Renderer/Camera.hpp"
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
 #include "Lavender/Renderer/UniformBuffer.hpp"
+#include "Lavender/Renderer/Image.hpp"
 
 #include "Lavender/Workspace/Scene.hpp"
 
@@ -22,6 +23,7 @@ namespace Lavender
 
 	private:
 		static std::vector<Ref<UniformBuffer>> s_ModelBuffers;
+		static Ref<Image2D> s_EmptyImage;
 	};
 
 }

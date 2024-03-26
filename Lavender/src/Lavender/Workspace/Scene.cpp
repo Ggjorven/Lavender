@@ -76,6 +76,22 @@ namespace Lavender
 		}
 	}
 
+	void Scene::OnEvent(Event& e)
+	{
+		switch (m_State)
+		{
+		case Scene::State::Editor:
+			m_EditorCamera->OnEvent(e);
+			break;
+		case Scene::State::Runtime:
+			break;
+
+		default:
+			LV_LOG_FATAL("No proper state specified.");
+			break;
+		}
+	}
+
 	void Scene::SetScript(Ref<ScriptLoader> script)
 	{
 		m_Script = script;
@@ -129,26 +145,26 @@ namespace Lavender
 		m_Scenes.clear();
 	}
 
-	void SceneCollection::Add(Ref<Scene> scene, const std::string& name, bool active)
+	void SceneCollection::Add(Ref<Scene> scene, bool active)
 	{
-		m_Scenes[name] = scene;
+		m_Scenes[scene->GetSceneID()] = scene;
 
 		if (active)
-			m_ActiveScene = std::make_pair(name, scene);
+			m_ActiveScene = std::make_pair(scene->GetSceneID(), scene);
 	}
 
-	void SceneCollection::Remove(const std::string& name)
+	void SceneCollection::Remove(UUID uuid)
 	{
-		m_Scenes.erase(name);
+		m_Scenes.erase(uuid);
 	}
 
-	Ref<Scene> SceneCollection::Get(const std::string& name)
+	Ref<Scene> SceneCollection::Get(UUID uuid)
 	{
-		auto obj = m_Scenes.find(name);
+		auto obj = m_Scenes.find(uuid);
 		if (obj != m_Scenes.end())
-			return m_Scenes[name];
+			return m_Scenes[uuid];
 
-		LV_LOG_WARN("Failed to find scene by name: '{0}'...", name);
+		LV_LOG_WARN("Failed to find scene by uuid: '{0}'...", uuid.Get());
 		return nullptr;
 	}
 

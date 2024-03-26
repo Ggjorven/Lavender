@@ -80,7 +80,11 @@ namespace Lavender
 			if (meshPath)
 			{
 				m_MeshPath = std::filesystem::path(meshPath.as<std::string>());
-				m_Mesh = Mesh::Create(m_MeshPath);
+
+				if (std::filesystem::exists(m_MeshPath))
+					m_Mesh = Mesh::Create(m_MeshPath);
+				else
+					LV_LOG_ERROR("(Mesh) Mesh by path: '{0}' doesn't exist.", m_MeshPath);
 			}
 		}
 	}

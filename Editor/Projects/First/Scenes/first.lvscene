@@ -5,19 +5,19 @@ SceneData:
       TagComponent:
         Tag: ABC
       TransformComponent:
-        Position: [0.600000024, 0, 0]
-        Size: [1, 1, 1]
-        Rotation: [0, 0, 0]
+        Position: [0.899999976, 0, 0]
+        Size: [0.100000001, 0.100000001, 0.100000001]
+        Rotation: [-90, 0, -25]
       MeshComponent:
-        AssetHandle: 6516009052361294990
-        Material: 8468309108205782655
+        AssetHandle: 6516009052361294980
+        Material: 8468309108205782645
     - Entity: 7325713287001512595
       TagComponent:
         Tag: DEF
       TransformComponent:
-        Position: [-0.300000012, 0, 0]
+        Position: [-1.29999995, 0, 0]
         Size: [1, 1, 1]
-        Rotation: [0, 0, 0]
+        Rotation: [-90, 0, -120]
       MeshComponent:
         AssetHandle: 6516009052361294990
         Material: 8468309108205782655

@@ -224,6 +224,24 @@ namespace Lavender::UI
 
 	void TableSetupColumn(const std::string& name, TableColumnFlags flags = TableColumnFlags::None, float widthOrWeight = 0.0f);
     
+	enum class ComboFlags : uint8_t
+	{
+		None = 0,
+		PopupAlignLeft = BIT(0),
+		HeightSmall = BIT(1),
+		HeightRegular = BIT(2),
+		HeightLarge = BIT(3),
+		HeightLargest = BIT(4),
+		NoArrowButton = BIT(5),
+		NoPreview = BIT(6),
+
+		HeightMask = ImGuiComboFlags_HeightSmall | ImGuiComboFlags_HeightRegular | ImGuiComboFlags_HeightLarge | ImGuiComboFlags_HeightLargest
+	};
+	DEFINE_BITWISE_OPS(ComboFlags)
+
+	bool BeginCombo(const std::string& name, const std::string& previewValue, ComboFlags flags = ComboFlags::None);
+	void EndCombo();
+
 	void FullScreenOverlay(const glm::vec4& colour = { 0.0f, 0.0f, 0.0f, 0.2f });
 
     void BeginPropertyGrid(uint32_t columns);

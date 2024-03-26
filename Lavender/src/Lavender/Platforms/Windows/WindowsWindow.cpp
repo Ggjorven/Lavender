@@ -49,6 +49,20 @@ namespace Lavender
 		return (uint32_t)yPos;
 	}
 
+	uint32_t WindowsWindow::GetMonitorWidth() const
+	{
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		return mode->height;
+	}
+
+	uint32_t WindowsWindow::GetMonitorHeight() const
+	{
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		return mode->width;
+	}
+
 	void WindowsWindow::SetVSync(bool enabled)
 	{
 		// TODO: Recreate Vulkan swapchain

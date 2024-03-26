@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+#include "Lavender/Core/Events.hpp"
+
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/Renderer/Viewport.hpp"
@@ -16,8 +18,8 @@ namespace Lavender
 	struct ProjectDirectories
 	{
 	public:
-		std::filesystem::path Project = "Projects/First/project.lvproject";
-		std::filesystem::path ProjectDir = "Projects/First";
+		std::filesystem::path Project = "";
+		std::filesystem::path ProjectDir = "";
 		std::filesystem::path Assets = "Assets";
 		std::filesystem::path Scripts = "Script";
 
@@ -40,9 +42,12 @@ namespace Lavender
 		void OnUpdate(float deltaTime);
 		void OnRender();
 		void OnImGuiRender();
+		void OnEvent(Event& e);
 
-		Ref<Scene> CreateAndAddScene();
-		void AddScene(Ref<Scene> scene, const std::string& name = "Unnamed scene", bool active = false);
+		Ref<Scene> CreateAndAddScene(bool active = false);
+		void AddScene(Ref<Scene> scene, bool active = false);
+
+		void InitializeStartScene();
 
 		inline SceneCollection& GetSceneCollection() { return m_Scenes; }
 		inline Ref<Viewport> GetViewport() { return m_Viewport; }
@@ -57,6 +62,7 @@ namespace Lavender
 		SceneCollection m_Scenes = {};
 
 		ProjectDirectories m_Directories = {};
+		std::filesystem::path m_StartScenePath = {};
 
 		friend class ProjectSerializer;
 	};

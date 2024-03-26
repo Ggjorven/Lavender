@@ -50,7 +50,7 @@ namespace Lavender
 
 		pipelineSpecs.Polygonmode = PipelineSpecification::PolygonMode::Fill;
 		pipelineSpecs.LineWidth = 1.0f;
-		pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Back;
+		pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::None;
 
 		DescriptorSetGroup::DescriptorCount size = {};
 		size.SetCount(0, Renderer::GetSpecification().PreAllocatedDescriptorSets);

@@ -31,6 +31,8 @@ namespace Lavender
 
 		void Upload(Ref<DescriptorSet> set, UniformElement element);
 
+		inline constexpr AssetType GetStaticType() const override { return AssetType::MaterialAsset; }
+
 		static Ref<MaterialAsset> Create();
 		static Ref<MaterialAsset> Create(const std::filesystem::path& path);
 
