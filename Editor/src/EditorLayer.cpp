@@ -96,10 +96,11 @@ void EditorLayer::OnImGuiRender()
 	ImGui::DockSpaceOverViewport();
 	RenderMenuBar();
 	//ImGui::ShowDemoWindow(); // TODO: Remove
+	//ImGui::ShowStyleEditor(); // TODO: Remove
 	
 	m_Project->OnImGuiRender();
 
-	m_ContentBrowserPanel->RenderUI();
+	//m_ContentBrowserPanel->RenderUI();
 	m_EntityPanel->RenderUI();
 	m_DebugPanel->RenderUI();
 }
@@ -133,6 +134,13 @@ bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 
 void EditorLayer::RenderMenuBar()
 {	
+	UI::ScopedStyleList colours = UI::StyleColourList({
+		{ UI::StyleColourType::WindowBg, UI::Colours::BackgroundDark },
+		{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+		{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+		{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint }
+	});
+
 	if (UI::BeginMainMenuBar())
 	{
 		if (UI::BeginMenu("File##LavenderUI"))

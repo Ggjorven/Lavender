@@ -6,8 +6,8 @@ SceneData:
         Tag: ABC
       TransformComponent:
         Position: [0.899999976, 0, 0]
-        Size: [0.100000001, 0.100000001, 0.100000001]
-        Rotation: [-90, 0, -25]
+        Size: [0.200000003, 0.200000003, 0.200000003]
+        Rotation: [-90, 0, -8.69999981]
       MeshComponent:
         AssetHandle: 6516009052361294980
         Material: 8468309108205782645
@@ -17,7 +17,7 @@ SceneData:
       TransformComponent:
         Position: [-1.29999995, 0, 0]
         Size: [1, 1, 1]
-        Rotation: [-90, 0, -120]
+        Rotation: [270, 0, -90]
       MeshComponent:
         AssetHandle: 6516009052361294990
         Material: 8468309108205782655

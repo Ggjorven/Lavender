@@ -57,7 +57,7 @@ namespace Lavender
 		return uuid;
 	}
 
-	void Registry::CreateEntity(UUID uuid)
+	void Registry::CreateEntity(const UUID& uuid)
 	{
 		entt::entity entity = m_Registry.create();
 
@@ -65,7 +65,7 @@ namespace Lavender
 		m_Entities[uuid] = entity;
 	}
 
-	void Registry::DeleteEntity(UUID entity)
+	void Registry::DeleteEntity(const UUID& entity)
 	{
 		m_Registry.destroy(m_Entities[entity]);
 		m_Entities.erase(entity);
@@ -108,12 +108,12 @@ namespace Lavender
 		return m_MainRegistry->CreateEntity();
 	}
 
-	void RegistryCollection::CreateEntity(UUID uuid)
+	void RegistryCollection::CreateEntity(const UUID& uuid)
 	{
 		m_MainRegistry->CreateEntity(uuid);
 	}
 
-	void RegistryCollection::DeleteEntity(UUID entity)
+	void RegistryCollection::DeleteEntity(const UUID& entity)
 	{
 		m_MainRegistry->DeleteEntity(entity);
 	}

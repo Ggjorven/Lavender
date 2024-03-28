@@ -6,7 +6,7 @@
 namespace Lavender::UI::Draw
 {
 
-	inline void Underline(bool fullWidth = false, float offsetX = 0.0f, float offsetY = -1.0f)
+	inline void Underline(bool fullWidth, float offsetX, float offsetY)
 	{
 		if (fullWidth)
 		{

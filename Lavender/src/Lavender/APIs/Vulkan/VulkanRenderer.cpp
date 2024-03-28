@@ -2,6 +2,7 @@
 #include "VulkanRenderer.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Core/Application.hpp"
 #include "Lavender/Utils/Utils.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
@@ -31,6 +32,9 @@ namespace Lavender
 
 	void VulkanRenderer::BeginFrame()
 	{
+		if (Application::Get().IsMinimized())
+			return;
+
 		s_RenderData->Reset();
 
 		// TODO: Execute resourceFree queue
@@ -60,6 +64,9 @@ namespace Lavender
 
 	void VulkanRenderer::EndFrame() // A.k.a Display/Present
 	{
+		if (Application::Get().IsMinimized())
+			return;
+
 		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->EndFrame();
 	}

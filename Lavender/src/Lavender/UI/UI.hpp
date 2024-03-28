@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include "Lavender/Utils/Utils.hpp"
+#include "Lavender/Utils/UUID.hpp"
 
 #include <glm/glm.hpp>
 
@@ -16,11 +18,22 @@
 namespace Lavender::UI
 {
 
+	namespace Draw
+	{
+		void Underline(bool fullWidth = false, float offsetX = 0.0f, float offsetY = -1.0f);
+	}
+
+	void PushID(uint32_t id = LV_MAX_UINT32);
+	void PopID();
+	void ResetIDs();
+
 	void ShiftCursor(float x, float y);
     void ShiftCursorX(float distance);
     void ShiftCursorY(float distance);
 
 	void HelpMarker(const std::string& desc);
+
+	bool Checkbox(const std::string& label, bool& value);
 
 	inline bool IsItemDisabled() { return ImGui::GetItemFlags() & ImGuiItemFlags_Disabled; }
 	inline ImRect GetItemRect() { return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax()); }
@@ -133,6 +146,7 @@ namespace Lavender::UI
     };
 	DEFINE_BITWISE_OPS(SliderFlags)
 
+	bool DragFloat(const std::string& name, float& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
 	bool DragFloat2(const std::string& name, glm::vec2& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
     bool DragFloat3(const std::string& name, glm::vec3& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
 	bool DragFloat4(const std::string& name, glm::vec4& value, float speed = 1.0f, float minValue = 0.0f, float maxValue = 0.0f, const std::string& format = "%.2f", SliderFlags flags = SliderFlags::None);
@@ -242,17 +256,34 @@ namespace Lavender::UI
 	bool BeginCombo(const std::string& name, const std::string& previewValue, ComboFlags flags = ComboFlags::None);
 	void EndCombo();
 
-	void FullScreenOverlay(const glm::vec4& colour = { 0.0f, 0.0f, 0.0f, 0.2f });
+	struct Combo
+	{
+	public:
+		typedef std::function<void()> SelectionFunc;
+	public:
+		std::string Preview = {};
+		std::string Selected = {};
+		std::vector<std::pair<std::string, SelectionFunc>> Items = { };
+	};
 
-    void BeginPropertyGrid(uint32_t columns);
+    void BeginPropertyGrid(uint32_t columns = 2);
     void EndPropertyGrid();
 
 	void BeginCustomProperty(const std::string& label, const std::string& helpText = "");
 	void EndCustomProperty();
 
-	bool Property(const std::string& label, glm::vec2& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& helpText = "");
-	bool Property(const std::string& label, glm::vec3& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& helpText = "");
-	bool Property(const std::string& label, glm::vec4& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& helpText = "");
+	template<typename ... Args>
+	bool Property(const std::string& label, const std::string& helpText = "", const std::string& fmt = "", Args&& ...args);
+
+	bool Property(const std::string& label, float& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
+	bool Property(const std::string& label, glm::vec2& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
+	bool Property(const std::string& label, glm::vec3& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
+	bool Property(const std::string& label, glm::vec4& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
+
+	bool Property(const std::string& label, Combo& value, const std::string& helpText = "");
+
+	// Custom property for entity size
+	bool UniformProperty(const std::string& label, glm::vec3& value, bool& uniform, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& hoverText = "");
 
     bool BeginMainMenuBar();
     void EndMainMenuBar();
@@ -264,430 +295,32 @@ namespace Lavender::UI
     void SameLine();
     void Dummy(const glm::vec2& size = { 10.0f, 10.0f });
 
-}
+	void FullScreenOverlay(const glm::vec4& colour = { 0.0f, 0.0f, 0.0f, 0.2f });
 
-/*
-	static bool Property(const std::string& label, std::string& value, const char* helpText = "");
-	static bool PropertyMultiline(const std::string& label, std::string& value, const char* helpText = "");
-	static void Property(const std::string& label, const std::string& value, const char* helpText = "");
-	static void Property(const std::string& label, const char* value, const char* helpText = "");
-	static bool Property(const std::string& label, char* value, size_t length, const char* helpText = "");
-	static bool Property(const std::string& label, bool& value, const char* helpText = "");
-	static bool Property(const std::string& label, int8_t& value, int8_t min = 0, int8_t max = 0, const char* helpText = "");
-	static bool Property(const std::string& label, int16_t& value, int16_t min = 0, int16_t max = 0, const char* helpText = "");
-	static bool Property(const std::string& label, int32_t& value, int32_t min = 0, int32_t max = 0, const char* helpText = "");
-	static bool Property(const std::string& label, int64_t& value, int64_t min = 0, int64_t max = 0, const char* helpText = "");
-	static bool Property(const std::string& label, uint8_t& value, uint8_t minValue = 0, uint8_t maxValue = 0, const char* helpText = "");
-	static bool Property(const std::string& label, uint16_t& value, uint16_t minValue = 0, uint16_t maxValue = 0, const char* helpText = "");
-	static bool Property(const std::string& label, uint32_t& value, uint32_t minValue = 0, uint32_t maxValue = 0, const char* helpText = "");
-	static bool Property(const std::string& label, uint64_t& value, uint64_t minValue = 0, uint64_t maxValue = 0, const char* helpText = "");
-
-static bool Property(const std::string& label, std::string& value, const char* helpText = "")
-{
-	bool modified = false;
-
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
+	// Templated functions
+	template<typename ... Args>
+	bool Property(const std::string& label, const std::string& helpText, const std::string& fmt, Args&& ...args)
 	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
+		UI::ShiftCursor(10.0f, 9.0f);
+		UI::Text(label);
+
+		if (std::strlen(helpText.c_str()) != 0)
+		{
+			UI::SameLine();
+			UI::HelpMarker(helpText);
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursor(4.0f, 8.0f);
+		ImGui::PushItemWidth(-1);
+
+		UI::Text<Args...>(fmt, args...);
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return false;
 	}
 
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	modified = UI::InputText(fmt::format("##{0}", label).c_str(), &value);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
 }
-
-static bool PropertyMultiline(const std::string& label, std::string& value, const char* helpText = "")
-{
-	bool modified = false;
-
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ImGui::PushItemWidth(-1);
-
-	modified = UI::InputTextMultiline(fmt::format("##{0}", label).c_str(), &value);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-
-	return modified;
-}
-
-static void Property(const std::string& label, const std::string& value, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-	BeginDisabled();
-	UI::InputText(fmt::format("##{0}", label).c_str(), (char*)value.c_str(), value.size(), ImGuiInputTextFlags_ReadOnly);
-	EndDisabled();
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-}
-
-static void Property(const std::string& label, const char* value, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-	BeginDisabled();
-	UI::InputText(fmt::format("##{0}", label).c_str(), (char*)value, 256, ImGuiInputTextFlags_ReadOnly);
-	EndDisabled();
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-}
-
-static bool Property(const std::string& label, char* value, size_t length, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::InputText(fmt::format("##{0}", label).c_str(), value, length);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, bool& value, const char* helpText = "")
-{
-	bool modified = false;
-
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	modified = UI::Checkbox(fmt::format("##{0}", label).c_str(), &value);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, int8_t& value, int8_t min = 0, int8_t max = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragInt8(fmt::format("##{0}", label).c_str(), &value, 1.0f, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, int16_t& value, int16_t min = 0, int16_t max = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragInt16(fmt::format("##{0}", label).c_str(), &value, 1.0f, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, int32_t& value, int32_t min = 0, int32_t max = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragInt32(fmt::format("##{0}", label).c_str(), &value, 1.0f, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, int64_t& value, int64_t min = 0, int64_t max = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragInt64(fmt::format("##{0}", label).c_str(), &value, 1.0f, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, uint8_t& value, uint8_t minValue = 0, uint8_t maxValue = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragUInt8(fmt::format("##{0}", label).c_str(), &value, 1.0f, minValue, maxValue);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, uint16_t& value, uint16_t minValue = 0, uint16_t maxValue = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragUInt16(fmt::format("##{0}", label).c_str(), &value, 1.0f, minValue, maxValue);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, uint32_t& value, uint32_t minValue = 0, uint32_t maxValue = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragUInt32(fmt::format("##{0}", label).c_str(), &value, 1.0f, minValue, maxValue);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const std::string& label, uint64_t& value, uint64_t minValue = 0, uint64_t maxValue = 0, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragUInt64(fmt::format("##{0}", label).c_str(), &value, 1.0f, minValue, maxValue);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const char* label, glm::vec2& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragFloat2(fmt::format("##{0}", label).c_str(), glm::value_ptr(value), delta, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const char* label, glm::vec3& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragFloat3(fmt::format("##{0}", label).c_str(), glm::value_ptr(value), delta, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-
-static bool Property(const char* label, glm::vec4& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const char* helpText = "")
-{
-	ShiftCursor(10.0f, 9.0f);
-	ImGui::Text(label);
-
-	if (std::strlen(helpText) != 0)
-	{
-		ImGui::SameLine();
-		HelpMarker(helpText);
-	}
-
-	ImGui::NextColumn();
-	ShiftCursorY(4.0f);
-	ImGui::PushItemWidth(-1);
-
-	bool modified = UI::DragFloat4(fmt::format("##{0}", label).c_str(), glm::value_ptr(value), delta, min, max);
-
-	ImGui::PopItemWidth();
-	ImGui::NextColumn();
-	Draw::Underline();
-
-	return modified;
-}
-*/

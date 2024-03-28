@@ -8,6 +8,7 @@
 #include "Lavender/Renderer/Pipeline.hpp"
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
 
+#include "Lavender/APIs/Vulkan/VulkanUtils.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
@@ -195,8 +196,10 @@ namespace Lavender
 			allocInfo.pSetLayouts = layouts.data();
 
 			descriptorSets[set.first].resize((size_t)Renderer::GetSpecification().FramesInFlight * m_Count.GetCount(set.first));
-			if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets[set.first].data()) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to allocate descriptor sets!");
+
+			VkResult res = vkAllocateDescriptorSets(device, &allocInfo, descriptorSets[set.first].data());
+			if (res != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to allocate descriptor sets! Error: {0}", VKResultToString(res));
 		}
 
 		ConvertToVulkanDescriptorSets(descriptorSets);

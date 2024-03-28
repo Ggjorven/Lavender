@@ -9,6 +9,8 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/UI/UI.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanCommands.hpp"
@@ -147,6 +149,8 @@ namespace Lavender
 
 	void VulkanImGuiLayer::End()
 	{
+		UI::ResetIDs();
+
 		ImGuiIO& io = ImGui::GetIO();
 
 		io.DisplaySize = ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight());

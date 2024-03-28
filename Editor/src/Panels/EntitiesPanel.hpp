@@ -57,6 +57,8 @@ namespace Lavender
 
 		UI::ScopedStyleList colours = {{
 			{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+			{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+			{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint },
 			{ UI::StyleColourType::Border, UI::Colours::BackgroundDark },
 		}};
 

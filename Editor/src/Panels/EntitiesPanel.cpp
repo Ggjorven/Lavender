@@ -32,7 +32,10 @@ namespace Lavender
 			});
 
 			UI::ScopedStyleList colours = UI::StyleColourList({
-				{ UI::StyleColourType::WindowBg, UI::Colours::BackgroundDark }
+				{ UI::StyleColourType::WindowBg, UI::Colours::BackgroundDark },
+				{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+				{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+				{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint }
 			});
 
 			UI::BeginWindow("Entities", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);
@@ -107,31 +110,19 @@ namespace Lavender
 				ComponentUsage usage = BeginECSComponent<TransformComponent>();
 				if (usage & ComponentUsage::Opened)
 				{
+					static Dict<UUID, bool> uniformSize = { };
+
 					// TODO: Look into ImGui tables, so the user doesn't have to move the column line every time.
 					UI::BeginPropertyGrid(2);
 
-					UI::ScopedStyle colour = UI::StyleColour(UI::StyleColourType::FrameBg, UI::Colours::NearBlack);
-					{
-						UI::ScopedStyleList red = {{
-							{ UI::StyleColourType::FrameBgHovered, LV_U32_COLOUR(211, 0, 0, 123) },
-							{ UI::StyleColourType::FrameBgActive, LV_U32_COLOUR(255, 0, 0, 172) }
-						}};
-						UI::Property("Position", transform.Position);
-					}
-					{
-						UI::ScopedStyleList blue = { {
-							{ UI::StyleColourType::FrameBgHovered, LV_U32_COLOUR(0, 171, 35, 123) },
-							{ UI::StyleColourType::FrameBgActive, LV_U32_COLOUR(0, 211, 35, 172) }
-						} };
-						UI::Property("Size", transform.Size);
-					}
-					{
-						UI::ScopedStyleList green = { {
-							{ UI::StyleColourType::FrameBgHovered, LV_U32_COLOUR(0, 80, 211, 123) },
-							{ UI::StyleColourType::FrameBgActive, LV_U32_COLOUR(0, 80, 255, 172) }
-						} };
-						UI::Property("Rotation", transform.Rotation);
-					}
+					UI::ScopedStyleList colours = UI::StyleColourList({
+						{ UI::StyleColourType::FrameBgHovered, UI::Colours::LightTint },
+						{ UI::StyleColourType::FrameBgActive, UI::Colours::LighterTint },
+						{ UI::StyleColourType::FrameBg, UI::Colours::NearBlack }
+					});
+					UI::Property("Position", transform.Position);
+					UI::UniformProperty("Size", transform.Size, uniformSize[m_SelectedUUID], 0.1f, 0.0f, 0.0f, "%.2f", "Uniform Scaling");
+					UI::Property("Rotation", transform.Rotation);
 
 					UI::EndPropertyGrid();
 				}
@@ -145,54 +136,73 @@ namespace Lavender
 				ComponentUsage usage = BeginECSComponent<MeshComponent>();
 				if (usage & ComponentUsage::Opened)
 				{
+					UI::ScopedStyleList colours = {{
+						{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+						{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+						{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint },
+						{ UI::StyleColourType::FrameBg, UI::Colours::AlphaTint },
+						{ UI::StyleColourType::FrameBgHovered, UI::Colours::LightTint },
+						{ UI::StyleColourType::FrameBgActive, UI::Colours::LighterTint },
+						{ UI::StyleColourType::Button, UI::Colours::DarkTint },
+						{ UI::StyleColourType::ButtonHovered, UI::Colours::DarkTint },
+						{ UI::StyleColourType::ButtonActive, UI::Colours::DarkTint }
+					}};
+
+					UI::BeginPropertyGrid(2);
+					
 					{
-						UI::Text("Mesh: ");
-						UI::SameLine();
-
-						if (UI::BeginCombo("##MeshAsset_LavenderUI", "Select Mesh"))
+						UI::Combo meshCombo = {};
+						for (auto& asset : m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAssets())
 						{
-							// TODO: Improve system
-							for (auto& asset : m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAssets())
+							if (asset.second->GetStaticType() != AssetType::MeshAsset)
+								continue;
+
+							auto path = asset.second->GetAssetPath();
+							std::string name = path.filename().replace_extension().string();
+							std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(name, [this, asset]()
 							{
-								if (asset.second->GetStaticType() != AssetType::MeshAsset)
-									continue;
+								auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
+								MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
+								mesh.MeshObject = RefHelper::RefAs<MeshAsset>(m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAsset(asset.first));
+							});
 
-								bool selected = false;
-								if (mesh.MeshObject)
-									selected = asset.second->GetAssetPath().filename() == mesh.MeshObject->GetAssetPath().filename();
-
-								if (UI::Selectable(asset.second->GetAssetPath().filename().string(), &selected))
-								{
-									mesh.MeshObject = RefHelper::RefAs<MeshAsset>(asset.second);
-								}
+							meshCombo.Items.push_back(item);
+							if (mesh.MeshObject->GetHandle() == asset.first)
+							{
+								meshCombo.Selected = item.first;
+								meshCombo.Preview = item.first;
 							}
-							UI::EndCombo();
 						}
+						UI::Property("Mesh", meshCombo);
 					}
 					{
-						UI::Text("Material: ");
-						UI::SameLine();
-
-						if (UI::BeginCombo("##MaterialAsset_LavenderUI", "Select Material"))
+						UI::Combo materialCombo = {};
+						for (auto& asset : m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAssets())
 						{
-							// TODO: Improve system
-							for (auto& asset : m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAssets())
+							if (asset.second->GetStaticType() != AssetType::MaterialAsset)
+								continue;
+
+							auto path = asset.second->GetAssetPath();
+							std::string name = path.filename().replace_extension().string();
+							std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(name, [this, asset]()
 							{
-								if (asset.second->GetStaticType() != AssetType::MaterialAsset)
-									continue;
+								auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
+								MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
+								mesh.Material = RefHelper::RefAs<MaterialAsset>(m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAsset(asset.first));
+							});
 
-								bool selected = false;
-								if (mesh.Material)
-									selected = asset.second->GetAssetPath().filename() == mesh.Material->GetAssetPath().filename();
-
-								if (UI::Selectable(asset.second->GetAssetPath().filename().string(), &selected))
-								{
-									mesh.Material = RefHelper::RefAs<MaterialAsset>(asset.second);
-								}
+							materialCombo.Items.push_back(item);
+							if (mesh.Material->GetHandle() == asset.first)
+							{
+								materialCombo.Selected = item.first;
+								materialCombo.Preview = item.first;
 							}
-							UI::EndCombo();
+
 						}
+						UI::Property("Material", materialCombo);
 					}
+
+					UI::EndPropertyGrid();
 				}
 			}
 

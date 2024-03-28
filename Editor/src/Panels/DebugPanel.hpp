@@ -19,6 +19,9 @@ namespace Lavender
 		static Ref<DebugPanel> Create(Ref<Project> project);
 
 	private:
+		bool CustomTree(const std::string& label);
+
+	private:
 		Ref<Project> m_Project = nullptr;
 
 		uint32_t m_FPS = 0;

@@ -61,7 +61,7 @@ namespace Lavender
 		void ReloadScript();
 		void AddScriptedEntity(Ref<EntityInterface> entityInterface) { m_EntityInterfaces[entityInterface->GetEntity().GetUUID()] = entityInterface; }
 
-		inline Ref<EntityInterface> GetEntityInterface(UUID uuid) { return m_EntityInterfaces[uuid]; }
+		inline Ref<EntityInterface> GetEntityInterface(const UUID& uuid) { return m_EntityInterfaces[uuid]; }
 
 		inline Ref<EditorCamera>& GetCamera() { return m_EditorCamera; }
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
@@ -112,8 +112,8 @@ namespace Lavender
 
 		void Clear();
 		void Add(Ref<Scene> scene, bool active = false);
-		void Remove(UUID uuid);
-		Ref<Scene> Get(UUID uuid);
+		void Remove(const UUID& uuid);
+		Ref<Scene> Get(const UUID& uuid);
 
 		inline UUID GetActiveUUID() { return m_ActiveScene.first; }
 		inline Ref<Scene> GetActive() { return m_ActiveScene.second; }

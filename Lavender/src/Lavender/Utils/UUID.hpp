@@ -312,9 +312,13 @@ namespace Lavender
             return m_UUID < rhs.m_UUID;
         }
 
+    public:
+        static const UUID Empty;
+
     private:
         uint64_t m_UUID = 0ull;
     };
+    inline const UUID UUID::Empty = UUID(0);
 
     // 128 bit
     class UUID128

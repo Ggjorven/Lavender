@@ -12,6 +12,26 @@
 namespace Lavender::UI
 {
 
+	static uint32_t s_CurrentID = 0;
+
+	void PushID(uint32_t id)
+	{
+		if (id == LV_MAX_UINT32)
+			ImGui::PushID((int)s_CurrentID++);
+		else
+			ImGui::PushID(id);
+	}
+
+	void PopID()
+	{
+		ImGui::PopID();
+	}
+
+	void ResetIDs()
+	{
+		s_CurrentID = 0;
+	}
+
 	void ShiftCursor(float x, float y)
 	{
 		const ImVec2 cursor = ImGui::GetCursorPos();
@@ -39,6 +59,11 @@ namespace Lavender::UI
 			ImGui::PopTextWrapPos();
 			ImGui::EndTooltip();
 		}
+	}
+
+	bool Checkbox(const std::string& label, bool& value)
+	{
+		return ImGui::Checkbox(label.c_str(), &value);
 	}
 
 	glm::vec2 GetContentRegionAvail()
@@ -85,6 +110,11 @@ namespace Lavender::UI
 	bool Selectable(const std::string& name, bool* selected, const glm::vec2& size, SelectableFlags flags)
 	{
 		return ImGui::Selectable(name.c_str(), selected, (ImGuiSelectableFlags)flags, ImVec2(size.x, size.y));
+	}
+
+	bool DragFloat(const std::string& name, float& value, float speed, float minValue, float maxValue, const std::string& format, SliderFlags flags)
+	{
+		return ImGui::DragFloat(name.c_str(), &value, speed, minValue, maxValue, format.c_str(), (ImGuiSliderFlags)flags);
 	}
 
 	bool DragFloat2(const std::string& name, glm::vec2& value, float speed, float minValue, float maxValue, const std::string& format, SliderFlags flags)
@@ -137,26 +167,12 @@ namespace Lavender::UI
 		ImGui::TableSetupColumn(name.c_str(), (ImGuiTableColumnFlags)flags, widthOrWeight);
 	}
 
-	void FullScreenOverlay(const glm::vec4& colour)
-	{
-		auto style = UI::ScopedStyle({ UI::StyleColourType::WindowBg, colour });
-		
-		auto& window = Application::Get().GetWindow();
-		ImGui::SetNextWindowSize(ImVec2((float)window.GetWidth(), (float)window.GetHeight()));
-		ImGui::SetNextWindowPos(ImVec2((float)window.GetPositionX(), (float)window.GetPositionY()));
-
-		ImGuiWindowClass imWindow = {};
-		imWindow.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
-		ImGui::SetNextWindowClass(&imWindow);
-
-		UI::BeginWindow("FullScreenOverlay##LavenderUI", UI::WindowFlags::NoSavedSettings | UI::WindowFlags::NoDecoration);
-		UI::EndWindow();
-	}
-
 	void BeginPropertyGrid(uint32_t columns)
 	{
 		UI::Style(UI::StyleType::ItemSpacing, { 8.0f, 8.0f }).Push();
 		UI::Style(UI::StyleType::FramePadding, { 4.0f, 4.0f }).Push();
+
+		UI::PushID();
 		ImGui::Columns(columns);
 	}
 
@@ -164,8 +180,10 @@ namespace Lavender::UI
 	{
 		ImGui::Columns(1);
 		UI::Draw::Underline();
-		UI::Style::PopStyles(2); // ItemSpacing, FramePadding
 		UI::ShiftCursorY(18.0f);
+		
+		PopID();
+		UI::Style::PopStyles(2); // ItemSpacing, FramePadding
 	}
 
 	void BeginCustomProperty(const std::string& label, const std::string& helpText)
@@ -191,7 +209,7 @@ namespace Lavender::UI
 		UI::Draw::Underline();
 	}
 
-	bool Property(const std::string& label, glm::vec2& value, float delta, float min, float max, const std::string& helpText)
+	bool Property(const std::string& label, float& value, float delta, float min, float max, const std::string& format, const std::string& helpText)
 	{
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
@@ -206,7 +224,7 @@ namespace Lavender::UI
 		UI::ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		bool modified = UI::DragFloat2(fmt::format("##{0}", label).c_str(), value, delta, min, max);
+		bool modified = UI::DragFloat(fmt::format("##{0}", label).c_str(), value, delta, min, max, format);
 
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
@@ -215,7 +233,7 @@ namespace Lavender::UI
 		return modified;
 	}
 
-	bool Property(const std::string& label, glm::vec3& value, float delta, float min, float max, const std::string& helpText)
+	bool Property(const std::string& label, glm::vec2& value, float delta, float min, float max, const std::string& format, const std::string& helpText)
 	{
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
@@ -230,7 +248,7 @@ namespace Lavender::UI
 		UI::ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		bool modified = UI::DragFloat3(fmt::format("##{0}", label).c_str(), value, delta, min, max);
+		bool modified = UI::DragFloat2(fmt::format("##{0}", label).c_str(), value, delta, min, max, format);
 
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
@@ -239,7 +257,7 @@ namespace Lavender::UI
 		return modified;
 	}
 
-	bool Property(const std::string& label, glm::vec4& value, float delta, float min, float max, const std::string& helpText)
+	bool Property(const std::string& label, glm::vec3& value, float delta, float min, float max, const std::string& format, const std::string& helpText)
 	{
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
@@ -254,7 +272,106 @@ namespace Lavender::UI
 		UI::ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		bool modified = UI::DragFloat4(fmt::format("##{0}", label).c_str(), value, delta, min, max);
+		bool modified = UI::DragFloat3(fmt::format("##{0}", label).c_str(), value, delta, min, max, format);
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return modified;
+	}
+
+	bool Property(const std::string& label, glm::vec4& value, float delta, float min, float max, const std::string& format, const std::string& helpText)
+	{
+		UI::ShiftCursor(10.0f, 9.0f);
+		UI::Text(label);
+
+		if (std::strlen(helpText.c_str()) != 0)
+		{
+			UI::SameLine();
+			UI::HelpMarker(helpText);
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		bool modified = UI::DragFloat4(fmt::format("##{0}", label).c_str(), value, delta, min, max, format);
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return modified;
+	}
+
+	bool Property(const std::string& label, Combo& value, const std::string& helpText)
+	{
+		UI::ShiftCursor(10.0f, 9.0f);
+		UI::Text(label);
+
+		if (std::strlen(helpText.c_str()) != 0)
+		{
+			UI::SameLine();
+			UI::HelpMarker(helpText);
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		UI::ComboFlags flags = UI::ComboFlags::HeightRegular;
+		if (UI::BeginCombo(fmt::format("##{0}{1}", label, "_LavenderUI").c_str(), value.Preview, flags))
+		{
+			for (auto& item : value.Items)
+			{
+				bool selected = item.first == value.Selected;
+				if (UI::Selectable(item.first, &selected))
+				{
+					if (item.second) 
+						item.second();
+				}
+				if (selected) { value.Selected = item.first; }
+			}
+			UI::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return false;
+	}
+
+	bool UniformProperty(const std::string& label, glm::vec3& value, bool& uniform, float delta, float min, float max, const std::string& format, const std::string& hoverText)
+	{
+		UI::ShiftCursor(10.0f, 9.0f);
+		UI::Text(label);
+
+		UI::SameLine();
+		UI::ShiftCursorY(-3.0f);
+		UI::Checkbox(fmt::format("##{0}", label).c_str(), uniform);
+
+		if (std::strlen(hoverText.c_str()) != 0)
+		{
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip(hoverText.c_str());
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		bool modified = UI::DragFloat3(fmt::format("##{0}", label).c_str(), value, delta, min, max, format);
+		if (uniform)
+		{
+			if (value.x == value.y && value.y != value.z)
+				value = glm::vec3(value.z, value.z, value.z);
+			else if (value.x != value.y && value.y == value.z)
+				value = glm::vec3(value.x, value.x, value.x);
+			else
+				value = glm::vec3(value.y, value.y, value.y);
+		}
 
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
@@ -296,6 +413,22 @@ namespace Lavender::UI
 	void Dummy(const glm::vec2& size)
 	{
 		ImGui::Dummy(ImVec2(size.x, size.y));
+	}
+
+	void FullScreenOverlay(const glm::vec4& colour)
+	{
+		auto style = UI::ScopedStyle({ UI::StyleColourType::WindowBg, colour });
+
+		auto& window = Application::Get().GetWindow();
+		ImGui::SetNextWindowSize(ImVec2((float)window.GetWidth(), (float)window.GetHeight()));
+		ImGui::SetNextWindowPos(ImVec2((float)window.GetPositionX(), (float)window.GetPositionY()));
+
+		ImGuiWindowClass imWindow = {};
+		imWindow.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+		ImGui::SetNextWindowClass(&imWindow);
+
+		UI::BeginWindow("FullScreenOverlay##LavenderUI", UI::WindowFlags::NoSavedSettings | UI::WindowFlags::NoDecoration);
+		UI::EndWindow();
 	}
 
 }

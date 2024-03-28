@@ -17,6 +17,7 @@ namespace Lavender::UI::Colours
 	constexpr uint32_t NiceBlue =				LV_U32_COLOUR(83, 232, 254, 255);
 	constexpr uint32_t Compliment =				LV_U32_COLOUR(78, 151, 166, 255);
 	constexpr uint32_t Background =				LV_U32_COLOUR(36, 36, 36, 255);
+	constexpr uint32_t BackgroundBitDarker =	LV_U32_COLOUR(36, 36, 36, 210);
 	constexpr uint32_t BackgroundDark =			LV_U32_COLOUR(26, 26, 26, 255);
 	constexpr uint32_t Titlebar =				LV_U32_COLOUR(21, 21, 21, 255);
 	constexpr uint32_t PropertyField =			LV_U32_COLOUR(15, 15, 15, 255);
@@ -30,6 +31,11 @@ namespace Lavender::UI::Colours
 	constexpr uint32_t SelectionMuted =			LV_U32_COLOUR(237, 201, 142, 23);
 	constexpr uint32_t BackgroundPopup =		LV_U32_COLOUR(50, 50, 50, 255);
 	constexpr uint32_t NearBlack =				LV_U32_COLOUR(18, 18, 18, 138);
+
+	constexpr uint32_t AlphaTint =				LV_U32_COLOUR(110, 65, 138, 68);
+	constexpr uint32_t DarkTint =				LV_U32_COLOUR(112, 52, 145, 102);
+	constexpr uint32_t LightTint =				LV_U32_COLOUR(110, 65, 138, 150);
+	constexpr uint32_t LighterTint =			LV_U32_COLOUR(110, 65, 138, 160);
 
 	inline static glm::vec4 ConvertU32Colour(uint32_t colour)
 	{

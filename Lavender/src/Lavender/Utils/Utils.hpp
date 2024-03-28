@@ -42,6 +42,19 @@ constexpr Type operator ^ (Type lhs, Type rhs) \
 namespace Lavender::Utils
 {
 
+    // Platform specific
+    class ToolKit
+    {
+    public:
+        static float GetTime() { return s_Instance->GetTimeImpl(); }
+
+    private:
+        virtual float GetTimeImpl() const = 0;
+
+    private:
+        static std::unique_ptr<ToolKit> s_Instance;
+    };
+
     // A class to be used for function queues
     template<typename Func>
     class Queue
@@ -70,6 +83,20 @@ namespace Lavender::Utils
 
     private:
         std::queue<Func> m_Queue = { };
+    };
+
+    class Timer
+    {
+    public:
+        Timer()
+            : m_Start(ToolKit::GetTime())
+        {
+        }
+
+        inline float GetPassedTime() const { return (ToolKit::GetTime() - m_Start); }
+
+    private:
+        float m_Start = 0.0f;
     };
 
 }
@@ -108,9 +135,6 @@ namespace Lavender
 
     template<typename Key, typename Value>
     using Dict = std::unordered_map<Key, Value>;
-
-    //template<typename Key, typename Value>
-    //using SortedDict = std::map<Key, Value>;
 
     template<typename Key, typename Value>
     class SortedDict

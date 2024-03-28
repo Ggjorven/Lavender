@@ -153,12 +153,12 @@ namespace Lavender
 			m_ActiveScene = std::make_pair(scene->GetSceneID(), scene);
 	}
 
-	void SceneCollection::Remove(UUID uuid)
+	void SceneCollection::Remove(const UUID& uuid)
 	{
 		m_Scenes.erase(uuid);
 	}
 
-	Ref<Scene> SceneCollection::Get(UUID uuid)
+	Ref<Scene> SceneCollection::Get(const UUID& uuid)
 	{
 		auto obj = m_Scenes.find(uuid);
 		if (obj != m_Scenes.end())

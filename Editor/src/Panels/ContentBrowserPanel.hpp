@@ -7,7 +7,7 @@
 namespace Lavender
 {
 
-	class ContentBrowserPanel
+	class ContentBrowserPanel // TODO
 	{
 	public:
 		ContentBrowserPanel(Ref<Project> project);
@@ -20,6 +20,8 @@ namespace Lavender
 
 	private:
 		Ref<Project> m_Project = nullptr;
+
+		uint32_t m_Width = 0, m_Height = 0;
 	};
 
 }

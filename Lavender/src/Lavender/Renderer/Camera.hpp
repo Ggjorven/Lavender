@@ -31,6 +31,7 @@ namespace Lavender
 		{
 			None = 0, ArcBall, FlyCam
 		};
+		static std::string StateToString(State state);
 	public:
 		EditorCamera(Ref<Viewport> viewport);
 		virtual ~EditorCamera();
@@ -42,6 +43,10 @@ namespace Lavender
 		void BindDescriptorSet(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer);
 
 		void SwitchState();
+
+		inline float& GetFOV() { return m_FOV; }
+		inline float& GetFlyCamSpeed() { return m_MovementSpeed; }
+		inline float& GetArcBallSpeed() { return m_Speed; }
 
 		inline State GetState() const { return m_State; }
 		inline Camera& GetCamera() { return m_Camera; }
@@ -63,7 +68,7 @@ namespace Lavender
 
 		// Main
 		State m_State = State::ArcBall;
-		float m_FOV = 60.0f;
+		float m_FOV = 45.0f;
 
 		float m_Near = 0.1f;
 		float m_Far = 1000.0f;

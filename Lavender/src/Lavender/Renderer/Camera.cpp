@@ -15,6 +15,23 @@
 namespace Lavender
 {
 
+	std::string EditorCamera::StateToString(State state)
+	{
+		switch (state)
+		{
+		case State::ArcBall:
+			return "ArcBall";
+		case State::FlyCam:
+			return "FlyCam";
+
+		default:
+			LV_LOG_ERROR("No proper camera state selected");
+			break;
+		}
+
+		return "Invalid Selection";
+	}
+
 	EditorCamera::EditorCamera(Ref<Viewport> viewport)
 		: m_Viewport(viewport)
 	{
@@ -75,6 +92,11 @@ namespace Lavender
 		{
 		case State::ArcBall:
 			m_State = State::FlyCam;
+
+			// Reset camera
+			glm::vec3 direction = glm::normalize(glm::vec3(0.0f) - m_Position);
+			m_Yaw = glm::degrees(atan2(direction.z, direction.x));
+			m_Pitch = glm::degrees(asin(direction.y));
 			break;
 		case State::FlyCam:
 			m_State = State::ArcBall;
@@ -217,8 +239,11 @@ namespace Lavender
 
 	bool EditorCamera::OnMouseScroll(MouseScrolledEvent& e)
 	{
-		float change = m_Change * e.GetYOffset();
-		m_Radius -= change;
+		if (Input::IsMousePressed(MouseButton::Right))
+		{
+			float change = m_Change * e.GetYOffset();
+			m_Radius -= change;
+		}
 
 		return false;
 	}

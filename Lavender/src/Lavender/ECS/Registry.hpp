@@ -17,8 +17,8 @@ namespace Lavender
 		virtual ~Registry();
 
 		UUID CreateEntity();
-		void CreateEntity(UUID uuid);
-		void DeleteEntity(UUID entity);
+		void CreateEntity(const UUID& uuid);
+		void DeleteEntity(const UUID& entity);
 
 		template<typename TComponent>
 		TComponent& AddComponent(UUID entity, TComponent component = TComponent())
@@ -79,8 +79,8 @@ namespace Lavender
 		virtual ~RegistryCollection();
 
 		UUID CreateEntity();
-		void CreateEntity(UUID uuid);
-		void DeleteEntity(UUID entity);
+		void CreateEntity(const UUID& uuid);
+		void DeleteEntity(const UUID& entity);
 
 		template<typename TComponent>
 		TComponent& AddComponent(UUID entity, TComponent component = TComponent())

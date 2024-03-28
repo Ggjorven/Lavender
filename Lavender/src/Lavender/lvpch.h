@@ -4,13 +4,14 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <utility>
 #include <limits>
-#include <algorithm>
-#include <functional>
 #include <numeric>
 #include <thread>
 #include <chrono>
+#include <future>
+#include <utility>
+#include <algorithm>
+#include <functional>
 
 #include <cstdint>
 #include <cstdlib>

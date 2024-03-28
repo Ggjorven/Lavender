@@ -29,7 +29,6 @@ namespace Lavender
 				result.push_back(entry.path());
 				LV_LOG_TRACE("Loaded asset: {0}", entry.path().string());
 			}
-
 		}
 
 		return result;
@@ -38,7 +37,8 @@ namespace Lavender
 	template<typename TAsset>
 	void DeserializeAsset(AssetManager* instance, const std::filesystem::path& assetPath)
 	{
-		for (auto path : GetPathsFromExtension(assetPath, TAsset::GetExtension())) // If this doesn't work make sure all asset paths are included
+		// If this doesn't work make sure all asset paths are included
+		for (auto path : GetPathsFromExtension(assetPath, TAsset::GetExtension())) 
 		{
 			Ref<TAsset> asset = TAsset::Create(path);
 			instance->AddAsset(asset);
@@ -76,7 +76,10 @@ namespace Lavender
 
 	void AssetManager::GetAssetsFromDirectory(const std::filesystem::path& directory)
 	{
+		Utils::Timer time = {};
+		LV_LOG_TRACE("Started timer for AssetManager");
 		DeserializeAssets(AllAssets(), this, directory);
+		LV_LOG_TRACE("Time passed: {0}", time.GetPassedTime());
 	}
 
 	void AssetManager::AddAsset(Ref<Asset> asset)
