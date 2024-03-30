@@ -3,6 +3,8 @@
 #include <Lavender/Core/Logging.hpp>
 #include <Lavender/Core/Application.hpp>
 
+#include <Lavender/Utils/Profiler.hpp>
+
 #include <Lavender/UI/UI.hpp>
 #include <Lavender/UI/Colours.hpp>
 #include <Lavender/UI/Style.hpp>
@@ -42,6 +44,8 @@ namespace Lavender
 
 	void DebugPanel::RenderUI()
 	{
+		LV_PROFILE_SCOPE("DebugPanel::RenderUI");
+
 		// To remove the tab bar.
 		ImGuiWindowClass window = {};
 		window.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
@@ -62,7 +66,7 @@ namespace Lavender
 			{ UI::StyleColourType::FrameBgActive, UI::Colours::LighterTint },
 			{ UI::StyleColourType::Button, UI::Colours::DarkTint },
 			{ UI::StyleColourType::ButtonHovered, UI::Colours::DarkTint },
-			{ UI::StyleColourType::ButtonActive, UI::Colours::DarkTint }
+			{ UI::StyleColourType::ButtonActive, UI::Colours::DarkTint },
 		}};
 
 		UI::BeginWindow("Debug", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);

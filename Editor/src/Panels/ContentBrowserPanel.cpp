@@ -44,7 +44,7 @@ namespace Lavender
 			{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
 			{ UI::StyleColourType::Border, UI::Colours::BackgroundDark },
 			{ UI::StyleColourType::WindowBg, UI::Colours::BackgroundDark },
-			{ UI::StyleColourType::ChildBg, UI::Colours::Background }
+			{ UI::StyleColourType::ChildBg, UI::Colours::Background },
 		} };
 
 		UI::BeginWindow("ContentBrowser", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);

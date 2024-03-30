@@ -27,10 +27,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <backends/imgui_impl_vulkan.h>
-
 static float vertices[] = {
 	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
 	0.5f, -0.5, 0.0f, 0.0f, 0.0f,
@@ -47,18 +43,16 @@ void EditorLayer::OnAttach()
 {
 	m_Preferences = RefHelper::Create<UIPreferences>();
 	PreferencesSerializer serializer(m_Preferences);
-	serializer.Deserialize("EditorPreferences.lvepref");
+	serializer.Deserialize(Utils::ToolKit::GetEnv() + "/Editor/EditorPreferences.lvepref");
 
 	m_Project = Project::Create();
 	ProjectSerializer projSerializer(m_Project);
-	projSerializer.Deserialize("Projects/First/Project.lvproject");
+	projSerializer.Deserialize(Utils::ToolKit::GetEnv() + "/Editor/Projects/First/Project.lvproject");
 
 	m_ContentBrowserPanel = ContentBrowserPanel::Create(m_Project);
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
+	m_MaterialPanel = MaterialPanel::Create(m_Project); m_MaterialPanel->SetEnabled(true); // TODO: Remove
 	m_DebugPanel = DebugPanel::Create(m_Project);
-
-	// Test area // TODO: Remove
-	TEMP();
 }
 
 void EditorLayer::OnDetach()
@@ -93,6 +87,15 @@ void EditorLayer::OnRender()
 
 void EditorLayer::OnImGuiRender()
 {
+	LV_PROFILE_SCOPE("EditorLayer::OnImGuiRender");
+
+	// Setting colours
+	auto& colours = ImGui::GetStyle().Colors;
+	auto colour = UI::Colours::ConvertU32Colour(UI::Colours::LighterTint);
+	colours[ImGuiCol_SeparatorActive] = ImVec4(colour.r, colour.g, colour.b, colour.a);
+	colours[ImGuiCol_SeparatorHovered] = ImVec4(colour.r, colour.g, colour.b, colour.a);
+
+	// Rendering
 	ImGui::DockSpaceOverViewport();
 	RenderMenuBar();
 	//ImGui::ShowDemoWindow(); // TODO: Remove
@@ -102,6 +105,7 @@ void EditorLayer::OnImGuiRender()
 
 	//m_ContentBrowserPanel->RenderUI();
 	m_EntityPanel->RenderUI();
+	m_MaterialPanel->RenderUI();
 	m_DebugPanel->RenderUI();
 }
 
@@ -161,8 +165,4 @@ void EditorLayer::RenderMenuBar()
 
 		UI::EndMainMenuBar();
 	}
-}
-
-void EditorLayer::TEMP() // TODO: Remove
-{
 }

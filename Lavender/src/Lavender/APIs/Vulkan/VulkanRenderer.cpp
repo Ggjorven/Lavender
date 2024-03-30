@@ -83,6 +83,8 @@ namespace Lavender
 
 	void VulkanRenderer::Wait()
 	{
+		LV_PROFILE_SCOPE("VulkanRenderer::Wait");
+
 		VkDevice& device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		vkDeviceWaitIdle(device);
 	}

@@ -28,14 +28,25 @@ namespace Lavender
 		void Upload() override;
 		void Upload(Ref<DescriptorSet> set, UniformElement element) override;
 
-		VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
+		inline std::filesystem::path GetPath() const override { return m_Path; }
 
-		VkImage GetVulkanImage() { return m_Image; }
-		VkImageView GetImageView() { return m_ImageView; }
-		VkSampler GetSampler() { return m_Sampler; }
+		#ifndef LV_DISABLE_IMGUI
+		inline void* GetUIImage() override { return m_TextureID; }
+		#endif
+
+		inline VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
+		
+		inline VkImage GetVulkanImage() { return m_Image; }
+		inline VkImageView GetImageView() { return m_ImageView; }
+		inline VkSampler GetSampler() { return m_Sampler; }
 
 	private:
 		void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+
+		#ifndef LV_DISABLE_IMGUI
+		void CreateUIImage();
+		void DestroyUIImage();
+		#endif
 
 	private:
 		Ref<DescriptorSet> m_Set = nullptr;
@@ -48,6 +59,11 @@ namespace Lavender
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
 		uint32_t m_Width = 0, m_Height = 0, m_Miplevels = 0;
+
+		std::filesystem::path m_Path = {};
+		#ifndef LV_DISABLE_IMGUI
+		void* m_TextureID = nullptr;
+		#endif
 	};
 
 }

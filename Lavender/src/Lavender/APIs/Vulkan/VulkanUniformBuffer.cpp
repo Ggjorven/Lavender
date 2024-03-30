@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Utils/Profiler.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
@@ -48,6 +50,8 @@ namespace Lavender
 
 	void VulkanUniformBuffer::SetData(void* data, size_t size)
 	{
+		LV_PROFILE_SCOPE("VulkanUniformBuffer::SetData");
+
 		// TODO(Jorben): Make assert?
 		if (size != m_Size)
 			LV_LOG_ERROR("Invalid size passed to SetData()");
@@ -68,6 +72,8 @@ namespace Lavender
 
 	void VulkanUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element)
 	{
+		LV_PROFILE_SCOPE("VulkanUniformBuffer::Upload");
+
 		auto vkSet = RefHelper::RefAs<VulkanDescriptorSet>(set);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)

@@ -4,6 +4,11 @@
 
 #include "Lavender/Utils/Utils.hpp"
 
+// Also defined in lvpch.h
+#if defined(LV_DIST)
+	#define LV_DISABLE_IMGUI
+#endif
+
 namespace Lavender
 {
 
@@ -23,6 +28,12 @@ namespace Lavender
 
 		virtual void Upload() = 0;
 		virtual void Upload(Ref<DescriptorSet> set, UniformElement element) = 0;
+
+		virtual std::filesystem::path GetPath() const = 0;
+
+		#ifndef LV_DISABLE_IMGUI
+		virtual void* GetUIImage() = 0;
+		#endif
 
 		static Ref<Image2D> Create(uint32_t width, uint32_t height);
 		static Ref<Image2D> Create(const std::filesystem::path& path);

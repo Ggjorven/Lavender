@@ -167,6 +167,11 @@ namespace Lavender::UI
 		ImGui::TableSetupColumn(name.c_str(), (ImGuiTableColumnFlags)flags, widthOrWeight);
 	}
 
+	bool InputText(const std::string& label, char* buffer, size_t size, InputTextFlags flags)
+	{
+		return ImGui::InputText(label.c_str(), buffer, size, (ImGuiInputTextFlags)flags);
+	}
+
 	void BeginPropertyGrid(uint32_t columns)
 	{
 		UI::Style(UI::StyleType::ItemSpacing, { 8.0f, 8.0f }).Push();
@@ -321,20 +326,31 @@ namespace Lavender::UI
 		ImGui::PushItemWidth(-1);
 
 		UI::ComboFlags flags = UI::ComboFlags::HeightRegular;
-		if (UI::BeginCombo(fmt::format("##{0}{1}", label, "_LavenderUI").c_str(), value.Preview, flags))
+		value.Render(label, flags);
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return false;
+	}
+
+	bool Property(const std::string& label, ClickAbleImage& value, const std::string& helpText)
+	{
+		UI::ShiftCursor(16.0f, value.Size.y / 2.0f - 2.0f);
+		UI::Text(label);
+
+		if (std::strlen(helpText.c_str()) != 0)
 		{
-			for (auto& item : value.Items)
-			{
-				bool selected = item.first == value.Selected;
-				if (UI::Selectable(item.first, &selected))
-				{
-					if (item.second) 
-						item.second();
-				}
-				if (selected) { value.Selected = item.first; }
-			}
-			UI::EndCombo();
+			UI::SameLine();
+			UI::HelpMarker(helpText);
 		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		value.Render();
 
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
@@ -429,6 +445,45 @@ namespace Lavender::UI
 
 		UI::BeginWindow("FullScreenOverlay##LavenderUI", UI::WindowFlags::NoSavedSettings | UI::WindowFlags::NoDecoration);
 		UI::EndWindow();
+	}
+
+	void Combo::Render(const std::string& label, UI::ComboFlags flags)
+	{
+		if (UI::BeginCombo(fmt::format("##{0}{1}", label, "_LavenderUI").c_str(), Preview, flags))
+		{
+			for (auto& item : Items)
+			{
+				bool selected = item.first == Selected;
+				if (UI::Selectable(item.first, &selected))
+				{
+					if (item.second)
+						item.second();
+				}
+				if (selected) { Selected = item.first; }
+			}
+			UI::EndCombo();
+		}
+	}
+
+	void ClickAbleImage::Render()
+	{
+		ImGui::Image(Image->GetUIImage(), ImVec2(Size.x, Size.y)/*, {0, 1}, {1, 0}*/);
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+
+			// TODO: Make customizable?
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 17.5f);
+			ImGui::TextUnformatted(Image->GetPath().string().c_str());
+			ImGui::PopTextWrapPos();
+			ImGui::Image(Image->GetUIImage(), ImVec2(192, 192)/*, {0, 1}, {1, 0}*/);
+
+			ImGui::EndTooltip();
+
+			if (ImGui::IsItemClicked())
+				Action();
+		}
 	}
 
 }

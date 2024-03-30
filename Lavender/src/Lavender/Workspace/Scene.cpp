@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Utils/Profiler.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
 #include "Lavender/Renderer/FrameResources.hpp"
@@ -120,21 +122,27 @@ namespace Lavender
 
 	void Scene::UpdateEditor(float deltaTime)
 	{
+		LV_PROFILE_SCOPE("Scene::UpdateEditor");
+
 		m_EditorCamera->OnUpdate(deltaTime);
 	}
 
 	void Scene::RenderEditor(Ref<RenderCommandBuffer> cmdBuffer)
 	{
+		LV_PROFILE_SCOPE("Scene::RenderEditor");
+
 		m_EditorCamera->BindDescriptorSet(FrameResources::GetPipeline(), cmdBuffer);
 		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
 	}
 
 	void Scene::UpdateRuntime(float deltaTime)
 	{
+		LV_PROFILE_SCOPE("Scene::UpdateRuntime");
 	}
 
 	void Scene::RenderRuntime(Ref<RenderCommandBuffer> cmdBuffer)
 	{
+		LV_PROFILE_SCOPE("Scene::RenderRuntime");
 	}
 
 	///////////////////////////////////////////////////////////////////////////

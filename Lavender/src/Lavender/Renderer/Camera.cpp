@@ -4,6 +4,8 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Core/Input/Input.hpp"
 
+#include "Lavender/Utils/Profiler.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/Pipeline.hpp"
 #include "Lavender/Renderer/DescriptorSet.hpp"
@@ -81,6 +83,7 @@ namespace Lavender
 
 	void EditorCamera::BindDescriptorSet(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer)
 	{
+		LV_PROFILE_SCOPE("EditorCamera::BindDescriptorSet");
 		// Note(Jorben): This is the Project/View (Camera) set
 		auto set = pipeline->GetDescriptorSets()->GetSets(1)[0];
 		set->Bind(pipeline, cmdBuffer);

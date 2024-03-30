@@ -19,6 +19,7 @@
 
 #include "Panels/ContentBrowserPanel.hpp"
 #include "Panels/EntitiesPanel.hpp"
+#include "Panels/MaterialPanel.hpp"
 #include "Panels/DebugPanel.hpp"
 
 using namespace Lavender;
@@ -41,8 +42,6 @@ private:
 
 	void RenderMenuBar();
 
-	void TEMP(); // TODO: Remove
-
 private:
 	Ref<UIPreferences> m_Preferences = nullptr;
 
@@ -50,6 +49,7 @@ private:
 
 	Ref<ContentBrowserPanel> m_ContentBrowserPanel = nullptr;
 	Ref<EntitiesPanel> m_EntityPanel = nullptr;
+	Ref<MaterialPanel> m_MaterialPanel = nullptr;
 	Ref<DebugPanel> m_DebugPanel = nullptr;
 
 	Ref<Image2D> m_Image = nullptr;

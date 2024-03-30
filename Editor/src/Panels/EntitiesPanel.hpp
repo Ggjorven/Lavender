@@ -39,7 +39,11 @@ namespace Lavender
 	private:
 		Ref<Project> m_Project = nullptr;
 
+		Ref<Image2D> m_PlusIcon = nullptr;
+
 		UUID m_SelectedUUID = {};
+
+		uint32_t m_Width = 0, m_Height = 0;
 	};
 
 	DEFINE_BITWISE_OPS(EntitiesPanel::ComponentUsage)

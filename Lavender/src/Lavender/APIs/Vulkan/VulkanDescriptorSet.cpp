@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Utils/Profiler.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/PipelineLayout.hpp"
 #include "Lavender/Renderer/Pipeline.hpp"
@@ -30,6 +32,8 @@ namespace Lavender
 
 	void VulkanDescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer)
 	{
+		LV_PROFILE_SCOPE("VulkanDescriptorSet::Bind");
+
 		auto vkPipelineLayout = RefHelper::RefAs<VulkanPipeline>(pipeline)->GetVulkanLayout();
 		auto vkCmdBuf = RefHelper::RefAs<VulkanRenderCommandBuffer>(cmdBuffer)->GetVulkanCommandBuffer();
 		auto currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();

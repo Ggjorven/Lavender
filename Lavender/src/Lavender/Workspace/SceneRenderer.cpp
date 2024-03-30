@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Utils/Profiler.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/Pipeline.hpp"
 #include "Lavender/Renderer/FrameResources.hpp"
@@ -37,6 +39,8 @@ namespace Lavender
 
 	void SceneRenderer::RenderScene(Scene* scene, Ref<EditorCamera>& camera, Ref<RenderCommandBuffer> cmdBuffer)
 	{
+		LV_PROFILE_SCOPE("SceneRenderer::RenderScene");
+
 		auto& registry = scene->GetCollection()->GetMainRegistry()->GetRegistry();
 
 		// Note(Jorben): Set 0 is for images and the model matrix
@@ -99,7 +103,7 @@ namespace Lavender
 			s_ModelBuffers[index]->SetData((void*)&modelMatrix, sizeof(glm::mat4));
 			s_ModelBuffers[index]->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"));
 
-			Renderer::Wait();
+			//Renderer::Wait();
 			set->Bind(pipeline, cmdBuffer);
 			if (mesh.MeshObject) Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
 			index++;

@@ -11,6 +11,11 @@ namespace Lavender::Utils
 		WindowsToolKit() = default;
 
 	private:
+		std::string OpenFileImpl(const std::string& filter, const std::string& dir) const override;
+		std::string SaveFileImpl(const std::string& filter, const std::string& dir) const override;
+
+		std::string OpenDirectoryImpl(const std::string& dir) const override;
+
 		float GetTimeImpl() const override;
 	};
 

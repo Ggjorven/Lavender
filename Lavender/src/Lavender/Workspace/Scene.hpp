@@ -72,6 +72,7 @@ namespace Lavender
 
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
 		inline Entity CreateEntityWithUUID(const UUID& uuid) { return Entity::Create(m_Collection, uuid); }
+		inline void DeleteEntity(const UUID& uuid) { m_Collection->DeleteEntity(uuid); }
 
 		static Ref<Scene> Create(Ref<Viewport> viewport);
 		static Ref<Scene> Create(Ref<Viewport> viewport, const UUID& uuid);

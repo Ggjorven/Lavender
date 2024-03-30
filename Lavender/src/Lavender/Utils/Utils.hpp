@@ -6,6 +6,8 @@
 #include <memory>
 #include <queue>
 #include <vector>
+#include <algorithm>
+#include <filesystem>
 #include <type_traits>
 #include <unordered_map>
 
@@ -36,8 +38,8 @@ constexpr Type operator ^ (Type lhs, Type rhs) \
 #define LV_MAX_INT16 32767
 #define LV_MAX_INT32 2147483647
 #define LV_MAX_INT64 9223372036854775807LL
-#define LV_MAX_FLOAT FLT_MAX 
-#define LV_MAX_DOUBLE DBL_MAX
+#define LV_MAX_FLOAT 3.402823466e+38F 
+#define LV_MAX_DOUBLE 1.7976931348623158e+308
 
 namespace Lavender::Utils
 {
@@ -46,9 +48,37 @@ namespace Lavender::Utils
     class ToolKit
     {
     public:
+        static std::string OpenFile(const std::string& filter, const std::string& dir = "") { return s_Instance->OpenFileImpl(filter, dir); }
+        static std::string SaveFile(const std::string& filter, const std::string& dir = "") { return s_Instance->SaveFileImpl(filter, dir); }
+
+        static std::string OpenDirectory(const std::string& dir = "") { return s_Instance->OpenDirectoryImpl(dir); }
+
         static float GetTime() { return s_Instance->GetTimeImpl(); }
 
+        // Non-Platform specific
+        static std::string GetEnv(const std::string& variable = "LAVENDER_DIR") 
+        {
+            const char* val = std::getenv(variable.c_str());
+            if (val != nullptr)
+                return std::string(val);
+
+            return std::string();
+        }
+
+        // Replaces /'s with \\'s
+        static std::filesystem::path ReplaceSlashes(const std::filesystem::path& path)
+        {
+            std::string strPath = path.string();
+            std::replace(strPath.begin(), strPath.end(), '/', '\\');
+            return std::filesystem::path(strPath);
+        }
+
     private:
+        virtual std::string OpenFileImpl(const std::string& filter, const std::string& dir) const = 0;
+        virtual std::string SaveFileImpl(const std::string& filter, const std::string& dir) const = 0;
+        
+        virtual std::string OpenDirectoryImpl(const std::string& dir) const = 0;
+
         virtual float GetTimeImpl() const = 0;
 
     private:

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <functional>
 
 #include "Lavender/Utils/Utils.hpp"
 #include "Lavender/Utils/UUID.hpp"
@@ -13,7 +14,9 @@
 
 #include <spdlog/formatter.h>
 
-#include <Lavender/UI/Colours.hpp>
+#include "Lavender/UI/Colours.hpp"
+
+#include "Lavender/Renderer/Image.hpp"
 
 namespace Lavender::UI
 {
@@ -264,6 +267,48 @@ namespace Lavender::UI
 		std::string Preview = {};
 		std::string Selected = {};
 		std::vector<std::pair<std::string, SelectionFunc>> Items = { };
+
+	public:
+		void Render(const std::string& label, UI::ComboFlags flags = UI::ComboFlags::None);
+	};
+
+	enum class InputTextFlags : uint32_t
+	{
+		None = 0,
+		CharsDecimal = BIT(0),
+		CharsHexadecimal = BIT(1),
+		CharsUppercase = BIT(2),
+		CharsNoBlank = BIT(3),
+		AutoSelectAll = BIT(4),
+		EnterReturnsTrue = BIT(5),
+		CallbackCompletion = BIT(6),
+		CallbackHistory = BIT(7),
+		CallbackAlways = BIT(8),
+		CallbackCharFilter = BIT(9),
+		AllowTabInput = BIT(10),
+		CtrlEnterForNewLine = BIT(11),
+		NoHorizontalScroll = BIT(12),
+		AlwaysOverwrite = BIT(13),
+		ReadOnly = BIT(14),
+		Password = BIT(15),
+		NoUndoRedo = BIT(16),
+		CharsScientific = BIT(17),
+		CallbackResize = BIT(18),
+		CallbackEdit = BIT(19)
+	};
+
+	bool InputText(const std::string& label, char* buffer, size_t size, InputTextFlags flags = InputTextFlags::None);
+
+	typedef std::function<void()> ClickableImageFn;
+	struct ClickAbleImage
+	{
+	public:
+		Ref<Image2D> Image = nullptr;
+		glm::vec2 Size = { 0.0f, 0.0f };
+		ClickableImageFn Action = nullptr;
+
+	public:
+		void Render();
 	};
 
     void BeginPropertyGrid(uint32_t columns = 2);
@@ -281,6 +326,7 @@ namespace Lavender::UI
 	bool Property(const std::string& label, glm::vec4& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
 
 	bool Property(const std::string& label, Combo& value, const std::string& helpText = "");
+	bool Property(const std::string& label, ClickAbleImage& value, const std::string& helpText = "");
 
 	// Custom property for entity size
 	bool UniformProperty(const std::string& label, glm::vec3& value, bool& uniform, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& hoverText = "");

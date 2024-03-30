@@ -3,6 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/Utils/Profiler.hpp"
+
 #include "Lavender/Renderer/Renderer.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
@@ -27,9 +29,16 @@ namespace Lavender
 
 		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		VulkanAllocator::TransitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
+
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
 	}
 
 	VulkanImage2D::VulkanImage2D(const std::filesystem::path& path)
+		: m_Path(path)
 	{
 		int width, height, texChannels;
 		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
@@ -43,6 +52,10 @@ namespace Lavender
 
 		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
 
 		SetData((void*)pixels, imageSize);
 	}
@@ -57,11 +70,15 @@ namespace Lavender
 		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
 
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
+
 		Upload();
 	}
 
 	VulkanImage2D::VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, const std::filesystem::path& path)
-		: m_Set(set), m_Element(element)
+		: m_Set(set), m_Element(element), m_Path(path)
 	{
 		int width, height, texChannels;
 		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
@@ -78,12 +95,20 @@ namespace Lavender
 
 		SetData((void*)pixels, imageSize);
 
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
+
 		Upload();
 	}
 
 	VulkanImage2D::~VulkanImage2D()
 	{
 		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+		#ifndef LV_DISABLE_IMGUI
+		DestroyUIImage();
+		#endif
 
 		vkDestroySampler(device, m_Sampler, nullptr);
 		vkDestroyImageView(device, m_ImageView, nullptr);
@@ -94,6 +119,8 @@ namespace Lavender
 
 	void VulkanImage2D::SetData(void* data, size_t size)
 	{
+		LV_PROFILE_SCOPE("VulkanImage2D::SetData");
+
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
 		VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
 		stagingBufferAllocation = VulkanAllocator::AllocateBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
@@ -117,6 +144,8 @@ namespace Lavender
 
 	void VulkanImage2D::Upload(Ref<DescriptorSet> set, UniformElement element)
 	{
+		LV_PROFILE_SCOPE("VulkanImage2D::Upload");
+
 		auto vkSet = RefHelper::RefAs<VulkanDescriptorSet>(set);
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
@@ -226,5 +255,17 @@ namespace Lavender
 
 		VulkanCommands::EndAndSubmit(commandBuffer);
 	}
+
+	#ifndef LV_DISABLE_IMGUI
+	void VulkanImage2D::CreateUIImage()
+	{
+		m_TextureID = ImGui_ImplVulkan_AddTexture(m_Sampler, m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	}
+
+	void VulkanImage2D::DestroyUIImage()
+	{
+		ImGui_ImplVulkan_FreeTexture(m_TextureID);
+	}
+	#endif
 
 }

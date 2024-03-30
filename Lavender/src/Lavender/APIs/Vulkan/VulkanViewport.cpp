@@ -279,6 +279,11 @@ namespace Lavender
 			{ UI::StyleType::WindowPadding, { 0.0f, 0.0f} }
 		});
 
+		m_WindowColours = UI::StyleColourList({
+			{ UI::StyleColourType::SeparatorActive, UI::Colours::LighterTint },
+			{ UI::StyleColourType::SeparatorHovered, UI::Colours::LighterTint }
+		});
+
 		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
@@ -312,6 +317,7 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginRender");
 		m_WindowStyle.Push();
+		m_WindowColours.Push();
 
 		// To remove the tab bar.
 		ImGuiWindowClass window = {};
@@ -344,6 +350,7 @@ namespace Lavender
 		UI::EndWindow();
 
 		m_WindowStyle.Pop();
+		m_WindowColours.Pop();
 	}
 
 	bool VulkanViewport::InView(const glm::vec2& mainWindowPosition) const

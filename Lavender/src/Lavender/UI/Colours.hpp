@@ -36,6 +36,7 @@ namespace Lavender::UI::Colours
 	constexpr uint32_t DarkTint =				LV_U32_COLOUR(112, 52, 145, 102);
 	constexpr uint32_t LightTint =				LV_U32_COLOUR(110, 65, 138, 150);
 	constexpr uint32_t LighterTint =			LV_U32_COLOUR(110, 65, 138, 160);
+	constexpr uint32_t LightestTint =			LV_U32_COLOUR(219, 199, 234, 255);
 
 	inline static glm::vec4 ConvertU32Colour(uint32_t colour)
 	{

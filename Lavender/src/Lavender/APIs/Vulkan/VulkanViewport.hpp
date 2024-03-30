@@ -103,6 +103,7 @@ namespace Lavender
 		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
 
 		UI::StyleList m_WindowStyle = {};
+		UI::StyleColourList m_WindowColours = {};
 
 		ImTextureID m_ImGuiImage = {};
 		uint32_t m_Width = 0, m_Height = 0;
