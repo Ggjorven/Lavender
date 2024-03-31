@@ -27,18 +27,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-static float vertices[] = {
-	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-	0.5f, -0.5, 0.0f, 0.0f, 0.0f,
-	0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-	-0.5f, 0.5, 0.0f, 1.0f, 1.0f
-};
-
-static uint32_t indices[] = {
-	0, 1, 2,
-	2, 3, 0
-};
-
 void EditorLayer::OnAttach()
 {
 	m_Preferences = RefHelper::Create<UIPreferences>();

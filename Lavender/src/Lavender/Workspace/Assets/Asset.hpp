@@ -18,6 +18,15 @@ namespace Lavender
 
 	typedef UUID AssetHandle;
 
+	struct AssetMetaData
+	{
+	public:
+		AssetHandle Handle = AssetHandle::Empty;
+		AssetType Type = AssetType::None;
+
+		std::filesystem::path Path = {};
+	};
+
 	class Asset
 	{
 	public:

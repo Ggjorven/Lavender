@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <memory>
 #include <functional>
 
@@ -10,6 +11,20 @@ namespace Lavender
 	{
 		None = 0, Vulkan
 	};
+
+	inline static std::string RenderingAPIToString(RenderingAPI api)
+	{
+		switch (api)
+		{
+		case RenderingAPI::Vulkan:
+			return "Vulkan";
+
+		default:
+			break;
+		}
+
+		return "Unrecognized API";
+	}
 
 	struct RendererSpecification
 	{

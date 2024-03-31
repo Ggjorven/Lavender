@@ -32,3 +32,4 @@ group "Lavender"
 group ""
 
 include "Editor"
+include "Sandbox"

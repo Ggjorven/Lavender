@@ -85,6 +85,8 @@ namespace Lavender
 		{
 			UI::BeginPropertyGrid(2);
 
+			std::string api = RenderingAPIToString(Renderer::GetAPI());
+			UI::Property("API", "", "{0}", api);
 			uint32_t drawCalls = Renderer::GetRenderData().DrawCalls;
 			UI::Property("DrawCalls", "", "{0}", drawCalls);
 

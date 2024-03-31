@@ -80,7 +80,7 @@ namespace Lavender
 		{
 			VkDescriptorPoolSize poolSize = {};
 			poolSize.type = UniformDataTypeToVulkanDescriptorType(type);
-			poolSize.descriptorCount = m_Layout.AmountOf(id, type) * Renderer::GetSpecification().FramesInFlight;
+			poolSize.descriptorCount = m_Layout.AmountOf(id, type) * Renderer::GetSpecification().FramesInFlight * m_Count.GetCount(id);
 
 			poolSizes.push_back(poolSize);
 		}
@@ -166,7 +166,7 @@ namespace Lavender
 			{
 				VkDescriptorPoolSize poolSize = {};
 				poolSize.type = UniformDataTypeToVulkanDescriptorType(type);
-				poolSize.descriptorCount = m_Layout.AmountOf(set.first, type) * Renderer::GetSpecification().FramesInFlight;
+				poolSize.descriptorCount = m_Layout.AmountOf(set.first, type) * Renderer::GetSpecification().FramesInFlight * m_Count.GetCount(set.first);
 
 				poolSizes.push_back(poolSize);
 			}

@@ -24,7 +24,7 @@ namespace Lavender
 		inline void SetAssetPath(const std::filesystem::path& path) override { m_Path = path; }
 		inline std::filesystem::path& GetAssetPath() override { return m_Path; }
 
-		void SetAlbedo(Ref<Image2D> image, const std::filesystem::path& path);
+		void SetAlbedo(Ref<Image2D> image, const std::filesystem::path& path); // TODO: Make path's relative to the ProjectDir / Assets
 		inline Ref<Image2D> GetAlbedo() { return m_Albedo; }
 
 		inline constexpr static std::string GetExtension() { return ".lvmaterial"; }

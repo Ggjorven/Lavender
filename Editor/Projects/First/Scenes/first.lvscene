@@ -3,7 +3,7 @@ SceneData:
   Entities:
     - Entity: 5988639549476990475
       TagComponent:
-        Tag: Cat
+        Tag: Mr. Cat
       TransformComponent:
         Position: [0.899999976, 0, 0]
         Size: [0.100000001, 0.100000001, 0.100000001]
@@ -23,11 +23,11 @@ SceneData:
         Material: 8468309108205782655
     - Entity: 3445474986533813990
       TagComponent:
-        Tag: Unnamed Entity
+        Tag: New Room
       TransformComponent:
-        Position: [0, 0, 0]
-        Size: [1, 1, 1]
-        Rotation: [0, 0, 0]
+        Position: [4.4000001, 0.300000012, -2.5]
+        Size: [1.89999998, 1.89999998, 1.89999998]
+        Rotation: [-90, 0, 273.899994]
       MeshComponent:
         AssetHandle: 6516009052361294990
         Material: 8468309108205782655
