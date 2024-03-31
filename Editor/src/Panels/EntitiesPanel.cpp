@@ -290,11 +290,11 @@ namespace Lavender
 							{
 								auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
 								MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
-								mesh.MeshObject = RefHelper::RefAs<MeshAsset>(m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAsset(asset.first));
+								mesh.Mesh = asset.first;
 							});
 
 							meshCombo.Items.push_back(item);
-							if (mesh.MeshObject && mesh.MeshObject->GetHandle() == asset.first)
+							if (mesh.Mesh != AssetHandle::Empty && mesh.Mesh == asset.first)
 							{
 								meshCombo.Selected = item.first;
 								meshCombo.Preview = item.first;
@@ -320,11 +320,11 @@ namespace Lavender
 							{
 								auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
 								MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
-								mesh.Material = RefHelper::RefAs<MaterialAsset>(m_Project->GetSceneCollection().GetActive()->GetAssetManager()->GetAsset(asset.first));
+								mesh.Material = asset.first;
 							});
 
 							materialCombo.Items.push_back(item);
-							if (mesh.Material && mesh.Material->GetHandle() == asset.first)
+							if (mesh.Material != AssetHandle::Empty && mesh.Material == asset.first)
 							{
 								materialCombo.Selected = item.first;
 								materialCombo.Preview = item.first;

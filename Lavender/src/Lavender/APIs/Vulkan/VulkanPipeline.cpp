@@ -43,10 +43,16 @@ namespace Lavender
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto pipeline = m_GraphicsPipeline;
+		auto layout = m_PipelineLayout;
 
-		vkDestroyPipeline(device, m_GraphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
+		Renderer::SubmitFree([pipeline, layout]()
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+			vkDestroyPipeline(device, pipeline, nullptr);
+			vkDestroyPipelineLayout(device, layout, nullptr);
+		});
 	}
 
 	void VulkanPipeline::Initialize()

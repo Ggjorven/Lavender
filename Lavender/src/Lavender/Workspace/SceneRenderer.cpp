@@ -12,6 +12,9 @@
 
 #include "Lavender/ECS/Components.hpp"
 
+#include "Lavender/Workspace/Assets/MeshAsset.hpp"
+#include "Lavender/Workspace/Assets/MaterialAsset.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Lavender
@@ -67,16 +70,22 @@ namespace Lavender
 		{
 			auto& set = sets[index];
 
+			auto assetManager = scene->GetAssetManager();
+
+			// Mesh
 			MeshComponent& mesh = view.get<MeshComponent>(entity);
-			if (mesh.MeshObject)
+			if (mesh.Mesh != AssetHandle::Empty)
 			{
-				mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
-				mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
+				auto meshAsset = RefHelper::RefAs<MeshAsset>(assetManager->GetAsset(mesh.Mesh));
+				meshAsset->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
+				meshAsset->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
 			}
 
-			if (mesh.Material)
+			// Material
+			if (mesh.Material != AssetHandle::Empty)
 			{
-				mesh.Material->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
+				auto materialAsset = RefHelper::RefAs<MaterialAsset>(assetManager->GetAsset(mesh.Material));
+				materialAsset->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
 			}
 			else
 			{
@@ -105,7 +114,9 @@ namespace Lavender
 
 			//Renderer::Wait();
 			set->Bind(pipeline, cmdBuffer);
-			if (mesh.MeshObject) Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
+			if (mesh.Mesh != AssetHandle::Empty) 
+				Renderer::DrawIndexed(cmdBuffer, RefHelper::RefAs<MeshAsset>(assetManager->GetAsset(mesh.Mesh))->GetMesh()->GetIndexBuffer());
+			
 			index++;
 		}
 	}

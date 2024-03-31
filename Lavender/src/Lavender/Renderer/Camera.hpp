@@ -83,7 +83,7 @@ namespace Lavender
 		float m_Yaw = 0.0f;
 		float m_Pitch = 0.0f;
 
-		float m_MovementSpeed = 2.5f;
+		float m_MovementSpeed = 5.0f;
 		float m_MouseSensitivity = 0.1f;
 
 		bool m_FirstUpdate = true;

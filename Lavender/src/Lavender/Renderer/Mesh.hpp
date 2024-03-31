@@ -32,11 +32,12 @@ namespace Lavender
 	public:
 		Mesh() = default;
 		Mesh(const std::filesystem::path& path);
-		Mesh(const Mesh& other); // TODO: Create new vb's and ib's
 		virtual ~Mesh();
 
 		Ref<VertexBuffer>& GetVertexBuffer() { return m_VertexBuffer; }
 		Ref<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
+
+		Ref<Mesh> Copy();
 
 		static Ref<Mesh> Create(const std::filesystem::path& path);
 

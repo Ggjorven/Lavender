@@ -11,16 +11,22 @@ namespace Lavender
 
 	VulkanShader::VulkanShader(ShaderCode code)
 	{
-		if (code.VertexSPIRV.size() != 0) m_VertexShader = CreateShaderModule(code.VertexSPIRV);
-		if (code.FragmentSPIRV.size() != 0) m_FragmentShader = CreateShaderModule(code.FragmentSPIRV);
+		if (!code.VertexSPIRV.empty()) m_VertexShader = CreateShaderModule(code.VertexSPIRV);
+		if (!code.FragmentSPIRV.empty()) m_FragmentShader = CreateShaderModule(code.FragmentSPIRV);
 	}
 
 	VulkanShader::~VulkanShader()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto fragmentShader = m_FragmentShader;
+		auto vertexShader = m_VertexShader;
 
-		vkDestroyShaderModule(device, m_FragmentShader, nullptr);
-		vkDestroyShaderModule(device, m_VertexShader, nullptr);
+		Renderer::SubmitFree([fragmentShader, vertexShader]() 
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+			vkDestroyShaderModule(device, fragmentShader, nullptr);
+			vkDestroyShaderModule(device, vertexShader, nullptr);
+		});
 	}
 
 	VkShaderModule VulkanShader::CreateShaderModule(const std::vector<char>& data)

@@ -22,6 +22,8 @@ namespace Lavender
 		void EndFrame() override;
 
 		void Submit(RenderFunction function) override;
+		void SubmitFree(FreeFunction function) override;
+
 		void WaitFor(Ref<RenderCommandBuffer> commandBuffer) override;
 		void Wait() override;
 
@@ -35,6 +37,8 @@ namespace Lavender
 
 	private:
 		Utils::Queue<RenderFunction> m_RenderQueue = { };
+		Utils::Queue<FreeFunction> m_ResourceFreeQueue = { };
+
 		std::vector<Ref<VulkanRenderCommandBuffer>> m_WaitForCommandBuffers = { };
 	};
 

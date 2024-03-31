@@ -3,6 +3,8 @@
 #include <Lavender/Core/Logging.hpp>
 
 #include <Lavender/Workspace/Assets/Asset.hpp>
+#include <Lavender/Workspace/Assets/MeshAsset.hpp>
+#include <Lavender/Workspace/Assets/MaterialAsset.hpp>
 
 #include <Lavender/UI/UI.hpp>
 #include <Lavender/UI/Style.hpp>
@@ -132,11 +134,12 @@ namespace Lavender
 					image.Action = [this, asset]()
 					{
 						std::filesystem::path beginDir = Utils::ToolKit::ReplaceSlashes(m_Project->GetDirectories().ProjectDir);
-						std::filesystem::path filename = std::filesystem::path(Utils::ToolKit::OpenFile("", beginDir.string()));
+						std::filesystem::path filepath = std::filesystem::path(Utils::ToolKit::OpenFile("", beginDir.string()));
 
-						if (!filename.empty())
+						if (!filepath.empty())
 						{
-							asset->SetAlbedo(Image2D::Create(filename), filename);
+							std::filesystem::path relPath = std::filesystem::relative(filepath, m_Project->GetDirectories().ProjectDir / m_Project->GetDirectories().Assets);
+							asset->SetAlbedo(Image2D::Create(filepath), relPath);
 						}
 					};
 

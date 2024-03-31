@@ -34,6 +34,8 @@ namespace Lavender
 		inline void* GetUIImage() override { return m_TextureID; }
 		#endif
 
+		Ref<Image2D> Copy() override;
+
 		inline VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
 		
 		inline VkImage GetVulkanImage() { return m_Image; }
@@ -45,7 +47,6 @@ namespace Lavender
 
 		#ifndef LV_DISABLE_IMGUI
 		void CreateUIImage();
-		void DestroyUIImage();
 		#endif
 
 	private:

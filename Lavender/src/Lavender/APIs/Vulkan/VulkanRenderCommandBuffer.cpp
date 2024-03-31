@@ -56,17 +56,24 @@ namespace Lavender
 
 	VulkanRenderCommandBuffer::~VulkanRenderCommandBuffer()
 	{
-		VkDevice device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto commandBuffers = m_CommandBuffers;
+		auto renderFinishedSemaphores = m_RenderFinishedSemaphores;
+		auto inFlightFences = m_InFlightFences;
 
-		vkDeviceWaitIdle(device);
-
-		vkFreeCommandBuffers(device, RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCommandPool(), Renderer::GetSpecification().FramesInFlight, m_CommandBuffers.data());
-
-		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+		Renderer::SubmitFree([commandBuffers, renderFinishedSemaphores, inFlightFences]() 
 		{
-			vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
-			vkDestroyFence(device, m_InFlightFences[i], nullptr);
-		}
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+			vkDeviceWaitIdle(device);
+
+			vkFreeCommandBuffers(device, RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCommandPool(), Renderer::GetSpecification().FramesInFlight, commandBuffers.data());
+
+			for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+			{
+				vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+				vkDestroyFence(device, inFlightFences[i], nullptr);
+			}
+		});
 	}
 
 	void VulkanRenderCommandBuffer::Begin()

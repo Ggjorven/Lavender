@@ -21,14 +21,18 @@ namespace Lavender
 
 		void AddAsset(Ref<Asset> asset);
 
+		void SwitchAssets();
+
 		bool Exists(AssetHandle handle) const;
 		Ref<Asset> GetAsset(AssetHandle handle);
-		inline Dict<AssetHandle, Ref<Asset>> GetAssets() { return m_Assets; }
+		inline Dict<AssetHandle, Ref<Asset>> GetAssets() { return m_PrimaryIsPrimary ? m_PrimaryAssets : m_SecondaryAssets; }
 
 		static Ref<AssetManager> Create();
 
 	private:
-		Dict<AssetHandle, Ref<Asset>> m_Assets = { };
+		Dict<AssetHandle, Ref<Asset>> m_PrimaryAssets = { };
+		Dict<AssetHandle, Ref<Asset>> m_SecondaryAssets = { };
+		bool m_PrimaryIsPrimary = true;
 	};
 
 }

@@ -27,7 +27,7 @@ namespace Lavender::Utils
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 
-		if (dir.size() != 0)
+		if (!dir.empty())
 		{
 			ofn.lpstrInitialDir = dir.c_str();
 		}
@@ -57,7 +57,7 @@ namespace Lavender::Utils
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 
-		if (dir.size() != 0)
+		if (!dir.empty())
 		{
 			ofn.lpstrInitialDir = dir.c_str();
 		}
@@ -90,7 +90,7 @@ namespace Lavender::Utils
 				fileDialog->SetOptions(options | FOS_PICKFOLDERS);
 			}
 
-			if (dir.size() != 0)
+			if (!dir.empty())
 			{
 				int wideStrLen = MultiByteToWideChar(CP_UTF8, 0, dir.c_str(), -1, NULL, 0);
 				if (wideStrLen > 0)

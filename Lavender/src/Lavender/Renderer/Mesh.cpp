@@ -29,14 +29,18 @@ namespace Lavender
 		m_IndexBuffer = IndexBuffer::Create(indices.data(), (uint32_t)indices.size());
 	}
 
-	// TODO: Copy to new vertexBuffer and indexBuffer
-	Mesh::Mesh(const Mesh& other)
-	{
-
-	}
-
 	Mesh::~Mesh()
 	{
+	}
+
+	Ref<Mesh> Mesh::Copy()
+	{
+		Ref<Mesh> newMesh = RefHelper::Create<Mesh>();
+
+		newMesh->m_VertexBuffer = m_VertexBuffer->Copy();
+		newMesh->m_IndexBuffer = m_IndexBuffer->Copy();
+
+		return newMesh;
 	}
 
 	Ref<Mesh> Mesh::Create(const std::filesystem::path& path)

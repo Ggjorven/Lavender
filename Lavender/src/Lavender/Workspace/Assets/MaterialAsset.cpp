@@ -5,6 +5,8 @@
 
 #include "Lavender/FileSystem/YAMLUtils.hpp"
 
+#include "Lavender/Workspace/Project.hpp"
+
 #include <fstream>
 
 namespace Lavender
@@ -77,9 +79,10 @@ namespace Lavender
 			if (albedo)
 			{
 				m_AlbedoPath = std::filesystem::path(albedo.as<std::string>());
+				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / m_AlbedoPath;
 
-				if (std::filesystem::exists(m_AlbedoPath))
-					m_Albedo = Image2D::Create(m_AlbedoPath);
+				if (std::filesystem::exists(path))
+					m_Albedo = Image2D::Create(path);
 				else
 					LV_LOG_ERROR("(Material) Albedo path: '{0}' doesn't exist.", m_AlbedoPath.string());
 			}
@@ -95,6 +98,20 @@ namespace Lavender
 	void MaterialAsset::Upload(Ref<DescriptorSet> set, UniformElement element)
 	{
 		if (m_Albedo) m_Albedo->Upload(set, element);
+	}
+
+	Ref<Asset> MaterialAsset::Copy()
+	{
+		Ref<MaterialAsset> newAsset = RefHelper::Create<MaterialAsset>();
+
+		newAsset->m_Handle = m_Handle;
+
+		newAsset->m_Path = m_Path;
+		newAsset->m_AlbedoPath = m_AlbedoPath;
+
+		newAsset->m_Albedo = m_Albedo->Copy();
+
+		return newAsset;
 	}
 
 	Ref<MaterialAsset> MaterialAsset::Create()

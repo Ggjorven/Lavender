@@ -46,5 +46,6 @@ namespace Lavender
 
 	// TODO: Maybe change?
 	typedef std::function<void()> RenderFunction;
+	typedef std::function<void()> FreeFunction;
 
 }

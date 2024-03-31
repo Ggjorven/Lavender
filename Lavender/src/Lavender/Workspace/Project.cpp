@@ -11,6 +11,8 @@
 namespace Lavender
 {
 
+    Project* Project::s_Instance = nullptr;
+
     Project::Project()
         : Project("")
     {
@@ -18,6 +20,8 @@ namespace Lavender
 
     Project::Project(const std::filesystem::path& path)
     {
+        s_Instance = this;
+
         m_Directories.Project = path;
 
         auto& window = Application::Get().GetWindow();
@@ -29,6 +33,7 @@ namespace Lavender
     Project::~Project()
     {
         FrameResources::Destroy();
+        s_Instance = nullptr;
     }
 
     void Project::StartRuntime()

@@ -16,7 +16,7 @@ namespace Lavender
 
 		static VmaAllocation AllocateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer);
 		static void CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size);
-		static void DestroyBuffer(VkBuffer& buffer, VmaAllocation& allocation);
+		static void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
 
 		static VmaAllocation CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkImage& image);
 		static VmaAllocation CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkMemoryPropertyFlags requiredFlags, VkImage& image);
@@ -25,7 +25,7 @@ namespace Lavender
 		static void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 		static void CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
 		static VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-		static void DestroyImage(VkImage& image, VmaAllocation& allocation);
+		static void DestroyImage(VkImage image, VmaAllocation allocation);
 		static VkSampler CreateSampler(uint32_t mipLevels); // TODO: Make it usable with multiple formats and stuff.
 
 		static void MapMemory(VmaAllocation& allocation, void*& mapData);

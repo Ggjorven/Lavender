@@ -14,8 +14,8 @@ namespace Lavender
 	{
 	}
 
-	MeshComponent::MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material)
-		: MeshObject(mesh), Material(material)
+	MeshComponent::MeshComponent(AssetHandle mesh, AssetHandle material)
+		: Mesh(mesh), Material(material)
 	{
 	}
 

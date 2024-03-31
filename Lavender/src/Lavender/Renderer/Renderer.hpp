@@ -25,6 +25,8 @@ namespace Lavender
 		static void EndFrame();
 
 		static void Submit(RenderFunction function);
+		static void SubmitFree(FreeFunction function);
+
 		static void WaitFor(Ref<RenderCommandBuffer> commandBuffer); // TODO: Remove this and replace with something else
 		static void Wait();
 

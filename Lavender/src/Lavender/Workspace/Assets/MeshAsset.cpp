@@ -5,6 +5,8 @@
 
 #include "Lavender/FileSystem/YAMLUtils.hpp"
 
+#include "Lavender/Workspace/Project.hpp"
+
 #include <fstream>
 
 namespace Lavender
@@ -80,13 +82,28 @@ namespace Lavender
 			if (meshPath)
 			{
 				m_MeshPath = std::filesystem::path(meshPath.as<std::string>());
+				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / m_MeshPath;
 
-				if (std::filesystem::exists(m_MeshPath))
-					m_Mesh = Mesh::Create(m_MeshPath);
+				if (std::filesystem::exists(path))
+					m_Mesh = Mesh::Create(path);
 				else
 					LV_LOG_ERROR("(Mesh) Mesh by path: '{0}' doesn't exist.", m_MeshPath);
 			}
 		}
+	}
+
+	Ref<Asset> MeshAsset::Copy()
+	{
+		Ref<MeshAsset> newAsset = RefHelper::Create<MeshAsset>();
+
+		newAsset->m_Handle = m_Handle;
+
+		newAsset->m_Path = m_Path;
+		newAsset->m_MeshPath = m_MeshPath;
+		
+		newAsset->m_Mesh = m_Mesh->Copy();
+
+		return newAsset;
 	}
 
 	Ref<MeshAsset> MeshAsset::Create()

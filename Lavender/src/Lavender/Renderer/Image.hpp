@@ -35,6 +35,8 @@ namespace Lavender
 		virtual void* GetUIImage() = 0;
 		#endif
 
+		virtual Ref<Image2D> Copy() = 0;
+
 		static Ref<Image2D> Create(uint32_t width, uint32_t height);
 		static Ref<Image2D> Create(const std::filesystem::path& path);
 		static Ref<Image2D> Create(Ref<DescriptorSet> set, UniformElement element, uint32_t width, uint32_t height);

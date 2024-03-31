@@ -71,7 +71,7 @@ namespace Lavender
 
 	void AssetManager::Serialize()
 	{
-		for (auto& asset : m_Assets)
+		for (auto& asset : m_PrimaryAssets)
 			asset.second->Serialize();
 	}
 
@@ -85,17 +85,36 @@ namespace Lavender
 
 	void AssetManager::AddAsset(Ref<Asset> asset)
 	{
-		m_Assets[asset->GetHandle()] = asset;
+		if (m_PrimaryIsPrimary)
+			m_PrimaryAssets[asset->GetHandle()] = asset;
+		else
+			m_SecondaryAssets[asset->GetHandle()] = asset;
+	}
+
+	void AssetManager::SwitchAssets()
+	{
+		if (m_PrimaryIsPrimary)
+		{
+			for (auto& asset : m_PrimaryAssets)
+				m_SecondaryAssets[asset.first] = asset.second->Copy();
+
+			m_PrimaryIsPrimary = false;
+		}
+		else
+		{
+			m_SecondaryAssets.clear();
+			m_PrimaryIsPrimary = true;
+		}
 	}
 
 	bool AssetManager::Exists(AssetHandle handle) const
 	{
-		return m_Assets.find(handle) != m_Assets.end();
+		return m_PrimaryIsPrimary ? m_PrimaryAssets.find(handle) != m_PrimaryAssets.end() : m_SecondaryAssets.find(handle) != m_SecondaryAssets.end();
 	}
 
 	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
 	{
-		return m_Assets[handle];
+		return m_PrimaryIsPrimary ? m_PrimaryAssets[handle] : m_SecondaryAssets[handle];
 	}
 
 	Ref<AssetManager> AssetManager::Create()

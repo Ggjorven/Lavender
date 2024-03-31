@@ -44,6 +44,8 @@ namespace Lavender
 
 		virtual AssetType GetStaticType() const = 0;
 
+		virtual Ref<Asset> Copy() = 0;
+
 	protected:
 		AssetHandle m_Handle = {};
 	};

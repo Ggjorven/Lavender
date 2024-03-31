@@ -25,7 +25,7 @@ namespace Lavender
 	{
 		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
-		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
 
 		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
@@ -65,7 +65,7 @@ namespace Lavender
 	{
 		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
-		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
 
 		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
 		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
@@ -104,17 +104,26 @@ namespace Lavender
 
 	VulkanImage2D::~VulkanImage2D()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto textureID = m_TextureID;
+		auto sampler = m_Sampler;
+		auto imageView = m_ImageView;
+		auto image = m_Image;
+		auto allocation = m_Allocation;
 
-		#ifndef LV_DISABLE_IMGUI
-		DestroyUIImage();
-		#endif
+		Renderer::SubmitFree([textureID, sampler, imageView, image, allocation]()
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		vkDestroySampler(device, m_Sampler, nullptr);
-		vkDestroyImageView(device, m_ImageView, nullptr);
+			#ifndef LV_DISABLE_IMGUI
+			ImGui_ImplVulkan_FreeTexture(textureID);
+			#endif
 
-		if (m_Image != VK_NULL_HANDLE)
-			VulkanAllocator::DestroyImage(m_Image, m_Allocation);
+			vkDestroySampler(device, sampler, nullptr);
+			vkDestroyImageView(device, imageView, nullptr);
+
+			if (image != VK_NULL_HANDLE)
+				VulkanAllocator::DestroyImage(image, allocation);
+		});
 	}
 
 	void VulkanImage2D::SetData(void* data, size_t size)
@@ -167,6 +176,38 @@ namespace Lavender
 			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);
 		}
 	}
+
+	Ref<Image2D> VulkanImage2D::Copy()
+	{
+		Ref<VulkanImage2D> newImage = RefHelper::Create<VulkanImage2D>(m_Width, m_Height);
+
+		VulkanAllocator::TransitionImageLayout(m_Image, GetFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_Miplevels);
+		VulkanAllocator::TransitionImageLayout(newImage->m_Image, newImage->GetFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, newImage->m_Miplevels);
+
+		VkCommandBuffer commandBuffer = VulkanCommands::Begin();
+
+		VkImageCopy copyRegion = {};
+		copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+		copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+		copyRegion.extent.width = m_Width;
+		copyRegion.extent.height = m_Height;
+		copyRegion.extent.depth = 1;
+
+		vkCmdCopyImage(
+			commandBuffer,
+			m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			newImage->m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1, &copyRegion
+		);
+
+		VulkanCommands::EndAndSubmit(commandBuffer);
+
+		VulkanAllocator::TransitionImageLayout(m_Image, GetFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
+		VulkanAllocator::TransitionImageLayout(newImage->m_Image, newImage->GetFormat(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, newImage->m_Miplevels);
+
+		return newImage;
+	}
+
 
 	void VulkanImage2D::GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
@@ -260,11 +301,6 @@ namespace Lavender
 	void VulkanImage2D::CreateUIImage()
 	{
 		m_TextureID = ImGui_ImplVulkan_AddTexture(m_Sampler, m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	}
-
-	void VulkanImage2D::DestroyUIImage()
-	{
-		ImGui_ImplVulkan_FreeTexture(m_TextureID);
 	}
 	#endif
 

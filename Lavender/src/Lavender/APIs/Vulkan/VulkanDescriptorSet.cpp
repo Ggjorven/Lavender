@@ -51,17 +51,19 @@ namespace Lavender
 
 	VulkanDescriptorSetGroup::~VulkanDescriptorSetGroup()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto pools = m_DescriptorPools;
+		auto layouts = m_DescriptorLayouts;
 
-		for (auto& pool : m_DescriptorPools)
+		Renderer::SubmitFree([pools, layouts]() 
 		{
-			vkDestroyDescriptorPool(device, pool.second, nullptr);
-		}
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		for (auto& layout : m_DescriptorLayouts)
-		{
-			vkDestroyDescriptorSetLayout(device, layout.second, nullptr);
-		}
+			for (auto& pool : pools)
+				vkDestroyDescriptorPool(device, pool.second, nullptr);
+
+			for (auto& layout : layouts)
+				vkDestroyDescriptorSetLayout(device, layout.second, nullptr);
+		});
 	}
 
 	void VulkanDescriptorSetGroup::AddMoreSetsTo(SetID id, uint32_t amount)

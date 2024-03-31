@@ -261,15 +261,22 @@ namespace Lavender
 
     void VulkanRenderPass::Destroy()
     {
-        auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
-
-        vkDeviceWaitIdle(device->GetVulkanDevice());
-
-        for (auto& framebuffer : m_Framebuffers)
-            vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+        auto frameBuffers = m_Framebuffers;
+        auto renderPass = m_RenderPass;
 
         if (m_Destroy)
-            vkDestroyRenderPass(device->GetVulkanDevice(), m_RenderPass, nullptr);
+        {
+            Renderer::SubmitFree([frameBuffers, renderPass]()
+            {
+                auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
+                vkDeviceWaitIdle(device->GetVulkanDevice());
+
+                for (auto& framebuffer : frameBuffers)
+                    vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+
+                vkDestroyRenderPass(device->GetVulkanDevice(), renderPass, nullptr);
+            });
+        }
     }
 
 }

@@ -41,11 +41,17 @@ namespace Lavender
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
 	{
-		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+		auto buffers = m_Buffers;
+		auto allocations = m_Allocations;
+
+		Renderer::SubmitFree([buffers, allocations]()
 		{
-			if (m_Buffers[i] != VK_NULL_HANDLE)
-				VulkanAllocator::DestroyBuffer(m_Buffers[i], m_Allocations[i]);
-		}
+			for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+			{
+				if (buffers[i] != VK_NULL_HANDLE)
+					VulkanAllocator::DestroyBuffer(buffers[i], allocations[i]);
+			}
+		});
 	}
 
 	void VulkanUniformBuffer::SetData(void* data, size_t size)

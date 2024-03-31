@@ -29,6 +29,8 @@ namespace Lavender
 
 		inline constexpr AssetType GetStaticType() const override { return AssetType::MeshAsset; }
 
+		Ref<Asset> Copy() override;
+
 		static Ref<MeshAsset> Create();
 		static Ref<MeshAsset> Create(const std::filesystem::path& path);
 		static Ref<MeshAsset> Create(const std::filesystem::path& path, const std::filesystem::path& meshPath);

@@ -56,7 +56,11 @@ namespace Lavender
 		static Ref<Project> Create();
 		static Ref<Project> Create(const std::filesystem::path& path);
 
+		static Project* Get() { return s_Instance; }
+
 	private:
+		static Project* s_Instance;
+
 		Ref<Viewport> m_Viewport = nullptr;
 
 		SceneCollection m_Scenes = {};

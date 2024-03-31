@@ -124,15 +124,20 @@ namespace Lavender
 
 	void VulkanImGuiLayer::OnDetach()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto pool = s_ImGuiPool;
 
-		vkDeviceWaitIdle(device);
+		Renderer::SubmitFree([pool]()
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		vkDestroyDescriptorPool(device, s_ImGuiPool, nullptr);
+			vkDeviceWaitIdle(device);
 
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
+			vkDestroyDescriptorPool(device, pool, nullptr);
+
+			ImGui_ImplVulkan_Shutdown();
+			ImGui_ImplGlfw_Shutdown();
+			ImGui::DestroyContext();
+		});
 	}
 
 	void VulkanImGuiLayer::Begin()

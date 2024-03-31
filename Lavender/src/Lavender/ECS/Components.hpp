@@ -6,8 +6,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Lavender/Workspace/Assets/MeshAsset.hpp"
-#include "Lavender/Workspace/Assets/MaterialAsset.hpp"
+#include "Lavender/Workspace/Assets/Asset.hpp"
 
 namespace Lavender
 {
@@ -39,13 +38,13 @@ namespace Lavender
 	struct MeshComponent // TODO: Implement for scripting
 	{
 	public:
-		Ref<MeshAsset> MeshObject = nullptr; // TODO: Copy on MeshComponent copy
-		Ref<MaterialAsset> Material = nullptr; // TODO: Copy on MeshComponent copy
+		AssetHandle Mesh = AssetHandle::Empty; 
+		AssetHandle Material = AssetHandle::Empty;
 
 	public:
 		MeshComponent() = default;
-		MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material = nullptr);
-		MeshComponent(const MeshComponent& other) = default; // TODO: ^
+		MeshComponent(AssetHandle mesh, AssetHandle material);
+		MeshComponent(const MeshComponent& other) = default;
 	};
 
 	enum class Component

@@ -37,6 +37,11 @@ namespace Lavender
 		s_RenderInstance->Submit(function);
 	}
 
+	void Renderer::SubmitFree(FreeFunction function)
+	{
+		s_RenderInstance->SubmitFree(function);
+	}
+
 	void Renderer::WaitFor(Ref<RenderCommandBuffer> commandBuffer)
 	{
 		s_RenderInstance->WaitFor(commandBuffer);

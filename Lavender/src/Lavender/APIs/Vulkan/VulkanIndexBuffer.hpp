@@ -13,12 +13,15 @@ namespace Lavender
 	class VulkanIndexBuffer : public IndexBuffer
 	{
 	public:
+		VulkanIndexBuffer() = default;
 		VulkanIndexBuffer(uint32_t* indices, uint32_t count);
 		virtual ~VulkanIndexBuffer();
 
 		void Bind(Ref<RenderCommandBuffer> commandBuffer) const;
 
 		inline uint32_t GetCount() const { return m_Count; }
+
+		Ref<IndexBuffer> Copy() override;
 
 	private:
 		VkBuffer m_Buffer = VK_NULL_HANDLE;

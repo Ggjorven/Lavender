@@ -27,6 +27,9 @@ namespace Lavender
 		VkDevice& device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		vkDeviceWaitIdle(device);
 
+		m_WaitForCommandBuffers.clear();
+		m_ResourceFreeQueue.Execute();
+
 		delete s_RenderData;
 	}
 
@@ -36,11 +39,9 @@ namespace Lavender
 			return;
 
 		s_RenderData->Reset();
-
-		// TODO: Execute resourceFree queue
+		m_ResourceFreeQueue.Execute();
 
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
-
 		{
 			LV_PROFILE_SCOPE("Wait for fences");
 			std::vector<VkFence> fences = { };
@@ -48,7 +49,7 @@ namespace Lavender
 				fences.push_back(cmd->GetInFlightFence(context->GetSwapChain()->GetCurrentFrame()));
 
 			// Wait for all previous fences
-			if (fences.size() > 0)
+			if (!fences.empty())
 			{
 				vkWaitForFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, LV_MAX_UINT64);
 				vkResetFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data());
@@ -74,6 +75,11 @@ namespace Lavender
 	void VulkanRenderer::Submit(RenderFunction function)
 	{
 		m_RenderQueue.Add(function);
+	}
+
+	void VulkanRenderer::SubmitFree(FreeFunction function)
+	{
+		m_ResourceFreeQueue.Add(function);
 	}
 
 	void VulkanRenderer::WaitFor(Ref<RenderCommandBuffer> commandBuffer)
