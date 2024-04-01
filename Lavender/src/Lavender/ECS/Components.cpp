@@ -1,6 +1,10 @@
 #include "lvpch.h"
 #include "Components.hpp"
 
+#include "Lavender/Core/Logging.hpp"
+
+#include "Lavender/Workspace/Project.hpp"
+
 namespace Lavender
 {
 
@@ -14,8 +18,20 @@ namespace Lavender
 	{
 	}
 
-	MeshComponent::MeshComponent(AssetHandle mesh, AssetHandle material)
-		: Mesh(mesh), Material(material)
+	MeshComponent::MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material)
+		: MeshObject(mesh), Material(material)
+	{
+	}
+
+	MeshComponent::MeshComponent(const MeshComponent& other)
+	{
+		auto assetmanager = Project::Get()->GetSceneCollection().GetActive()->GetAssetManager();
+		if (MeshObject) MeshObject = RefHelper::RefAs<MeshAsset>(assetmanager->GetAsset(MeshObject->GetHandle()));
+		if (Material) Material = RefHelper::RefAs<MaterialAsset>(assetmanager->GetAsset(Material->GetHandle()));
+	}
+
+	ScriptComponent::ScriptComponent(const std::string& name)
+		: ClassName(name)
 	{
 	}
 

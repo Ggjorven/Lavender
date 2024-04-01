@@ -67,6 +67,8 @@ namespace Lavender
 
 	AssetManager::~AssetManager()
 	{
+		m_PrimaryAssets.clear();
+		m_SecondaryAssets.clear();
 	}
 
 	void AssetManager::Serialize()

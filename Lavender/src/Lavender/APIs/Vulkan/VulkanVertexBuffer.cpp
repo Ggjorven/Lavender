@@ -58,6 +58,7 @@ namespace Lavender
 
 		newBuffer->m_BufferAllocation = VulkanAllocator::AllocateBuffer(m_BufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY, newBuffer->m_Buffer);
 		VulkanAllocator::CopyBuffer(m_Buffer, newBuffer->m_Buffer, m_BufferSize);
+		newBuffer->m_BufferSize = m_BufferSize;
 
 		return newBuffer;
 	}

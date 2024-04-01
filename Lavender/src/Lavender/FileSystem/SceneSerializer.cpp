@@ -123,8 +123,8 @@ namespace Lavender
 			emitter << YAML::Key << "MeshComponent";
 			emitter << YAML::BeginMap;
 
-			if (mesh.Mesh != AssetHandle::Empty) emitter << YAML::Key << "AssetHandle" << mesh.Mesh.Get();
-			if (mesh.Material != AssetHandle::Empty) emitter << YAML::Key << "Material" << YAML::Value << mesh.Material.Get();
+			if (mesh.MeshObject) emitter << YAML::Key << "AssetHandle" << mesh.MeshObject->GetHandle().Get();
+			if (mesh.Material) emitter << YAML::Key << "Material" << YAML::Value << mesh.Material->GetHandle().Get();
 
 			emitter << YAML::EndMap;
 		}
@@ -168,7 +168,7 @@ namespace Lavender
 			{
 				AssetHandle meshAssetHandle = meshHandle.as<uint64_t>();
 				if (assets->Exists(meshAssetHandle))
-					mesh.Mesh = meshAssetHandle;
+					mesh.MeshObject = RefHelper::RefAs<MeshAsset>(m_Scene->GetAssetManager()->GetAsset(meshAssetHandle));
 				else
 					LV_LOG_ERROR("(Entity[{0}]) Asset by handle {1} doesn't exist.", uuid.Get(), meshAssetHandle.Get());
 			}
@@ -179,7 +179,7 @@ namespace Lavender
 			{
 				AssetHandle materialAssetHandle = materialHandle.as<uint64_t>();
 				if (assets->Exists(materialAssetHandle))
-					mesh.Material = materialAssetHandle;
+					mesh.Material = RefHelper::RefAs<MaterialAsset>(m_Scene->GetAssetManager()->GetAsset(materialAssetHandle));
 				else
 					LV_LOG_ERROR("(Entity[{0}]) Asset by handle {1} doesn't exist.", uuid.Get(), materialAssetHandle.Get());
 			}

@@ -17,6 +17,7 @@ namespace Lavender
 	class VulkanImage2D : public Image2D
 	{
 	public:
+		VulkanImage2D() = default;
 		VulkanImage2D(uint32_t width, uint32_t height);
 		VulkanImage2D(const std::filesystem::path& path);
 		VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, uint32_t width, uint32_t height);

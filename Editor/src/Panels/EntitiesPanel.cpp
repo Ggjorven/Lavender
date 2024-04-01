@@ -190,6 +190,7 @@ namespace Lavender
 			}
 
 			auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
+			auto assetManager = m_Project->GetSceneCollection().GetActive()->GetAssetManager();
 
 			// TagComponent
 			if (registry->HasComponent<TagComponent>(m_SelectedUUID))
@@ -286,15 +287,15 @@ namespace Lavender
 
 							auto path = asset.second->GetAssetPath();
 							std::string name = path.filename().replace_extension().string();
-							std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(name, [this, asset]()
+							std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(name, [this, assetManager, asset]()
 							{
 								auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
 								MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
-								mesh.Mesh = asset.first;
+								mesh.MeshObject = RefHelper::RefAs<MeshAsset>(assetManager->GetAsset(asset.first));
 							});
 
 							meshCombo.Items.push_back(item);
-							if (mesh.Mesh != AssetHandle::Empty && mesh.Mesh == asset.first)
+							if (mesh.MeshObject && mesh.MeshObject->GetHandle() == asset.first)
 							{
 								meshCombo.Selected = item.first;
 								meshCombo.Preview = item.first;
@@ -316,15 +317,15 @@ namespace Lavender
 
 							auto path = asset.second->GetAssetPath();
 							std::string name = path.filename().replace_extension().string();
-							std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(name, [this, asset]()
+							std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(name, [this, assetManager, asset]()
 							{
 								auto registry = m_Project->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry();
 								MeshComponent& mesh = registry->GetComponent<MeshComponent>(m_SelectedUUID);
-								mesh.Material = asset.first;
+								mesh.Material = RefHelper::RefAs<MaterialAsset>(assetManager->GetAsset(asset.first));
 							});
 
 							materialCombo.Items.push_back(item);
-							if (mesh.Material != AssetHandle::Empty && mesh.Material == asset.first)
+							if (mesh.Material&& mesh.Material->GetHandle() == asset.first)
 							{
 								materialCombo.Selected = item.first;
 								materialCombo.Preview = item.first;

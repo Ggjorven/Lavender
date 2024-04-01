@@ -30,6 +30,7 @@ namespace Lavender
 	typedef void (*RemoveComponentFn)(Component, uint64_t);
 	typedef void (*SetRemoveComponentFn)(RemoveComponentFn);
 
+	// Note(Jorben): This class sets the function pointers in the script.
 	// Note(Jorben): The functions with the Native_ are wrappers around member functions
 	class RegistryInterface
 	{
@@ -66,6 +67,13 @@ namespace Lavender
 				data = (void*)s_Instance->AddComponent<TransformComponent>(entity, transformComponent);
 				break;
 			}
+			case Component::Mesh:
+			{
+				MeshComponent* meshComponent = (MeshComponent*)component;
+				data = (void*)s_Instance->AddComponent<MeshComponent>(entity, meshComponent);
+				break;
+			}
+
 			default:
 				// TODO: Implement logging (issue is with linking to script)
 				break;
@@ -101,6 +109,13 @@ namespace Lavender
 				data = (void*)s_Instance->AddOrReplaceComponent<TransformComponent>(entity, transformComponent);
 				break;
 			}
+			case Component::Mesh:
+			{
+				MeshComponent* meshComponent = (MeshComponent*)component;
+				data = (void*)s_Instance->AddOrReplaceComponent<MeshComponent>(entity, meshComponent);
+				break;
+			}
+
 			default:
 				// TODO: Implement logging (issue is with linking to script)
 				break;
@@ -124,9 +139,10 @@ namespace Lavender
 			{
 			case Component::Tag:
 				return s_Instance->HasComponent<TagComponent>(entity);
-
 			case Component::Transform:
 				return s_Instance->HasComponent<TransformComponent>(entity);
+			case Component::Mesh:
+				return s_Instance->HasComponent<MeshComponent>(entity);
 
 			default:
 				// TODO: Implement logging (issue is with linking to script)
@@ -154,9 +170,11 @@ namespace Lavender
 			case Component::Tag:
 				data = (void*)s_Instance->GetComponent<TagComponent>(entity);
 				break;
-
 			case Component::Transform:
 				data = (void*)s_Instance->GetComponent<TransformComponent>(entity);
+				break;
+			case Component::Mesh:
+				data = (void*)s_Instance->GetComponent<MeshComponent>(entity);
 				break;
 
 			default:
@@ -183,9 +201,11 @@ namespace Lavender
 			case Component::Tag:
 				s_Instance->RemoveComponent<TagComponent>(entity);
 				break;
-
 			case Component::Transform:
 				s_Instance->RemoveComponent<TransformComponent>(entity);
+				break;
+			case Component::Mesh:
+				s_Instance->RemoveComponent<MeshComponent>(entity);
 				break;
 
 			default:

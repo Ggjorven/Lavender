@@ -14,6 +14,7 @@ namespace Lavender
 	class WindowsEntityInterface : public EntityInterface
 	{
 	public:
+		WindowsEntityInterface(const UUID& uuid, Ref<ScriptLoader> loader, const std::string& classname);
 		WindowsEntityInterface(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname);
 		virtual ~WindowsEntityInterface();
 

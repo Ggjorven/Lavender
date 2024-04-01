@@ -97,7 +97,8 @@ namespace Lavender
 
 	void MaterialAsset::Upload(Ref<DescriptorSet> set, UniformElement element)
 	{
-		if (m_Albedo) m_Albedo->Upload(set, element);
+		if (m_Albedo) 
+			m_Albedo->Upload(set, element);
 	}
 
 	Ref<Asset> MaterialAsset::Copy()

@@ -23,7 +23,7 @@ namespace Lavender
 	{
 	}
 
-	MeshAsset::~MeshAsset() // TODO: Create new vb's and ib's
+	MeshAsset::~MeshAsset() 
 	{
 	}
 

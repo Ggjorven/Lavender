@@ -37,11 +37,27 @@ namespace Lavender
 	void Scene::StartRuntime()
 	{
 		m_State = Scene::State::Runtime;
+	
+		m_Assets->SwitchAssets();
+		m_Collection->SwitchRegistry();
+
+		auto& registry = m_Collection->GetMainRegistry()->GetRegistry();
+		auto view = registry.view<ScriptComponent>();
+		for (auto& script : view)
+		{
+			ScriptComponent& component = view.get<ScriptComponent>(script);
+			UUID uuid = registry.get<UUID>(script);
+
+			m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_Script, component.ClassName);
+		}
 	}
 
 	void Scene::StopRuntime()
 	{
 		m_State = Scene::State::Editor;
+
+		m_RegistryInterface.reset();
+		m_EntityInterfaces.clear();
 	}
 
 	void Scene::OnUpdate(float deltaTime)
@@ -138,11 +154,20 @@ namespace Lavender
 	void Scene::UpdateRuntime(float deltaTime)
 	{
 		LV_PROFILE_SCOPE("Scene::UpdateRuntime");
+
+		// TODO: Update some physics or something
+
+		for (auto& entity : m_EntityInterfaces)
+			entity.second->InvokeOnUpdate(deltaTime);
 	}
 
 	void Scene::RenderRuntime(Ref<RenderCommandBuffer> cmdBuffer)
 	{
 		LV_PROFILE_SCOPE("Scene::RenderRuntime");
+
+		// TODO: Change camera
+		m_EditorCamera->BindDescriptorSet(FrameResources::GetPipeline(), cmdBuffer);
+		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
 	}
 
 	///////////////////////////////////////////////////////////////////////////

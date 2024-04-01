@@ -71,7 +71,7 @@ namespace Lavender
 			}
 
 			#if !defined(LV_DISABLE_IMGUI)
-			if (!m_Minimized) // TODO: Remove once Viewport uses ImGui window size instead of main window size
+			if (!m_Minimized) 
 			{
 				LV_PROFILE_SCOPE("ImGui Submission");
 				{

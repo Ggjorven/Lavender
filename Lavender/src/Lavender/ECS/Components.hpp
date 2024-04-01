@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 
 #include "Lavender/Workspace/Assets/Asset.hpp"
+#include "Lavender/Workspace/Assets/MeshAsset.hpp"
+#include "Lavender/Workspace/Assets/MaterialAsset.hpp"
 
 namespace Lavender
 {
@@ -35,16 +37,27 @@ namespace Lavender
 		TransformComponent(const TransformComponent& other) = default;
 	};
 
-	struct MeshComponent // TODO: Implement for scripting
+	struct MeshComponent
 	{
 	public:
-		AssetHandle Mesh = AssetHandle::Empty; 
-		AssetHandle Material = AssetHandle::Empty;
+		Ref<MeshAsset> MeshObject = nullptr; 
+		Ref<MaterialAsset> Material = nullptr;
 
 	public:
 		MeshComponent() = default;
-		MeshComponent(AssetHandle mesh, AssetHandle material);
-		MeshComponent(const MeshComponent& other) = default;
+		MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material);
+		MeshComponent(const MeshComponent& other);
+	};
+
+	struct ScriptComponent
+	{
+	public:
+		std::string ClassName = {};
+
+	public:
+		ScriptComponent() = default;
+		ScriptComponent(const std::string& name);
+		ScriptComponent(const ScriptComponent& other) = default;
 	};
 
 	enum class Component

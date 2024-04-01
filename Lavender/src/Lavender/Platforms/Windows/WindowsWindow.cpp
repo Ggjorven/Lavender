@@ -65,8 +65,6 @@ namespace Lavender
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
-		// TODO: Recreate Vulkan swapchain
-
 		m_Data.Vsync = enabled;
 	}
 

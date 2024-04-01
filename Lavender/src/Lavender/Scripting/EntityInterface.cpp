@@ -8,6 +8,13 @@
 namespace Lavender
 {
 
+	Ref<EntityInterface> EntityInterface::Create(const UUID& uuid, Ref<ScriptLoader> loader, const std::string& classname)
+	{
+		#if defined(LV_PLATFORM_WINDOWS)
+		return RefHelper::Create<WindowsEntityInterface>(uuid, loader, classname);
+		#endif
+	}
+
 	Ref<EntityInterface> EntityInterface::Create(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname)
 	{
 		#if defined(LV_PLATFORM_WINDOWS)

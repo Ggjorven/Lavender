@@ -85,6 +85,7 @@ namespace Lavender
 
 		virtual Entity& GetEntity() = 0;
 
+		static Ref<EntityInterface> Create(const UUID& uuid, Ref<ScriptLoader> loader, const std::string& classname);
 		static Ref<EntityInterface> Create(Entity& entity, Ref<ScriptLoader> loader, const std::string& classname);
 	};
 

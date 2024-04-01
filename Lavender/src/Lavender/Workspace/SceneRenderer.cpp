@@ -70,22 +70,18 @@ namespace Lavender
 		{
 			auto& set = sets[index];
 
-			auto assetManager = scene->GetAssetManager();
-
 			// Mesh
 			MeshComponent& mesh = view.get<MeshComponent>(entity);
-			if (mesh.Mesh != AssetHandle::Empty)
+			if (mesh.MeshObject)
 			{
-				auto meshAsset = RefHelper::RefAs<MeshAsset>(assetManager->GetAsset(mesh.Mesh));
-				meshAsset->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
-				meshAsset->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
+				mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
+				mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
 			}
 
 			// Material
-			if (mesh.Material != AssetHandle::Empty)
+			if (mesh.Material)
 			{
-				auto materialAsset = RefHelper::RefAs<MaterialAsset>(assetManager->GetAsset(mesh.Material));
-				materialAsset->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
+				mesh.Material->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
 			}
 			else
 			{
@@ -112,10 +108,9 @@ namespace Lavender
 			s_ModelBuffers[index]->SetData((void*)&modelMatrix, sizeof(glm::mat4));
 			s_ModelBuffers[index]->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"));
 
-			//Renderer::Wait();
 			set->Bind(pipeline, cmdBuffer);
-			if (mesh.Mesh != AssetHandle::Empty) 
-				Renderer::DrawIndexed(cmdBuffer, RefHelper::RefAs<MeshAsset>(assetManager->GetAsset(mesh.Mesh))->GetMesh()->GetIndexBuffer());
+			if (mesh.MeshObject) 
+				Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
 			
 			index++;
 		}

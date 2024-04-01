@@ -179,31 +179,47 @@ namespace Lavender
 
 	Ref<Image2D> VulkanImage2D::Copy()
 	{
-		Ref<VulkanImage2D> newImage = RefHelper::Create<VulkanImage2D>(m_Width, m_Height);
+		Ref<VulkanImage2D> newImage = RefHelper::Create<VulkanImage2D>();
+		newImage->m_Width = m_Width;
+		newImage->m_Height = m_Height;
+		newImage->m_Miplevels = m_Miplevels;
+		newImage->m_Element = m_Element;
+		newImage->m_Path = m_Path;
+
+		newImage->m_Allocation = VulkanAllocator::CreateImage(m_Width, m_Height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, newImage->m_Image);
+		VulkanAllocator::TransitionImageLayout(newImage->m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 
 		VulkanAllocator::TransitionImageLayout(m_Image, GetFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_Miplevels);
 		VulkanAllocator::TransitionImageLayout(newImage->m_Image, newImage->GetFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, newImage->m_Miplevels);
 
 		VkCommandBuffer commandBuffer = VulkanCommands::Begin();
 
-		VkImageCopy copyRegion = {};
-		copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-		copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-		copyRegion.extent.width = m_Width;
-		copyRegion.extent.height = m_Height;
-		copyRegion.extent.depth = 1;
+		for (uint32_t i = 0; i < m_Miplevels; i++) 
+		{
+			VkImageCopy copyRegion = {};
+			copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1 };
+			copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1 };
+			copyRegion.extent.width = m_Width >> i;		// Halfs the size
+			copyRegion.extent.height = m_Height >> i;	// Halfs the size
+			copyRegion.extent.depth = 1;
 
-		vkCmdCopyImage(
-			commandBuffer,
-			m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			newImage->m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1, &copyRegion
-		);
+			vkCmdCopyImage(
+				commandBuffer,
+				m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				newImage->m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				1, &copyRegion
+			);
+		}
 
 		VulkanCommands::EndAndSubmit(commandBuffer);
 
 		VulkanAllocator::TransitionImageLayout(m_Image, GetFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 		VulkanAllocator::TransitionImageLayout(newImage->m_Image, newImage->GetFormat(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, newImage->m_Miplevels);
+
+		newImage->m_ImageView = VulkanAllocator::CreateImageView(newImage->m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, newImage->m_Miplevels);
+		newImage->m_Sampler = VulkanAllocator::CreateSampler(newImage->m_Miplevels);
+
+		newImage->CreateUIImage();
 
 		return newImage;
 	}
