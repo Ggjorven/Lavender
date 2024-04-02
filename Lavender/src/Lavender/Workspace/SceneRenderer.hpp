@@ -22,7 +22,7 @@ namespace Lavender
 		static void RenderScene(Scene* scene, Ref<EditorCamera>& camera, Ref<RenderCommandBuffer> cmdBuffer);
 
 	private:
-		static std::vector<Ref<UniformBuffer>> s_ModelBuffers;
+		static Ref<DynamicUniformBuffer> s_ModelBuffer;
 		static Ref<Image2D> s_EmptyImage;
 	};
 

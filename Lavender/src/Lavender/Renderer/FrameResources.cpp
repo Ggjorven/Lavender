@@ -40,7 +40,7 @@ namespace Lavender
 
 		UniformLayout uniformLayout = {
 			{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
-			{ UniformDataType::UniformBuffer, 0, 1, "u_Model", UniformElement::ShaderStage::Vertex },
+			{ UniformDataType::DynamicUniformBuffer, 0, 1, "u_Model", UniformElement::ShaderStage::Vertex },
 			{ UniformDataType::UniformBuffer, 1, 0, "u_Camera", UniformElement::ShaderStage::Vertex }
 		};
 

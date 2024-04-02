@@ -26,7 +26,7 @@ SceneData:
         Tag: New Room
       TransformComponent:
         Position: [2.29999995, 0.400000006, 0.600000024]
-        Size: [1.39999998, 1.39999998, 1.39999998]
+        Size: [1, 1, 1]
         Rotation: [-90, 0, 273.899994]
       MeshComponent:
         AssetHandle: 6516009052361294990

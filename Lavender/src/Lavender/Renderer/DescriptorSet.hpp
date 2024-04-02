@@ -18,6 +18,7 @@ namespace Lavender
 		virtual ~DescriptorSet() = default;
 
 		virtual void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer) = 0;
+		virtual void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, size_t offset) = 0;
 		virtual SetID GetSetID() = 0;
 	};
 
@@ -47,7 +48,7 @@ namespace Lavender
 		virtual UniformLayout& GetLayout() = 0;
 		virtual const DescriptorCount& GetCount() = 0;
 
-		virtual std::vector<Ref<DescriptorSet>> GetSets(SetID id) = 0;
+		virtual std::vector<Ref<DescriptorSet>>& GetSets(SetID id) = 0;
 
 		static Ref<DescriptorSetGroup> Create(const UniformLayout& layout, DescriptorCount count = {});
 	};

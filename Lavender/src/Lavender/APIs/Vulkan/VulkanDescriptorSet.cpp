@@ -41,6 +41,18 @@ namespace Lavender
 		vkCmdBindDescriptorSets(vkCmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, m_ID, 1, &m_DescriptorSets[currentFrame], 0, nullptr);
 	}
 
+	void VulkanDescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, size_t offset)
+	{
+		LV_PROFILE_SCOPE("VulkanDescriptorSet::Bind");
+
+		auto vkPipelineLayout = RefHelper::RefAs<VulkanPipeline>(pipeline)->GetVulkanLayout();
+		auto vkCmdBuf = RefHelper::RefAs<VulkanRenderCommandBuffer>(cmdBuffer)->GetVulkanCommandBuffer();
+		auto currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
+
+		uint32_t dynamicOffset = (uint32_t)offset;
+		vkCmdBindDescriptorSets(vkCmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, m_ID, 1, &m_DescriptorSets[currentFrame], 1, &dynamicOffset);
+	}
+
 	VulkanDescriptorSetGroup::VulkanDescriptorSetGroup(const UniformLayout& layout, DescriptorSetGroup::DescriptorCount count)
 		: m_Layout(layout), m_Count(count)
 	{
@@ -118,7 +130,7 @@ namespace Lavender
 		ConvertToVulkanDescriptorSets(descriptorSets);
 	}
 
-	std::vector<Ref<DescriptorSet>> VulkanDescriptorSetGroup::GetSets(SetID id)
+	std::vector<Ref<DescriptorSet>>& VulkanDescriptorSetGroup::GetSets(SetID id)
 	{
 		return m_Sets[id];
 	}
@@ -239,8 +251,9 @@ namespace Lavender
 		switch (type)
 		{
 		case UniformDataType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case UniformDataType::DynamicUniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+
 		case UniformDataType::Image: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		// TODO(Jorben): Implement the rest
 		}
 
 		return VK_DESCRIPTOR_TYPE_MAX_ENUM;

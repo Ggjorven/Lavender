@@ -20,23 +20,23 @@
 namespace Lavender
 {
 
-	std::vector<Ref<UniformBuffer>> SceneRenderer::s_ModelBuffers = { };
+	static uint32_t s_EntitiesAllocated = 0; // Is used for images and uniforms
+	static size_t s_UniformSize = sizeof(glm::mat4); // glm::mat4 'cause of Model matrix
+
+	Ref<DynamicUniformBuffer> SceneRenderer::s_ModelBuffer = nullptr;
 	Ref<Image2D> SceneRenderer::s_EmptyImage = nullptr;
 
 	void SceneRenderer::Init()
 	{
-		s_ModelBuffers.resize((size_t)Renderer::GetSpecification().PreAllocatedDescriptorSets);
-		for (uint32_t i = 0; i < Renderer::GetSpecification().PreAllocatedDescriptorSets; i++)
-		{
-			s_ModelBuffers[i] = UniformBuffer::Create(sizeof(glm::mat4));
-		}
+		s_ModelBuffer = DynamicUniformBuffer::Create(Renderer::GetSpecification().PreAllocatedDescriptorSets, s_UniformSize);
+		s_EntitiesAllocated = Renderer::GetSpecification().PreAllocatedDescriptorSets;
 
 		s_EmptyImage = Image2D::Create(1, 1);
 	}
 
 	void SceneRenderer::Destroy()
 	{
-		s_ModelBuffers.clear();
+		s_ModelBuffer.reset();
 		s_EmptyImage.reset();
 	}
 
@@ -47,28 +47,52 @@ namespace Lavender
 		auto& registry = scene->GetCollection()->GetMainRegistry()->GetRegistry();
 
 		// Note(Jorben): Set 0 is for images and the model matrix
-		uint32_t index = 0;
 		auto pipeline = FrameResources::GetPipeline();
 		auto group = pipeline->GetDescriptorSets();
-		auto sets = group->GetSets(0);
 
 		auto view = registry.view<MeshComponent>();
+
 		// Check if we need to resize
-		if (view.size() > sets.size())
+		if (view.size() > s_EntitiesAllocated)
 		{
-			group->AddMoreSetsTo(0, (uint32_t)(view.size() - (sets.size())));
-			sets = group->GetSets(0);
-		
-			s_ModelBuffers.resize(view.size());
-			for (size_t i = sets.size() - 1; i < view.size(); i++)
-			{
-				s_ModelBuffers[i] = UniformBuffer::Create(sizeof(glm::mat4));
-			}
+			s_ModelBuffer.reset();
+			s_ModelBuffer = DynamicUniformBuffer::Create(s_EntitiesAllocated + (s_EntitiesAllocated - (uint32_t)view.size()), s_UniformSize);
+			pipeline->GetDescriptorSets()->AddMoreSetsTo(0, (uint32_t)view.size() - s_EntitiesAllocated);
+
+			s_EntitiesAllocated = (uint32_t)view.size();
 		}
 
+		// Upload model matrices to dynamic buffer
+		uint32_t index = 0;
+		std::vector<glm::mat4> matrices((size_t)s_EntitiesAllocated, glm::mat4(1.0f));
 		for (auto& entity : view)
 		{
-			auto& set = sets[index];
+			MeshComponent& mesh = view.get<MeshComponent>(entity);
+
+			auto transformView = registry.view<TransformComponent>();
+			if (transformView.contains(entity))
+			{
+				TransformComponent& transform = transformView.get<TransformComponent>(entity);
+
+				matrices[index] = glm::translate(matrices[index], transform.Position);
+				matrices[index] = glm::scale(matrices[index], transform.Size);
+
+				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			}
+
+			s_ModelBuffer->SetDataIndexed(index, (void*)&matrices[index], s_UniformSize);
+
+			index++;
+		}
+		s_ModelBuffer->UploadIndexedData();
+
+		// Actually draw using the data and uploading texture
+		index = 0;
+		for (auto& entity : view)
+		{
+			auto set = group->GetSets(0)[index];
 
 			// Mesh
 			MeshComponent& mesh = view.get<MeshComponent>(entity);
@@ -89,26 +113,8 @@ namespace Lavender
 				s_EmptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
 			}
 
-			// Change Model matrix based on transformation
-			glm::mat4 modelMatrix(1.0f);
-
-			auto transformView = registry.view<TransformComponent>();
-			if (transformView.contains(entity))
-			{
-				TransformComponent& transform = transformView.get<TransformComponent>(entity);
-
-				modelMatrix = glm::translate(modelMatrix, transform.Position);
-				modelMatrix = glm::scale(modelMatrix, transform.Size);
-
-				modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			}
-			s_ModelBuffers[index]->SetData((void*)&modelMatrix, sizeof(glm::mat4));
-			s_ModelBuffers[index]->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"));
-
-			set->Bind(pipeline, cmdBuffer);
+			s_ModelBuffer->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"), index * s_ModelBuffer->GetAlignment());
+			set->Bind(pipeline, cmdBuffer, 0);
 			if (mesh.MeshObject) 
 				Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
 			
