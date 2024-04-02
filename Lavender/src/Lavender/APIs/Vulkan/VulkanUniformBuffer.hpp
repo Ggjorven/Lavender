@@ -39,23 +39,6 @@ namespace Lavender
 	class VulkanDynamicUniformBuffer : public DynamicUniformBuffer
 	{
 	public:
-		struct AlignedData
-		{
-		public:
-			void* Data = nullptr;
-			char* Padding = nullptr;
-
-		public:
-			AlignedData() = default;
-			AlignedData(void* data, size_t size, size_t alignment);
-			AlignedData(const AlignedData& other) = default;
-			virtual ~AlignedData();
-
-		private:
-			size_t m_PaddingSize = 0;
-		};
-
-	public:
 		VulkanDynamicUniformBuffer(uint32_t elements, size_t sizeOfOneElement);
 		VulkanDynamicUniformBuffer(Ref<DescriptorSet> set, UniformElement element, uint32_t elements, size_t sizeOfOneElement);
 		virtual ~VulkanDynamicUniformBuffer();
@@ -67,8 +50,7 @@ namespace Lavender
 
 		inline size_t GetAlignment() const override { return m_AlignmentOfOneElement; }
 
-		void Upload() override;
-		void Upload(Ref<DescriptorSet> set, UniformElement element) override;
+		void Upload(Ref<DescriptorSet> set, UniformElement element, size_t offset) override;
 
 	private:
 		Ref<DescriptorSet> m_Set = nullptr;

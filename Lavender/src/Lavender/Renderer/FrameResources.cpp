@@ -40,8 +40,8 @@ namespace Lavender
 
 		UniformLayout uniformLayout = {
 			{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
-			{ UniformDataType::DynamicUniformBuffer, 1, 0, "u_Model", UniformElement::ShaderStage::Vertex },
-			{ UniformDataType::UniformBuffer, 2, 0, "u_Camera", UniformElement::ShaderStage::Vertex }
+			{ UniformDataType::DynamicUniformBuffer, 0, 1, "u_Model", UniformElement::ShaderStage::Vertex },
+			{ UniformDataType::UniformBuffer, 1, 0, "u_Camera", UniformElement::ShaderStage::Vertex }
 		};
 
 		PipelineSpecification pipelineSpecs = {};
@@ -53,9 +53,8 @@ namespace Lavender
 		pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::None;
 
 		DescriptorSetGroup::DescriptorCount size = {};
-		size.SetCount(0, 100); // TODO: Create a variable to use // Note(Jorben): The 100 corresponds with the s_EntitiesAllocated in SceneRenderer.cpp
+		size.SetCount(0, Renderer::GetSpecification().PreAllocatedDescriptorSets);
 		size.SetCount(1, 1);
-		size.SetCount(2, 1);
 
 		auto descriptorSets = DescriptorSetGroup::Create(uniformLayout, size);
 

@@ -38,8 +38,7 @@ namespace Lavender
 
 		virtual size_t GetAlignment() const = 0;
 
-		virtual void Upload() = 0;
-		virtual void Upload(Ref<DescriptorSet> set, UniformElement element) = 0;
+		virtual void Upload(Ref<DescriptorSet> set, UniformElement element, size_t offset) = 0;
 
 		static Ref<DynamicUniformBuffer> Create(uint32_t elements, size_t sizeOfOneElement);
 		static Ref<DynamicUniformBuffer> Create(Ref<DescriptorSet> set, UniformElement element, uint32_t elements, size_t sizeOfOneElement);

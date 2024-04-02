@@ -138,7 +138,6 @@ namespace Lavender
 			m_Allocations[i] = VulkanAllocator::AllocateBuffer((VkDeviceSize)(m_ElementCount * m_AlignmentOfOneElement), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, m_Buffers[i]);
 
 		m_IndexedData.resize((size_t)elements);
-		Upload();
 	}
 
 	VulkanDynamicUniformBuffer::~VulkanDynamicUniformBuffer()
@@ -202,12 +201,7 @@ namespace Lavender
 		m_IndexedData.resize(m_ElementCount);
 	}
 
-	void VulkanDynamicUniformBuffer::Upload()
-	{
-		Upload(m_Set, m_Element);
-	}
-
-	void VulkanDynamicUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element)
+	void VulkanDynamicUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element, size_t offset)
 	{
 		LV_PROFILE_SCOPE("VulkanUniformBuffer::Upload");
 
@@ -217,8 +211,8 @@ namespace Lavender
 		{
 			VkDescriptorBufferInfo bufferInfo = {};
 			bufferInfo.buffer = m_Buffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = VK_WHOLE_SIZE;
+			bufferInfo.offset = offset;
+			bufferInfo.range = m_AlignmentOfOneElement;
 
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -231,23 +225,6 @@ namespace Lavender
 
 			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);
 		}
-	}
-
-	VulkanDynamicUniformBuffer::AlignedData::AlignedData(void* data, size_t size, size_t alignment)
-		: Data(data), m_PaddingSize(alignment - size)
-	{
-		size_t remainder = size % alignment;
-		if (remainder != 0) 
-		{
-			m_PaddingSize = alignment - remainder;
-			Padding = new char[m_PaddingSize];
-		}
-	}
-
-	VulkanDynamicUniformBuffer::AlignedData::~AlignedData()
-	{
-		if (Padding)
-			delete[] Padding;
 	}
 
 }

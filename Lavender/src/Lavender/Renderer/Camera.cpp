@@ -76,8 +76,8 @@ namespace Lavender
 		m_CameraUniform->SetData((void*)&m_Camera, sizeof(Camera));
 
 		auto pipeline = FrameResources::GetPipeline();
-		auto element = pipeline->GetSpecification().Uniformlayout.GetElementByName(2, "u_Camera");
-		auto set = pipeline->GetDescriptorSets()->GetSets(2)[0];
+		auto element = pipeline->GetSpecification().Uniformlayout.GetElementByName(1, "u_Camera");
+		auto set = pipeline->GetDescriptorSets()->GetSets(1)[0];
 		m_CameraUniform->Upload(set, element); 
 	}
 
@@ -85,7 +85,7 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("EditorCamera::BindDescriptorSet");
 		// Note(Jorben): This is the Project/View (Camera) set
-		auto set = pipeline->GetDescriptorSets()->GetSets(2)[0];
+		auto set = pipeline->GetDescriptorSets()->GetSets(1)[0];
 		set->Bind(pipeline, cmdBuffer);
 	}
 

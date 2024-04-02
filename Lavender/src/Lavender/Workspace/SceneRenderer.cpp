@@ -20,7 +20,7 @@
 namespace Lavender
 {
 
-	static uint32_t s_EntitiesAllocated = 100u; // Is used for images and uniforms
+	static uint32_t s_EntitiesAllocated = 0; // Is used for images and uniforms
 	static size_t s_UniformSize = sizeof(glm::mat4); // glm::mat4 'cause of Model matrix
 
 	Ref<DynamicUniformBuffer> SceneRenderer::s_ModelBuffer = nullptr;
@@ -28,7 +28,9 @@ namespace Lavender
 
 	void SceneRenderer::Init()
 	{
-		s_ModelBuffer = DynamicUniformBuffer::Create(s_EntitiesAllocated, s_UniformSize);
+		s_ModelBuffer = DynamicUniformBuffer::Create(Renderer::GetSpecification().PreAllocatedDescriptorSets, s_UniformSize);
+		s_EntitiesAllocated = Renderer::GetSpecification().PreAllocatedDescriptorSets;
+
 		s_EmptyImage = Image2D::Create(1, 1);
 	}
 
@@ -49,11 +51,15 @@ namespace Lavender
 		auto group = pipeline->GetDescriptorSets();
 
 		auto view = registry.view<MeshComponent>();
+
 		// Check if we need to resize
 		if (view.size() > s_EntitiesAllocated)
 		{
 			s_ModelBuffer.reset();
 			s_ModelBuffer = DynamicUniformBuffer::Create(s_EntitiesAllocated + (s_EntitiesAllocated - (uint32_t)view.size()), s_UniformSize);
+			pipeline->GetDescriptorSets()->AddMoreSetsTo(0, (uint32_t)view.size() - s_EntitiesAllocated);
+
+			s_EntitiesAllocated = (uint32_t)view.size();
 		}
 
 		// Upload model matrices to dynamic buffer
@@ -76,13 +82,11 @@ namespace Lavender
 				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 			}
 
-			// TODO: Change 
 			s_ModelBuffer->SetDataIndexed(index, (void*)&matrices[index], s_UniformSize);
 
 			index++;
 		}
 		s_ModelBuffer->UploadIndexedData();
-		s_ModelBuffer->Upload(group->GetSets(1)[0], pipeline->GetSpecification().Uniformlayout.GetElementByName(1, "u_Model"));
 
 		// Actually draw using the data and uploading texture
 		index = 0;
@@ -109,8 +113,8 @@ namespace Lavender
 				s_EmptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
 			}
 
-			set->Bind(pipeline, cmdBuffer);
-			group->GetSets(1)[0]->Bind(pipeline, cmdBuffer, (size_t)index * s_ModelBuffer->GetAlignment());
+			s_ModelBuffer->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"), index * s_ModelBuffer->GetAlignment());
+			set->Bind(pipeline, cmdBuffer, 0);
 			if (mesh.MeshObject) 
 				Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
 			
