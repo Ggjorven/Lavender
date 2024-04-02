@@ -16,12 +16,12 @@ struct ModelSpecification
     mat4 Model;
 };
 
-layout(set = 1, binding = 0) uniform CameraSettings
+layout(set = 2, binding = 0) uniform CameraSettings
 {
     CameraSpecification u_Camera;
 };
 
-layout(set = 0, binding = 1) uniform ModelSettings
+layout(set = 1, binding = 0) uniform ModelSettings
 {
     ModelSpecification u_Model;
 };

@@ -62,7 +62,7 @@ namespace Lavender
 
 	enum class UniformDataType : uint8_t
 	{
-		None = 0, UniformBuffer, Image
+		None = 0, UniformBuffer, DynamicUniformBuffer, Image
 	};
 
 	// Note(Jorben): To use multiple descriptor set you need have Vulkan selected as the API
