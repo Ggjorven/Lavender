@@ -39,6 +39,7 @@ namespace Lavender
 		static Ref<MaterialAsset> Create(const std::filesystem::path& path);
 
 	private:
+		std::filesystem::path m_OriginalPath = {};
 		std::filesystem::path m_Path = {};
 
 		std::filesystem::path m_AlbedoPath = {};

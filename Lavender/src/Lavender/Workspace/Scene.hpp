@@ -37,6 +37,12 @@ namespace Lavender
 	template<typename T>
 	T GetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name);
 
+	struct SceneMetaData
+	{
+	public:
+		std::filesystem::path Path = {};
+	};
+
 	class Scene
 	{
 	public:
@@ -69,6 +75,8 @@ namespace Lavender
 		inline Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 		inline Ref<AssetManager> GetAssetManager() { return m_Assets; }
 		inline UUID GetSceneID() { return m_UUID; }
+		inline SceneMetaData GetMetaData() { return m_Data; }
+		inline State GetState() const { return m_State; }
 
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
 		inline Entity CreateEntityWithUUID(const UUID& uuid) { return Entity::Create(m_Collection, uuid); }
@@ -97,7 +105,7 @@ namespace Lavender
 		Ref<Viewport> m_Viewport = nullptr;
 		Ref<EditorCamera> m_EditorCamera = nullptr;
 
-		std::filesystem::path m_Path = "Projects/First/Scenes/first.lvscene";
+		SceneMetaData m_Data = {};
 
 		State m_State = State::Editor;
 
@@ -112,18 +120,16 @@ namespace Lavender
 		virtual ~SceneCollection() = default;
 
 		void Clear();
-		void Add(Ref<Scene> scene, bool active = false);
+		void Add(Ref<Scene> scene);
+		void Add(const UUID& uuid, const SceneMetaData& data);
 		void Remove(const UUID& uuid);
-		Ref<Scene> Get(const UUID& uuid);
+		SceneMetaData GetData(const UUID& uuid);
 
 		inline UUID GetActiveUUID() { return m_ActiveScene.first; }
 		inline Ref<Scene> GetActive() { return m_ActiveScene.second; }
 
-		typedef std::function<void(Ref<Scene>)> EachSceneFn;
-		void Each(EachSceneFn function);
-
 	private:
-		Dict<UUID, Ref<Scene>> m_Scenes = { };
+		Dict<UUID, SceneMetaData> m_Scenes = { };
 		std::pair<UUID, Ref<Scene>> m_ActiveScene = {};
 	};
 

@@ -36,6 +36,8 @@ namespace Lavender
 		static Ref<MeshAsset> Create(const std::filesystem::path& path, const std::filesystem::path& meshPath);
 
 	private:
+		std::filesystem::path m_OriginalPath = {};
+
 		std::filesystem::path m_Path = {};
 		std::filesystem::path m_MeshPath = {};
 

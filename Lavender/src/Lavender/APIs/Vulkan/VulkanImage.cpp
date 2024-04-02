@@ -113,6 +113,7 @@ namespace Lavender
 		Renderer::SubmitFree([textureID, sampler, imageView, image, allocation]()
 		{
 			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+			Renderer::Wait();
 
 			#ifndef LV_DISABLE_IMGUI
 			ImGui_ImplVulkan_FreeTexture(textureID);
@@ -144,6 +145,47 @@ namespace Lavender
 		GenerateMipmaps(m_Image, VK_FORMAT_R8G8B8A8_UNORM, m_Width, m_Height, m_Miplevels);
 
 		VulkanAllocator::DestroyBuffer(stagingBuffer, stagingBufferAllocation);
+	}
+
+	void VulkanImage2D::Resize(uint32_t width, uint32_t height)
+	{
+		auto textureID = m_TextureID;
+		auto sampler = m_Sampler;
+		auto imageView = m_ImageView;
+		auto image = m_Image;
+		auto allocation = m_Allocation;
+
+		Renderer::SubmitFree([textureID, sampler, imageView, image, allocation]()
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+			Renderer::Wait();
+
+			#ifndef LV_DISABLE_IMGUI
+			ImGui_ImplVulkan_FreeTexture(textureID);
+			#endif
+
+			vkDestroySampler(device, sampler, nullptr);
+			vkDestroyImageView(device, imageView, nullptr);
+
+			if (image != VK_NULL_HANDLE)
+				VulkanAllocator::DestroyImage(image, allocation);
+		});
+
+		//////////////////////////////////////////////////////////////////////
+		m_Width = width;
+		m_Height = height;
+		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		VulkanAllocator::TransitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
+
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
 	}
 
 	void VulkanImage2D::Upload()

@@ -13,18 +13,20 @@ namespace Lavender
 {
 
 	MeshAsset::MeshAsset(const std::filesystem::path& path)
-		: m_Path(path)
+		: m_Path(path), m_OriginalPath(path)
 	{
 		Deserialize(path);
 	}
 
 	MeshAsset::MeshAsset(const std::filesystem::path& path, const std::filesystem::path& meshPath)
-		: m_Path(path), m_MeshPath(meshPath), m_Mesh(Mesh::Create(meshPath))
+		: m_Path(path), m_OriginalPath(path), m_MeshPath(meshPath), m_Mesh(Mesh::Create(meshPath))
 	{
 	}
 
 	MeshAsset::~MeshAsset() 
 	{
+		if (m_Path != m_OriginalPath && std::filesystem::exists(m_OriginalPath))
+			std::filesystem::remove(m_OriginalPath);
 	}
 
 	void MeshAsset::Serialize()
@@ -59,6 +61,7 @@ namespace Lavender
 	void MeshAsset::Deserialize(const std::filesystem::path& path)
 	{
 		m_Path = path;
+		m_OriginalPath = path;
 
 		YAML::Node data = {};
 		try

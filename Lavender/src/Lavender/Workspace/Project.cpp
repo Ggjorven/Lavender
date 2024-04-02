@@ -69,24 +69,26 @@ namespace Lavender
         m_Scenes.GetActive()->OnEvent(e);
     }
 
-    Ref<Scene> Project::CreateAndAddScene(bool active)
+    Ref<Scene> Project::CreateAndAddScene()
     {
         auto scene = Scene::Create(m_Viewport);
-        AddScene(scene, active);
+        AddScene(scene);
         return scene;
     }
 
-    void Project::AddScene(Ref<Scene> scene, bool active)
+    void Project::AddScene(Ref<Scene> scene)
     {
-        m_Scenes.Add(scene, active);
-        
-        auto& camera = scene->GetCamera();
-        camera = EditorCamera::Create(m_Viewport);
+        m_Scenes.Add(scene);
+    }
+
+    void Project::AddScene(const UUID& uuid, const SceneMetaData& data)
+    {
+        m_Scenes.Add(uuid, data);
     }
 
     void Project::InitializeStartScene()
     {
-        Ref<Scene> scene = CreateAndAddScene(true);
+        Ref<Scene> scene = CreateAndAddScene();
         scene->GetAssetManager()->GetAssetsFromDirectory(m_Directories.ProjectDir / m_Directories.Assets);
 
         SceneSerializer serializer(scene);

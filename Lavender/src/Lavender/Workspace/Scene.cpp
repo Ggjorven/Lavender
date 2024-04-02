@@ -26,6 +26,8 @@ namespace Lavender
 		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_Assets(AssetManager::Create()), m_UUID(uuid)
 	{
 		SceneRenderer::Init();
+
+		m_EditorCamera = EditorCamera::Create(m_Viewport);
 	}
 
 	Scene::~Scene()
@@ -178,12 +180,15 @@ namespace Lavender
 		m_Scenes.clear();
 	}
 
-	void SceneCollection::Add(Ref<Scene> scene, bool active)
+	void SceneCollection::Add(Ref<Scene> scene)
 	{
-		m_Scenes[scene->GetSceneID()] = scene;
+		m_ActiveScene = std::make_pair(scene->GetSceneID(), scene);
+		m_Scenes[scene->GetSceneID()] = scene->GetMetaData();
+	}
 
-		if (active)
-			m_ActiveScene = std::make_pair(scene->GetSceneID(), scene);
+	void SceneCollection::Add(const UUID& uuid, const SceneMetaData& data)
+	{
+		m_Scenes[uuid] = data;
 	}
 
 	void SceneCollection::Remove(const UUID& uuid)
@@ -191,20 +196,14 @@ namespace Lavender
 		m_Scenes.erase(uuid);
 	}
 
-	Ref<Scene> SceneCollection::Get(const UUID& uuid)
+	SceneMetaData SceneCollection::GetData(const UUID& uuid)
 	{
 		auto obj = m_Scenes.find(uuid);
 		if (obj != m_Scenes.end())
 			return m_Scenes[uuid];
 
 		LV_LOG_WARN("Failed to find scene by uuid: '{0}'...", uuid.Get());
-		return nullptr;
-	}
-
-	void SceneCollection::Each(SceneCollection::EachSceneFn function)
-	{
-		for (auto& scene : m_Scenes)
-			function(scene.second);
+		return {};
 	}
 
 }

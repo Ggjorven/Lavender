@@ -44,8 +44,9 @@ namespace Lavender
 		void OnImGuiRender();
 		void OnEvent(Event& e);
 
-		Ref<Scene> CreateAndAddScene(bool active = false);
-		void AddScene(Ref<Scene> scene, bool active = false);
+		Ref<Scene> CreateAndAddScene();
+		void AddScene(Ref<Scene> scene);
+		void AddScene(const UUID& uuid, const SceneMetaData& data);
 
 		void InitializeStartScene();
 

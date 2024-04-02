@@ -13,13 +13,15 @@ namespace Lavender
 {
 
 	MaterialAsset::MaterialAsset(const std::filesystem::path& path)
-		: m_Path(path)
+		: m_Path(path), m_OriginalPath(path)
 	{
 		Deserialize(path);
 	}
 
 	MaterialAsset::~MaterialAsset()
 	{
+		if (m_Path != m_OriginalPath && std::filesystem::exists(m_OriginalPath))
+			std::filesystem::remove(m_OriginalPath);
 	}
 
 	void MaterialAsset::Serialize()
@@ -54,6 +56,7 @@ namespace Lavender
 	void MaterialAsset::Deserialize(const std::filesystem::path& path)
 	{
 		m_Path = path;
+		m_OriginalPath = path;
 
 		YAML::Node data = {};
 		try

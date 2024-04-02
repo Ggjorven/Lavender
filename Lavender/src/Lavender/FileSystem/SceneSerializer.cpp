@@ -43,10 +43,10 @@ namespace Lavender
 
 		data << YAML::EndMap;
 
-		std::ofstream fileStream(m_Scene->m_Path);
+		std::ofstream fileStream(m_Scene->m_Data.Path);
 		if (!fileStream.good() || !fileStream.is_open())
 		{
-			LV_LOG_ERROR("Failed to open file {0}", m_Scene->m_Path);
+			LV_LOG_ERROR("Failed to open file {0}", m_Scene->m_Data.Path);
 			return;
 		}
 
@@ -56,7 +56,7 @@ namespace Lavender
 
 	void SceneSerializer::Deserialize(const std::filesystem::path& path)
 	{
-		m_Scene->m_Path = path;
+		m_Scene->m_Data.Path = path;
 
 		YAML::Node data = {};
 		try

@@ -24,7 +24,7 @@ namespace Lavender
 
 		virtual void SetData(void* data, size_t size) = 0;
 
-		// TODO: Add resizing
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual void Upload() = 0;
 		virtual void Upload(Ref<DescriptorSet> set, UniformElement element) = 0;
