@@ -18,10 +18,8 @@ namespace Lavender
 	{
 	public:
 		VulkanImage2D() = default;
-		VulkanImage2D(uint32_t width, uint32_t height);
-		VulkanImage2D(const std::filesystem::path& path);
-		VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, uint32_t width, uint32_t height);
-		VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, const std::filesystem::path& path);
+		VulkanImage2D(const ImageSpecification& specs);
+		VulkanImage2D(const ImageSpecification& specs, Ref<DescriptorSet> set, UniformElement element);
 		virtual ~VulkanImage2D();
 
 		void SetData(void* data, size_t size) override;
@@ -31,7 +29,7 @@ namespace Lavender
 		void Upload() override;
 		void Upload(Ref<DescriptorSet> set, UniformElement element) override;
 
-		inline std::filesystem::path GetPath() const override { return m_Path; }
+		inline ImageSpecification& GetSpecification() override { return m_Specification; }
 
 		#ifndef LV_DISABLE_IMGUI
 		inline void* GetUIImage() override { return m_TextureID; }
@@ -39,13 +37,16 @@ namespace Lavender
 
 		Ref<Image2D> Copy() override;
 
-		inline VkFormat GetFormat() const { return VK_FORMAT_R8G8B8A8_UNORM; } // TODO: Use custom format
+		VkFormat GetFormat() const;
 		
 		inline VkImage GetVulkanImage() { return m_Image; }
 		inline VkImageView GetImageView() { return m_ImageView; }
 		inline VkSampler GetSampler() { return m_Sampler; }
 
 	private:
+		void CreateImage(uint32_t width, uint32_t height);
+		void CreateImage(const std::filesystem::path& path);
+
 		void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 		#ifndef LV_DISABLE_IMGUI
@@ -53,6 +54,8 @@ namespace Lavender
 		#endif
 
 	private:
+		ImageSpecification m_Specification = {};
+
 		Ref<DescriptorSet> m_Set = nullptr;
 		UniformElement m_Element = {};
 
@@ -62,9 +65,7 @@ namespace Lavender
 		VkImageView m_ImageView = VK_NULL_HANDLE;
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
-		uint32_t m_Width = 0, m_Height = 0, m_Miplevels = 0;
-
-		std::filesystem::path m_Path = {};
+		uint32_t m_Miplevels = 0;
 		#ifndef LV_DISABLE_IMGUI
 		void* m_TextureID = nullptr;
 		#endif

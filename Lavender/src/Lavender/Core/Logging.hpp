@@ -18,6 +18,7 @@ namespace Lavender
 		};
 
 		static void Init();
+		static bool Initialized();
 
 		template<typename ... Args>
 		static void LogMessage(Log::Level level, Args&&... args);

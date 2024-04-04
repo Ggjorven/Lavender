@@ -309,6 +309,7 @@ namespace Lavender
 		VkResult result = VK_SUCCESS;
 		{
 			LV_PROFILE_SCOPE("QueuePresent");
+			vkQueueWaitIdle(m_Device->GetGraphicsQueue());
 			result = vkQueuePresentKHR(m_Device->GetPresentQueue(), &presentInfo);
 		}
 
@@ -350,6 +351,7 @@ namespace Lavender
 		LV_PROFILE_SCOPE("AquireNextImage");
 		uint32_t imageIndex = 0;
 
+		//vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 		VkResult result = vkAcquireNextImageKHR(m_Device->GetVulkanDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{

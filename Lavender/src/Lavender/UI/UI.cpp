@@ -475,7 +475,7 @@ namespace Lavender::UI
 
 			// TODO: Make customizable?
 			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 17.5f);
-			ImGui::TextUnformatted(Image->GetPath().string().c_str());
+			ImGui::TextUnformatted(Image->GetSpecification().Path.string().c_str());
 			ImGui::PopTextWrapPos();
 			ImGui::Image(Image->GetUIImage(), ImVec2(192, 192)/*, {0, 1}, {1, 0}*/);
 

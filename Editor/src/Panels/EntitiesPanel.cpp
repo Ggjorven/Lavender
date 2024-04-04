@@ -45,7 +45,11 @@ namespace Lavender
 	EntitiesPanel::EntitiesPanel(Ref<Project> project)
 		: m_Project(project)
 	{
-		m_PlusIcon = Image2D::Create(std::filesystem::path(Utils::ToolKit::GetEnv("LAVENDER_DIR") + "\\Editor\\assets\\images\\grey-plus.png"));
+		ImageSpecification specs = {};
+		specs.Usage = ImageSpecification::ImageUsage::File;
+		specs.Flags = ImageSpecification::ImageUsageFlags::Sampled;
+		specs.Path = std::filesystem::path(Utils::ToolKit::GetEnv("LAVENDER_DIR") + "\\Editor\\assets\\images\\grey-plus.png");
+		m_PlusIcon = Image2D::Create(specs);
 	}
 
 	EntitiesPanel::~EntitiesPanel()

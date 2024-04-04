@@ -6,6 +6,8 @@
 #include <memory>
 #include <queue>
 #include <vector>
+#include <chrono>
+#include <thread>
 #include <algorithm>
 #include <filesystem>
 #include <type_traits>
@@ -48,15 +50,27 @@ namespace Lavender::Utils
     class ToolKit
     {
     public:
-        static std::string OpenFile(const std::string& filter, const std::string& dir = "") { return s_Instance->OpenFileImpl(filter, dir); }
-        static std::string SaveFile(const std::string& filter, const std::string& dir = "") { return s_Instance->SaveFileImpl(filter, dir); }
+        static std::string OpenFile(const std::string& filter, const std::string& dir = "") { return s_Instance ? s_Instance->OpenFileImpl(filter, dir) : ""; }
+        static std::string SaveFile(const std::string& filter, const std::string& dir = "") { return s_Instance ? s_Instance->SaveFileImpl(filter, dir) : ""; }
 
-        static std::string OpenDirectory(const std::string& dir = "") { return s_Instance->OpenDirectoryImpl(dir); }
+        static std::string OpenDirectory(const std::string& dir = "") { return s_Instance ? s_Instance->OpenDirectoryImpl(dir) : ""; }
 
-        static float GetTime() { return s_Instance->GetTimeImpl(); }
+        static float GetTime() { return s_Instance ? s_Instance->GetTimeImpl() : 0.0f; }
+        static size_t GetMemoryUsage() { return s_Instance ? s_Instance->GetMemoryUsageImpl(): 0; }
+        static size_t GetHeapMemoryUsage() { return s_Instance ? s_Instance->GetHeapMemoryUsageImpl(): 0; }
 
         // Non-Platform specific
-        static std::string GetEnv(const std::string& variable = "LAVENDER_DIR") 
+        inline static uint64_t& GetAllocationCount()
+        {
+            return s_Allocations;
+        }
+
+        inline static void Sleep(uint32_t miliseconds)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
+        }
+
+        inline static std::string GetEnv(const std::string& variable = "LAVENDER_DIR") 
         {
             const char* val = std::getenv(variable.c_str());
             if (val != nullptr)
@@ -66,7 +80,7 @@ namespace Lavender::Utils
         }
 
         // Replaces /'s with \\'s
-        static std::filesystem::path ReplaceSlashes(const std::filesystem::path& path)
+        inline static std::filesystem::path ReplaceSlashes(const std::filesystem::path& path)
         {
             std::string strPath = path.string();
             std::replace(strPath.begin(), strPath.end(), '/', '\\');
@@ -80,9 +94,12 @@ namespace Lavender::Utils
         virtual std::string OpenDirectoryImpl(const std::string& dir) const = 0;
 
         virtual float GetTimeImpl() const = 0;
+        virtual size_t GetMemoryUsageImpl() const = 0;
+        virtual size_t GetHeapMemoryUsageImpl() const = 0;
 
     private:
         static std::unique_ptr<ToolKit> s_Instance;
+        inline static uint64_t s_Allocations = 0;
     };
 
     // A class to be used for function queues

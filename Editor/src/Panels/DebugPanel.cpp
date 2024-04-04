@@ -37,6 +37,7 @@ namespace Lavender
 		{
 			m_FPS = (uint32_t)io.Framerate;
 			m_Frametime = 1.0f / io.Framerate * 1000.0f; // in ms
+			m_MemoryUsage = (float)((double)Utils::ToolKit::GetMemoryUsage() / (1024.0 * 1024.0));
 
 			timer = 0.0f;
 		}
@@ -77,6 +78,7 @@ namespace Lavender
 
 			UI::Property("FPS", "", "{0}", m_FPS);
 			UI::Property("Frametime", "", "{0:.2f} ms", m_Frametime);
+			UI::Property("Memory", "Not comparable with task manager", "{0:.1f} MB", m_MemoryUsage);
 
 			UI::EndPropertyGrid();
 		}

@@ -100,96 +100,102 @@ namespace Lavender
 
 		//Event system
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				data.Width = width;
-				data.Height = height;
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			data.Width = width;
+			data.Height = height;
 				
-				Ref<Event> event = RefHelper::Create<WindowResizeEvent>(width, height);
-				data.CallBack(event);
-				Application::Get().HandleEvents();
-			});
+			Ref<Event> event = RefHelper::Create<WindowResizeEvent>(width, height);
+			data.CallBack(event);
+			Application::Get().HandleEvents();
+		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				
-				Ref<Event> event = RefHelper::Create<WindowCloseEvent>();
-				data.CallBack(event);
-			});
+			Ref<Event> event = RefHelper::Create<WindowCloseEvent>();
+			data.CallBack(event);
+			Application::Get().HandleEvents();
+		});
 
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				switch (action)
-				{
-				case GLFW_PRESS:
-				{
-					Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 0);
-					data.CallBack(event);
-					break;
-				}
-				case GLFW_RELEASE:
-				{
-					Ref<Event> event = RefHelper::Create<KeyReleasedEvent>(key);
-					data.CallBack(event);
-					break;
-				}
-				case GLFW_REPEAT:
-				{
-					Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 1);
-					data.CallBack(event);
-					break;
-				}
-				}
-			});
+			switch (action)
+			{
+			case GLFW_PRESS:
+			{
+				Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 0);
+				data.CallBack(event);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				Ref<Event> event = RefHelper::Create<KeyReleasedEvent>(key);
+				data.CallBack(event);
+				break;
+			}
+			case GLFW_REPEAT:
+			{
+				Ref<Event> event = RefHelper::Create<KeyPressedEvent>(key, 1);
+				data.CallBack(event);
+				break;
+			}
+			Application::Get().HandleEvents();
+			}
+		});
 
 		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				Ref<Event> event = RefHelper::Create<KeyTypedEvent>(keycode);
-				data.CallBack(event);
-			});
+			Ref<Event> event = RefHelper::Create<KeyTypedEvent>(keycode);
+			data.CallBack(event);
+			Application::Get().HandleEvents();
+		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				switch (action)
-				{
-				case GLFW_PRESS:
-				{
-					Ref<Event> event = RefHelper::Create<MouseButtonPressedEvent>(button);
-					data.CallBack(event);
-					break;
-				}
-				case GLFW_RELEASE:
-				{
-					Ref<Event> event = RefHelper::Create<MouseButtonReleasedEvent>(button);
-					data.CallBack(event);
-					break;
-				}
-				}
-			});
+			switch (action)
+			{
+			case GLFW_PRESS:
+			{
+				Ref<Event> event = RefHelper::Create<MouseButtonPressedEvent>(button);
+				data.CallBack(event);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				Ref<Event> event = RefHelper::Create<MouseButtonReleasedEvent>(button);
+				data.CallBack(event);
+				break;
+			}
+			Application::Get().HandleEvents();
+			}
+		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				Ref<Event> event = RefHelper::Create<MouseScrolledEvent>((float)xOffset, (float)yOffset);
-				data.CallBack(event);
-			});
+			Ref<Event> event = RefHelper::Create<MouseScrolledEvent>((float)xOffset, (float)yOffset);
+			data.CallBack(event);
+			Application::Get().HandleEvents();
+		});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				Ref<Event> event = RefHelper::Create<MouseMovedEvent>((float)xPos, (float)yPos);
-				data.CallBack(event);
-			});
+			Ref<Event> event = RefHelper::Create<MouseMovedEvent>((float)xPos, (float)yPos);
+			data.CallBack(event);
+			Application::Get().HandleEvents();
+		});
 
 
 		return false;

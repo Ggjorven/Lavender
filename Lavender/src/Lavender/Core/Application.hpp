@@ -23,6 +23,7 @@ namespace Lavender
 		WindowSpecification WindowSpecs = { };
 		RendererSpecification RenderSpecs = { };
 
+	public:
 		ApplicationSpecification() = default;
 	};
 
@@ -31,6 +32,9 @@ namespace Lavender
 	public:
 		Application(const ApplicationSpecification& appInfo);
 		virtual ~Application();
+
+		static void SetInitialized(bool value);
+		static bool Initialized();
 
 		void OnEvent(Ref<Event>& e);
 

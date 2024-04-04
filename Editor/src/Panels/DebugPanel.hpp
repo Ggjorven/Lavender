@@ -25,7 +25,8 @@ namespace Lavender
 		Ref<Project> m_Project = nullptr;
 
 		uint32_t m_FPS = 0;
-		float m_Frametime = 0.0;
+		float m_Frametime = 0.0f;
+		float m_MemoryUsage = 0.0f;
 	};
 
 }

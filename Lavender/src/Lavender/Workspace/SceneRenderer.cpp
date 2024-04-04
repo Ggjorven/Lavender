@@ -31,7 +31,12 @@ namespace Lavender
 		s_ModelBuffer = DynamicUniformBuffer::Create(Renderer::GetSpecification().PreAllocatedDescriptorSets, s_UniformSize);
 		s_EntitiesAllocated = Renderer::GetSpecification().PreAllocatedDescriptorSets;
 
-		s_EmptyImage = Image2D::Create(1, 1);
+		ImageSpecification specs = {};
+		specs.Usage = ImageSpecification::ImageUsage::Size;
+		specs.Flags = ImageSpecification::ImageUsageFlags::Sampled;
+		specs.Width = 1;
+		specs.Height = 1;
+		s_EmptyImage = Image2D::Create(specs);
 	}
 
 	void SceneRenderer::Destroy()

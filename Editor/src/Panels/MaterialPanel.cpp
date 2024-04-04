@@ -18,7 +18,11 @@ namespace Lavender
 	MaterialPanel::MaterialPanel(Ref<Project> project)
 		: m_Project(project)
 	{
-		m_CheckerBoard = Image2D::Create(std::filesystem::path(Utils::ToolKit::GetEnv("LAVENDER_DIR") + "\\Editor\\assets\\images\\Checkerboard.tga"));
+		ImageSpecification specs = {};
+		specs.Usage = ImageSpecification::ImageUsage::File;
+		specs.Flags = ImageSpecification::ImageUsageFlags::Sampled;
+		specs.Path = std::filesystem::path(Utils::ToolKit::GetEnv("LAVENDER_DIR") + "\\Editor\\assets\\images\\Checkerboard.tga");
+		m_CheckerBoard = Image2D::Create(specs);
 	}
 
 	MaterialPanel::~MaterialPanel()

@@ -84,8 +84,14 @@ namespace Lavender
 				m_AlbedoPath = std::filesystem::path(albedo.as<std::string>());
 				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / m_AlbedoPath;
 
-				if (std::filesystem::exists(path))
-					m_Albedo = Image2D::Create(path);
+				if (std::filesystem::exists(path) && !path.filename().empty())
+				{
+					ImageSpecification specs = {};
+					specs.Usage = ImageSpecification::ImageUsage::File;
+					specs.Flags = ImageSpecification::ImageUsageFlags::Sampled;
+					specs.Path = path;
+					m_Albedo = Image2D::Create(specs);
+				}
 				else
 					LV_LOG_ERROR("(Material) Albedo path: '{0}' doesn't exist.", m_AlbedoPath.string());
 			}

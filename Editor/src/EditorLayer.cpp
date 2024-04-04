@@ -41,6 +41,8 @@ void EditorLayer::OnAttach()
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
 	m_MaterialPanel = MaterialPanel::Create(m_Project); m_MaterialPanel->SetEnabled(true); // TODO: Remove
 	m_DebugPanel = DebugPanel::Create(m_Project);
+
+	Application::SetInitialized(true);
 }
 
 void EditorLayer::OnDetach()
@@ -48,7 +50,6 @@ void EditorLayer::OnDetach()
 	ProjectSerializer projSerializer(m_Project);
 	projSerializer.Serialize();
 
-	// TODO: Serialize all scenes
 	SceneSerializer sceneSerializer(m_Project->GetSceneCollection().GetActive());
 	sceneSerializer.Serialize();
 

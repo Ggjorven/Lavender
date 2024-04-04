@@ -14,6 +14,7 @@ namespace Lavender
 {
 
 	Application* Application::s_Instance = nullptr;
+	static bool s_Initialized = false;
 
 	Application::Application(const ApplicationSpecification& appInfo)
 		: m_AppInfo(appInfo)
@@ -37,6 +38,16 @@ namespace Lavender
 		m_Window->Shutdown();
 	}
 
+	void Application::SetInitialized(bool value)
+	{
+		s_Initialized = value;
+	}
+
+	bool Application::Initialized()
+	{
+		return s_Initialized;
+	}
+
 	void Application::OnEvent(Ref<Event>& e)
 	{
 		m_EventQueue.push(e);
@@ -55,8 +66,7 @@ namespace Lavender
 
 			// Update & Render
 			m_Window->OnUpdate();
-			HandleEvents();
-
+			HandleEvents(); // TODO: Remove??
 			{
 				LV_PROFILE_SCOPE("Renderer::Begin");
 				Renderer::BeginFrame();
@@ -86,7 +96,6 @@ namespace Lavender
 				}
 			}
 			#endif
-
 			{
 				LV_PROFILE_SCOPE("Renderer::End");
 				Renderer::EndFrame();

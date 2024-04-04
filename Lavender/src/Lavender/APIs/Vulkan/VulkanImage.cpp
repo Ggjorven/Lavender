@@ -20,86 +20,43 @@
 namespace Lavender
 {
 
-	VulkanImage2D::VulkanImage2D(uint32_t width, uint32_t height)
-		: m_Width(width), m_Height(height), m_Miplevels(1)
+	static VkFormat GetVulkanFormatFromImageFormat(ImageSpecification::ImageFormat format);
+	static VkImageUsageFlags GetVulkanImageUsageFromImageUsage(ImageSpecification::ImageUsageFlags usage);
+
+	VulkanImage2D::VulkanImage2D(const ImageSpecification& specs)
+		: m_Specification(specs)
 	{
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+		switch (m_Specification.Usage)
+		{
+		case ImageSpecification::ImageUsage::Size:
+			CreateImage(m_Specification.Width, m_Specification.Height);
+			break;
+		case ImageSpecification::ImageUsage::File:
+			CreateImage(m_Specification.Path);
+			break;
 
-		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
-
-		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
-
-		VulkanAllocator::TransitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
-
-		#ifndef LV_DISABLE_IMGUI
-		CreateUIImage();
-		#endif
+		default:
+			LV_LOG_ERROR("Invalid image usage selected.");
+			break;
+		}
 	}
 
-	VulkanImage2D::VulkanImage2D(const std::filesystem::path& path)
-		: m_Path(path)
+	VulkanImage2D::VulkanImage2D(const ImageSpecification& specs, Ref<DescriptorSet> set, UniformElement element)
+		: m_Specification(specs), m_Set(set), m_Element(element)
 	{
-		int width, height, texChannels;
-		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
-		m_Width = width;
-		m_Height = height;
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+		switch (m_Specification.Usage)
+		{
+		case ImageSpecification::ImageUsage::Size:
+			CreateImage(m_Specification.Width, m_Specification.Height);
+			break;
+		case ImageSpecification::ImageUsage::File:
+			CreateImage(m_Specification.Path);
+			break;
 
-		size_t imageSize = m_Width * m_Height * 4;
-
-		m_Allocation = VulkanAllocator::CreateImage(m_Width, m_Height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
-
-		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
-
-		#ifndef LV_DISABLE_IMGUI
-		CreateUIImage();
-		#endif
-
-		SetData((void*)pixels, imageSize);
-	}
-
-	VulkanImage2D::VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, uint32_t width, uint32_t height)
-		: m_Set(set), m_Element(element), m_Width(width), m_Height(height), m_Miplevels(1)
-	{
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
-
-		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
-
-		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
-
-		#ifndef LV_DISABLE_IMGUI
-		CreateUIImage();
-		#endif
-
-		Upload();
-	}
-
-	VulkanImage2D::VulkanImage2D(Ref<DescriptorSet> set, UniformElement element, const std::filesystem::path& path)
-		: m_Set(set), m_Element(element), m_Path(path)
-	{
-		int width, height, texChannels;
-		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
-		m_Width = width;
-		m_Height = height;
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
-
-		size_t imageSize = m_Width * m_Height * 4;
-
-		m_Allocation = VulkanAllocator::CreateImage(m_Width, m_Height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
-
-		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
-
-		SetData((void*)pixels, imageSize);
-
-		#ifndef LV_DISABLE_IMGUI
-		CreateUIImage();
-		#endif
-
-		Upload();
+		default:
+			LV_LOG_ERROR("Invalid image usage selected.");
+			break;
+		}
 	}
 
 	VulkanImage2D::~VulkanImage2D()
@@ -140,9 +97,9 @@ namespace Lavender
 		memcpy(mappedData, data, size);
 		VulkanAllocator::UnMapMemory(stagingBufferAllocation);
 
-		VulkanAllocator::TransitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_Miplevels);
-		VulkanAllocator::CopyBufferToImage(stagingBuffer, m_Image, m_Width, m_Height);
-		GenerateMipmaps(m_Image, VK_FORMAT_R8G8B8A8_UNORM, m_Width, m_Height, m_Miplevels);
+		VulkanAllocator::TransitionImageLayout(m_Image, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_Miplevels);
+		VulkanAllocator::CopyBufferToImage(stagingBuffer, m_Image, m_Specification.Width, m_Specification.Height);
+		GenerateMipmaps(m_Image, GetVulkanFormatFromImageFormat(m_Specification.Format), m_Specification.Width, m_Specification.Height, m_Miplevels);
 
 		VulkanAllocator::DestroyBuffer(stagingBuffer, stagingBufferAllocation);
 	}
@@ -172,20 +129,7 @@ namespace Lavender
 		});
 
 		//////////////////////////////////////////////////////////////////////
-		m_Width = width;
-		m_Height = height;
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
-
-		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
-
-		m_ImageView = VulkanAllocator::CreateImageView(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
-
-		VulkanAllocator::TransitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
-
-		#ifndef LV_DISABLE_IMGUI
-		CreateUIImage();
-		#endif
+		CreateImage(width, height);
 	}
 
 	void VulkanImage2D::Upload()
@@ -222,13 +166,11 @@ namespace Lavender
 	Ref<Image2D> VulkanImage2D::Copy()
 	{
 		Ref<VulkanImage2D> newImage = RefHelper::Create<VulkanImage2D>();
-		newImage->m_Width = m_Width;
-		newImage->m_Height = m_Height;
+		newImage->m_Specification = m_Specification;
 		newImage->m_Miplevels = m_Miplevels;
 		newImage->m_Element = m_Element;
-		newImage->m_Path = m_Path;
 
-		newImage->m_Allocation = VulkanAllocator::CreateImage(m_Width, m_Height, m_Miplevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY, newImage->m_Image);
+		newImage->m_Allocation = VulkanAllocator::CreateImage(m_Specification.Width, m_Specification.Height, m_Miplevels, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | GetVulkanImageUsageFromImageUsage(m_Specification.Flags), VMA_MEMORY_USAGE_GPU_ONLY, newImage->m_Image);
 		VulkanAllocator::TransitionImageLayout(newImage->m_Image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
 
 		VulkanAllocator::TransitionImageLayout(m_Image, GetFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_Miplevels);
@@ -241,16 +183,11 @@ namespace Lavender
 			VkImageCopy copyRegion = {};
 			copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1 };
 			copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1 };
-			copyRegion.extent.width = m_Width >> i;		// Halfs the size
-			copyRegion.extent.height = m_Height >> i;	// Halfs the size
+			copyRegion.extent.width = m_Specification.Width >> i;		// Halfs the size
+			copyRegion.extent.height = m_Specification.Height >> i;	// Halfs the size
 			copyRegion.extent.depth = 1;
 
-			vkCmdCopyImage(
-				commandBuffer,
-				m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				newImage->m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				1, &copyRegion
-			);
+			vkCmdCopyImage(commandBuffer, m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, newImage->m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 		}
 
 		VulkanCommands::EndAndSubmit(commandBuffer);
@@ -266,6 +203,53 @@ namespace Lavender
 		return newImage;
 	}
 
+	VkFormat VulkanImage2D::GetFormat() const
+	{
+		return GetVulkanFormatFromImageFormat(m_Specification.Format);
+	}
+
+	void VulkanImage2D::CreateImage(uint32_t width, uint32_t height)
+	{
+		m_Specification.Width = width;
+		m_Specification.Height = height;
+		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | GetVulkanImageUsageFromImageUsage(m_Specification.Flags), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_Image, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		VulkanAllocator::TransitionImageLayout(m_Image, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_Miplevels);
+
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
+	}
+
+	void VulkanImage2D::CreateImage(const std::filesystem::path& path)
+	{
+		int width, height, texChannels;
+		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
+
+		m_Specification.Width = width;
+		m_Specification.Height = height;
+		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		m_Specification.Format = ImageSpecification::ImageFormat::RGBA;
+		size_t imageSize = m_Specification.Width * m_Specification.Height * 4;
+
+		m_Allocation = VulkanAllocator::CreateImage(m_Specification.Width, m_Specification.Height, m_Miplevels, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | GetVulkanImageUsageFromImageUsage(m_Specification.Flags), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_Image, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_Miplevels);
+
+		#ifndef LV_DISABLE_IMGUI
+		CreateUIImage();
+		#endif
+
+		SetData((void*)pixels, imageSize);
+		stbi_image_free((void*)pixels);
+	}
 
 	void VulkanImage2D::GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
@@ -361,5 +345,45 @@ namespace Lavender
 		m_TextureID = ImGui_ImplVulkan_AddTexture(m_Sampler, m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 	#endif
+
+	static VkFormat GetVulkanFormatFromImageFormat(ImageSpecification::ImageFormat format)
+	{
+		switch (format)
+		{
+		case ImageSpecification::ImageFormat::RGBA: 
+			return VK_FORMAT_R8G8B8A8_UNORM;
+		case ImageSpecification::ImageFormat::sRGB:
+			return VK_FORMAT_R8G8B8A8_SRGB;
+		case ImageSpecification::ImageFormat::BGRA:
+			return VK_FORMAT_B8G8R8A8_UNORM;
+
+		default:
+			LV_LOG_ERROR("Invalid image format.");
+			break;
+		}
+
+		return VK_FORMAT_UNDEFINED;
+	}
+
+	static VkImageUsageFlags GetVulkanImageUsageFromImageUsage(ImageSpecification::ImageUsageFlags usage)
+	{
+		VkImageUsageFlags flags = 0;
+
+		if (usage & ImageSpecification::ImageUsageFlags::Colour)
+			flags = flags | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		if (usage & ImageSpecification::ImageUsageFlags::Depth)
+			flags = flags | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		if (usage & ImageSpecification::ImageUsageFlags::Sampled)
+			flags = flags | VK_IMAGE_USAGE_SAMPLED_BIT;
+		if (usage & ImageSpecification::ImageUsageFlags::Storage)
+			flags = flags | VK_IMAGE_USAGE_STORAGE_BIT;
+		if (usage & ImageSpecification::ImageUsageFlags::Transient)
+			flags = flags | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+		if (usage & ImageSpecification::ImageUsageFlags::Input)
+			flags = flags | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+
+		return flags;
+	}
+
 
 }

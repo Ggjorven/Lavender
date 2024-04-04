@@ -6,6 +6,7 @@
 
 #include <commdlg.h>
 #include <Shlobj.h>
+#include <psapi.h>
 
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -15,7 +16,7 @@ namespace Lavender::Utils
 {
 
 	std::unique_ptr<ToolKit> ToolKit::s_Instance = std::make_unique<WindowsToolKit>();
-
+	
 	std::string WindowsToolKit::OpenFileImpl(const std::string& filter, const std::string& dir) const
 	{
 		OPENFILENAMEA ofn;
@@ -143,6 +144,32 @@ namespace Lavender::Utils
 	float WindowsToolKit::GetTimeImpl() const
 	{
 		return (float)glfwGetTime();
+	}
+
+	size_t WindowsToolKit::GetMemoryUsageImpl() const
+	{
+		size_t used = 0;
+
+		PROCESS_MEMORY_COUNTERS_EX pmc = {};
+		if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
+			used = pmc.WorkingSetSize;
+		else
+			LV_LOG_ERROR("Failed to retrieve used memory usage");
+
+		return used;
+	}
+
+	size_t WindowsToolKit::GetHeapMemoryUsageImpl() const
+	{
+		size_t used = 0;
+
+		// Heap memory usage
+		HANDLE hProcessHeap = GetProcessHeap();
+		used = HeapSize(hProcessHeap, 0, NULL);
+		if (used == -1)
+			LV_LOG_ERROR("Failed to retrieve heap memory");
+
+		return used;
 	}
 
 }
