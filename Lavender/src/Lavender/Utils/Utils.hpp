@@ -43,6 +43,14 @@ constexpr Type operator ^ (Type lhs, Type rhs) \
 #define LV_MAX_FLOAT 3.402823466e+38F 
 #define LV_MAX_DOUBLE 1.7976931348623158e+308
 
+#define PUBLIC_PADDING(index, size) \
+private: \
+    char Padding##index[size] = {}; \
+public:
+
+#define PRIVATE_PADDING(index, size) \
+char Padding##index[size] = {}; 
+
 namespace Lavender::Utils
 {
 

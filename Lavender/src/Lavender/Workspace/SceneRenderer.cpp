@@ -21,15 +21,22 @@ namespace Lavender
 {
 
 	static uint32_t s_EntitiesAllocated = 0; // Is used for images and uniforms
+	static uint32_t s_DirLightsAllocated = 0; // Is used for directional lights and more
 	static size_t s_UniformSize = sizeof(glm::mat4); // glm::mat4 'cause of Model matrix
 
 	Ref<DynamicUniformBuffer> SceneRenderer::s_ModelBuffer = nullptr;
+	Ref<UniformBuffer> SceneRenderer::s_DirectionalLightBuffer = nullptr;
 	Ref<Image2D> SceneRenderer::s_EmptyImage = nullptr;
+
+	Ref<UniformBuffer> SceneRenderer::s_SceneDataBuffer = nullptr;
 
 	void SceneRenderer::Init()
 	{
 		s_ModelBuffer = DynamicUniformBuffer::Create(Renderer::GetSpecification().PreAllocatedDescriptorSets, s_UniformSize);
 		s_EntitiesAllocated = Renderer::GetSpecification().PreAllocatedDescriptorSets;
+		
+		s_DirectionalLightBuffer = UniformBuffer::Create(sizeof(DirectionalLightComponent) * Renderer::GetSpecification().PreAllocatedLightSlots);
+		s_DirLightsAllocated = Renderer::GetSpecification().PreAllocatedLightSlots;
 
 		ImageSpecification specs = {};
 		specs.Usage = ImageSpecification::ImageUsage::Size;
@@ -37,12 +44,17 @@ namespace Lavender
 		specs.Width = 1;
 		specs.Height = 1;
 		s_EmptyImage = Image2D::Create(specs);
+
+		s_SceneDataBuffer = UniformBuffer::Create(sizeof(SceneData));
 	}
 
 	void SceneRenderer::Destroy()
 	{
 		s_ModelBuffer.reset();
+		s_DirectionalLightBuffer.reset();
 		s_EmptyImage.reset();
+
+		s_SceneDataBuffer.reset();
 	}
 
 	void SceneRenderer::RenderScene(Scene* scene, Ref<EditorCamera>& camera, Ref<RenderCommandBuffer> cmdBuffer)
@@ -55,75 +67,114 @@ namespace Lavender
 		auto pipeline = FrameResources::GetPipeline();
 		auto group = pipeline->GetDescriptorSets();
 
-		auto view = registry.view<MeshComponent>();
-
-		// Check if we need to resize
-		if (view.size() > s_EntitiesAllocated)
+		auto dirView = registry.view<DirectionalLightComponent>();
+		// Directional Lights
 		{
-			s_ModelBuffer.reset();
-			s_ModelBuffer = DynamicUniformBuffer::Create(s_EntitiesAllocated + (s_EntitiesAllocated - (uint32_t)view.size()), s_UniformSize);
-			pipeline->GetDescriptorSets()->AddMoreSetsTo(0, (uint32_t)view.size() - s_EntitiesAllocated);
+			// Check if we need to resize
+			if (dirView.size() > s_DirLightsAllocated)
+			{
+				s_DirectionalLightBuffer.reset();
+				s_DirectionalLightBuffer = UniformBuffer::Create(sizeof(DirectionalLightComponent) * dirView.size());
 
-			s_EntitiesAllocated = (uint32_t)view.size();
+				s_DirLightsAllocated = (uint32_t)dirView.size();
+			}
+
+			// Upload lights
+			uint32_t index = 0;
+			std::vector<DirectionalLightComponent> lights((size_t)s_DirLightsAllocated);
+			for (auto& entity : dirView)
+			{
+				DirectionalLightComponent& light = dirView.get<DirectionalLightComponent>(entity);
+				lights[index] = light;
+				index++;
+			}
+			size_t size = sizeof(DirectionalLightComponent) * s_DirLightsAllocated;
+			s_DirectionalLightBuffer->SetData((void*)lights.data(), size);
+			s_DirectionalLightBuffer->Upload(pipeline->GetDescriptorSets()->GetSets(1)[0], pipeline->GetSpecification().Uniformlayout.GetElementByName(1, "u_DirectionalLights"));
 		}
 
-		// Upload model matrices to dynamic buffer
-		uint32_t index = 0;
-		std::vector<glm::mat4> matrices((size_t)s_EntitiesAllocated, glm::mat4(1.0f));
-		for (auto& entity : view)
+		// SceneData
 		{
-			MeshComponent& mesh = view.get<MeshComponent>(entity);
+			SceneData data = {};
+			data.DirectionalLights = (uint32_t)dirView.size();
 
-			auto transformView = registry.view<TransformComponent>();
-			if (transformView.contains(entity))
-			{
-				TransformComponent& transform = transformView.get<TransformComponent>(entity);
-
-				matrices[index] = glm::translate(matrices[index], transform.Position);
-				matrices[index] = glm::scale(matrices[index], transform.Size);
-
-				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-				matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-			}
-
-			s_ModelBuffer->SetDataIndexed(index, (void*)&matrices[index], s_UniformSize);
-
-			index++;
+			s_SceneDataBuffer->SetData((void*)&data, sizeof(SceneData));
+			s_SceneDataBuffer->Upload(pipeline->GetDescriptorSets()->GetSets(1)[0], pipeline->GetSpecification().Uniformlayout.GetElementByName(1, "u_SceneData"));
 		}
-		s_ModelBuffer->UploadIndexedData();
 
-		// Actually draw using the data and uploading texture
-		index = 0;
-		for (auto& entity : view)
+		// Meshes/transforms
 		{
-			auto set = group->GetSets(0)[index];
-
-			// Mesh
-			MeshComponent& mesh = view.get<MeshComponent>(entity);
-			if (mesh.MeshObject)
+			// Check if we need to resize
+			auto meshView = registry.view<MeshComponent>();
+			if (meshView.size() > s_EntitiesAllocated)
 			{
-				mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
-				mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
+				s_ModelBuffer.reset();
+				s_ModelBuffer = DynamicUniformBuffer::Create((uint32_t)meshView.size(), s_UniformSize);
+				pipeline->GetDescriptorSets()->AddMoreSetsTo(0, (uint32_t)meshView.size() - s_EntitiesAllocated);
+
+				s_EntitiesAllocated = (uint32_t)meshView.size();
 			}
 
-			// Material
-			if (mesh.Material)
+			// Upload model matrices to dynamic buffer
+			uint32_t index = 0;
+			std::vector<glm::mat4> matrices((size_t)s_EntitiesAllocated, glm::mat4(1.0f));
+			for (auto& entity : meshView)
 			{
-				mesh.Material->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
-			}
-			else
-			{
-				LV_LOG_WARN("Mesh of entity[{0}] has no material. This is not critical, but not recommended.", registry.get<UUID>(entity).Get());
-				s_EmptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
-			}
+				MeshComponent& mesh = meshView.get<MeshComponent>(entity);
 
-			s_ModelBuffer->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"), index * s_ModelBuffer->GetAlignment());
-			set->Bind(pipeline, cmdBuffer, 0);
-			if (mesh.MeshObject) 
-				Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
-			
-			index++;
+				auto transformmeshView = registry.view<TransformComponent>();
+				if (transformmeshView.contains(entity))
+				{
+					TransformComponent& transform = transformmeshView.get<TransformComponent>(entity);
+
+					matrices[index] = glm::translate(matrices[index], transform.Position);
+					matrices[index] = glm::scale(matrices[index], transform.Size);
+
+					matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+					matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+					matrices[index] = glm::rotate(matrices[index], glm::radians(transform.Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+				}
+
+				s_ModelBuffer->SetDataIndexed(index, (void*)&matrices[index], s_UniformSize);
+
+				index++;
+			}
+			s_ModelBuffer->UploadIndexedData();
+
+			camera->BindDescriptorSet(pipeline, cmdBuffer);
+
+			// Actually draw using the data and uploading texture
+			index = 0;
+			for (auto& entity : meshView)
+			{
+				auto set = group->GetSets(0)[index];
+
+				// Mesh
+				MeshComponent& mesh = meshView.get<MeshComponent>(entity);
+				if (mesh.MeshObject)
+				{
+					mesh.MeshObject->GetMesh()->GetVertexBuffer()->Bind(cmdBuffer);
+					mesh.MeshObject->GetMesh()->GetIndexBuffer()->Bind(cmdBuffer);
+				}
+
+				// Material
+				if (mesh.Material)
+				{
+					mesh.Material->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
+				}
+				else
+				{
+					LV_LOG_WARN("Mesh of entity[{0}] has no material. This is not critical, but not recommended.", registry.get<UUID>(entity).Get());
+					s_EmptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Image"));
+				}
+
+				s_ModelBuffer->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_Model"), index * s_ModelBuffer->GetAlignment());
+				set->Bind(pipeline, cmdBuffer, 0);
+				if (mesh.MeshObject)
+					Renderer::DrawIndexed(cmdBuffer, mesh.MeshObject->GetMesh()->GetIndexBuffer());
+
+				index++;
+			}
 		}
 	}
 

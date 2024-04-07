@@ -29,7 +29,9 @@ namespace Lavender
 	struct RendererSpecification
 	{
 		uint32_t FramesInFlight = 3;
+
 		uint32_t PreAllocatedDescriptorSets = 100;
+		uint32_t PreAllocatedLightSlots = 10;
 	};
 
 	struct RenderData

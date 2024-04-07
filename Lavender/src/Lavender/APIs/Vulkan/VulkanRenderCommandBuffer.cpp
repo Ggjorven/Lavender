@@ -7,6 +7,7 @@
 
 #include "Lavender/Renderer/Renderer.hpp"
 
+#include "Lavender/APIs//Vulkan/VulkanUtils.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanSwapChain.hpp"
@@ -138,8 +139,11 @@ namespace Lavender
 
 		{
 			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::Submit::Queue");
-			if (vkQueueSubmit(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[currentFrame]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to submit draw command buffer!");
+			auto logicalDevice = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
+			//vkQueueWaitIdle(logicalDevice->GetGraphicsQueue());
+			VkResult result = vkQueueSubmit(logicalDevice->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[currentFrame]);
+			if (result != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to submit draw command buffer! Error: {0}", VKResultToString(result));
 		}
 
 		if (m_Usage == RenderCommandBuffer::Usage::Sequential)

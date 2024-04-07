@@ -12,7 +12,8 @@ namespace Lavender
 	{
 		static BufferLayout layout = {
 			BufferElement(DataType::Float3, 0, "a_Position"),
-			BufferElement(DataType::Float2, 1, "a_TexCoord")
+			BufferElement(DataType::Float2, 1, "a_TexCoord"),
+			BufferElement(DataType::Float3, 2, "a_Normal")
 		};
 
 		return layout;
@@ -53,7 +54,8 @@ namespace Lavender
 		Assimp::Importer importer = {};
 
 		uint32_t flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace;
-		if (Renderer::GetAPI() == RenderingAPI::Vulkan) flags |= aiProcess_FlipUVs;
+		if (Renderer::GetAPI() == RenderingAPI::Vulkan) 
+			flags |= aiProcess_FlipUVs;
 
 		const aiScene* scene = importer.ReadFile(path.string(), flags);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -83,17 +85,16 @@ namespace Lavender
 	{
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-			MeshVertex vertex;
+			MeshVertex vertex = {};
 			glm::vec3 vector(0.0f);
 
 			// Position
-			vector.x = mesh->mVertices[i].x;
-			vector.y = mesh->mVertices[i].y;
-			vector.z = mesh->mVertices[i].z;
-			vertex.Position = vector;
+			vertex.Position.x = mesh->mVertices[i].x;
+			vertex.Position.y = mesh->mVertices[i].y;
+			vertex.Position.z = mesh->mVertices[i].z;
 
 			// Texture coordinates
-			if (mesh->mTextureCoords[0])
+			if (mesh->HasTextureCoords(0))
 			{
 				glm::vec2 vec(0.0f);
 				vec.x = mesh->mTextureCoords[0][i].x;
@@ -102,6 +103,16 @@ namespace Lavender
 			}
 			else
 				vertex.TexCoord = glm::vec2(0.0f, 0.0f);
+
+			// Normals
+			if (mesh->HasNormals())
+			{
+				vertex.Normal.x = mesh->mNormals[i].x;
+				vertex.Normal.y = mesh->mNormals[i].y;
+				vertex.Normal.z = mesh->mNormals[i].z;
+			}
+			else
+				vertex.Normal = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			vertices.push_back(vertex);
 		}

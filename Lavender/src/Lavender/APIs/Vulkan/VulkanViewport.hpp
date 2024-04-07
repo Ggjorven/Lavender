@@ -27,7 +27,6 @@ namespace Lavender
 			VmaAllocation Allocation = VK_NULL_HANDLE;
 			VkImageView ImageView = VK_NULL_HANDLE;
 		};
-
 	public:
 		VulkanViewportImage(uint32_t width, uint32_t height);
 		virtual ~VulkanViewportImage();

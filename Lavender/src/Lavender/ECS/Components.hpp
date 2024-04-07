@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Lavender/Utils/Utils.hpp"
+
 #include "Lavender/Workspace/Assets/Asset.hpp"
 #include "Lavender/Workspace/Assets/MeshAsset.hpp"
 #include "Lavender/Workspace/Assets/MaterialAsset.hpp"
@@ -60,9 +62,25 @@ namespace Lavender
 		ScriptComponent(const ScriptComponent& other) = default;
 	};
 
+	struct DirectionalLightComponent // TODO: Implement for scripting
+	{
+	public:
+		glm::vec4 Colour = { 1.0f, 0.0f, 0.0f, 1.0f };
+		glm::vec3 Direction = { 0.0f, 0.0f, 0.0f };
+		//PUBLIC_PADDING(0, 4)
+		float Intensity = 1.0f;
+		//PUBLIC_PADDING(1, 12)
+
+	public:
+		DirectionalLightComponent() = default;
+		DirectionalLightComponent(const glm::vec3& direction, const glm::vec4& colour, float intensity);
+		DirectionalLightComponent(const glm::vec4& colour, const glm::vec3& direction, float intensity);
+		DirectionalLightComponent(const DirectionalLightComponent& other) = default;
+	};
+
 	enum class Component
 	{
-		None = 0, Tag, Transform, Mesh
+		None = 0, Tag, Transform, Mesh, DirectionalLight
 	};
 
 	template<typename TComponent>
@@ -74,6 +92,8 @@ namespace Lavender
 			return Component::Transform;
 		else if (typeid(TComponent) == typeid(MeshComponent))
 			return Component::Mesh;
+		else if (typeid(TComponent) == typeid(DirectionalLightComponent))
+			return Component::DirectionalLight;
 
 		return Component::None;
 	}
@@ -87,6 +107,8 @@ namespace Lavender
 			return "TransformComponent";
 		else if (typeid(TComponent) == typeid(MeshComponent))
 			return "MeshComponent";
+		else if (typeid(TComponent) == typeid(DirectionalLightComponent))
+			return "DirectionalLightComponent";
 
 		return "Undefined Component";
 	}
@@ -96,6 +118,6 @@ namespace Lavender
 	{
 	};
 
-	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent>;
+	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent, DirectionalLightComponent>;
 
 }

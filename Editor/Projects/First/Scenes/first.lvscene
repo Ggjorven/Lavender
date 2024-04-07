@@ -31,3 +31,17 @@ SceneData:
       MeshComponent:
         AssetHandle: 6516009052361294990
         Material: 8468309108205782655
+    - Entity: 12969201205008786772
+      TagComponent:
+        Tag: Light
+      DirectionalLightComponent:
+        Direction: [0, 0, 0]
+        Colour: [0.899999976, 0, 0, 1]
+        Intensity: 1
+    - Entity: 18194777125944551807
+      TagComponent:
+        Tag: Light2
+      DirectionalLightComponent:
+        Direction: [0, 0, 0]
+        Colour: [0, 1, 0, 1]
+        Intensity: 1

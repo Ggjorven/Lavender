@@ -37,7 +37,7 @@ namespace Lavender
 		{
 			m_FPS = (uint32_t)io.Framerate;
 			m_Frametime = 1.0f / io.Framerate * 1000.0f; // in ms
-			m_MemoryUsage = (float)((double)Utils::ToolKit::GetMemoryUsage() / (1024.0 * 1024.0));
+			m_MemoryUsage = (float)((double)Utils::ToolKit::GetMemoryUsage() / (1024.0 * 1024.0))/* - 67.0f*/;
 
 			timer = 0.0f;
 		}

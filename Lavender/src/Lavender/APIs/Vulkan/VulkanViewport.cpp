@@ -56,7 +56,6 @@ namespace Lavender
 	{
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		auto device = context->GetLogicalDevice()->GetVulkanDevice();
-
 		VkFormat format = context->GetSwapChain()->GetColourFormat();
 
 		vkDeviceWaitIdle(device);
@@ -64,8 +63,14 @@ namespace Lavender
 		m_Width = width;
 		m_Height = height;
 
-		VulkanAllocator::DestroyImage(m_Image.Image, m_Image.Allocation);
-		vkDestroyImageView(device, m_Image.ImageView, nullptr);
+		auto image = m_Image.Image;
+		auto allocation = m_Image.Allocation;
+		auto imageView = m_Image.ImageView;
+		Renderer::SubmitFree([device, image, allocation, imageView]()
+		{
+			VulkanAllocator::DestroyImage(image, allocation);
+			vkDestroyImageView(device, imageView, nullptr);
+		});
 
 		m_Image.Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VMA_MEMORY_USAGE_GPU_ONLY/*, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT*/, m_Image.Image);
 
@@ -243,7 +248,11 @@ namespace Lavender
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
 		auto device = context->GetLogicalDevice();
 
-		vkDestroyFramebuffer(device->GetVulkanDevice(), m_Framebuffer, nullptr);
+		auto framebuffer = m_Framebuffer;
+		Renderer::SubmitFree([device, framebuffer]()
+		{
+			vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+		});
 
 		std::vector<VkImageView> attachments = { };
 		attachments.push_back(m_Image->GetImage().ImageView);
@@ -368,15 +377,17 @@ namespace Lavender
 	{
 		if (width != 0 && height != 0)
 		{
-			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-			vkDeviceWaitIdle(device);
+			auto renderPass = m_Renderpass;
+			auto imguiImagePtr = &m_ImGuiImage;
+			Renderer::SubmitFree([renderPass, imguiImagePtr, width, height]()
+			{
+				auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+				vkDeviceWaitIdle(device);
 
-			auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
-			vkFreeDescriptorSets(device, pool, 1, (VkDescriptorSet*)&m_ImGuiImage);
-
-			m_Renderpass->Resize(width, height);
-
-			m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(m_Renderpass->GetImage()->GetSampler(), m_Renderpass->GetImage()->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+				ImGui_ImplVulkan_FreeTexture(*imguiImagePtr);
+				renderPass->Resize(width, height);
+				*imguiImagePtr = (ImTextureID)ImGui_ImplVulkan_AddTexture(renderPass->GetImage()->GetSampler(), renderPass->GetImage()->GetImage().ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			});
 		}
 	}
 

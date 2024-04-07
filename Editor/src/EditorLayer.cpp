@@ -29,20 +29,31 @@
 
 void EditorLayer::OnAttach()
 {
+	int i = 0;
+
+	LV_LOG_TRACE("{0}", i++);
 	m_Preferences = RefHelper::Create<UIPreferences>();
 	PreferencesSerializer serializer(m_Preferences);
 	serializer.Deserialize(Utils::ToolKit::GetEnv() + "/Editor/EditorPreferences.lvepref");
+	LV_LOG_TRACE("{0}", i++);
 
 	m_Project = Project::Create();
+	LV_LOG_TRACE("{0}", i++);
 	ProjectSerializer projSerializer(m_Project);
 	projSerializer.Deserialize(Utils::ToolKit::GetEnv() + "/Editor/Projects/First/Project.lvproject");
+	LV_LOG_TRACE("{0}", i++);
 
+	LV_LOG_TRACE("{0}", i++);
 	m_ContentBrowserPanel = ContentBrowserPanel::Create(m_Project);
+	LV_LOG_TRACE("{0}", i++);
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
+	LV_LOG_TRACE("{0}", i++);
 	m_MaterialPanel = MaterialPanel::Create(m_Project); m_MaterialPanel->SetEnabled(true); // TODO: Remove
+	LV_LOG_TRACE("{0}", i++);
 	m_DebugPanel = DebugPanel::Create(m_Project);
 
 	Application::SetInitialized(true);
+	LV_LOG_TRACE("{0}", i++);
 }
 
 void EditorLayer::OnDetach()

@@ -50,6 +50,8 @@ namespace Lavender
 
 		inline size_t GetAlignment() const override { return m_AlignmentOfOneElement; }
 
+		void Upload() override;
+		void Upload(Ref<DescriptorSet> set, UniformElement element) override;
 		void Upload(Ref<DescriptorSet> set, UniformElement element, size_t offset) override;
 
 	private:

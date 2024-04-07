@@ -22,6 +22,7 @@ namespace Lavender
 	public:
 		glm::vec3 Position = { };
 		glm::vec2 TexCoord = { };
+		glm::vec3 Normal = { };
 
 	public:
 		static BufferLayout GetLayout();

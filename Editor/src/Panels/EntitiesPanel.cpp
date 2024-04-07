@@ -252,6 +252,7 @@ namespace Lavender
 						{ UI::StyleColourType::FrameBgActive, UI::Colours::LighterTint },
 						{ UI::StyleColourType::FrameBg, UI::Colours::NearBlack }
 					});
+
 					UI::Property("Position", transform.Position);
 					UI::UniformProperty("Size", transform.Size, uniformSize, 0.1f, 0.0f, 0.0f, "%.2f", "Uniform Scaling");
 					UI::Property("Rotation", transform.Rotation);
@@ -343,6 +344,31 @@ namespace Lavender
 						}
 						UI::Property("Material", materialCombo);
 					}
+
+					UI::EndPropertyGrid();
+				}
+			}
+
+			// TransformComponent
+			if (registry->HasComponent<DirectionalLightComponent>(m_SelectedUUID))
+			{
+				DirectionalLightComponent& light = registry->GetComponent<DirectionalLightComponent>(m_SelectedUUID);
+
+				ComponentUsage usage = BeginECSComponent<DirectionalLightComponent>("DirectionalLight");
+				if (usage & ComponentUsage::Opened)
+				{
+					// TODO: Look into ImGui tables, so the user doesn't have to move the column line every time.
+					UI::BeginPropertyGrid(2);
+
+					UI::ScopedStyleList colours = UI::StyleColourList({
+						{ UI::StyleColourType::FrameBgHovered, UI::Colours::LightTint },
+						{ UI::StyleColourType::FrameBgActive, UI::Colours::LighterTint },
+						{ UI::StyleColourType::FrameBg, UI::Colours::NearBlack }
+					});
+
+					UI::Property("Direction", light.Direction);
+					UI::Property("Colour", light.Colour);
+					UI::Property("Intensity", light.Intensity);
 
 					UI::EndPropertyGrid();
 				}

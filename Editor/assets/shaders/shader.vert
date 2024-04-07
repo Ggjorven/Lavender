@@ -2,8 +2,10 @@
 
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec2 a_TexCoord;
+layout(location = 2) in vec3 a_Normal;
 
 layout(location = 0) out vec2 v_TexCoord;
+layout(location = 1) out vec3 v_Normal;
 
 struct CameraSpecification
 {
@@ -16,12 +18,12 @@ struct ModelSpecification
     mat4 Model;
 };
 
-layout(set = 1, binding = 0) uniform CameraSettings
+layout(std140, set = 1, binding = 0) uniform CameraSettings
 {
     CameraSpecification u_Camera;
 };
 
-layout(set = 0, binding = 1) uniform ModelSettings
+layout(std140, set = 0, binding = 1) uniform ModelSettings
 {
     ModelSpecification u_Model;
 };
@@ -30,5 +32,8 @@ layout(set = 0, binding = 1) uniform ModelSettings
 void main()
 {
 	gl_Position = u_Camera.Projection * u_Camera.View * u_Model.Model * vec4(a_Position, 1.0);
-	v_TexCoord = a_TexCoord;
+	
+    v_TexCoord = a_TexCoord;
+    v_Normal = a_Normal;
+    //v_Normal = mat3(transpose(inverse(u_Model.Model))) * a_Normal;
 }

@@ -201,6 +201,37 @@ namespace Lavender
 		m_IndexedData.resize(m_ElementCount);
 	}
 
+	void VulkanDynamicUniformBuffer::Upload()
+	{
+		Upload(m_Set, m_Element);
+	}
+
+	void VulkanDynamicUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element)
+	{
+		LV_PROFILE_SCOPE("VulkanUniformBuffer::Upload");
+
+		auto vkSet = RefHelper::RefAs<VulkanDescriptorSet>(set);
+
+		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo = {};
+			bufferInfo.buffer = m_Buffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = m_ElementCount * m_AlignmentOfOneElement;
+
+			VkWriteDescriptorSet descriptorWrite = {};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = vkSet->GetVulkanSet((uint32_t)i);
+			descriptorWrite.dstBinding = element.Binding;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+			descriptorWrite.descriptorCount = element.Count;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+
+			vkUpdateDescriptorSets(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
 	void VulkanDynamicUniformBuffer::Upload(Ref<DescriptorSet> set, UniformElement element, size_t offset)
 	{
 		LV_PROFILE_SCOPE("VulkanUniformBuffer::Upload");

@@ -149,7 +149,6 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("Scene::RenderEditor");
 
-		m_EditorCamera->BindDescriptorSet(FrameResources::GetPipeline(), cmdBuffer);
 		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
 	}
 
@@ -168,7 +167,6 @@ namespace Lavender
 		LV_PROFILE_SCOPE("Scene::RenderRuntime");
 
 		// TODO: Change camera
-		m_EditorCamera->BindDescriptorSet(FrameResources::GetPipeline(), cmdBuffer);
 		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
 	}
 

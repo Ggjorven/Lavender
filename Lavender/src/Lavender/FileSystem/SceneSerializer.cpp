@@ -129,6 +129,19 @@ namespace Lavender
 			emitter << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<DirectionalLightComponent>())
+		{
+			DirectionalLightComponent& light = entity.GetComponent<DirectionalLightComponent>();
+			emitter << YAML::Key << "DirectionalLightComponent";
+			emitter << YAML::BeginMap;
+
+			emitter << YAML::Key << "Direction" << light.Direction;
+			emitter << YAML::Key << "Colour" << YAML::Value << light.Colour;
+			emitter << YAML::Key << "Intensity" << YAML::Value << light.Intensity;
+
+			emitter << YAML::EndMap;
+		}
+
 		emitter << YAML::EndMap;
 	}
 
@@ -183,6 +196,16 @@ namespace Lavender
 				else
 					LV_LOG_ERROR("(Entity[{0}]) Asset by handle {1} doesn't exist.", uuid.Get(), materialAssetHandle.Get());
 			}
+		}
+
+		// DirectionalLightComponent
+		auto directionalLightComponent = node["DirectionalLightComponent"];
+		if (directionalLightComponent)
+		{
+			DirectionalLightComponent& light = entity.AddOrReplaceComponent<DirectionalLightComponent>();
+			light.Direction = directionalLightComponent["Direction"].as<glm::vec3>();
+			light.Colour = directionalLightComponent["Colour"].as<glm::vec4>();
+			light.Intensity = directionalLightComponent["Intensity"].as<float>();
 		}
 	}
 

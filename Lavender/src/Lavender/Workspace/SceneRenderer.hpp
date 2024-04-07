@@ -23,7 +23,10 @@ namespace Lavender
 
 	private:
 		static Ref<DynamicUniformBuffer> s_ModelBuffer;
+		static Ref<UniformBuffer> s_DirectionalLightBuffer;
 		static Ref<Image2D> s_EmptyImage;
+
+		static Ref<UniformBuffer> s_SceneDataBuffer;
 	};
 
 }

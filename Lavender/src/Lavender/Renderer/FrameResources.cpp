@@ -41,7 +41,9 @@ namespace Lavender
 		UniformLayout uniformLayout = {
 			{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
 			{ UniformDataType::DynamicUniformBuffer, 0, 1, "u_Model", UniformElement::ShaderStage::Vertex },
-			{ UniformDataType::UniformBuffer, 1, 0, "u_Camera", UniformElement::ShaderStage::Vertex }
+			{ UniformDataType::UniformBuffer, 1, 0, "u_Camera", UniformElement::ShaderStage::Vertex },
+			{ UniformDataType::UniformBuffer, 1, 1, "u_DirectionalLights", UniformElement::ShaderStage::Fragment },
+			{ UniformDataType::UniformBuffer, 1, 2, "u_SceneData", UniformElement::ShaderStage::Fragment },
 		};
 
 		PipelineSpecification pipelineSpecs = {};
