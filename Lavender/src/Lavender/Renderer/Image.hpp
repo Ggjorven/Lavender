@@ -27,7 +27,8 @@ namespace Lavender
 		};
 		enum class ImageUsageFlags : uint8_t
 		{
-			None = 0, Sampled = BIT(0), Storage = BIT(1), Colour = BIT(2), Depth = BIT(3), Transient = BIT(4), Input = BIT(5)
+			None = 0, Sampled = BIT(0), Storage = BIT(1), Colour = BIT(2), Depth = BIT(3), Transient = BIT(4), Input = BIT(5),
+				NoMipMaps = BIT(6)
 		};
 		enum class ImageFormat : uint8_t
 		{
@@ -35,7 +36,7 @@ namespace Lavender
 		};
 	public:
 		ImageUsage Usage = ImageUsage::None;
-		ImageUsageFlags Flags = ImageUsageFlags::None;
+		ImageUsageFlags Flags = ImageUsageFlags::Sampled;
 		ImageFormat Format = ImageFormat::RGBA;
 
 		std::filesystem::path Path = {};
@@ -45,8 +46,8 @@ namespace Lavender
 
 	public:
 		ImageSpecification() = default;
-		ImageSpecification(uint32_t width, uint32_t height, ImageUsageFlags flags = ImageUsageFlags::None);
-		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags = ImageUsageFlags::None);
+		ImageSpecification(uint32_t width, uint32_t height, ImageUsageFlags flags = ImageUsageFlags::Sampled);
+		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags = ImageUsageFlags::Sampled);
 		virtual ~ImageSpecification() = default;
 	};
 	DEFINE_BITWISE_OPS(ImageSpecification::ImageUsageFlags)
@@ -65,6 +66,9 @@ namespace Lavender
 		virtual void Upload(Ref<DescriptorSet> set, UniformElement element) = 0;
 
 		virtual ImageSpecification& GetSpecification() = 0;
+
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
 
 		#ifndef LV_DISABLE_IMGUI
 		virtual void* GetUIImage() = 0;

@@ -92,7 +92,7 @@ namespace Lavender
         scene->GetAssetManager()->GetAssetsFromDirectory(m_Directories.ProjectDir / m_Directories.Assets);
 
         SceneSerializer serializer(scene);
-        serializer.Deserialize(m_StartScenePath);
+        serializer.Deserialize(m_Directories.ProjectDir / m_StartScenePath);
     }
 
     Ref<Project> Project::Create()

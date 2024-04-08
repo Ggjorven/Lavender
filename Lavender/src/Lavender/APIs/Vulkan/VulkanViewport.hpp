@@ -7,7 +7,9 @@
 #include "Lavender/Renderer/Viewport.hpp"
 #include "Lavender/Renderer/RenderPass.hpp"
 
+#include "Lavender/APIs/Vulkan/VulkanImage.hpp"
 #include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
+#include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
 
 #include "Lavender/UI/Style.hpp"
@@ -17,62 +19,6 @@
 
 namespace Lavender
 {
-
-	class VulkanViewportImage
-	{
-	public:
-		struct ViewportImageGroup
-		{
-			VkImage Image = VK_NULL_HANDLE;
-			VmaAllocation Allocation = VK_NULL_HANDLE;
-			VkImageView ImageView = VK_NULL_HANDLE;
-		};
-	public:
-		VulkanViewportImage(uint32_t width, uint32_t height);
-		virtual ~VulkanViewportImage();
-
-		void Resize(uint32_t width, uint32_t height);
-
-		inline uint32_t GetWidth() const { return m_Width; }
-		inline uint32_t GetHeight() const { return m_Height; }
-
-		inline ViewportImageGroup GetImage() { return m_Image; }
-		inline VkSampler GetSampler() { return m_Sampler; }
-
-	private:
-		ViewportImageGroup m_Image = {};
-		VkSampler m_Sampler = VK_NULL_HANDLE;
-
-		uint32_t m_Width = 0, m_Height = 0, m_Miplevels = 0;
-	};
-
-
-
-	class VulkanViewportRenderPass
-	{
-	public:
-		VulkanViewportRenderPass(Ref<VulkanViewportImage> image);
-		virtual ~VulkanViewportRenderPass();
-
-		void Begin();
-		void End();
-		void Submit();
-
-		void Resize(uint32_t width, uint32_t height);
-
-		Ref<RenderPass> GetRenderPass();
-		inline Ref<RenderCommandBuffer> GetCommandBuffer() { return m_CommandBuffer; }
-		inline Ref<VulkanViewportImage> GetImage() { return m_Image; }
-
-	private:
-		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;
-		Ref<VulkanViewportImage> m_Image = VK_NULL_HANDLE;
-
-		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
-		VkFramebuffer m_Framebuffer = VK_NULL_HANDLE;
-	};
-
-
 
 	class VulkanViewport : public Viewport
 	{
@@ -95,11 +41,12 @@ namespace Lavender
 		void Resize(uint32_t width, uint32_t height) override;
 		glm::vec2 ConvertMousePosition(const glm::vec2& mainWindowPosition) const override;
 
-		inline Ref<RenderPass> GetRenderPass() override { return m_Renderpass->GetRenderPass(); }
-		ImTextureID GetCurrentImGuiTexture() override;
+		inline Ref<RenderPass> GetRenderPass() override { return m_Renderpass; }
+		ImTextureID GetImGuiTexture() override;
 
 	private:
-		Ref<VulkanViewportRenderPass> m_Renderpass = VK_NULL_HANDLE;
+		Ref<Image2D> m_Image = VK_NULL_HANDLE;
+		Ref<RenderPass> m_Renderpass = VK_NULL_HANDLE;
 
 		UI::StyleList m_WindowStyle = {};
 		UI::StyleColourList m_WindowColours = {};

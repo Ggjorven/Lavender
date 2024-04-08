@@ -3,4 +3,4 @@ Project:
     Assets: Assets
     Scripts: Script
   Scenes:
-    Start: Projects/First/Scenes/first.lvscene
+    Start: Scenes/first.lvscene

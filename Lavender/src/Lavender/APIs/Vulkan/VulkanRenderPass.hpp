@@ -18,7 +18,6 @@ namespace Lavender
 	class VulkanRenderPass : public RenderPass
 	{
 	public:
-		VulkanRenderPass(VkRenderPass renderPass, Ref<VulkanRenderCommandBuffer> commandBuffer);
 		VulkanRenderPass(RenderPassSpecification specs);
 		VulkanRenderPass(RenderPassSpecification specs, Ref<RenderCommandBuffer> commandBuffer);
 		virtual ~VulkanRenderPass();
@@ -29,17 +28,16 @@ namespace Lavender
 
 		void Resize(uint32_t width, uint32_t height) override;
 
-		Ref<RenderCommandBuffer> GetCommandBuffer() override { return m_CommandBuffer; }
-		VkRenderPass& GetVulkanRenderPass() { return m_RenderPass; }
+		inline Ref<RenderCommandBuffer> GetCommandBuffer() override { return m_CommandBuffer; }
+		inline VkRenderPass& GetVulkanRenderPass() { return m_RenderPass; }
+		inline std::vector<VkFramebuffer> GetFrameBuffers() { return m_Framebuffers; };
 
 	private:
 		void Create();
-
 		void Destroy();
 
 	private:
 		RenderPassSpecification m_Specification = {};
-		bool m_Destroy = true;
 
 		Ref<VulkanRenderCommandBuffer> m_CommandBuffer = VK_NULL_HANDLE;
 

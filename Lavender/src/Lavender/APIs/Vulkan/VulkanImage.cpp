@@ -7,6 +7,7 @@
 
 #include "Lavender/Renderer/Renderer.hpp"
 
+#include "Lavender/APIs/Vulkan/VulkanUtils.hpp"
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanPipeline.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
@@ -20,7 +21,6 @@
 namespace Lavender
 {
 
-	static VkFormat GetVulkanFormatFromImageFormat(ImageSpecification::ImageFormat format);
 	static VkImageUsageFlags GetVulkanImageUsageFromImageUsage(ImageSpecification::ImageUsageFlags usage);
 
 	VulkanImage2D::VulkanImage2D(const ImageSpecification& specs)
@@ -212,7 +212,8 @@ namespace Lavender
 	{
 		m_Specification.Width = width;
 		m_Specification.Height = height;
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+		if (!(m_Specification.Flags & ImageSpecification::ImageUsageFlags::NoMipMaps))
+			m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 		m_Allocation = VulkanAllocator::CreateImage(width, height, m_Miplevels, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | GetVulkanImageUsageFromImageUsage(m_Specification.Flags), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
 
@@ -233,7 +234,8 @@ namespace Lavender
 
 		m_Specification.Width = width;
 		m_Specification.Height = height;
-		m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+		if (!(m_Specification.Flags & ImageSpecification::ImageUsageFlags::NoMipMaps))
+			m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 		m_Specification.Format = ImageSpecification::ImageFormat::RGBA;
 		size_t imageSize = m_Specification.Width * m_Specification.Height * 4;
@@ -346,7 +348,7 @@ namespace Lavender
 	}
 	#endif
 
-	static VkFormat GetVulkanFormatFromImageFormat(ImageSpecification::ImageFormat format)
+	VkFormat GetVulkanFormatFromImageFormat(ImageSpecification::ImageFormat format)
 	{
 		switch (format)
 		{

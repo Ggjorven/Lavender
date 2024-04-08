@@ -5,6 +5,8 @@
 #include "Lavender/Core/Application.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
+
+#include "Lavender/APIs/Vulkan/VulkanImage.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
@@ -13,13 +15,8 @@
 namespace Lavender
 {
 
-    VulkanRenderPass::VulkanRenderPass(VkRenderPass renderPass, Ref<VulkanRenderCommandBuffer> commandBuffer) // Note(Jorben): Since this constructor is only used for the Viewport we need to not destroy
-        : m_RenderPass(renderPass), m_CommandBuffer(commandBuffer), m_Destroy(false)
-    {
-    }
-
     VulkanRenderPass::VulkanRenderPass(RenderPassSpecification specs)
-        : VulkanRenderPass(specs, RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create(RenderCommandBuffer::Usage::Sequential))) // TODO: Make this selectable
+        : VulkanRenderPass(specs, RefHelper::RefAs<VulkanRenderCommandBuffer>(RenderCommandBuffer::Create()))
     {
 	}
 
@@ -40,11 +37,19 @@ namespace Lavender
         m_CommandBuffer->Begin();
 
         VkExtent2D swapChainExtent = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
+        if (m_Specification.ColourAttachment)
+        {
+            ImageSpecification specs = m_Specification.ColourAttachment->GetSpecification();
+            swapChainExtent = { specs.Width, specs.Height };
+        }
 
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = m_RenderPass;
-        renderPassInfo.framebuffer = m_Framebuffers[RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage()];
+        if (m_Specification.ColourAttachment)
+            renderPassInfo.framebuffer = m_Framebuffers[0];
+        else
+            renderPassInfo.framebuffer = m_Framebuffers[RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetAquiredImage()];
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = swapChainExtent;
 
@@ -64,7 +69,6 @@ namespace Lavender
 
         vkCmdBeginRenderPass(m_CommandBuffer->GetVulkanCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // TODO: Maybe move this?
         VkViewport viewport = {};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
@@ -102,13 +106,15 @@ namespace Lavender
             vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
 
         auto imageViews = context->GetSwapChain()->GetImageViews();
-
+        if (m_Specification.ColourAttachment) imageViews = { RefHelper::RefAs<VulkanImage2D>(m_Specification.ColourAttachment)->GetImageView() };
         m_Framebuffers.resize(imageViews.size());
-        
         for (size_t i = 0; i < imageViews.size(); i++)
         {
             std::vector<VkImageView> attachments = { };
-            attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+            if (m_Specification.ColourAttachment)
+                attachments.push_back(RefHelper::RefAs<VulkanImage2D>(m_Specification.ColourAttachment)->GetImageView());
+            else
+                attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
 
             if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             {
@@ -140,9 +146,13 @@ namespace Lavender
         std::vector<VkAttachmentDescription> attachments = { };
         std::vector<VkAttachmentReference> attachmentRefs = { };
 
-        {
+        { 
             VkAttachmentDescription& colorAttachment = attachments.emplace_back();
-            colorAttachment.format = context->GetSwapChain()->GetColourFormat();
+            if (m_Specification.ColourAttachment) 
+                colorAttachment.format = GetVulkanFormatFromImageFormat(m_Specification.ColourAttachment->GetSpecification().Format);
+            else 
+                colorAttachment.format = context->GetSwapChain()->GetColourFormat();
+
             colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
             colorAttachment.loadOp = (VkAttachmentLoadOp)m_Specification.ColourLoadOp;
             colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -177,10 +187,10 @@ namespace Lavender
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &attachmentRefs[0];
-
         if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             subpass.pDepthStencilAttachment = &attachmentRefs[1];
 
+        /*
         std::array<VkSubpassDependency, 1> dependencies = { };
         dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
         dependencies[0].dstSubpass = 0;
@@ -190,17 +200,17 @@ namespace Lavender
         dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             dependencies[0].dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        */
 
-        /*
+        std::array<VkSubpassDependency, 2> dependencies = { };
         dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
         dependencies[0].dstSubpass = 0;
         dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
         dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
-            dependencies[0].dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
+        //if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+        //    dependencies[0].dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
         dependencies[1].srcSubpass = 0;
@@ -208,12 +218,10 @@ namespace Lavender
         dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
-            dependencies[0].srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        
+        //if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
+        //    dependencies[0].srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
         dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-        */
 
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -237,7 +245,10 @@ namespace Lavender
         for (size_t i = 0; i < imageViews.size(); i++)
         {
             std::vector<VkImageView> attachments = { };
-            attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
+            if (m_Specification.ColourAttachment)
+                attachments.push_back(RefHelper::RefAs<VulkanImage2D>(m_Specification.ColourAttachment)->GetImageView());
+            else
+                attachments.push_back(context->GetSwapChain()->GetImageViews()[i]);
 
             if (m_Specification.UsedAttachments & RenderPassSpecification::Attachments::Depth)
             {
@@ -250,8 +261,16 @@ namespace Lavender
             framebufferInfo.renderPass = m_RenderPass;
             framebufferInfo.attachmentCount = (uint32_t)attachments.size();
             framebufferInfo.pAttachments = attachments.data();
-            framebufferInfo.width = Application::Get().GetWindow().GetWidth();
-            framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+            if (m_Specification.ColourAttachment)
+            {
+                framebufferInfo.width = m_Specification.ColourAttachment->GetWidth();
+                framebufferInfo.height = m_Specification.ColourAttachment->GetHeight();
+            }
+            else
+            {
+                framebufferInfo.width = Application::Get().GetWindow().GetWidth();
+                framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+            }
             framebufferInfo.layers = 1;
 
             if (vkCreateFramebuffer(context->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
@@ -264,19 +283,16 @@ namespace Lavender
         auto frameBuffers = m_Framebuffers;
         auto renderPass = m_RenderPass;
 
-        if (m_Destroy)
+        Renderer::SubmitFree([frameBuffers, renderPass]()
         {
-            Renderer::SubmitFree([frameBuffers, renderPass]()
-            {
-                auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
-                vkDeviceWaitIdle(device->GetVulkanDevice());
+            auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
+            vkDeviceWaitIdle(device->GetVulkanDevice());
 
-                for (auto& framebuffer : frameBuffers)
-                    vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+            for (auto& framebuffer : frameBuffers)
+                vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
 
-                vkDestroyRenderPass(device->GetVulkanDevice(), renderPass, nullptr);
-            });
-        }
+            vkDestroyRenderPass(device->GetVulkanDevice(), renderPass, nullptr);
+        });
     }
 
 }

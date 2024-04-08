@@ -12,7 +12,7 @@ namespace Lavender
 	struct SceneData
 	{
 	public:
-		uint32_t DirectionalLights = 0;
+		//uint32_t DirectionalLights = 0;
 	};
 	
 	class FrameResources

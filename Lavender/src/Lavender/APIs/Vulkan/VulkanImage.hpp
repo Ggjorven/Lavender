@@ -14,6 +14,8 @@
 namespace Lavender
 {
 
+	VkFormat GetVulkanFormatFromImageFormat(ImageSpecification::ImageFormat format);
+
 	class VulkanImage2D : public Image2D
 	{
 	public:
@@ -30,6 +32,8 @@ namespace Lavender
 		void Upload(Ref<DescriptorSet> set, UniformElement element) override;
 
 		inline ImageSpecification& GetSpecification() override { return m_Specification; }
+		inline uint32_t GetWidth() const override { return m_Specification.Width; }
+		inline uint32_t GetHeight() const override { return m_Specification.Height; }
 
 		#ifndef LV_DISABLE_IMGUI
 		inline void* GetUIImage() override { return m_TextureID; }
@@ -65,7 +69,7 @@ namespace Lavender
 		VkImageView m_ImageView = VK_NULL_HANDLE;
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
-		uint32_t m_Miplevels = 0;
+		uint32_t m_Miplevels = 1;
 		#ifndef LV_DISABLE_IMGUI
 		void* m_TextureID = nullptr;
 		#endif

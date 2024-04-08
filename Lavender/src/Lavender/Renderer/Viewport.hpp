@@ -38,7 +38,7 @@ namespace Lavender
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Ref<RenderPass> GetRenderPass() = 0;
-		virtual ImTextureID GetCurrentImGuiTexture() = 0;
+		virtual ImTextureID GetImGuiTexture() = 0;
 
 		static Ref<Viewport> Create(uint32_t width, uint32_t height);
 	};

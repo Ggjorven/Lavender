@@ -149,7 +149,7 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("Scene::RenderEditor");
 
-		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
+		SceneRenderer::RenderScene(this, cmdBuffer);
 	}
 
 	void Scene::UpdateRuntime(float deltaTime)
@@ -166,8 +166,7 @@ namespace Lavender
 	{
 		LV_PROFILE_SCOPE("Scene::RenderRuntime");
 
-		// TODO: Change camera
-		SceneRenderer::RenderScene(this, m_EditorCamera, cmdBuffer);
+		SceneRenderer::RenderScene(this, cmdBuffer);
 	}
 
 	///////////////////////////////////////////////////////////////////////////
