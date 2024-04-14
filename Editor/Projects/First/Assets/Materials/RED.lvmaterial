@@ -1,0 +1,6 @@
+Material: 9734121199003703710
+MetaData:
+  AlbedoImage: ..\..\..\assets\images\test.jpg
+  AlbedoColour: [1, 1, 1, 1]
+  SpecularImage: ""
+  SpecularColour: [0, 0, 0, 1]

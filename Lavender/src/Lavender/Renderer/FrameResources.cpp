@@ -34,18 +34,20 @@ namespace Lavender
 	void FrameResources::CreatePipeline()
 	{
 		ShaderCode code = {};
-		code.VertexSPIRV = Shader::ReadSPIRVFile(Utils::ToolKit::GetEnv() + "/Editor/assets/shaders/vert.spv");
-		code.FragmentSPIRV = Shader::ReadSPIRVFile(Utils::ToolKit::GetEnv() + "/Editor/assets/shaders/frag.spv");
+		code.VertexGLSL = Shader::ReadGLSLFile(Utils::ToolKit::GetEnv() + "/Editor/assets/shaders/shader.vert");
+		code.FragmentGLSL = Shader::ReadGLSLFile(Utils::ToolKit::GetEnv() + "/Editor/assets/shaders/shader.frag");
+
 		Ref<Shader> shader = Shader::Create(code);
 
 		UniformLayout uniformLayout = {
-			{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
-			{ UniformDataType::DynamicUniformBuffer, 0, 1, "u_Model", UniformElement::ShaderStage::Vertex },
+			{ UniformDataType::Image, 0, 0, "u_AlbedoImage", UniformElement::ShaderStage::Fragment },
+			{ UniformDataType::Image, 0, 1, "u_SpecularImage", UniformElement::ShaderStage::Fragment },
+			{ UniformDataType::DynamicUniformBuffer, 0, 2, "u_Model", UniformElement::ShaderStage::Vertex },
+			{ UniformDataType::DynamicUniformBuffer, 0, 3, "u_Material", UniformElement::ShaderStage::Fragment },
+
 			{ UniformDataType::UniformBuffer, 1, 0, "u_Camera", UniformElement::ShaderStage::Vertex },
-			/*
-			{ UniformDataType::UniformBuffer, 1, 1, "u_DirectionalLights", UniformElement::ShaderStage::Fragment },
+			{ UniformDataType::UniformBuffer, 1, 1, "u_LightSettings", UniformElement::ShaderStage::Fragment },
 			{ UniformDataType::UniformBuffer, 1, 2, "u_SceneData", UniformElement::ShaderStage::Fragment }
-			*/
 		};
 
 		PipelineSpecification pipelineSpecs = {};

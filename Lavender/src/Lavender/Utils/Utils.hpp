@@ -63,7 +63,7 @@ namespace Lavender::Utils
 
         static std::string OpenDirectory(const std::string& dir = "") { return s_Instance ? s_Instance->OpenDirectoryImpl(dir) : ""; }
 
-        static float GetTime() { return s_Instance ? s_Instance->GetTimeImpl() : 0.0f; }
+        static double GetTime() { return s_Instance ? s_Instance->GetTimeImpl() : 0.0f; }
         static size_t GetMemoryUsage() { return s_Instance ? s_Instance->GetMemoryUsageImpl(): 0; }
         static size_t GetHeapMemoryUsage() { return s_Instance ? s_Instance->GetHeapMemoryUsageImpl(): 0; }
 
@@ -101,7 +101,7 @@ namespace Lavender::Utils
         
         virtual std::string OpenDirectoryImpl(const std::string& dir) const = 0;
 
-        virtual float GetTimeImpl() const = 0;
+        virtual double GetTimeImpl() const = 0;
         virtual size_t GetMemoryUsageImpl() const = 0;
         virtual size_t GetHeapMemoryUsageImpl() const = 0;
 
@@ -148,10 +148,16 @@ namespace Lavender::Utils
         {
         }
 
-        inline float GetPassedTime() const { return (ToolKit::GetTime() - m_Start); }
+        inline double GetPassedTime() const 
+        { 
+            double end = ToolKit::GetTime();
+            double result = end - m_Start;
+
+            return result; 
+        }
 
     private:
-        float m_Start = 0.0f;
+        double m_Start = 0.0f;
     };
 
 }

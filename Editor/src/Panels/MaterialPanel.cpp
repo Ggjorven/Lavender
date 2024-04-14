@@ -129,11 +129,11 @@ namespace Lavender
 					asset->SetAssetPath(path);
 				}
 
-				UI::BeginPropertyGrid(2);
+				UI::BeginPropertyGrid(3);
 				// Albedo
 				{
 					UI::ClickAbleImage image = {};
-					image.Image = asset->GetAlbedo() ? asset->GetAlbedo() : m_CheckerBoard;
+					image.Image = asset->AlbedoImage ? asset->AlbedoImage : m_CheckerBoard;
 					image.Size = { 32.0f, 32.0f };
 					image.Action = [this, asset]()
 					{
@@ -143,11 +143,59 @@ namespace Lavender
 						if (!filepath.empty())
 						{
 							std::filesystem::path relPath = std::filesystem::relative(filepath, m_Project->GetDirectories().ProjectDir / m_Project->GetDirectories().Assets);
-							asset->SetAlbedo(Image2D::Create(filepath), relPath);
+							asset->AlbedoImage = Image2D::Create(filepath);
+							asset->AlbedoPath = relPath;
 						}
 					};
 
-					UI::Property("Albedo", image);
+					UI::ColourPicker picker = UI::ColourPicker(asset->AlbedoColour);
+					picker.Label = "Albedo Colour";
+					picker.Size = 32.0f;
+
+					{
+						UI::ScopedStyle style = UI::Style(UI::StyleType::FrameRounding, 0.0f);
+						UI::Property("Albedo", picker, image);
+
+						if (image.Image == nullptr)
+						{
+							asset->AlbedoImage.reset();
+							asset->AlbedoImage = nullptr;
+						}
+					}
+				}
+
+				// Specular
+				{
+					UI::ClickAbleImage image = {};
+					image.Image = asset->SpecularImage ? asset->SpecularImage : m_CheckerBoard;
+					image.Size = { 32.0f, 32.0f };
+					image.Action = [this, asset]()
+					{
+						std::filesystem::path beginDir = Utils::ToolKit::ReplaceSlashes(m_Project->GetDirectories().ProjectDir);
+						std::filesystem::path filepath = std::filesystem::path(Utils::ToolKit::OpenFile("", beginDir.string()));
+
+						if (!filepath.empty())
+						{
+							std::filesystem::path relPath = std::filesystem::relative(filepath, m_Project->GetDirectories().ProjectDir / m_Project->GetDirectories().Assets);
+							asset->SpecularImage = Image2D::Create(filepath);
+							asset->SpecularPath = relPath;
+						}
+					};
+
+					UI::ColourPicker picker = UI::ColourPicker(asset->SpecularColour);
+					picker.Label = "Specular Colour";
+					picker.Size = 32.0f;
+
+					{
+						UI::ScopedStyle style = UI::Style(UI::StyleType::FrameRounding, 0.0f);
+						UI::Property("Specular", picker, image);
+
+						if (image.Image == nullptr)
+						{
+							asset->SpecularImage.reset();
+							asset->SpecularImage = nullptr;
+						}
+					}
 				}
 
 				UI::EndPropertyGrid();

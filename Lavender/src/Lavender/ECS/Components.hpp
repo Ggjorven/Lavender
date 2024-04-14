@@ -62,25 +62,33 @@ namespace Lavender
 		ScriptComponent(const ScriptComponent& other) = default;
 	};
 
-	struct DirectionalLightComponent // TODO: Implement for scripting
+	struct PointLightComponent // TODO: Implement for scripting
 	{
 	public:
-		glm::vec4 Colour = { 1.0f, 0.0f, 0.0f, 1.0f };
-		glm::vec3 Direction = { 0.0f, 0.0f, 0.0f };
-		//PUBLIC_PADDING(0, 4)
-		float Intensity = 1.0f;
-		//PUBLIC_PADDING(1, 12)
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f }; // TODO: Use transformComponent
+		PUBLIC_PADDING(0, 4);
+
+		glm::vec3 Ambient = {};
+		PUBLIC_PADDING(1, 4);
+		glm::vec3 Diffuse = {};
+		PUBLIC_PADDING(2, 4);
+		glm::vec3 Specular = {};
+		PUBLIC_PADDING(3, 4);
+
+		float Constant = 0.5f;
+		float Linear = 0.5f;
+		float Quadratic = 0.5f;
+		PUBLIC_PADDING(4, 4);
 
 	public:
-		DirectionalLightComponent() = default;
-		DirectionalLightComponent(const glm::vec3& direction, const glm::vec4& colour, float intensity);
-		DirectionalLightComponent(const glm::vec4& colour, const glm::vec3& direction, float intensity);
-		DirectionalLightComponent(const DirectionalLightComponent& other) = default;
+		PointLightComponent() = default;
+		// TODO: Proper initializer
+		PointLightComponent(const PointLightComponent& other) = default;
 	};
 
 	enum class Component
 	{
-		None = 0, Tag, Transform, Mesh, DirectionalLight
+		None = 0, Tag, Transform, Mesh, PointLight
 	};
 
 	template<typename TComponent>
@@ -92,8 +100,8 @@ namespace Lavender
 			return Component::Transform;
 		else if (typeid(TComponent) == typeid(MeshComponent))
 			return Component::Mesh;
-		else if (typeid(TComponent) == typeid(DirectionalLightComponent))
-			return Component::DirectionalLight;
+		else if (typeid(TComponent) == typeid(PointLightComponent))
+			return Component::Light;
 
 		return Component::None;
 	}
@@ -107,8 +115,8 @@ namespace Lavender
 			return "TransformComponent";
 		else if (typeid(TComponent) == typeid(MeshComponent))
 			return "MeshComponent";
-		else if (typeid(TComponent) == typeid(DirectionalLightComponent))
-			return "DirectionalLightComponent";
+		else if (typeid(TComponent) == typeid(PointLightComponent))
+			return "PointLightComponent";
 
 		return "Undefined Component";
 	}
@@ -118,6 +126,6 @@ namespace Lavender
 	{
 	};
 
-	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent, DirectionalLightComponent>;
+	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent>;
 
 }

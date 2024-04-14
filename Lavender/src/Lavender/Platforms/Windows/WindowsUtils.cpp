@@ -141,9 +141,9 @@ namespace Lavender::Utils
 		return std::string();
 	}
 
-	float WindowsToolKit::GetTimeImpl() const
+	double WindowsToolKit::GetTimeImpl() const
 	{
-		return (float)glfwGetTime();
+		return glfwGetTime();
 	}
 
 	size_t WindowsToolKit::GetMemoryUsageImpl() const

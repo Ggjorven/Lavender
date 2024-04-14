@@ -18,7 +18,7 @@ namespace Lavender
 		virtual ~DescriptorSet() = default;
 
 		virtual void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer) = 0;
-		virtual void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, size_t offset) = 0;
+		virtual void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, const std::vector<uint32_t>& offset) = 0;
 		virtual SetID GetSetID() = 0;
 	};
 

@@ -17,6 +17,11 @@ namespace Lavender
 		s_RenderInstance = RenderInstance::Create();
 	}
 
+	bool Renderer::Initialized()
+	{
+		return s_RenderInstance != nullptr;;
+	}
+
 	void Renderer::Destroy()
 	{
 		delete s_RenderInstance;

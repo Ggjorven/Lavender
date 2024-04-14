@@ -19,7 +19,7 @@ namespace Lavender
 		virtual ~VulkanDescriptorSet();
 
 		void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer) override;
-		void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, size_t offset) override;
+		void Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, const std::vector<uint32_t>& offset) override;
 		inline SetID GetSetID() override { return m_ID; }
 
 		VkDescriptorSet GetVulkanSet(uint32_t index) { return m_DescriptorSets[index]; }

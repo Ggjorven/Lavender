@@ -42,6 +42,9 @@ namespace Lavender::UI
 	inline ImRect GetItemRect() { return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax()); }
 
 	glm::vec2 GetContentRegionAvail();
+	void SetContextFontSize(float fontSize);
+
+	void CustomColourPicker(const std::string& label, glm::vec4& colour, float size = 2.0f);
 
 	inline ImRect RectExpanded(const ImRect& rect, float x, float y)
 	{
@@ -306,8 +309,20 @@ namespace Lavender::UI
 		Ref<Image2D> Image = nullptr;
 		glm::vec2 Size = { 0.0f, 0.0f };
 		ClickableImageFn Action = nullptr;
+		
+	public:
+		void Render();
+	};
+
+	struct ColourPicker
+	{
+	public:
+		std::string Label = {};
+		glm::vec4& Colour;
+		float Size = 1.8f; // Is Uniform for X and Y
 
 	public:
+		ColourPicker(glm::vec4& colour);
 		void Render();
 	};
 
@@ -327,6 +342,7 @@ namespace Lavender::UI
 
 	bool Property(const std::string& label, Combo& value, const std::string& helpText = "");
 	bool Property(const std::string& label, ClickAbleImage& value, const std::string& helpText = "");
+	bool Property(const std::string& label, ColourPicker& picker, ClickAbleImage& image, const std::string& helpText = "");
 
 	// Custom property for entity size
 	bool UniformProperty(const std::string& label, glm::vec3& value, bool& uniform, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& hoverText = "");

@@ -58,7 +58,7 @@ namespace Lavender
 		while (m_Running)
 		{
 			// Delta Time
-			float currentTime = (float)glfwGetTime();
+			float currentTime = (float)Utils::ToolKit::GetTime();
 			static float lastTime = 0.0f;
 
 			float deltaTime = currentTime - lastTime;

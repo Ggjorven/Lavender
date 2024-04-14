@@ -330,7 +330,7 @@ namespace Lavender
 							});
 
 							materialCombo.Items.push_back(item);
-							if (mesh.Material&& mesh.Material->GetHandle() == asset.first)
+							if (mesh.Material && mesh.Material->GetHandle() == asset.first)
 							{
 								materialCombo.Selected = item.first;
 								materialCombo.Preview = item.first;
@@ -349,12 +349,12 @@ namespace Lavender
 				}
 			}
 
-			// TransformComponent
-			if (registry->HasComponent<DirectionalLightComponent>(m_SelectedUUID))
+			// PointLightComponent
+			if (registry->HasComponent<PointLightComponent>(m_SelectedUUID))
 			{
-				DirectionalLightComponent& light = registry->GetComponent<DirectionalLightComponent>(m_SelectedUUID);
+				PointLightComponent& light = registry->GetComponent<PointLightComponent>(m_SelectedUUID);
 
-				ComponentUsage usage = BeginECSComponent<DirectionalLightComponent>("DirectionalLight");
+				ComponentUsage usage = BeginECSComponent<PointLightComponent>("PointLight");
 				if (usage & ComponentUsage::Opened)
 				{
 					// TODO: Look into ImGui tables, so the user doesn't have to move the column line every time.
@@ -366,9 +366,15 @@ namespace Lavender
 						{ UI::StyleColourType::FrameBg, UI::Colours::NearBlack }
 					});
 
-					UI::Property("Direction", light.Direction);
-					UI::Property("Colour", light.Colour);
-					UI::Property("Intensity", light.Intensity);
+					UI::Property("Position", light.Position);
+
+					UI::Property("Ambient", light.Ambient);
+					UI::Property("Diffuse", light.Diffuse);
+					UI::Property("Specular", light.Specular);
+
+					UI::Property("Constant", light.Constant);
+					UI::Property("Linear", light.Linear);
+					UI::Property("Quadratic", light.Quadratic);
 
 					UI::EndPropertyGrid();
 				}

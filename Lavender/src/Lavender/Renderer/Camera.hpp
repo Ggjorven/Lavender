@@ -47,6 +47,7 @@ namespace Lavender
 		inline float& GetFOV() { return m_FOV; }
 		inline float& GetFlyCamSpeed() { return m_MovementSpeed; }
 		inline float& GetArcBallSpeed() { return m_Speed; }
+		inline glm::vec3& GetPosition() { return m_Position; }
 
 		inline State GetState() const { return m_State; }
 		inline Camera& GetCamera() { return m_Camera; }

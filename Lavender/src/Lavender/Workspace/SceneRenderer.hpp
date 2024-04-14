@@ -12,6 +12,33 @@
 namespace Lavender
 {
 
+	struct LightSettings
+	{
+	public:
+		std::vector<PointLightComponent> PointLights = { };
+		uint32_t AmountOfPointLights = 0;
+
+	public:
+		LightSettings(uint32_t amountOfPointLights, size_t sizeOfPointLights)
+			: AmountOfPointLights(amountOfPointLights), PointLights(sizeOfPointLights)
+		{
+		}
+
+		inline constexpr static size_t GetSize(uint32_t amountOfPointLights) { return amountOfPointLights * sizeof(PointLightComponent) + sizeof(uint32_t); }
+
+		inline void AddDataTo(Ref<UniformBuffer> buffer)
+		{
+			buffer->SetData((void*)PointLights.data(), PointLights.size() * sizeof(PointLightComponent));
+			buffer->SetData((void*)&AmountOfPointLights, sizeof(uint32_t), PointLights.size() * sizeof(PointLightComponent));
+		}
+	};
+
+	struct SceneData
+	{
+	public:
+		glm::vec3 ViewPosition = {};
+	};
+
 	class SceneRenderer
 	{
 	public:
@@ -21,20 +48,22 @@ namespace Lavender
 		static void Destroy();
 
 		// TODO: Add some kind of custom/runtime camera as well
-		static void RenderScene(Scene* scene, Ref<RenderCommandBuffer> cmdBuffer);
+		static void RenderScene(Scene* scene, const glm::vec3& cameraPosition, Ref<RenderCommandBuffer> cmdBuffer);
 
 	private:
 		static void UpdateLights(Scene* scene, Ref<Pipeline> pipeline);
-		static void UpdateSceneData(Scene* scene, Ref<Pipeline> pipeline);
-		static void UpdateModels(Scene* scene, Ref<Pipeline> pipeline);
+		static void UpdateSceneData(Scene* scene, const glm::vec3& cameraPosition, Ref<Pipeline> pipeline);
+		static void UpdateBuffers(Scene* scene, Ref<Pipeline> pipeline);
 
 		static void RenderModels(Scene* scene, Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer);
 
 	private:
-		static Ref<DynamicUniformBuffer> s_ModelBuffer;
-		static Ref<UniformBuffer> s_LightBuffer;
 		static Ref<Image2D> s_EmptyImage;
+		
+		static Ref<DynamicUniformBuffer> s_ModelBuffer;
+		static Ref<DynamicUniformBuffer> s_MaterialBuffer;
 
+		static Ref<UniformBuffer> s_LightsBuffer;
 		static Ref<UniformBuffer> s_SceneDataBuffer;
 	};
 

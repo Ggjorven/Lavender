@@ -72,6 +72,47 @@ namespace Lavender::UI
 		return glm::vec2(result.x, result.y);
 	}
 
+	void SetContextFontSize(float fontSize)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		ImFont* font = io.Fonts->Fonts[0]; // Assuming you are using the first font, change as needed
+
+		static bool firstRun = true;
+		static float defaultScale = 0.0f;
+		if (firstRun)
+		{
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			defaultScale = window->FontWindowScale;
+			firstRun = false;
+		}
+
+		if (fontSize == 0.0f)
+		{
+			ImGui::SetWindowFontScale(defaultScale);
+			return;
+		}
+
+		ImGui::SetWindowFontScale(fontSize);
+	}
+
+	void CustomColourPicker(const std::string& label, glm::vec4& colour, float size)
+	{
+		UI::SetContextFontSize(size);
+		ImGui::ColorEdit4(fmt::format("##{0}", label).c_str(), glm::value_ptr(colour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip);
+		UI::SetContextFontSize(0.0f);
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+		{
+			ImGui::OpenPopup(fmt::format("{0}##ColorPickerPopup", label).c_str());
+		}
+
+		if (ImGui::BeginPopup(fmt::format("{0}##ColorPickerPopup", label).c_str()))
+		{
+			ImGui::ColorPicker4(label.c_str(), glm::value_ptr(colour));
+			ImGui::EndPopup();
+		}
+	}
+
 	void BeginWindow(const std::string& name, WindowFlags flags)
 	{
 		ImGui::Begin(name.c_str(), (bool*)0, (ImGuiWindowFlags)flags);
@@ -196,7 +237,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -219,7 +260,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -243,7 +284,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -267,7 +308,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -291,7 +332,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -315,7 +356,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -340,7 +381,7 @@ namespace Lavender::UI
 		UI::ShiftCursor(16.0f, value.Size.y / 2.0f - 2.0f);
 		UI::Text(label);
 
-		if (std::strlen(helpText.c_str()) != 0)
+		if (!helpText.empty())
 		{
 			UI::SameLine();
 			UI::HelpMarker(helpText);
@@ -353,6 +394,37 @@ namespace Lavender::UI
 		value.Render();
 
 		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return false;
+	}
+
+	bool Property(const std::string& label, ColourPicker& picker, ClickAbleImage& image, const std::string& helpText)
+	{
+		UI::ShiftCursor(16.0f, picker.Size / 2.0f - 2.0f);
+		UI::Text(label);
+
+		if (!helpText.empty())
+		{
+			UI::SameLine();
+			UI::HelpMarker(helpText);
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+
+		ImGui::PushItemWidth(-1);
+		picker.Render();
+		ImGui::PopItemWidth();
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+
+		ImGui::PushItemWidth(-1);
+		image.Render();
+		ImGui::PopItemWidth();
+
 		ImGui::NextColumn();
 		UI::Draw::Underline();
 
@@ -483,7 +555,30 @@ namespace Lavender::UI
 
 			if (ImGui::IsItemClicked())
 				Action();
+
+			// Open Delete/Remove
+			if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+				ImGui::OpenPopup("Remove image");
 		}
+
+		// Actual Delete/Remove
+		if (ImGui::BeginPopup("Remove image"))
+		{
+			if (ImGui::MenuItem("Remove"))
+				Image = nullptr;
+
+			ImGui::EndPopup();
+		}
+	}
+
+	ColourPicker::ColourPicker(glm::vec4& colour)
+		: Colour(colour)
+	{
+	}
+
+	void ColourPicker::Render()
+	{
+		CustomColourPicker(Label, Colour, Size * 0.05625);
 	}
 
 }

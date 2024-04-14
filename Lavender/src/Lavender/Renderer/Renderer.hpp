@@ -19,6 +19,7 @@ namespace Lavender
 	{
 	public:
 		static void Init();
+		static bool Initialized();
 		static void Destroy();
 
 		static void BeginFrame();

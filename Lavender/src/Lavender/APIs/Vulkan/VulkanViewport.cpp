@@ -106,6 +106,7 @@ namespace Lavender
 		}
 		m_Width = (uint32_t)size.x;
 		m_Height = (uint32_t)size.y;
+		//LV_LOG_TRACE("Width: {0}, Height: {1}", m_Width, m_Height);
 
 		auto& mainWindow = Application::Get().GetWindow();
 		m_XPos = (uint32_t)position.x - mainWindow.GetPositionX();
@@ -135,27 +136,23 @@ namespace Lavender
 		return false;
 	}
 
+	void VulkanViewport::Resize()
+	{
+		Resize(m_Width, m_Height);
+	}
+
 	void VulkanViewport::Resize(uint32_t width, uint32_t height)
 	{
-		m_Image->Resize(width, height);
-		m_Renderpass->Resize(width, height);
-
 		if (width != 0 && height != 0)
 		{
-			auto image = m_Image;
-			auto renderPass = m_Renderpass;
-			auto imguiImagePtr = &m_ImGuiImage;
-			Renderer::SubmitFree([image, renderPass, imguiImagePtr, width, height]()
-			{
-				auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-				vkDeviceWaitIdle(device);
+			m_Image->Resize(width, height);
 
-				ImGui_ImplVulkan_FreeTexture(*imguiImagePtr);
-				renderPass->Resize(width, height);
+			auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
+			auto depth = swapchain->GetDepthImage();
+			if (depth.Width != width || depth.Height != height)
+				swapchain->ResizeDepth(width, height);
 
-				auto vkImage = RefHelper::RefAs<VulkanImage2D>(image);
-				*imguiImagePtr = (ImTextureID)ImGui_ImplVulkan_AddTexture(vkImage->GetSampler(), vkImage->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			});
+			m_Renderpass->Resize(width, height);
 		}
 	}
 
@@ -166,7 +163,7 @@ namespace Lavender
 
 	ImTextureID VulkanViewport::GetImGuiTexture()
 	{
-		return m_ImGuiImage;
+		return (ImTextureID)m_Image->GetUIImage();
 	}
 
 }

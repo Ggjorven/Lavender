@@ -16,7 +16,7 @@ namespace Lavender
 		UniformBuffer() = default;
 		virtual ~UniformBuffer() = default;
 
-		virtual void SetData(void* data, size_t size) = 0;
+		virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
 
 		virtual void Upload() = 0;
 		virtual void Upload(Ref<DescriptorSet> set, UniformElement element) = 0;

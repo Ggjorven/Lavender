@@ -129,15 +129,21 @@ namespace Lavender
 			emitter << YAML::EndMap;
 		}
 
-		if (entity.HasComponent<DirectionalLightComponent>())
+		if (entity.HasComponent<PointLightComponent>())
 		{
-			DirectionalLightComponent& light = entity.GetComponent<DirectionalLightComponent>();
-			emitter << YAML::Key << "DirectionalLightComponent";
+			PointLightComponent& light = entity.GetComponent<PointLightComponent>();
+			emitter << YAML::Key << "PointLightComponent";
 			emitter << YAML::BeginMap;
 
-			emitter << YAML::Key << "Direction" << light.Direction;
-			emitter << YAML::Key << "Colour" << YAML::Value << light.Colour;
-			emitter << YAML::Key << "Intensity" << YAML::Value << light.Intensity;
+			emitter << YAML::Key << "Position" << YAML::Value << light.Position;
+
+			emitter << YAML::Key << "Ambient" << YAML::Value << light.Ambient;
+			emitter << YAML::Key << "Diffuse" << YAML::Value << light.Diffuse;
+			emitter << YAML::Key << "Specular" << YAML::Value << light.Specular;
+
+			emitter << YAML::Key << "Constant" << YAML::Value << light.Constant;
+			emitter << YAML::Key << "Linear" << YAML::Value << light.Linear;
+			emitter << YAML::Key << "Quadratic" << YAML::Value << light.Quadratic;
 
 			emitter << YAML::EndMap;
 		}
@@ -198,14 +204,20 @@ namespace Lavender
 			}
 		}
 
-		// DirectionalLightComponent
-		auto directionalLightComponent = node["DirectionalLightComponent"];
-		if (directionalLightComponent)
+		// PointLightComponent
+		auto pointLightComponent = node["PointLightComponent"];
+		if (pointLightComponent)
 		{
-			DirectionalLightComponent& light = entity.AddOrReplaceComponent<DirectionalLightComponent>();
-			light.Direction = directionalLightComponent["Direction"].as<glm::vec3>();
-			light.Colour = directionalLightComponent["Colour"].as<glm::vec4>();
-			light.Intensity = directionalLightComponent["Intensity"].as<float>();
+			PointLightComponent& light = entity.AddOrReplaceComponent<PointLightComponent>();
+			light.Position = pointLightComponent["Position"].as<glm::vec3>();
+
+			light.Ambient = pointLightComponent["Ambient"].as<glm::vec3>();
+			light.Diffuse = pointLightComponent["Diffuse"].as<glm::vec3>();
+			light.Specular = pointLightComponent["Specular"].as<glm::vec3>();
+
+			light.Constant = pointLightComponent["Constant"].as<float>();
+			light.Linear = pointLightComponent["Linear"].as<float>();
+			light.Quadratic = pointLightComponent["Quadratic"].as<float>();
 		}
 	}
 

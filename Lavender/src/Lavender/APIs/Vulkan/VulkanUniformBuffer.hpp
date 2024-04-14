@@ -22,7 +22,7 @@ namespace Lavender
 		VulkanUniformBuffer(Ref<DescriptorSet> set, UniformElement element, size_t dataSize);
 		virtual ~VulkanUniformBuffer();
 
-		void SetData(void* data, size_t size) override;
+		void SetData(void* data, size_t size, size_t offset) override;
 
 		void Upload() override;
 		void Upload(Ref<DescriptorSet> set, UniformElement element) override;

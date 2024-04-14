@@ -26,7 +26,6 @@ namespace Lavender
 		inline Ref<Mesh> GetMesh() { return m_Mesh; }
 
 		inline constexpr static std::string GetExtension() { return ".lvmesh"; }
-
 		inline constexpr AssetType GetStaticType() const override { return AssetType::MeshAsset; }
 
 		Ref<Asset> Copy() override;

@@ -16,7 +16,7 @@ namespace Lavender::Utils
 
 		std::string OpenDirectoryImpl(const std::string& dir) const override;
 
-		float GetTimeImpl() const override;
+		double GetTimeImpl() const override;
 		size_t GetMemoryUsageImpl() const override;
 		size_t GetHeapMemoryUsageImpl() const override;
 	};

@@ -57,19 +57,22 @@ namespace Lavender
 		});
 	}
 
-	void VulkanUniformBuffer::SetData(void* data, size_t size)
+	void VulkanUniformBuffer::SetData(void* data, size_t size, size_t offset)
 	{
 		LV_PROFILE_SCOPE("VulkanUniformBuffer::SetData");
 
-		// TODO(Jorben): Make assert?
-		if (size != m_Size)
-			LV_LOG_ERROR("Invalid size passed to SetData()");
+		if (size + offset > m_Size)
+		{
+			// TODO(Jorben): Make assert?	
+			LV_LOG_ERROR("Data exceeds buffer size in SetData()");
+			return;
+		}
 
 		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
 		{
 			void* mappedMemory = nullptr;
 			VulkanAllocator::MapMemory(m_Allocations[i], mappedMemory);
-			memcpy(mappedMemory, data, size);
+			memcpy(static_cast<uint8_t*>(mappedMemory) + offset, data, size);
 			VulkanAllocator::UnMapMemory(m_Allocations[i]);
 		}
 	}

@@ -7,6 +7,19 @@
 namespace Lavender
 {
 
+	// TODO: ...
+	enum class ShaderStage
+	{
+		None = 0, Vertex, Fragment
+	};
+
+	class VulkanShaderCompiler
+	{
+	public:
+		static void Compile(ShaderCode& code);
+		static std::vector<char> CompileGLSL(const std::string& source, ShaderStage stage);
+	};
+
 	class VulkanShader : public Shader
 	{
 	public:

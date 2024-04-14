@@ -38,6 +38,7 @@ namespace Lavender
 
 		bool InView(const glm::vec2& mainWindowPosition) const override;
 
+		void Resize() override;
 		void Resize(uint32_t width, uint32_t height) override;
 		glm::vec2 ConvertMousePosition(const glm::vec2& mainWindowPosition) const override;
 

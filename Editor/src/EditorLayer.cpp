@@ -54,7 +54,7 @@ void EditorLayer::OnDetach()
 	sceneSerializer.Serialize();
 
 	PreferencesSerializer prefSerializer(m_Preferences);
-	prefSerializer.Serialize("EditorPreferences.lvepref");
+	prefSerializer.Serialize(Utils::ToolKit::GetEnv() + "/Editor/EditorPreferences.lvepref");
 }
 
 void EditorLayer::OnUpdate(float deltaTime)
@@ -120,7 +120,7 @@ bool EditorLayer::OnKeyPressEvent(KeyPressedEvent& e)
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 {
-	m_Project->GetViewport()->Resize(e.GetWidth(), e.GetHeight());
+	m_Project->GetViewport()->Resize();
 
 	return false;
 }

@@ -106,6 +106,8 @@ namespace Lavender
 
 	void VulkanImage2D::Resize(uint32_t width, uint32_t height)
 	{
+		//LV_LOG_TRACE("(VulkanImage2D::Resize)");
+
 		auto textureID = m_TextureID;
 		auto sampler = m_Sampler;
 		auto imageView = m_ImageView;

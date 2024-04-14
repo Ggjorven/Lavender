@@ -35,6 +35,7 @@ namespace Lavender
 		virtual bool InView(const glm::vec2& mainWindowPosition) const = 0;
 		virtual glm::vec2 ConvertMousePosition(const glm::vec2& mainWindowPosition) const = 0;
 
+		virtual void Resize() = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Ref<RenderPass> GetRenderPass() = 0;

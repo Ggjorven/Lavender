@@ -41,7 +41,7 @@ namespace Lavender
 		vkCmdBindDescriptorSets(vkCmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, m_ID, 1, &m_DescriptorSets[currentFrame], 0, nullptr);
 	}
 
-	void VulkanDescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, size_t offset)
+	void VulkanDescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<RenderCommandBuffer> cmdBuffer, const std::vector<uint32_t>& offsets)
 	{
 		LV_PROFILE_SCOPE("VulkanDescriptorSet::Bind");
 
@@ -49,8 +49,7 @@ namespace Lavender
 		auto vkCmdBuf = RefHelper::RefAs<VulkanRenderCommandBuffer>(cmdBuffer)->GetVulkanCommandBuffer();
 		auto currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
 
-		uint32_t dynamicOffset = (uint32_t)offset;
-		vkCmdBindDescriptorSets(vkCmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, m_ID, 1, &m_DescriptorSets[currentFrame], 1, &dynamicOffset);
+		vkCmdBindDescriptorSets(vkCmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, m_ID, 1, &m_DescriptorSets[currentFrame], (uint32_t)offsets.size(), offsets.data());
 	}
 
 	VulkanDescriptorSetGroup::VulkanDescriptorSetGroup(const UniformLayout& layout, DescriptorSetGroup::DescriptorCount count)

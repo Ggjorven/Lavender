@@ -52,6 +52,7 @@ project "Lavender"
 	links
 	{
 		"%{Library.Vulkan}",
+		"%{Library.shaderc}",
 		
 		"GLFW",
 		"ImGui",

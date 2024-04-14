@@ -35,8 +35,17 @@ namespace Lavender
 		data << YAML::Key << "MetaData";
 		data << YAML::Value << YAML::BeginMap;
 
-		data << YAML::Key << "Albedo";
-		data << YAML::Value << m_AlbedoPath.string();
+		// Albedo
+		data << YAML::Key << "AlbedoImage";
+		data << YAML::Value << AlbedoPath.string();
+		data << YAML::Key << "AlbedoColour";
+		data << YAML::Value << AlbedoColour;
+
+		// Specular
+		data << YAML::Key << "SpecularImage";
+		data << YAML::Value << SpecularPath.string();
+		data << YAML::Key << "SpecularColour";
+		data << YAML::Value << SpecularColour;
 
 		data << YAML::EndMap;
 
@@ -78,11 +87,12 @@ namespace Lavender
 		auto metadata = data["MetaData"];
 		if (metadata)
 		{
-			auto albedo = metadata["Albedo"];
-			if (albedo)
+			// Albedo
+			auto albedoImage = metadata["AlbedoImage"];
+			if (albedoImage)
 			{
-				m_AlbedoPath = std::filesystem::path(albedo.as<std::string>());
-				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / m_AlbedoPath;
+				AlbedoPath = std::filesystem::path(albedoImage.as<std::string>());
+				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / AlbedoPath;
 
 				if (std::filesystem::exists(path) && !path.filename().empty())
 				{
@@ -90,24 +100,54 @@ namespace Lavender
 					specs.Usage = ImageSpecification::ImageUsage::File;
 					specs.Flags = ImageSpecification::ImageUsageFlags::Sampled;
 					specs.Path = path;
-					m_Albedo = Image2D::Create(specs);
+					AlbedoImage = Image2D::Create(specs);
 				}
 				else
-					LV_LOG_ERROR("(Material) Albedo path: '{0}' doesn't exist.", m_AlbedoPath.string());
+					LV_LOG_ERROR("(Material) Albedo path: '{0}' doesn't exist.", AlbedoPath.string());
+			}
+			auto albedoColour = metadata["AlbedoColour"];
+			if (albedoColour)
+			{
+				AlbedoColour = albedoColour.as<glm::vec4>();
+			}
+
+			// Specular
+			auto specularImage = metadata["SpecularImage"];
+			if (specularImage)
+			{
+				SpecularPath = std::filesystem::path(specularImage.as<std::string>());
+				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / SpecularPath;
+
+				if (std::filesystem::exists(path) && !path.filename().empty())
+				{
+					ImageSpecification specs = {};
+					specs.Usage = ImageSpecification::ImageUsage::File;
+					specs.Flags = ImageSpecification::ImageUsageFlags::Sampled;
+					specs.Path = path;
+					AlbedoImage = Image2D::Create(specs);
+				}
+				else
+					LV_LOG_ERROR("(Material) Specular path: '{0}' doesn't exist.", SpecularPath.string());
+			}
+			auto specularColour = metadata["SpecularColour"];
+			if (specularColour)
+			{
+				SpecularColour = specularColour.as<glm::vec4>();
 			}
 		}
 	}
 
-	void MaterialAsset::SetAlbedo(Ref<Image2D> image, const std::filesystem::path& path)
+	void MaterialAsset::Upload(Ref<Pipeline> pipeline, Ref<DescriptorSet> set, Ref<Image2D> emptyImage)
 	{
-		m_Albedo = image;
-		m_AlbedoPath = path;
-	}
+		if (AlbedoImage)
+			AlbedoImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_AlbedoImage"));
+		else
+			emptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_AlbedoImage"));
 
-	void MaterialAsset::Upload(Ref<DescriptorSet> set, UniformElement element)
-	{
-		if (m_Albedo) 
-			m_Albedo->Upload(set, element);
+		if (SpecularImage)
+			SpecularImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_SpecularImage"));
+		else
+			emptyImage->Upload(set, pipeline->GetSpecification().Uniformlayout.GetElementByName(0, "u_SpecularImage"));
 	}
 
 	Ref<Asset> MaterialAsset::Copy()
@@ -117,11 +157,21 @@ namespace Lavender
 		newAsset->m_Handle = m_Handle;
 
 		newAsset->m_Path = m_Path;
-		newAsset->m_AlbedoPath = m_AlbedoPath;
+		newAsset->AlbedoPath = AlbedoPath;
 
-		newAsset->m_Albedo = m_Albedo->Copy();
+		newAsset->AlbedoImage = AlbedoImage->Copy();
 
 		return newAsset;
+	}
+
+	ShaderMaterial MaterialAsset::AsShaderMaterial()
+	{
+		ShaderMaterial material = {};
+		material.AlbedoColour = AlbedoColour;
+		material.SpecularColour = SpecularColour;
+		material.Shininess = Shininess;
+
+		return material;
 	}
 
 	Ref<MaterialAsset> MaterialAsset::Create()

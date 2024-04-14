@@ -35,6 +35,7 @@ namespace Lavender
 	{
 	}
 
+	/*
 	DirectionalLightComponent::DirectionalLightComponent(const glm::vec3& direction, const glm::vec4& colour, float intensity)
 		: DirectionalLightComponent(colour, direction, intensity)
 	{
@@ -44,5 +45,6 @@ namespace Lavender
 		: Colour(colour), Direction(direction), Intensity(intensity)
 	{
 	}
+	*/
 
 }

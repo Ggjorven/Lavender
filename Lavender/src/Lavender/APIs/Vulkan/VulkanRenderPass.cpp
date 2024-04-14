@@ -98,12 +98,18 @@ namespace Lavender
 
     void VulkanRenderPass::Resize(uint32_t width, uint32_t height)
     {
+        //LV_LOG_TRACE("VulkanRenderPass::Resize");
+
         auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
         auto device = context->GetLogicalDevice();
 
-        // Destroy
-        for (auto& framebuffer : m_Framebuffers)
-            vkDestroyFramebuffer(device->GetVulkanDevice(), framebuffer, nullptr);
+        auto frameBuffers = m_Framebuffers;
+        Renderer::SubmitFree([frameBuffers]()
+        {
+            for (auto& framebuffer : frameBuffers)
+                vkDestroyFramebuffer(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), framebuffer, nullptr);
+        });
+        m_Framebuffers.clear();
 
         auto imageViews = context->GetSwapChain()->GetImageViews();
         if (m_Specification.ColourAttachment) imageViews = { RefHelper::RefAs<VulkanImage2D>(m_Specification.ColourAttachment)->GetImageView() };

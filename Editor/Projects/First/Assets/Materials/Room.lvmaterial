@@ -1,3 +1,6 @@
 Material: 8468309108205782655
 MetaData:
-  Albedo: ..\..\..\assets\objects\viking_room.png
+  AlbedoImage: ..\..\..\assets\objects\viking_room.png
+  AlbedoColour: [1, 1, 1, 1]
+  SpecularImage: ""
+  SpecularColour: [0.312764138, 0.330134749, 0.384615362, 1]
