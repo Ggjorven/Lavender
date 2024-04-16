@@ -13,7 +13,7 @@ namespace Lavender
 	{
 	public:
 		MeshAsset() = default;
-		MeshAsset(const std::filesystem::path& path);
+		MeshAsset(const std::filesystem::path& path, bool forceLoad = false);
 		MeshAsset(const std::filesystem::path& path, const std::filesystem::path& meshPath);
 		virtual ~MeshAsset();
 
@@ -33,6 +33,9 @@ namespace Lavender
 		static Ref<MeshAsset> Create();
 		static Ref<MeshAsset> Create(const std::filesystem::path& path);
 		static Ref<MeshAsset> Create(const std::filesystem::path& path, const std::filesystem::path& meshPath);
+
+	private:
+		void LoadUUID();
 
 	private:
 		std::filesystem::path m_OriginalPath = {};

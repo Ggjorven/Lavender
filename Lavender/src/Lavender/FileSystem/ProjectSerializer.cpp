@@ -21,6 +21,9 @@ namespace Lavender
 
 	void ProjectSerializer::Serialize()
 	{
+		if (m_Project->GetState() == ProjectState::Runtime)
+			m_Project->SwitchState();
+
 		YAML::Emitter data = {};
 
 		data << YAML::BeginMap;
@@ -85,8 +88,16 @@ namespace Lavender
 			{
 				m_Project->m_Directories.Project = path;
 				m_Project->m_Directories.ProjectDir = path.parent_path();
-				if (directories["Assets"]) m_Project->m_Directories.Assets = std::filesystem::path(directories["Assets"].as<std::string>());
-				if (directories["Scripts"]) m_Project->m_Directories.Scripts = std::filesystem::path(directories["Scripts"].as<std::string>());
+				if (directories["Assets"])
+				{
+					std::string assetString = directories["Assets"].as<std::string>();
+					m_Project->m_Directories.Assets = std::filesystem::path(assetString);
+				}
+				if (directories["Scripts"])
+				{
+					std::string scriptString = directories["Scripts"].as<std::string>();
+					m_Project->m_Directories.Scripts = std::filesystem::path(scriptString);
+				}
 			}
 
 			auto scenes = project["Scenes"];

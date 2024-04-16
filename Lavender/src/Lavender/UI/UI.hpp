@@ -33,6 +33,7 @@ namespace Lavender::UI
 	void ShiftCursor(float x, float y);
     void ShiftCursorX(float distance);
     void ShiftCursorY(float distance);
+	void SetCursorPos(const glm::vec2& position);
 
 	void HelpMarker(const std::string& desc);
 

@@ -12,7 +12,6 @@
 #include "Lavender/ECS/Entity.hpp"
 #include "Lavender/ECS/Registry.hpp"
 
-#include "Lavender/Scripting/ScriptLoader.hpp"
 #include "Lavender/Scripting/EntityInterface.hpp"
 #include "Lavender/Scripting/RegistryInterface.hpp"
 
@@ -20,6 +19,7 @@
 #include "Lavender/Renderer/Camera.hpp"
 #include "Lavender/Renderer/UniformBuffer.hpp"
 
+#include "Lavender/Workspace/ProjectSettings.hpp"
 #include "Lavender/Workspace/Assets/AssetManager.hpp"
 
 #ifdef LV_PLATFORM_WINDOWS
@@ -46,22 +46,16 @@ namespace Lavender
 	class Scene
 	{
 	public:
-		enum class State
-		{
-			None = 0, Editor, Runtime
-		};
-
-	public:
-		Scene(Ref<Viewport> viewport);
-		Scene(Ref<Viewport> viewport, const UUID& uuid);
+		Scene(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script);
+		Scene(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script, const UUID& uuid);
 		virtual ~Scene();
 
 		void StartRuntime();
 		void StopRuntime();
 
-		void OnUpdate(float deltaTime);
-		void OnRender(Ref<RenderCommandBuffer> cmdBuffer);
-		void OnEvent(Event& e);
+		void OnUpdate(ProjectState state, float deltaTime);
+		void OnRender(ProjectState state, Ref<RenderCommandBuffer> cmdBuffer);
+		void OnEvent(ProjectState state, Event& e);
 
 		void SetScript(Ref<ScriptLoader> script);
 		void ReloadScript();
@@ -73,17 +67,16 @@ namespace Lavender
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
 		inline Ref<Viewport> GetViewport() { return m_Viewport; }
 		inline Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
-		inline Ref<AssetManager> GetAssetManager() { return m_Assets; }
+		inline Ref<AssetManager> GetAssetManager() { return m_AssetsReference; }
 		inline UUID GetSceneID() { return m_UUID; }
 		inline SceneMetaData GetMetaData() { return m_Data; }
-		inline State GetState() const { return m_State; }
 
 		inline Entity CreateEntity() { return Entity::Create(m_Collection); }
 		inline Entity CreateEntityWithUUID(const UUID& uuid) { return Entity::Create(m_Collection, uuid); }
 		inline void DeleteEntity(const UUID& uuid) { m_Collection->DeleteEntity(uuid); }
 
-		static Ref<Scene> Create(Ref<Viewport> viewport);
-		static Ref<Scene> Create(Ref<Viewport> viewport, const UUID& uuid);
+		static Ref<Scene> Create(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script);
+		static Ref<Scene> Create(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script, const UUID& uuid);
 
 	private:
 		void UpdateEditor(float deltaTime);
@@ -95,10 +88,10 @@ namespace Lavender
 	private:
 		UUID m_UUID = {};
 
-		Ref<AssetManager> m_Assets = nullptr;
+		Ref<AssetManager> m_AssetsReference = nullptr;
+		Ref<ScriptLoader> m_ScriptReference = nullptr;
 
 		Ref<RegistryCollection> m_Collection = nullptr;
-		Ref<ScriptLoader> m_Script = nullptr;
 		Ref<RegistryInterface> m_RegistryInterface = nullptr;
 		Dict<UUID, Ref<EntityInterface>> m_EntityInterfaces = { };
 
@@ -106,8 +99,6 @@ namespace Lavender
 		Ref<EditorCamera> m_EditorCamera = nullptr;
 
 		SceneMetaData m_Data = {};
-
-		State m_State = State::Editor;
 
 		friend class SceneSerializer;
 	};

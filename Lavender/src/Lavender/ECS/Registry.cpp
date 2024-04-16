@@ -14,14 +14,24 @@ namespace Lavender
 	template<typename TComponent>
 	void CopyComponent(entt::registry& src, entt::registry& dst, SortedDict<UUID, entt::entity>& entityMap)
 	{
+		// TODO: Fix Mesh copy
 		auto view = src.view<TComponent>();
 
 		for (auto& entity : view)
 		{
 			UUID uuid = src.get<UUID>(entity);
 			auto dstEntity = entityMap[uuid];
-			auto component = src.get<TComponent>(entity);
-			dst.emplace<TComponent>(dstEntity, component);
+			auto& component = src.get<TComponent>(entity);
+			dst.emplace_or_replace<TComponent>(dstEntity, component);
+
+			// Note(Jorben): For some reason the MeshComponent doesn't copy properly
+			if constexpr (std::is_same_v<TComponent, MeshComponent>)
+			{
+				MeshComponent& srcMesh = component;
+				MeshComponent& dstMesh = dst.get<MeshComponent>(dstEntity);
+				dstMesh.MeshObject = srcMesh.MeshObject;
+				dstMesh.Material = srcMesh.Material;
+			}
 		}
 	}
 
@@ -61,7 +71,7 @@ namespace Lavender
 	{
 		entt::entity entity = m_Registry.create();
 
-		m_Registry.emplace<UUID>(entity, uuid); // TODO: Maybe only set the UUID component when copying
+		m_Registry.emplace<UUID>(entity, uuid);
 		m_Entities[uuid] = entity;
 	}
 
@@ -83,6 +93,18 @@ namespace Lavender
 		}
 
 		CopyComponents(AllComponents(), m_Registry, registry->m_Registry, registry->m_Entities);
+
+		// Quick test // TODO: Remove
+		{
+			auto meshView = registry->m_Registry.view<MeshComponent>();
+
+			for (auto& e : meshView)
+			{
+				MeshComponent& component = meshView.get<MeshComponent>(e);
+
+				int i = 0;
+			}
+		}
 
 		return registry;
 	}
@@ -130,6 +152,7 @@ namespace Lavender
 		else
 		{
 			m_MainRegistry = m_SecondaryRegistry;
+			m_SecondaryRegistry.reset();
 			m_SecondaryRegistry = nullptr;
 
 			m_MainIsMain = true;

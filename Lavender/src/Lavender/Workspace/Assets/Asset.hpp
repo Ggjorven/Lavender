@@ -42,12 +42,16 @@ namespace Lavender
 		inline AssetHandle GetHandle() { return m_Handle; }
 		inline void SetHandle(AssetHandle handle) { m_Handle = handle; }
 
+		inline bool IsLoaded() const { return m_Loaded; }
+		inline void SetLoaded(bool loaded) { m_Loaded = loaded; }
+
 		virtual AssetType GetStaticType() const = 0;
 
 		virtual Ref<Asset> Copy() = 0;
 
 	protected:
 		AssetHandle m_Handle = {};
+		bool m_Loaded = false;
 	};
 	
 	class MeshAsset;

@@ -1,6 +1,7 @@
 #include "ContentBrowserPanel.hpp"
 
 #include <Lavender/Core/Logging.hpp>
+#include <Lavender/Utils/Profiler.hpp>
 
 #include <Lavender/Workspace/Assets/Asset.hpp>
 
@@ -28,6 +29,8 @@ namespace Lavender
 
 	void ContentBrowserPanel::RenderUI()
 	{
+		LV_PROFILE_SCOPE("ContentBrowserPanel::RenderUI");
+
 		// To remove the tab bar.
 		ImGuiWindowClass window = {};
 		window.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;

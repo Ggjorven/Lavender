@@ -9,6 +9,7 @@
 #include "Lavender/Renderer/RenderCommandBuffer.hpp"
 #include "Lavender/Renderer/FrameResources.hpp"
 
+#include "Lavender/Workspace/Project.hpp"
 #include "Lavender/Workspace/SceneRenderer.hpp"
 
 namespace Lavender
@@ -17,30 +18,23 @@ namespace Lavender
 	///////////////////////////////////////////////////////////////////////////
 	// SceneCollection
 	///////////////////////////////////////////////////////////////////////////
-	Scene::Scene(Ref<Viewport> viewport)
-		: Scene(viewport, UUID::Create())
+	Scene::Scene(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script)
+		: Scene(viewport, assets, script, UUID::Create())
 	{
 	}
 
-	Scene::Scene(Ref<Viewport> viewport, const UUID& uuid)
-		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_Assets(AssetManager::Create()), m_UUID(uuid)
+	Scene::Scene(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script, const UUID& uuid)
+		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_AssetsReference(assets), m_ScriptReference(script), m_UUID(uuid)
 	{
-		SceneRenderer::Init();
-
 		m_EditorCamera = EditorCamera::Create(m_Viewport);
 	}
 
 	Scene::~Scene()
 	{
-		m_Assets->Serialize();
-		SceneRenderer::Destroy();
 	}
 
 	void Scene::StartRuntime()
 	{
-		m_State = Scene::State::Runtime;
-	
-		m_Assets->SwitchAssets();
 		m_Collection->SwitchRegistry();
 
 		auto& registry = m_Collection->GetMainRegistry()->GetRegistry();
@@ -50,26 +44,26 @@ namespace Lavender
 			ScriptComponent& component = view.get<ScriptComponent>(script);
 			UUID uuid = registry.get<UUID>(script);
 
-			m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_Script, component.ClassName);
+			m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_ScriptReference, component.ClassName);
 		}
 	}
 
 	void Scene::StopRuntime()
 	{
-		m_State = Scene::State::Editor;
+		m_Collection->SwitchRegistry();
 
 		m_RegistryInterface.reset();
 		m_EntityInterfaces.clear();
 	}
 
-	void Scene::OnUpdate(float deltaTime)
+	void Scene::OnUpdate(ProjectState state, float deltaTime)
 	{
-		switch (m_State)
+		switch (state)
 		{
-		case Scene::State::Editor:
+		case ProjectState::Editor:
 			UpdateEditor(deltaTime);
 			break;
-		case Scene::State::Runtime:
+		case ProjectState::Runtime:
 			UpdateRuntime(deltaTime);
 			break;
 
@@ -79,14 +73,14 @@ namespace Lavender
 		}
 	}
 
-	void Scene::OnRender(Ref<RenderCommandBuffer> cmdBuffer)
+	void Scene::OnRender(ProjectState state, Ref<RenderCommandBuffer> cmdBuffer)
 	{
-		switch (m_State)
+		switch (state)
 		{
-		case Scene::State::Editor:
+		case ProjectState::Editor:
 			RenderEditor(cmdBuffer);
 			break;
-		case Scene::State::Runtime:
+		case ProjectState::Runtime:
 			RenderRuntime(cmdBuffer);
 			break;
 
@@ -96,14 +90,14 @@ namespace Lavender
 		}
 	}
 
-	void Scene::OnEvent(Event& e)
+	void Scene::OnEvent(ProjectState state, Event& e)
 	{
-		switch (m_State)
+		switch (state)
 		{
-		case Scene::State::Editor:
+		case ProjectState::Editor:
 			m_EditorCamera->OnEvent(e);
 			break;
-		case Scene::State::Runtime:
+		case ProjectState::Runtime:
 			break;
 
 		default:
@@ -114,28 +108,27 @@ namespace Lavender
 
 	void Scene::SetScript(Ref<ScriptLoader> script)
 	{
-		m_Script = script;
-		m_RegistryInterface = RegistryInterface::Create(m_Collection, m_Script);
+		m_ScriptReference = script;
+		m_RegistryInterface = RegistryInterface::Create(m_Collection, m_ScriptReference);
 		m_EntityInterfaces.clear();
 	}
 
 	void Scene::ReloadScript()
 	{
-		m_Script->Reload();
 		m_RegistryInterface->Reload();
 
 		for (auto& e : m_EntityInterfaces)
 			e.second->Reload();
 	}
 
-	Ref<Scene> Scene::Create(Ref<Viewport> viewport)
+	Ref<Scene> Scene::Create(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script)
 	{
-		return RefHelper::Create<Scene>(viewport);
+		return RefHelper::Create<Scene>(viewport, assets, script);
 	}
 
-	Ref<Scene> Scene::Create(Ref<Viewport> viewport, const UUID& uuid)
+	Ref<Scene> Scene::Create(Ref<Viewport> viewport, Ref<AssetManager> assets, Ref<ScriptLoader> script, const UUID& uuid)
 	{
-		return RefHelper::Create<Scene>(viewport, uuid);
+		return RefHelper::Create<Scene>(viewport, assets, script, uuid);
 	}
 
 	void Scene::UpdateEditor(float deltaTime)

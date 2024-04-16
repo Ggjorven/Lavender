@@ -12,6 +12,12 @@
 namespace Lavender
 {
 
+	struct ShaderPointLight
+	{
+	public:
+
+	};
+
 	struct LightSettings
 	{
 	public:

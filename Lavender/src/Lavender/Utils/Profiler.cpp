@@ -8,7 +8,7 @@
 
 #if !defined(LV_DIST) && LV_ENABLE_PROFILING
 #if LV_MEM_PROFILING
-void* operator new(std::size_t size) 
+void* operator new(size_t size) 
 {
     if (Lavender::Application::Initialized())
         Lavender::Utils::ToolKit::GetAllocationCount()++;
@@ -30,7 +30,7 @@ void operator delete(void* ptr) noexcept
     std::free(ptr);
 }
 
-void operator delete(void* ptr, std::size_t size) noexcept 
+void operator delete(void* ptr, size_t size) noexcept 
 {
     if (Lavender::Application::Initialized())
         Lavender::Utils::ToolKit::GetAllocationCount()--;

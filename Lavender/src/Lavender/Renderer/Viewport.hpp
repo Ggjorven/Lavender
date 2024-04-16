@@ -12,6 +12,7 @@
 namespace Lavender
 {
 
+	class Project;
 	class Pipeline;
 	class UniformBuffer;
 
@@ -26,6 +27,7 @@ namespace Lavender
 		virtual void EndFrame() = 0;
 
 		virtual void BeginRender() = 0;
+		virtual void RenderUI(Project* project) = 0;
 		virtual void EndRender() = 0;
 
 		virtual uint32_t GetWidth() const = 0;

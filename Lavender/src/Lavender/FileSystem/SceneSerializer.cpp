@@ -123,8 +123,10 @@ namespace Lavender
 			emitter << YAML::Key << "MeshComponent";
 			emitter << YAML::BeginMap;
 
-			if (mesh.MeshObject) emitter << YAML::Key << "AssetHandle" << mesh.MeshObject->GetHandle().Get();
-			if (mesh.Material) emitter << YAML::Key << "Material" << YAML::Value << mesh.Material->GetHandle().Get();
+			if (mesh.MeshObject) 
+				emitter << YAML::Key << "Mesh" << mesh.MeshObject->GetHandle().Get();
+			if (mesh.Material) 
+				emitter << YAML::Key << "Material" << YAML::Value << mesh.Material->GetHandle().Get();
 
 			emitter << YAML::EndMap;
 		}
@@ -182,7 +184,7 @@ namespace Lavender
 			auto assets = m_Scene->GetAssetManager();
 			
 			// Mesh
-			auto meshHandle = meshComponent["AssetHandle"];
+			auto meshHandle = meshComponent["Mesh"];
 			if (meshHandle)
 			{
 				AssetHandle meshAssetHandle = meshHandle.as<uint64_t>();

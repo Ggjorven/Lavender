@@ -164,7 +164,8 @@ namespace Lavender
 			{
 				MeshComponent& mesh = s_Entities.get<MeshComponent>(entity);
 
-				materials[index] = mesh.Material->AsShaderMaterial();
+				if (mesh.Material)
+					materials[index] = mesh.Material->AsShaderMaterial();
 			}
 			s_MaterialBuffer->SetDataIndexed(index, (void*)&materials[index], sizeof(ShaderMaterial));
 

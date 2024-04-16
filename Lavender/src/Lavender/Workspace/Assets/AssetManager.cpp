@@ -27,7 +27,7 @@ namespace Lavender
 			if (entry.is_regular_file() && entry.path().extension() == extension)
 			{
 				result.push_back(entry.path());
-				LV_LOG_TRACE("Loaded asset: {0}", entry.path().string());
+				LV_LOG_TRACE("Found asset: {0}", entry.path().string());
 			}
 		}
 
@@ -79,10 +79,7 @@ namespace Lavender
 
 	void AssetManager::GetAssetsFromDirectory(const std::filesystem::path& directory)
 	{
-		Utils::Timer time = {};
-		LV_LOG_TRACE("Started timer for AssetManager");
 		DeserializeAssets(AllAssets(), this, directory);
-		LV_LOG_TRACE("Time passed: {0}", time.GetPassedTime());
 	}
 
 	void AssetManager::AddAsset(Ref<Asset> asset)
@@ -116,12 +113,31 @@ namespace Lavender
 
 	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
 	{
-		return m_PrimaryIsPrimary ? m_PrimaryAssets[handle] : m_SecondaryAssets[handle];
+		auto it = m_PrimaryIsPrimary ? m_PrimaryAssets.find(handle) : m_SecondaryAssets.find(handle);
+		if (it == (m_PrimaryIsPrimary ? m_PrimaryAssets.end() : m_SecondaryAssets.end()))
+		{
+			LV_LOG_ERROR("Failed to find asset by handle: {0}", handle.Get());
+			return nullptr;
+		}
+
+		auto asset = m_PrimaryIsPrimary ? m_PrimaryAssets[handle] : m_SecondaryAssets[handle];
+		if (!asset->IsLoaded())
+			LoadAsset(asset);
+
+		return asset;
 	}
 
 	Ref<AssetManager> AssetManager::Create()
 	{
 		return RefHelper::Create<AssetManager>();
+	}
+
+	void AssetManager::LoadAsset(Ref<Asset> asset)
+	{
+		LV_LOG_TRACE("Loading '{0}' into memory.", asset->GetAssetPath().string());
+
+		asset->Deserialize(asset->GetAssetPath());
+		asset->SetLoaded(true);
 	}
 
 }

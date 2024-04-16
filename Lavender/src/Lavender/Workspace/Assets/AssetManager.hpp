@@ -30,6 +30,9 @@ namespace Lavender
 		static Ref<AssetManager> Create();
 
 	private:
+		void LoadAsset(Ref<Asset> asset);
+
+	private:
 		Dict<AssetHandle, Ref<Asset>> m_PrimaryAssets = { };
 		Dict<AssetHandle, Ref<Asset>> m_SecondaryAssets = { };
 		bool m_PrimaryIsPrimary = true;

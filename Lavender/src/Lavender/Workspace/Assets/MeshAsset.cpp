@@ -12,15 +12,25 @@
 namespace Lavender
 {
 
-	MeshAsset::MeshAsset(const std::filesystem::path& path)
+	MeshAsset::MeshAsset(const std::filesystem::path& path, bool forceLoad)
 		: m_Path(path), m_OriginalPath(path)
 	{
-		Deserialize(path);
+		if (forceLoad)
+		{
+			LV_LOG_TRACE("Loading '{0}' into memory.", path.string());
+
+			Deserialize(path);
+			m_Loaded = true;
+		}
+		else
+			LoadUUID();
 	}
 
+	// Creates a new UUID, maybe not what's wanted?
 	MeshAsset::MeshAsset(const std::filesystem::path& path, const std::filesystem::path& meshPath)
 		: m_Path(path), m_OriginalPath(path), m_MeshPath(meshPath), m_Mesh(Mesh::Create(meshPath))
 	{
+		m_Loaded = true;
 	}
 
 	MeshAsset::~MeshAsset() 
@@ -87,10 +97,10 @@ namespace Lavender
 				m_MeshPath = std::filesystem::path(meshPath.as<std::string>());
 				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / m_MeshPath;
 
-				if (std::filesystem::exists(path))
+				if (std::filesystem::exists(path) && path.has_filename())
 					m_Mesh = Mesh::Create(path);
-				else
-					LV_LOG_ERROR("(Mesh) Mesh by path: '{0}' doesn't exist.", m_MeshPath);
+				else if (!path.empty())
+					LV_LOG_ERROR("(Mesh) Mesh by path: '{0}' doesn't exist.", m_MeshPath.string());
 			}
 		}
 	}
@@ -104,7 +114,8 @@ namespace Lavender
 		newAsset->m_Path = m_Path;
 		newAsset->m_MeshPath = m_MeshPath;
 		
-		newAsset->m_Mesh = m_Mesh->Copy();
+		if (m_Mesh)
+			newAsset->m_Mesh = m_Mesh->Copy();
 
 		return newAsset;
 	}
@@ -122,6 +133,24 @@ namespace Lavender
 	Ref<MeshAsset> MeshAsset::Create(const std::filesystem::path& path, const std::filesystem::path& meshPath)
 	{
 		return RefHelper::Create<MeshAsset>(path, meshPath);
+	}
+
+	void MeshAsset::LoadUUID()
+	{
+		YAML::Node data = {};
+		try
+		{
+			data = YAML::LoadFile(m_Path.string());
+		}
+		catch (YAML::BadFile e)
+		{
+			LV_LOG_WARN("Failed to load {0} (Code: {1})", m_Path.string(), e.what());
+			return;
+		}
+
+		auto handle = data["MeshAsset"];
+		if (handle)
+			m_Handle = UUID(handle.as<uint64_t>());
 	}
 
 }

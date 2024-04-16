@@ -48,6 +48,11 @@ namespace Lavender::UI
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + distance);
 	}
 
+	void SetCursorPos(const glm::vec2& position)
+	{
+		ImGui::SetCursorPos(ImVec2(position.x, position.y));
+	}
+
 	void HelpMarker(const std::string& desc)
 	{
 		ImGui::TextDisabled("(?)");

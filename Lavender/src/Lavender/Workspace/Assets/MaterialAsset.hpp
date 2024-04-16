@@ -19,7 +19,7 @@ namespace Lavender
 	{
 	public:
 		MaterialAsset() = default;
-		MaterialAsset(const std::filesystem::path& path);
+		MaterialAsset(const std::filesystem::path& path, bool forceLoad = false);
 		virtual ~MaterialAsset();
 
 		void Serialize() override;
@@ -38,6 +38,9 @@ namespace Lavender
 
 		static Ref<MaterialAsset> Create();
 		static Ref<MaterialAsset> Create(const std::filesystem::path& path);
+
+	private:
+		void LoadUUID();
 
 	public:
 		std::filesystem::path AlbedoPath = {};

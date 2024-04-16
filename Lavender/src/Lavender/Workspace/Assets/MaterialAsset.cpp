@@ -12,10 +12,18 @@
 namespace Lavender
 {
 
-	MaterialAsset::MaterialAsset(const std::filesystem::path& path)
+	MaterialAsset::MaterialAsset(const std::filesystem::path& path, bool forceLoad)
 		: m_Path(path), m_OriginalPath(path)
 	{
-		Deserialize(path);
+		if (forceLoad)
+		{
+			LV_LOG_TRACE("Loading '{0}' into memory.", path.string());
+
+			Deserialize(path);
+			m_Loaded = true;
+		}
+		else
+			LoadUUID();
 	}
 
 	MaterialAsset::~MaterialAsset()
@@ -94,7 +102,7 @@ namespace Lavender
 				AlbedoPath = std::filesystem::path(albedoImage.as<std::string>());
 				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / AlbedoPath;
 
-				if (std::filesystem::exists(path) && !path.filename().empty())
+				if (std::filesystem::exists(path) && path.has_filename())
 				{
 					ImageSpecification specs = {};
 					specs.Usage = ImageSpecification::ImageUsage::File;
@@ -102,7 +110,7 @@ namespace Lavender
 					specs.Path = path;
 					AlbedoImage = Image2D::Create(specs);
 				}
-				else
+				else if (!AlbedoPath.empty())
 					LV_LOG_ERROR("(Material) Albedo path: '{0}' doesn't exist.", AlbedoPath.string());
 			}
 			auto albedoColour = metadata["AlbedoColour"];
@@ -118,7 +126,7 @@ namespace Lavender
 				SpecularPath = std::filesystem::path(specularImage.as<std::string>());
 				auto path = Project::Get()->GetDirectories().ProjectDir / Project::Get()->GetDirectories().Assets / SpecularPath;
 
-				if (std::filesystem::exists(path) && !path.filename().empty())
+				if (std::filesystem::exists(path) && path.has_filename())
 				{
 					ImageSpecification specs = {};
 					specs.Usage = ImageSpecification::ImageUsage::File;
@@ -126,7 +134,7 @@ namespace Lavender
 					specs.Path = path;
 					AlbedoImage = Image2D::Create(specs);
 				}
-				else
+				else if (!SpecularPath.empty())
 					LV_LOG_ERROR("(Material) Specular path: '{0}' doesn't exist.", SpecularPath.string());
 			}
 			auto specularColour = metadata["SpecularColour"];
@@ -159,7 +167,8 @@ namespace Lavender
 		newAsset->m_Path = m_Path;
 		newAsset->AlbedoPath = AlbedoPath;
 
-		newAsset->AlbedoImage = AlbedoImage->Copy();
+		if (AlbedoImage)
+			newAsset->AlbedoImage = AlbedoImage->Copy();
 
 		return newAsset;
 	}
@@ -182,6 +191,26 @@ namespace Lavender
 	Ref<MaterialAsset> MaterialAsset::Create(const std::filesystem::path& path)
 	{
 		return RefHelper::Create<MaterialAsset>(path);
+	}
+
+	void MaterialAsset::LoadUUID()
+	{
+		YAML::Node data = {};
+		try
+		{
+			data = YAML::LoadFile(m_Path.string());
+		}
+		catch (YAML::BadFile e)
+		{
+			LV_LOG_WARN("Failed to load {0} (Code: {1})", m_Path.string(), e.what());
+			return;
+		}
+
+		auto handle = data["Material"];
+		if (handle)
+		{
+			m_Handle = UUID(handle.as<uint64_t>());
+		}
 	}
 
 }

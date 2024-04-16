@@ -1,6 +1,7 @@
 #include "MaterialPanel.hpp"
 
 #include <Lavender/Core/Logging.hpp>
+#include <Lavender/Utils/Profiler.hpp>
 
 #include <Lavender/Workspace/Assets/Asset.hpp>
 #include <Lavender/Workspace/Assets/MeshAsset.hpp>
@@ -33,6 +34,8 @@ namespace Lavender
 	{
 		if (!m_Enabled)
 			return;
+
+		LV_PROFILE_SCOPE("ContentBrowserPanel::RenderUI");
 
 		// To remove the tab bar.
 		ImGuiWindowClass window = {};

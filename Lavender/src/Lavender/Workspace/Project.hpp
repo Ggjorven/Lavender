@@ -8,26 +8,15 @@
 
 #include "Lavender/Renderer/Viewport.hpp"
 
+#include "Lavender/Scripting/ScriptLoader.hpp"
+
 #include "Lavender/Workspace/Scene.hpp"
+#include "Lavender/Workspace/ProjectSettings.hpp"
 
 namespace Lavender
 {
 
 	class ProjectSerializer;
-
-	struct ProjectDirectories
-	{
-	public:
-		std::filesystem::path Project = "";
-		std::filesystem::path ProjectDir = "";
-		std::filesystem::path Assets = "Assets";
-		std::filesystem::path Scripts = "Script";
-
-	public:
-		ProjectDirectories() = default;
-		ProjectDirectories(const ProjectDirectories& other) = default;
-		virtual ~ProjectDirectories() = default;
-	};
 
 	class Project
 	{
@@ -38,6 +27,7 @@ namespace Lavender
 
 		void StartRuntime();
 		void StopRuntime();
+		void SwitchState();
 
 		void OnUpdate(float deltaTime);
 		void OnRender();
@@ -50,8 +40,14 @@ namespace Lavender
 
 		void InitializeStartScene();
 
-		inline SceneCollection& GetSceneCollection() { return m_Scenes; }
+		void SetScript(Ref<ScriptLoader> script);
+		void ReloadScript();
+
+		inline ProjectState GetState() const { return m_State; }
+
 		inline Ref<Viewport> GetViewport() { return m_Viewport; }
+		inline Ref<AssetManager> GetAssetManager() { return m_Assets; }
+		inline SceneCollection& GetSceneCollection() { return m_Scenes; }
 		inline ProjectDirectories& GetDirectories() { return m_Directories; }
 
 		static Ref<Project> Create();
@@ -64,11 +60,16 @@ namespace Lavender
 
 		Ref<Viewport> m_Viewport = nullptr;
 
+		Ref<AssetManager> m_Assets = nullptr;
+		Ref<ScriptLoader> m_Script = nullptr;
+
 		SceneCollection m_Scenes = {};
 
+		ProjectState m_State = ProjectState::Editor;
 		ProjectDirectories m_Directories = {};
 		std::filesystem::path m_StartScenePath = {};
 
+		friend class Viewport;
 		friend class ProjectSerializer;
 	};
 

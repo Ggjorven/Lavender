@@ -5,16 +5,16 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/Workspace/Project.hpp"
+
 #include "Lavender/Renderer/Mesh.hpp"
 #include "Lavender/Renderer/Shader.hpp"
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/UniformBuffer.hpp"
 #include "Lavender/Renderer/FrameResources.hpp"
+#include "Lavender/Renderer/Image.hpp"
 
-#include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
-#include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
-#include "Lavender/APIs/Vulkan/VulkanImGuiLayer.hpp"
 
 #include "Lavender/UI/UI.hpp"
 
@@ -25,6 +25,9 @@
 
 namespace Lavender
 {
+
+	static Ref<Image2D> s_PlayImage = nullptr;
+	static Ref<Image2D> s_StopImage = nullptr;
 
 	VulkanViewport::VulkanViewport(uint32_t width, uint32_t height)
 		: m_Width(width), m_Height(height)
@@ -54,17 +57,23 @@ namespace Lavender
 			{ UI::StyleColourType::SeparatorHovered, UI::Colours::LighterTint }
 		});
 
-		auto image = RefHelper::RefAs<VulkanImage2D>(m_Image);
-		m_ImGuiImage = (ImTextureID)ImGui_ImplVulkan_AddTexture(image->GetSampler(), image->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		// Images
+		ImageSpecification uiImageSpecs = {};
+		uiImageSpecs.Usage = ImageSpecification::ImageUsage::File;
+		uiImageSpecs.Format = ImageSpecification::ImageFormat::RGBA;
+		uiImageSpecs.Flags = ImageSpecification::ImageUsageFlags::Colour | ImageSpecification::ImageUsageFlags::Sampled | ImageSpecification::ImageUsageFlags::NoMipMaps;
+
+		uiImageSpecs.Path = Utils::ToolKit::GetEnv() + "/Editor/assets/images/Play.png";
+		s_PlayImage = Image2D::Create(uiImageSpecs);
+
+		uiImageSpecs.Path = Utils::ToolKit::GetEnv() + "/Editor/assets/images/Stop.png";
+		s_StopImage = Image2D::Create(uiImageSpecs);
 	}
 
 	VulkanViewport::~VulkanViewport()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-		vkDeviceWaitIdle(device);
-		
-		auto pool = ((VulkanImGuiLayer*)Application::Get().GetImGuiLayer())->GetVulkanDescriptorPool();
-		vkFreeDescriptorSets(device, pool, 1, (VkDescriptorSet*)&m_ImGuiImage);
+		s_PlayImage.reset();
+		s_StopImage.reset();
 	}
 
 	void VulkanViewport::BeginFrame()
@@ -84,6 +93,7 @@ namespace Lavender
 		Renderer::WaitFor(m_Renderpass->GetCommandBuffer());
 	}
 
+	static glm::vec2 s_TopLeftCursorPos = {};
 	void VulkanViewport::BeginRender()
 	{
 		LV_PROFILE_SCOPE("VulkanViewport::BeginRender");
@@ -97,6 +107,8 @@ namespace Lavender
 
 		UI::BeginWindow("Viewport", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoBackground | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove);
 
+		s_TopLeftCursorPos = glm::vec2(ImGui::GetCursorPos().x, ImGui::GetCursorPos().y);
+
 		auto imWindow = ImGui::GetCurrentWindow();
 		auto position = imWindow->Pos;
 		auto size = imWindow->Size;
@@ -106,14 +118,48 @@ namespace Lavender
 		}
 		m_Width = (uint32_t)size.x;
 		m_Height = (uint32_t)size.y;
-		//LV_LOG_TRACE("Width: {0}, Height: {1}", m_Width, m_Height);
 
 		auto& mainWindow = Application::Get().GetWindow();
 		m_XPos = (uint32_t)position.x - mainWindow.GetPositionX();
 		m_YPos = (uint32_t)position.y - mainWindow.GetPositionY();
 
 		auto region = ImGui::GetContentRegionAvail();
-		ImGui::Image(GetImGuiTexture(), ImVec2(region.x, region.y), ImVec2(1.0f, 0.0f), ImVec2(0.0f, 1.0f)); // TODO: Replace with UI Image
+		ImGui::Image(GetImGuiTexture(), ImVec2(region.x, region.y), ImVec2(1.0f, 0.0f), ImVec2(0.0f, 1.0f));
+	}
+
+	void VulkanViewport::RenderUI(Project* project)
+	{
+		LV_PROFILE_SCOPE("VulkanViewport::RenderUI");
+
+		UI::SetCursorPos(s_TopLeftCursorPos);
+
+		glm::vec2 buttonSize = { 32.0f, 32.0f };
+		UI::ShiftCursorX(((float)m_Width / 2.0f) - (buttonSize.x / 2.0f));
+		{
+			UI::ScopedStyleList colours = UI::StyleColourList({
+				{ UI::StyleColourType::Button, { 0.0f, 0.0f, 0.0f, 0.0f } },
+				{ UI::StyleColourType::ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f } },
+				{ UI::StyleColourType::ButtonActive, { 0.0f, 0.0f, 0.0f, 0.0f } }
+			});
+
+			ImTextureID id = nullptr;
+			switch (project->GetState())
+			{
+			case ProjectState::Editor:
+				id = s_PlayImage->GetUIImage();
+				break;
+			case ProjectState::Runtime:
+				id = s_StopImage->GetUIImage();
+				break;
+
+			default:
+				LV_LOG_FATAL("No proper state selected.");
+				break;
+			}
+
+			if (ImGui::ImageButton(id, ImVec2(buttonSize.x, buttonSize.y)))
+				project->SwitchState();
+		}
 	}
 
 	void VulkanViewport::EndRender()

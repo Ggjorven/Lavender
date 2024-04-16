@@ -9,7 +9,7 @@ SceneData:
         Size: [0.100000001, 0.100000001, 0.100000001]
         Rotation: [-90, 0, -8.69999981]
       MeshComponent:
-        AssetHandle: 6516009052361294980
+        Mesh: 6516009052361294980
         Material: 8468309108205782645
     - Entity: 7325713287001512595
       TagComponent:
@@ -19,26 +19,15 @@ SceneData:
         Size: [1, 1, 1]
         Rotation: [270, 0, -90]
       MeshComponent:
-        AssetHandle: 6516009052361294990
+        Mesh: 6516009052361294990
         Material: 8468309108205782655
     - Entity: 3445474986533813990
       TagComponent:
         Tag: New Room
       TransformComponent:
-        Position: [2.29999995, 0.400000006, 0.600000024]
+        Position: [2.29999995, 0, 0.600000024]
         Size: [1, 1, 1]
         Rotation: [-90, 0, 273.899994]
       MeshComponent:
-        AssetHandle: 6516009052361294990
+        Mesh: 6516009052361294990
         Material: 8468309108205782655
-    - Entity: 11880706179649390839
-      TagComponent:
-        Tag: Light
-      PointLightComponent:
-        Position: [2.4000001, 1.10000002, 0.800000012]
-        Ambient: [1, 1, 1]
-        Diffuse: [0, 0, 0]
-        Specular: [0, 0, 0]
-        Constant: 0.800000012
-        Linear: 0.100000001
-        Quadratic: 0.400000006

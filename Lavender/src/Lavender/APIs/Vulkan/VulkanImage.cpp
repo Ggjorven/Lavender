@@ -233,6 +233,11 @@ namespace Lavender
 	{
 		int width, height, texChannels;
 		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
+		if (pixels == nullptr)
+		{
+			LV_LOG_ERROR("Failed to load image from '{0}'", path.string());
+			return;
+		}
 
 		m_Specification.Width = width;
 		m_Specification.Height = height;

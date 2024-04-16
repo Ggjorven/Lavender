@@ -30,6 +30,7 @@ namespace Lavender
 		void EndFrame() override;
 
 		void BeginRender() override;
+		void RenderUI(Project* project) override;
 		void EndRender() override;
 
 		inline uint32_t GetWidth() const override { return m_Width; }
@@ -52,7 +53,6 @@ namespace Lavender
 		UI::StyleList m_WindowStyle = {};
 		UI::StyleColourList m_WindowColours = {};
 
-		ImTextureID m_ImGuiImage = {};
 		uint32_t m_Width = 0, m_Height = 0;
 		uint32_t m_XPos = 0, m_YPos = 0;
 	};
