@@ -10,6 +10,7 @@ layout(location = 2) in vec3 v_Normal;
 struct PointLight 
 {
     vec3 Position;
+    vec3 Rotation;
 
     vec3 Ambient;
     vec3 Diffuse;
@@ -75,12 +76,38 @@ void main()
     }
 }
 
+mat3 rotationMatrix(vec3 rotation)
+{
+    float cosX = cos(rotation.x);
+    float sinX = sin(rotation.x);
+    float cosY = cos(rotation.y);
+    float sinY = sin(rotation.y);
+    float cosZ = cos(rotation.z);
+    float sinZ = sin(rotation.z);
+
+    mat3 rotateX = mat3(1.0, 0.0, 0.0,
+                        0.0, cosX, -sinX,
+                        0.0, sinX, cosX);
+
+    mat3 rotateY = mat3(cosY, 0.0, sinY,
+                        0.0, 1.0, 0.0,
+                        -sinY, 0.0, cosY);
+
+    mat3 rotateZ = mat3(cosZ, -sinZ, 0.0,
+                        sinZ, cosZ, 0.0,
+                        0.0, 0.0, 1.0);
+
+    return rotateX * rotateY * rotateZ;
+}
+
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 albedoCol = (texture(u_AlbedoImage, v_TexCoord) * u_Material.AlbedoColour).rgb;
     vec3 specCol = (texture(u_SpecularImage, v_TexCoord) * u_Material.SpecularColour).rgb;
 
+    // Apply rotation to the light direction
     vec3 lightDir = normalize(light.Position - v_Position);
+    lightDir = mat3(rotationMatrix(light.Rotation)) * lightDir;
 
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);

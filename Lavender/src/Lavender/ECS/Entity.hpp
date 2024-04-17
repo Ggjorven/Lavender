@@ -53,7 +53,7 @@ namespace Lavender
 		UUID GetUUID() const { return m_UUID; }
 
 		static Entity Create(Ref<RegistryCollection> registry);
-		static Entity Create(Ref<RegistryCollection> registry, const UUID& uuid);
+		static Entity Create(Ref<RegistryCollection> registry, const UUID& uuid, bool reset = true);
 
 	private:
 		Ref<RegistryCollection> m_Registry = nullptr;

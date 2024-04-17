@@ -131,13 +131,22 @@ namespace Lavender
 			emitter << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			ScriptComponent& script = entity.GetComponent<ScriptComponent>();
+			emitter << YAML::Key << "ScriptComponent";
+			emitter << YAML::BeginMap;
+
+			emitter << YAML::Key << "ClassName" << script.ClassName;
+
+			emitter << YAML::EndMap;
+		}
+
 		if (entity.HasComponent<PointLightComponent>())
 		{
 			PointLightComponent& light = entity.GetComponent<PointLightComponent>();
 			emitter << YAML::Key << "PointLightComponent";
 			emitter << YAML::BeginMap;
-
-			emitter << YAML::Key << "Position" << YAML::Value << light.Position;
 
 			emitter << YAML::Key << "Ambient" << YAML::Value << light.Ambient;
 			emitter << YAML::Key << "Diffuse" << YAML::Value << light.Diffuse;
@@ -206,13 +215,19 @@ namespace Lavender
 			}
 		}
 
+		// ScriptComponent
+		auto scriptComponent = node["ScriptComponent"];
+		if (scriptComponent)
+		{
+			ScriptComponent& script = entity.AddOrReplaceComponent<ScriptComponent>();
+			script.ClassName = scriptComponent["ClassName"].as<std::string>();
+		}
+
 		// PointLightComponent
 		auto pointLightComponent = node["PointLightComponent"];
 		if (pointLightComponent)
 		{
 			PointLightComponent& light = entity.AddOrReplaceComponent<PointLightComponent>();
-			light.Position = pointLightComponent["Position"].as<glm::vec3>();
-
 			light.Ambient = pointLightComponent["Ambient"].as<glm::vec3>();
 			light.Diffuse = pointLightComponent["Diffuse"].as<glm::vec3>();
 			light.Specular = pointLightComponent["Specular"].as<glm::vec3>();

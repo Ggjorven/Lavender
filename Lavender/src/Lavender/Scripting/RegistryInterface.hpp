@@ -7,6 +7,7 @@
 #include "Lavender/ECS/Registry.hpp"
 
 #include "Lavender/Scripting/ScriptLoader.hpp"
+#include "Lavender/Scripting/ScriptableEntity.hpp"
 
 #ifdef LV_PLATFORM_WINDOWS
 #include "Lavender/Platforms/Windows/WindowsRegistryInterface.hpp"
@@ -29,6 +30,8 @@ namespace Lavender
 
 	typedef void (*RemoveComponentFn)(Component, uint64_t);
 	typedef void (*SetRemoveComponentFn)(RemoveComponentFn);
+
+	typedef ClassList* (*GetClassesFn)();
 
 	// Note(Jorben): This class sets the function pointers in the script.
 	// Note(Jorben): The functions with the Native_ are wrappers around member functions
@@ -213,6 +216,8 @@ namespace Lavender
 				break;
 			}
 		}
+
+		inline ClassList GetClasses() const { return m_Interface->GetClasses(); }
 
 		static RegistryInterface* Get() { return s_Instance; }
 

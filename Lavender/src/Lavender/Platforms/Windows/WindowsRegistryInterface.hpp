@@ -6,12 +6,12 @@
 #include "Lavender/ECS/Registry.hpp"
 
 #include "Lavender/Scripting/ScriptLoader.hpp"
+#include "Lavender/Scripting/ScriptableEntity.hpp"
+
 #include "Lavender/Platforms/Windows/WindowsScriptLoader.hpp"
 
 namespace Lavender
 {
-
-
 
 	class WindowsRegistryInterface
 	{
@@ -54,9 +54,13 @@ namespace Lavender
 			m_Collection->RemoveComponent<TComponent>(UUID(entity));
 		}
 
+		inline ClassList GetClasses() const { return m_Classes; }
+
 	private:
 		Ref<RegistryCollection> m_Collection = nullptr;
 		Ref<WindowsScriptLoader> m_Loader = nullptr;
+
+		ClassList m_Classes = {};
 	};
 
 }

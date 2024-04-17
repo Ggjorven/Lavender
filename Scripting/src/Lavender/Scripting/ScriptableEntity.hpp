@@ -76,6 +76,14 @@ namespace Lavender
         uint64_t m_UUID = 0ull;
     };
 
+    struct ClassList
+    {
+    public:
+        std::vector<std::string> Classes = { };
+
+        void Add(const std::string& name);
+    };
+
     enum class VariableType
     {
         None = 0,
@@ -116,6 +124,19 @@ namespace Lavender
     };
 }
 
+// Public scope class list
+#ifdef LV_CLASS_EXPORT
+inline static Lavender::ClassList DefinedClasses = {};
+
+extern "C"
+{
+EXPORT Lavender::ClassList* Script_GetDefinedClasses()
+{ 
+    return &DefinedClasses;
+}
+}
+#endif
+
 #define LV_ENTITY(name) \
 static Lavender::VariableList name##Variables = {}; \
 extern "C" \
@@ -148,6 +169,15 @@ EXPORT void Script_SetUUID##name(name* instance, uint64_t uuid) \
 { \
     return instance->SetUUID(uuid); \
 } \
+} \
+namespace \
+{ \
+inline void Add##name##ToDefinedClasses() \
+{ \
+    DefinedClasses.Add(#name); \
+} \
+\
+static int dummy##name = (Add##name##ToDefinedClasses(), 0); \
 }
 
 // Note(Jorben): This is only for public variables use LV_DEFINE_PRIVATE_VARIABLE in a public scope and use LV_PRIVATE_VARIABLE for a private variable.
@@ -173,6 +203,7 @@ inline void Add##varname##ToVariableList() \
 static int dummy##varname = (Add##varname##ToVariableList(), 0); \
 }
 
+// Note(Jorben): The private variables are not recommended. Personal opinion.
 // Note(Jorben): This macro has to be used in a public scope
 #define LV_DEFINE_PRIVATE_VARIABLE(type, varname) \
 void Script_SetVar##varname##Value(type value) \

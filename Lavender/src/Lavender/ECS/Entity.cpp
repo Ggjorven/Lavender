@@ -31,9 +31,11 @@ namespace Lavender
 		return Entity(registry, uuid);
 	}
 
-	Entity Entity::Create(Ref<RegistryCollection> registry, const UUID& uuid)
+	Entity Entity::Create(Ref<RegistryCollection> registry, const UUID& uuid, bool reset)
 	{
-		registry->CreateEntity(uuid);
+		if (reset)
+			registry->CreateEntity(uuid);
+		
 		return Entity(registry, uuid);
 	}
 

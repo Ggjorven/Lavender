@@ -130,13 +130,17 @@ namespace Lavender
     void Project::SetScript(Ref<ScriptLoader> script)
     {
         m_Script = script;
-        m_Scenes.GetActive()->SetScript(script);
+
+        if (m_Scenes.GetActive())
+            m_Scenes.GetActive()->SetScript(script);
     }
 
     void Project::ReloadScript()
     {
         m_Script->Reload();
-        m_Scenes.GetActive()->ReloadScript();
+
+        if (m_Scenes.GetActive())
+            m_Scenes.GetActive()->ReloadScript();
     }
 
     Ref<Project> Project::Create()

@@ -27,6 +27,9 @@ namespace Lavender
 		: m_Viewport(viewport), m_Collection(RegistryCollection::Create()), m_AssetsReference(assets), m_ScriptReference(script), m_UUID(uuid)
 	{
 		m_EditorCamera = EditorCamera::Create(m_Viewport);
+
+		if (script)
+			SetScript(script);
 	}
 
 	Scene::~Scene()
@@ -37,14 +40,18 @@ namespace Lavender
 	{
 		m_Collection->SwitchRegistry();
 
-		auto& registry = m_Collection->GetMainRegistry()->GetRegistry();
-		auto view = registry.view<ScriptComponent>();
-		for (auto& script : view)
+		if (m_ScriptReference != nullptr && !m_ScriptReference->IsDetached())
 		{
-			ScriptComponent& component = view.get<ScriptComponent>(script);
-			UUID uuid = registry.get<UUID>(script);
+			auto& registry = m_Collection->GetMainRegistry()->GetRegistry();
+			auto view = registry.view<ScriptComponent>();
+			for (auto& script : view)
+			{
+				ScriptComponent& component = view.get<ScriptComponent>(script);
+				UUID uuid = registry.get<UUID>(script);
 
-			m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_ScriptReference, component.ClassName);
+				m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_ScriptReference, component.ClassName);
+				m_EntityInterfaces[uuid]->InvokeOnCreate();
+			}
 		}
 	}
 
@@ -52,7 +59,6 @@ namespace Lavender
 	{
 		m_Collection->SwitchRegistry();
 
-		m_RegistryInterface.reset();
 		m_EntityInterfaces.clear();
 	}
 
@@ -108,9 +114,13 @@ namespace Lavender
 
 	void Scene::SetScript(Ref<ScriptLoader> script)
 	{
+		m_EntityInterfaces.clear();
+
 		m_ScriptReference = script;
 		m_RegistryInterface = RegistryInterface::Create(m_Collection, m_ScriptReference);
-		m_EntityInterfaces.clear();
+	
+		for (auto& c : m_RegistryInterface->GetClasses().Classes)
+			LV_LOG_TRACE("(Script) Class '{0}' found.", c);
 	}
 
 	void Scene::ReloadScript()

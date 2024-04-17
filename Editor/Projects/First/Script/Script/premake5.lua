@@ -18,6 +18,7 @@ project "Script"
 
 	defines
 	{
+		"LV_CLASS_EXPORT"
 	}
 
 	includedirs

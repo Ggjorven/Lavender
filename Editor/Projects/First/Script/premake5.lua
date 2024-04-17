@@ -1,8 +1,8 @@
-workspace "First"
+workspace "LavenderScript"
     architecture "x86_64"
     startproject "Script"
 
-	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	outputdir = "%{cfg.buildcfg}"
 
     configurations
     {

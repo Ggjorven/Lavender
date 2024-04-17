@@ -349,6 +349,48 @@ namespace Lavender
 				}
 			}
 
+			// ScriptComponent
+			if (registry->HasComponent<ScriptComponent>(m_SelectedUUID))
+			{
+				ScriptComponent& script = registry->GetComponent<ScriptComponent>(m_SelectedUUID);
+
+				ComponentUsage usage = BeginECSComponent<ScriptComponent>();
+				if (usage & ComponentUsage::Opened)
+				{
+					UI::BeginPropertyGrid(2);
+
+					UI::ScopedStyleList colours = UI::StyleColourList({
+						{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+						{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+						{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint },
+						{ UI::StyleColourType::FrameBg, UI::Colours::AlphaTint },
+						{ UI::StyleColourType::FrameBgHovered, UI::Colours::LightTint },
+						{ UI::StyleColourType::FrameBgActive, UI::Colours::LighterTint },
+						{ UI::StyleColourType::Button, UI::Colours::DarkTint },
+						{ UI::StyleColourType::ButtonHovered, UI::Colours::DarkTint },
+						{ UI::StyleColourType::ButtonActive, UI::Colours::DarkTint }
+					});
+
+					// !TODO: Make changeable!
+					UI::Combo combo = {};
+					combo.Preview = script.ClassName;
+					combo.Selected = script.ClassName;
+
+					for (auto& cls : m_Project->GetSceneCollection().GetActive()->GetRegistryInterface()->GetClasses().Classes)
+					{
+						auto uuid = m_SelectedUUID;
+						combo.Items.push_back(std::make_pair(cls, [uuid, cls]() 
+						{
+							Project::Get()->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry()->GetComponent<ScriptComponent>(uuid).ClassName = cls;
+						}));
+					}
+
+					UI::Property("Class", combo);
+
+					UI::EndPropertyGrid();
+				}
+			}
+
 			// PointLightComponent
 			if (registry->HasComponent<PointLightComponent>(m_SelectedUUID))
 			{
@@ -366,11 +408,31 @@ namespace Lavender
 						{ UI::StyleColourType::FrameBg, UI::Colours::NearBlack }
 					});
 
-					UI::Property("Position", light.Position);
+					static const float colourSize = 32.0f;
 
-					UI::Property("Ambient", light.Ambient);
-					UI::Property("Diffuse", light.Diffuse);
-					UI::Property("Specular", light.Specular);
+					// Ambient
+					glm::vec4 ambient = glm::vec4(light.Ambient.r, light.Ambient.g, light.Ambient.b, 1.0f);
+					UI::ColourPicker ambientPicker = UI::ColourPicker(ambient);
+					ambientPicker.Label = "Ambient Colour";
+					ambientPicker.Size = colourSize;
+					UI::Property("Ambient", ambientPicker);
+					light.Ambient = glm::vec3(ambient.r, ambient.g, ambient.b);
+
+					// Diffuse
+					glm::vec4 diffuse = glm::vec4(light.Diffuse.r, light.Diffuse.g, light.Diffuse.b, 1.0f);
+					UI::ColourPicker diffusePicker = UI::ColourPicker(diffuse);
+					diffusePicker.Label = "Diffuse Colour";
+					diffusePicker.Size = colourSize;
+					UI::Property("Diffuse", diffusePicker);
+					light.Diffuse = glm::vec3(diffuse.r, diffuse.g, diffuse.b);
+
+					// Specular
+					glm::vec4 specular = glm::vec4(light.Specular.r, light.Specular.g, light.Specular.b, 1.0f);
+					UI::ColourPicker specularPicker = UI::ColourPicker(specular);
+					specularPicker.Label = "Specular Colour";
+					specularPicker.Size = colourSize;
+					UI::Property("Specular", specularPicker);
+					light.Specular = glm::vec3(specular.r, specular.g, specular.b);
 
 					UI::Property("Constant", light.Constant);
 					UI::Property("Linear", light.Linear);

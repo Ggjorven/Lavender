@@ -11,6 +11,8 @@ SceneData:
       MeshComponent:
         Mesh: 6516009052361294980
         Material: 8468309108205782645
+      ScriptComponent:
+        ClassName: MyEntity
     - Entity: 7325713287001512595
       TagComponent:
         Tag: Viking Room
@@ -31,3 +33,26 @@ SceneData:
       MeshComponent:
         Mesh: 6516009052361294990
         Material: 8468309108205782655
+    - Entity: 13017324879661343518
+      TagComponent:
+        Tag: Light
+      TransformComponent:
+        Position: [1.29999995, 0, 0]
+        Size: [1, 1, 1]
+        Rotation: [0, 0, 0]
+      PointLightComponent:
+        Ambient: [1, 1, 1]
+        Diffuse: [1, 1, 1]
+        Specular: [0, 0, 0]
+        Constant: 0.5
+        Linear: 0.5
+        Quadratic: 0.5
+    - Entity: 9704368390726060075
+      TagComponent:
+        Tag: ABC
+      TransformComponent:
+        Position: [0, 0, 0]
+        Size: [1, 1, 1]
+        Rotation: [0, 0, 0]
+      ScriptComponent:
+        ClassName: MyEntity

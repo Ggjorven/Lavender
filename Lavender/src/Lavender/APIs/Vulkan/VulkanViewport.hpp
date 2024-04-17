@@ -44,7 +44,7 @@ namespace Lavender
 		glm::vec2 ConvertMousePosition(const glm::vec2& mainWindowPosition) const override;
 
 		inline Ref<RenderPass> GetRenderPass() override { return m_Renderpass; }
-		ImTextureID GetImGuiTexture() override;
+		void* GetImGuiTexture() override;
 
 	private:
 		Ref<Image2D> m_Image = VK_NULL_HANDLE;

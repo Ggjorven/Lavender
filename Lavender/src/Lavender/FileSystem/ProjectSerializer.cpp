@@ -97,6 +97,17 @@ namespace Lavender
 				{
 					std::string scriptString = directories["Scripts"].as<std::string>();
 					m_Project->m_Directories.Scripts = std::filesystem::path(scriptString);
+
+					// Initialize script
+					// TODO: Make configuration selectable (Debug/Release/Dist) in project file/metadata
+					std::filesystem::path scriptPath = m_Project->m_Directories.ProjectDir / m_Project->m_Directories.Scripts / "bin/Debug/Script/Script.dll";
+					
+					if (std::filesystem::exists(scriptPath))
+					{
+						LV_LOG_TRACE("Loading script '{0}' into memory.", scriptPath.string());
+						Ref<ScriptLoader> script = ScriptLoader::Create(scriptPath);
+						m_Project->SetScript(script);
+					}
 				}
 			}
 

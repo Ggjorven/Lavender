@@ -23,7 +23,8 @@ namespace Lavender
 		void InvokeOnCreate() override;
 		void InvokeOnUpdate(float deltaTime) override;
 
-		bool HasVariable(const std::string& name);
+		inline Dict<std::string, EntityVariableFunctions>& GetVariables() { return m_Variables; }
+		bool HasVariable(const std::string& name) override;
 
 		template<typename T>
 		void Set(const std::string& name, T value);

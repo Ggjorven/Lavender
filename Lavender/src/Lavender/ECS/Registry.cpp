@@ -94,18 +94,6 @@ namespace Lavender
 
 		CopyComponents(AllComponents(), m_Registry, registry->m_Registry, registry->m_Entities);
 
-		// Quick test // TODO: Remove
-		{
-			auto meshView = registry->m_Registry.view<MeshComponent>();
-
-			for (auto& e : meshView)
-			{
-				MeshComponent& component = meshView.get<MeshComponent>(e);
-
-				int i = 0;
-			}
-		}
-
 		return registry;
 	}
 

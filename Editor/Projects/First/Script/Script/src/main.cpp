@@ -10,8 +10,8 @@ class MyEntity : public ScriptableEntity
 public:
 	void OnCreate() override
 	{
-		m_Tag = &AddComponent<TagComponent>(TagComponent("New Tag"));
-		m_Tranform = &AddComponent<TransformComponent>(TransformComponent());
+		m_Tag = &AddOrReplaceComponent<TagComponent>(TagComponent("New Tag"));
+		m_Tranform = &GetComponent<TransformComponent>();
 
 		ScriptLogger::LogMessage(ScriptLogger::Level::Trace, "Wagwan G");
 	}

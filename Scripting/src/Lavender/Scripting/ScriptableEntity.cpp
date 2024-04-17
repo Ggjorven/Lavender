@@ -81,6 +81,11 @@ namespace Lavender
         }
     }
 
+    void ClassList::Add(const std::string& name)
+    {
+        Classes.push_back(name);
+    }
+    
     void VariableList::Add(VariableType type, const std::string& name)
     {
         Variables.push_back({ type, name });

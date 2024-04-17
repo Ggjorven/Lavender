@@ -51,7 +51,7 @@ namespace Lavender
 		MeshComponent(const MeshComponent& other);
 	};
 
-	struct ScriptComponent
+	struct ScriptComponent // TODO: Implement for scripting
 	{
 	public:
 		std::string ClassName = {};
@@ -65,20 +65,13 @@ namespace Lavender
 	struct PointLightComponent // TODO: Implement for scripting
 	{
 	public:
-		glm::vec3 Position = { 0.0f, 0.0f, 0.0f }; // TODO: Use transformComponent
-		PUBLIC_PADDING(0, 4);
-
-		glm::vec3 Ambient = {};
-		PUBLIC_PADDING(1, 4);
-		glm::vec3 Diffuse = {};
-		PUBLIC_PADDING(2, 4);
-		glm::vec3 Specular = {};
-		PUBLIC_PADDING(3, 4);
+		glm::vec3 Ambient = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 Diffuse = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 Specular = { 0.0f, 0.0f, 0.0f };
 
 		float Constant = 0.5f;
 		float Linear = 0.5f;
 		float Quadratic = 0.5f;
-		PUBLIC_PADDING(4, 4);
 
 	public:
 		PointLightComponent() = default;
@@ -88,19 +81,21 @@ namespace Lavender
 
 	enum class Component
 	{
-		None = 0, Tag, Transform, Mesh, PointLight
+		None = 0, Tag, Transform, Script, Mesh, PointLight
 	};
 
 	template<typename TComponent>
 	static Component GetComponentType()
 	{
-		if (typeid(TComponent) == typeid(TagComponent))
+		if constexpr (std::is_same_v<TComponent, TagComponent>)
 			return Component::Tag;
-		else if (typeid(TComponent) == typeid(TransformComponent))
+		else if constexpr (std::is_same_v<TComponent, TransformComponent>)
 			return Component::Transform;
-		else if (typeid(TComponent) == typeid(MeshComponent))
+		else if constexpr (std::is_same_v<TComponent, ScriptComponent>)
+			return Component::Script;
+		else if constexpr (std::is_same_v<TComponent, MeshComponent>)
 			return Component::Mesh;
-		else if (typeid(TComponent) == typeid(PointLightComponent))
+		else if constexpr (std::is_same_v<TComponent, PointLightComponent>)
 			return Component::Light;
 
 		return Component::None;
@@ -109,13 +104,15 @@ namespace Lavender
 	template<typename TComponent>
 	static std::string ComponentToString()
 	{
-		if (typeid(TComponent) == typeid(TagComponent))
+		if constexpr (std::is_same_v<TComponent, TagComponent>)
 			return "TagComponent";
-		else if (typeid(TComponent) == typeid(TransformComponent))
+		else if constexpr (std::is_same_v<TComponent, TransformComponent>)
 			return "TransformComponent";
-		else if (typeid(TComponent) == typeid(MeshComponent))
+		else if constexpr (std::is_same_v<TComponent, ScriptComponent>)
+			return "ScriptComponent";
+		else if constexpr (std::is_same_v<TComponent, MeshComponent>)
 			return "MeshComponent";
-		else if (typeid(TComponent) == typeid(PointLightComponent))
+		else if constexpr (std::is_same_v<TComponent, PointLightComponent>)
 			return "PointLightComponent";
 
 		return "Undefined Component";
@@ -126,6 +123,6 @@ namespace Lavender
 	{
 	};
 
-	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent>;
+	using AllComponents = ComponentGroup<TagComponent, TransformComponent, ScriptComponent, MeshComponent, PointLightComponent>;
 
 }

@@ -343,6 +343,7 @@ namespace Lavender::UI
 
 	bool Property(const std::string& label, Combo& value, const std::string& helpText = "");
 	bool Property(const std::string& label, ClickAbleImage& value, const std::string& helpText = "");
+	bool Property(const std::string& label, ColourPicker& value, const std::string& helpText = "");
 	bool Property(const std::string& label, ColourPicker& picker, ClickAbleImage& image, const std::string& helpText = "");
 
 	// Custom property for entity size

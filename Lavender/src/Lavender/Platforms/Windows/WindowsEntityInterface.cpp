@@ -18,7 +18,7 @@ namespace Lavender
 	WindowsEntityInterface::WindowsEntityInterface(const UUID& uuid, Ref<ScriptLoader> loader, const std::string& classname)
 		: m_Loader(RefHelper::RefAs<WindowsScriptLoader>(loader)), m_ClassName(classname)
 	{
-		m_Entity = Entity::Create(Project::Get()->GetSceneCollection().GetActive()->GetCollection(), uuid);
+		m_Entity = Entity::Create(Project::Get()->GetSceneCollection().GetActive()->GetCollection(), uuid, false);
 		Reload();
 	}
 
@@ -106,6 +106,7 @@ namespace Lavender
 		{
 			EntityVariableFunctions functions = { };
 
+			// TODO: Implement all types
 			switch (var.Type)
 			{
 			case VariableType::Float:

@@ -11,6 +11,10 @@ namespace Lavender
 	WindowsRegistryInterface::WindowsRegistryInterface(Ref<RegistryCollection> collection, Ref<ScriptLoader> loader)
 		: m_Collection(collection), m_Loader(RefHelper::RefAs<WindowsScriptLoader>(loader))
 	{
+		std::string fnName = std::string("Script_GetDefinedClasses");
+		GetClassesFn getClassesFP = (GetClassesFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
+
+		m_Classes = *getClassesFP();
 	}
 
 	WindowsRegistryInterface::~WindowsRegistryInterface()

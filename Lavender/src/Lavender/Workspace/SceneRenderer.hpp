@@ -15,13 +15,31 @@ namespace Lavender
 	struct ShaderPointLight
 	{
 	public:
+		alignas(16) glm::vec3 Position = { 0.0f, 0.0f, 0.0f }; 
+		alignas(16) glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f }; 
 
+		alignas(16) glm::vec3 Ambient = {};
+		alignas(16) glm::vec3 Diffuse = {};
+		alignas(16) glm::vec3 Specular = {};
+
+		float Constant = 0.5f;
+		float Linear = 0.5f;
+		float Quadratic = 0.5f;
+		PUBLIC_PADDING(0, 4);
+
+	public:
+		ShaderPointLight() = default;
+		ShaderPointLight(const PointLightComponent& component)
+			: Ambient(component.Ambient), Diffuse(component.Diffuse), Specular(component.Specular),
+			Constant(component.Constant), Linear(component.Linear), Quadratic(component.Quadratic)
+		{
+		}
 	};
 
 	struct LightSettings
 	{
 	public:
-		std::vector<PointLightComponent> PointLights = { };
+		std::vector<ShaderPointLight> PointLights = { };
 		uint32_t AmountOfPointLights = 0;
 
 	public:
@@ -30,12 +48,12 @@ namespace Lavender
 		{
 		}
 
-		inline constexpr static size_t GetSize(uint32_t amountOfPointLights) { return amountOfPointLights * sizeof(PointLightComponent) + sizeof(uint32_t); }
+		inline constexpr static size_t GetSize(uint32_t amountOfPointLights) { return amountOfPointLights * sizeof(ShaderPointLight) + sizeof(uint32_t); }
 
 		inline void AddDataTo(Ref<UniformBuffer> buffer)
 		{
-			buffer->SetData((void*)PointLights.data(), PointLights.size() * sizeof(PointLightComponent));
-			buffer->SetData((void*)&AmountOfPointLights, sizeof(uint32_t), PointLights.size() * sizeof(PointLightComponent));
+			buffer->SetData((void*)PointLights.data(), PointLights.size() * sizeof(ShaderPointLight));
+			buffer->SetData((void*)&AmountOfPointLights, sizeof(uint32_t), PointLights.size() * sizeof(ShaderPointLight));
 		}
 	};
 

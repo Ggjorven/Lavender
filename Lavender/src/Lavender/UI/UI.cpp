@@ -405,6 +405,30 @@ namespace Lavender::UI
 		return false;
 	}
 
+	bool Property(const std::string& label, ColourPicker& value, const std::string& helpText)
+	{
+		UI::ShiftCursor(16.0f, value.Size / 2.0f - 2.0f);
+		UI::Text(label);
+
+		if (!helpText.empty())
+		{
+			UI::SameLine();
+			UI::HelpMarker(helpText);
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		value.Render();
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return false;
+	}
+
 	bool Property(const std::string& label, ColourPicker& picker, ClickAbleImage& image, const std::string& helpText)
 	{
 		UI::ShiftCursor(16.0f, picker.Size / 2.0f - 2.0f);
@@ -583,7 +607,7 @@ namespace Lavender::UI
 
 	void ColourPicker::Render()
 	{
-		CustomColourPicker(Label, Colour, Size * 0.05625);
+		CustomColourPicker(Label, Colour, Size * 0.05625f);
 	}
 
 }

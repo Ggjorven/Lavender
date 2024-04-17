@@ -68,6 +68,7 @@ namespace Lavender
 		inline Ref<Viewport> GetViewport() { return m_Viewport; }
 		inline Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 		inline Ref<AssetManager> GetAssetManager() { return m_AssetsReference; }
+		inline Ref<RegistryInterface> GetRegistryInterface() { return m_RegistryInterface; }
 		inline UUID GetSceneID() { return m_UUID; }
 		inline SceneMetaData GetMetaData() { return m_Data; }
 

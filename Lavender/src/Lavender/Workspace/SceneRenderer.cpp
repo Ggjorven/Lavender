@@ -101,7 +101,21 @@ namespace Lavender
 		for (auto& entity : pointLightView)
 		{
 			PointLightComponent& light = pointLightView.get<PointLightComponent>(entity);
-			lights.PointLights[index] = light;
+
+			ShaderPointLight shaderLight = ShaderPointLight(light);
+
+			auto transforms = scene->GetCollection()->GetMainRegistry()->GetRegistry().view<TransformComponent>();
+			if (transforms.contains(entity))
+			{
+				TransformComponent& transform = transforms.get<TransformComponent>(entity);
+				shaderLight.Position = transform.Position;
+				shaderLight.Rotation = transform.Rotation;
+			}
+			else
+				LV_LOG_WARN("PointLight entity doesn't have TransformComponent.");
+
+			lights.PointLights[index] = shaderLight;
+			
 			index++;
 		}
 		lights.AddDataTo(s_LightsBuffer);
