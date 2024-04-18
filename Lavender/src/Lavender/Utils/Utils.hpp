@@ -95,6 +95,13 @@ namespace Lavender::Utils
             return std::filesystem::path(strPath);
         }
 
+        inline static std::filesystem::path ReplaceBackSlashes(const std::filesystem::path& path)
+        {
+            std::string strPath = path.string();
+            std::replace(strPath.begin(), strPath.end(), '\\', '/');
+            return std::filesystem::path(strPath);
+        }
+
     private:
         virtual std::string OpenFileImpl(const std::string& filter, const std::string& dir) const = 0;
         virtual std::string SaveFileImpl(const std::string& filter, const std::string& dir) const = 0;

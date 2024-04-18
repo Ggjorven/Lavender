@@ -18,6 +18,13 @@ namespace Lavender
 
 	class ProjectSerializer;
 
+	enum class ScriptConfig
+	{
+		None = 0, Debug, Release, Dist
+	};
+	ScriptConfig StringToScriptConfig(const std::string& str);
+	std::string ScriptConfigToString(ScriptConfig config);
+
 	class Project
 	{
 	public:
@@ -50,6 +57,9 @@ namespace Lavender
 		inline SceneCollection& GetSceneCollection() { return m_Scenes; }
 		inline ProjectDirectories& GetDirectories() { return m_Directories; }
 
+		inline Ref<ScriptLoader> GetScript() { return m_Script; }
+		inline ScriptConfig& GetScriptConfig() { return m_ScriptConfig; }
+
 		static Ref<Project> Create();
 		static Ref<Project> Create(const std::filesystem::path& path);
 
@@ -62,6 +72,7 @@ namespace Lavender
 
 		Ref<AssetManager> m_Assets = nullptr;
 		Ref<ScriptLoader> m_Script = nullptr;
+		ScriptConfig m_ScriptConfig = ScriptConfig::Debug;
 
 		SceneCollection m_Scenes = {};
 

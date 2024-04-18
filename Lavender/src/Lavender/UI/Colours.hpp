@@ -33,6 +33,7 @@ namespace Lavender::UI::Colours
 	constexpr uint32_t NearBlack =				LV_U32_COLOUR(18, 18, 18, 138);
 
 	constexpr uint32_t AlphaTint =				LV_U32_COLOUR(110, 65, 138, 68);
+	constexpr uint32_t AlphaTintNonAlpha =		LV_U32_COLOUR(110, 65, 138, 255);
 	constexpr uint32_t DarkTint =				LV_U32_COLOUR(112, 52, 145, 102);
 	constexpr uint32_t LightTint =				LV_U32_COLOUR(110, 65, 138, 150);
 	constexpr uint32_t LighterTint =			LV_U32_COLOUR(110, 65, 138, 160);

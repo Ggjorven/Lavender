@@ -22,6 +22,8 @@ namespace Lavender
 		inline bool IsDetached() override { return m_Detached; }
 		inline bool IsValid() const { return m_Handle != nullptr; }
 
+		inline std::filesystem::path GetPath() override { return m_Path; }
+
 		#ifdef LV_PLATFORM_WINDOWS
 		inline HMODULE GetHandle() { return m_Handle; }
 		#endif

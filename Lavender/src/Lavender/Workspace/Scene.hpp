@@ -36,7 +36,7 @@ namespace Lavender
 	void SetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name, T value);
 	template<typename T>
 	T GetScriptVariable(Ref<EntityInterface> entityInterface, const std::string& name);
-
+	
 	struct SceneMetaData
 	{
 	public:
@@ -61,7 +61,6 @@ namespace Lavender
 		void ReloadScript();
 		void AddScriptedEntity(Ref<EntityInterface> entityInterface) { m_EntityInterfaces[entityInterface->GetEntity().GetUUID()] = entityInterface; }
 
-		inline Ref<EntityInterface> GetEntityInterface(const UUID& uuid) { return m_EntityInterfaces[uuid]; }
 
 		inline Ref<EditorCamera>& GetCamera() { return m_EditorCamera; }
 		inline Ref<RegistryCollection> GetCollection() { return m_Collection; }
@@ -69,6 +68,7 @@ namespace Lavender
 		inline Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 		inline Ref<AssetManager> GetAssetManager() { return m_AssetsReference; }
 		inline Ref<RegistryInterface> GetRegistryInterface() { return m_RegistryInterface; }
+		inline Ref<EntityInterface> GetEntityInterface(const UUID& uuid) { return m_EntityInterfaces[uuid]; }
 		inline UUID GetSceneID() { return m_UUID; }
 		inline SceneMetaData GetMetaData() { return m_Data; }
 

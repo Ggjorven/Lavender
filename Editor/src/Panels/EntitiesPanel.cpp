@@ -373,21 +373,89 @@ namespace Lavender
 
 					// !TODO: Make changeable!
 					UI::Combo combo = {};
-					combo.Preview = script.ClassName;
-					combo.Selected = script.ClassName;
-
-					for (auto& cls : m_Project->GetSceneCollection().GetActive()->GetRegistryInterface()->GetClasses().Classes)
+					if (m_Project->GetSceneCollection().GetActive()->GetRegistryInterface())
 					{
-						auto uuid = m_SelectedUUID;
-						combo.Items.push_back(std::make_pair(cls, [uuid, cls]() 
+						combo.Preview = script.ClassName;
+						combo.Selected = script.ClassName;
+
+						for (auto& cls : m_Project->GetSceneCollection().GetActive()->GetRegistryInterface()->GetClasses().Classes)
 						{
-							Project::Get()->GetSceneCollection().GetActive()->GetCollection()->GetMainRegistry()->GetComponent<ScriptComponent>(uuid).ClassName = cls;
-						}));
+							auto uuid = m_SelectedUUID;
+							combo.Items.push_back(std::make_pair(cls, [uuid, cls]()
+							{
+								auto scene = Project::Get()->GetSceneCollection().GetActive();
+								scene->GetCollection()->GetMainRegistry()->GetComponent<ScriptComponent>(uuid).ClassName = cls;
+
+								// Double check if there even is a script
+								if (Project::Get()->GetScript())
+								{
+									auto entityInterface = EntityInterface::Create(uuid, Project::Get()->GetScript(), cls);
+									scene->AddScriptedEntity(entityInterface);
+								}
+							}));
+						}
 					}
+					else
+						combo.Preview = "No Script";
 
 					UI::Property("Class", combo);
 
 					UI::EndPropertyGrid();
+					UI::ShiftCursorY(2.0f);
+
+					auto variables = m_Project->GetSceneCollection().GetActive()->GetEntityInterface(m_SelectedUUID)->GetVariables().Variables;
+					if (!variables.empty())
+					{
+						UI::Text("ValueFields: "); // TODO: Make better looking
+						UI::BeginPropertyGrid(2);
+
+						Ref<EntityInterface> entityInterface = m_Project->GetSceneCollection().GetActive()->GetEntityInterface(m_SelectedUUID);
+
+						for (auto& var : variables)
+						{
+							// TODO: All types
+							switch (var.Type)
+							{
+							case VariableType::Char:
+								break;
+							case VariableType::SChar:
+								break;
+							case VariableType::UChar:
+								break;
+							case VariableType::Short:
+								break;
+							case VariableType::UShort:
+								break;
+							case VariableType::Int:
+								break;
+							case VariableType::UInt:
+								break;
+							case VariableType::Long:
+								break;
+							case VariableType::ULong:
+								break;
+							case VariableType::LongLong:
+								break;
+							case VariableType::ULongLong:
+								break;
+							case VariableType::Float:
+							{
+								float value = GetScriptVariable<float>(entityInterface, var.Name);
+								if (UI::Property(var.Name, value))
+									SetScriptVariable<float>(entityInterface, var.Name, value);
+								break;
+							}
+							case VariableType::Double:
+								break;
+							case VariableType::LongDouble:
+								break;
+							case VariableType::Bool:
+								break;
+							}
+						}
+
+						UI::EndPropertyGrid();
+					}
 				}
 			}
 

@@ -23,10 +23,54 @@ namespace Lavender
 	typedef uint64_t (*GetUUIDFn)(ScriptableEntity*);
 	typedef void (*SetUUIDFn)(ScriptableEntity*, uint64_t);
 
+	//////////////////////////////////////////////////////////////////////////////
 	// Variable functions
+	//////////////////////////////////////////////////////////////////////////////
+	typedef char (*GetCharFn)(ScriptableEntity*);
+	typedef void (*SetCharFn)(ScriptableEntity*, char);
+
+	typedef signed char (*GetSCharFn)(ScriptableEntity*);
+	typedef void (*SetSCharFn)(ScriptableEntity*, signed char);
+
+	typedef unsigned char (*GetUCharFn)(ScriptableEntity*);
+	typedef void (*SetUCharFn)(ScriptableEntity*, unsigned char);
+
+	typedef short (*GetShortFn)(ScriptableEntity*);
+	typedef void (*SetShortFn)(ScriptableEntity*, short);
+
+	typedef unsigned short (*GetUShortFn)(ScriptableEntity*);
+	typedef void (*SetUShortFn)(ScriptableEntity*, unsigned short);
+
+	typedef int (*GetIntFn)(ScriptableEntity*);
+	typedef void (*SetIntFn)(ScriptableEntity*, int);
+
+	typedef unsigned int (*GetUIntFn)(ScriptableEntity*);
+	typedef void (*SetUIntFn)(ScriptableEntity*, unsigned int);
+
+	typedef long (*GetLongFn)(ScriptableEntity*);
+	typedef void (*SetLongFn)(ScriptableEntity*, long);
+
+	typedef unsigned long (*GetULongFn)(ScriptableEntity*);
+	typedef void (*SetULongFn)(ScriptableEntity*, unsigned long);
+
+	typedef long long (*GetLongLongFn)(ScriptableEntity*);
+	typedef void (*SetLongLongFn)(ScriptableEntity*, long long);
+
+	typedef unsigned long long (*GetULongLongFn)(ScriptableEntity*);
+	typedef void (*SetULongLongFn)(ScriptableEntity*, unsigned long long);
+
 	typedef float (*GetFloatFn)(ScriptableEntity*);
 	typedef void (*SetFloatFn)(ScriptableEntity*, float);
-	// TODO: Add more variable types
+
+	typedef double (*GetDoubleFn)(ScriptableEntity*);
+	typedef void (*SetDoubleFn)(ScriptableEntity*, double);
+
+	typedef long double (*GetLongDoubleFn)(ScriptableEntity*);
+	typedef void (*SetLongDoubleFn)(ScriptableEntity*, long double);
+
+	typedef bool (*GetBoolFn)(ScriptableEntity*);
+	typedef void (*SetBoolFn)(ScriptableEntity*, bool);
+	//////////////////////////////////////////////////////////////////////////////
 
 	struct ScriptableEntityFunctions
 	{
@@ -66,6 +110,7 @@ namespace Lavender
 		virtual void InvokeOnCreate() = 0;
 		virtual void InvokeOnUpdate(float deltaTime) = 0;
 
+		virtual VariableList GetVariables() = 0;
 		virtual bool HasVariable(const std::string& name) = 0;
 
 		virtual Entity& GetEntity() = 0;

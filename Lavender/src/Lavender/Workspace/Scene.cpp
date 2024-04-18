@@ -42,24 +42,14 @@ namespace Lavender
 
 		if (m_ScriptReference != nullptr && !m_ScriptReference->IsDetached())
 		{
-			auto& registry = m_Collection->GetMainRegistry()->GetRegistry();
-			auto view = registry.view<ScriptComponent>();
-			for (auto& script : view)
-			{
-				ScriptComponent& component = view.get<ScriptComponent>(script);
-				UUID uuid = registry.get<UUID>(script);
-
-				m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_ScriptReference, component.ClassName);
-				m_EntityInterfaces[uuid]->InvokeOnCreate();
-			}
+			for (auto& entity : m_EntityInterfaces)
+				entity.second->InvokeOnCreate();
 		}
 	}
 
 	void Scene::StopRuntime()
 	{
 		m_Collection->SwitchRegistry();
-
-		m_EntityInterfaces.clear();
 	}
 
 	void Scene::OnUpdate(ProjectState state, float deltaTime)
@@ -121,6 +111,16 @@ namespace Lavender
 	
 		for (auto& c : m_RegistryInterface->GetClasses().Classes)
 			LV_LOG_TRACE("(Script) Class '{0}' found.", c);
+
+		auto& registry = m_Collection->GetMainRegistry()->GetRegistry();
+		auto view = registry.view<ScriptComponent>();
+		for (auto& script : view)
+		{
+			ScriptComponent& component = view.get<ScriptComponent>(script);
+			UUID uuid = registry.get<UUID>(script);
+
+			m_EntityInterfaces[uuid] = EntityInterface::Create(uuid, m_ScriptReference, component.ClassName);
+		}
 	}
 
 	void Scene::ReloadScript()
@@ -158,6 +158,8 @@ namespace Lavender
 	void Scene::UpdateRuntime(float deltaTime)
 	{
 		LV_PROFILE_SCOPE("Scene::UpdateRuntime");
+
+		m_EditorCamera->OnUpdate(deltaTime); // TODO: Remove and replace with runtime camera
 
 		// TODO: Update some physics or something
 

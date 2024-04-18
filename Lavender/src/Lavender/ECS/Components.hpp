@@ -48,7 +48,7 @@ namespace Lavender
 	public:
 		MeshComponent() = default;
 		MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material);
-		MeshComponent(const MeshComponent& other);
+		MeshComponent(const MeshComponent& other) = default;
 	};
 
 	struct ScriptComponent // TODO: Implement for scripting

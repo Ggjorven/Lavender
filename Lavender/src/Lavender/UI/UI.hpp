@@ -90,6 +90,7 @@ namespace Lavender::UI
     DEFINE_BITWISE_OPS(WindowFlags)
 
     void BeginWindow(const std::string& name = "Unnamed Window", WindowFlags flags = WindowFlags::None);
+    void BeginWindow(const std::string& name, bool& open, WindowFlags flags = WindowFlags::None);
     void EndWindow();
 
 	void BeginChild(const std::string& name, const glm::vec2& size = { 0.0f, 0.0f }, bool border = false, WindowFlags flags = WindowFlags::None);
@@ -354,6 +355,7 @@ namespace Lavender::UI
 
     bool BeginMenu(const std::string& name);
     bool MenuItem(const std::string& name = "Empty Item", const std::string& shortcut = "");
+    bool MenuItem(const std::string& name, bool& enabled, const std::string& shortcut = "");
     void EndMenu();
 
     void SameLine();

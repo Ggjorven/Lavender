@@ -18,6 +18,9 @@ namespace Lavender
 	class ScriptLoader
 	{
 	public:
+		// Inside bin/%Config%/
+		inline static const std::filesystem::path DefaultPath = "Script\\script.dll";
+	public:
 		ScriptLoader() = default;
 		virtual ~ScriptLoader() = default;
 
@@ -25,6 +28,8 @@ namespace Lavender
 
 		virtual void Detach() = 0;
 		virtual bool IsDetached() = 0;
+
+		virtual std::filesystem::path GetPath() = 0;
 
 		static Ref<ScriptLoader> Create(const std::filesystem::path& filepath);
 	};

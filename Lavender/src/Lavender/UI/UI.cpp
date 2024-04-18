@@ -123,6 +123,11 @@ namespace Lavender::UI
 		ImGui::Begin(name.c_str(), (bool*)0, (ImGuiWindowFlags)flags);
 	}
 
+	void BeginWindow(const std::string& name, bool& open, WindowFlags flags)
+	{
+		ImGui::Begin(name.c_str(), &open, (ImGuiWindowFlags)flags);
+	}
+
 	void EndWindow()
 	{
 		ImGui::End();
@@ -515,6 +520,11 @@ namespace Lavender::UI
 	bool MenuItem(const std::string& name, const std::string& shortcut)
 	{
 		return ImGui::MenuItem(name.c_str(), shortcut.c_str());
+	}
+
+	bool MenuItem(const std::string& name, bool& enabled, const std::string& shortcut)
+	{
+		return ImGui::MenuItem(name.c_str(), shortcut.c_str(), &enabled);
 	}
 
 	void EndMenu()

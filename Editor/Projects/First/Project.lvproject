@@ -4,3 +4,5 @@ Project:
     Scripts: Script
   Scenes:
     Start: Scenes/first.lvscene
+  Extra:
+    ScriptConfig: Debug

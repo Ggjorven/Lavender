@@ -22,6 +22,8 @@
 #include "Panels/MaterialPanel.hpp"
 #include "Panels/DebugPanel.hpp"
 
+#include "Panels/SettingsWindow.hpp"
+
 using namespace Lavender;
 
 class EditorLayer : public Layer
@@ -51,6 +53,8 @@ private:
 	Ref<EntitiesPanel> m_EntityPanel = nullptr;
 	Ref<MaterialPanel> m_MaterialPanel = nullptr;
 	Ref<DebugPanel> m_DebugPanel = nullptr;
+
+	Ref<SettingsWindow> m_SettingsWindow = nullptr;
 
 	Ref<Image2D> m_Image = nullptr;
 

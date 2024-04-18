@@ -39,8 +39,10 @@ void EditorLayer::OnAttach()
 
 	m_ContentBrowserPanel = ContentBrowserPanel::Create(m_Project);
 	m_EntityPanel = EntitiesPanel::Create(m_Project);
-	m_MaterialPanel = MaterialPanel::Create(m_Project); m_MaterialPanel->SetEnabled(true); // TODO: Remove
+	m_MaterialPanel = MaterialPanel::Create(m_Project);
 	m_DebugPanel = DebugPanel::Create(m_Project);
+
+	m_SettingsWindow = SettingsWindow::Create(m_Project);
 
 	Application::SetInitialized(true);
 }
@@ -96,6 +98,8 @@ void EditorLayer::OnImGuiRender()
 	m_EntityPanel->RenderUI();
 	m_MaterialPanel->RenderUI();
 	m_DebugPanel->RenderUI();
+
+	m_SettingsWindow->RenderUI();
 }
 
 void EditorLayer::OnEvent(Event& e)
@@ -147,9 +151,29 @@ void EditorLayer::RenderMenuBar()
 		}
 
 		UI::Dummy({ 1.0f, 0.0f });
-		if (UI::MenuItem("Edit##LavenderUI"))
+		if (UI::BeginMenu("Edit##LavenderUI"))
 		{
-			LV_LOG_TRACE("Edit");
+			if (UI::MenuItem("Reload Script##LavenderUI"))
+			{
+				m_Project->ReloadScript();
+			}
+
+			UI::EndMenu();
+		}
+
+		UI::Dummy({ 1.0f, 0.0f });
+		if (UI::BeginMenu("View##LavenderUI"))
+		{
+			if (UI::MenuItem("MaterialPanel##LavenderUI", m_MaterialPanel->GetEnabled()))
+			{
+			}
+
+			if (UI::MenuItem("Settings##LavenderUI"))
+			{
+				m_SettingsWindow->SetEnabled(true);
+			}
+
+			UI::EndMenu();
 		}
 
 		UI::EndMainMenuBar();

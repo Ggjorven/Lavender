@@ -110,9 +110,83 @@ namespace Lavender
         VariableType Type = VariableType::None;
         std::string Name = "Empty";
 
-        static VariableType GetVariableType(std::type_info const& type);
+        inline static VariableType GetVariableType(std::type_info const& type)
+        {
+            if (type == typeid(float))
+                return VariableType::Float;
+            else if (type == typeid(double))
+                return VariableType::Double;
+            else if (type == typeid(int))
+                return VariableType::Int;
+            else if (type == typeid(unsigned int))
+                return VariableType::UInt;
+            else if (type == typeid(bool))
+                return VariableType::Bool;
+            else if (type == typeid(char))
+                return VariableType::Char;
+            else if (type == typeid(signed char))
+                return VariableType::SChar;
+            else if (type == typeid(unsigned char))
+                return VariableType::UChar;
+            else if (type == typeid(short))
+                return VariableType::Short;
+            else if (type == typeid(unsigned short))
+                return VariableType::UShort;
+            else if (type == typeid(long))
+                return VariableType::Long;
+            else if (type == typeid(unsigned long))
+                return VariableType::ULong;
+            else if (type == typeid(long long))
+                return VariableType::LongLong;
+            else if (type == typeid(unsigned long long))
+                return VariableType::ULongLong;
+            else if (type == typeid(long double))
+                return VariableType::LongDouble;
 
-        static std::string VariableTypeToString(VariableType type);
+            return VariableType::None;
+        }
+
+        inline static std::string VariableTypeToString(VariableType type)
+        {
+            switch (type)
+            {
+            case VariableType::None:
+                return "None";
+            case VariableType::Float:
+                return "Float";
+            case VariableType::Double:
+                return "Double";
+            case VariableType::Int:
+                return "Int";
+            case VariableType::UInt:
+                return "UInt";
+            case VariableType::Bool:
+                return "Bool";
+            case VariableType::Char:
+                return "Char";
+            case VariableType::SChar:
+                return "SChar";
+            case VariableType::UChar:
+                return "UChar";
+            case VariableType::Short:
+                return "Short";
+            case VariableType::UShort:
+                return "UShort";
+            case VariableType::Long:
+                return "Long";
+            case VariableType::ULong:
+                return "ULong";
+            case VariableType::LongLong:
+                return "LongLong";
+            case VariableType::ULongLong:
+                return "ULongLong";
+            case VariableType::LongDouble:
+                return "LongDouble";
+
+            default:
+                return "Unknown";
+            }
+        }
     };
 
     struct VariableList
@@ -126,15 +200,18 @@ namespace Lavender
 
 // Public scope class list
 #ifdef LV_CLASS_EXPORT
-inline static Lavender::ClassList DefinedClasses = {};
+inline Lavender::ClassList DefinedClasses = {};
 
+#ifndef LV_CLASSES_EXPORTED
+#define LV_CLASSES_EXPORTED
 extern "C"
 {
-EXPORT Lavender::ClassList* Script_GetDefinedClasses()
+EXPORT inline Lavender::ClassList* Script_GetDefinedClasses()
 { 
     return &DefinedClasses;
 }
 }
+#endif
 #endif
 
 #define LV_ENTITY(name) \
@@ -195,12 +272,12 @@ EXPORT type Script_GetValueOf##varname##classname(classname* instance) \
 } \
 namespace \
 { \
-inline void Add##varname##ToVariableList() \
+inline void Add##varname##ToVariableList##classname() \
 { \
     classname##Variables.Add(Lavender::VariableInfo::GetVariableType(typeid(type)), #varname); \
 } \
 \
-static int dummy##varname = (Add##varname##ToVariableList(), 0); \
+static int dummy##varname##classname = (Add##varname##ToVariableList##classname(), 0); \
 }
 
 // Note(Jorben): The private variables are not recommended. Personal opinion.
@@ -229,10 +306,10 @@ EXPORT type Script_GetValueOf##varname##classname(classname* instance) \
 } \
 namespace \
 { \
-inline void Add##varname##ToVariableList() \
+inline void Add##varname##ToVariableList##classname() \
 { \
     classname##Variables.Add(Lavender::VariableInfo::GetVariableType(typeid(type)), #varname); \
 } \
 \
-static int dummy##varname = (Add##varname##ToVariableList(), 0); \
+static int dummy##varname##classname = (Add##varname##ToVariableList##classname(), 0); \
 }

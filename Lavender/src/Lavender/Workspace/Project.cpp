@@ -15,6 +15,40 @@ namespace Lavender
 
     Project* Project::s_Instance = nullptr;
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helper functions
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ScriptConfig StringToScriptConfig(const std::string& str)
+    {
+        if (str == "Debug") return ScriptConfig::Debug;
+        else if (str == "Release") return ScriptConfig::Release;
+        else if (str == "Dist") return ScriptConfig::Dist;
+
+        // Note(Jorben): Return debug by default
+        LV_LOG_ERROR("Invalid config string passed in.");
+        return ScriptConfig::Debug;
+    }
+
+    std::string ScriptConfigToString(ScriptConfig config)
+    {
+        switch (config)
+        {
+        case ScriptConfig::Debug: return "Debug";
+        case ScriptConfig::Release: return "Release";
+        case ScriptConfig::Dist: return "Dist";
+
+        default:
+            LV_LOG_ERROR("Invalid ScriptConfig passed in.");
+            break;
+        }
+
+        // Note(Jorben): Return debug by default
+        return "Debug";
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Main functions
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Project::Project()
         : Project("")
     {
@@ -48,8 +82,10 @@ namespace Lavender
 
     void Project::StartRuntime()
     {
-        m_State = ProjectState::Runtime;
+        ReloadScript(); // Note(Jorben): This is what makes starting runtime slow, but kinda necessary to not keep static variables at old values.
+
         m_Scenes.GetActive()->StartRuntime();
+        m_State = ProjectState::Runtime;
     }
 
     void Project::StopRuntime()

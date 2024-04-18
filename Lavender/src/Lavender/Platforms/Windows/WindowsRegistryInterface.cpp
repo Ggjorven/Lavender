@@ -11,9 +11,14 @@ namespace Lavender
 	WindowsRegistryInterface::WindowsRegistryInterface(Ref<RegistryCollection> collection, Ref<ScriptLoader> loader)
 		: m_Collection(collection), m_Loader(RefHelper::RefAs<WindowsScriptLoader>(loader))
 	{
+		if (m_Loader->IsDetached())
+		{
+			LV_LOG_ERROR("Failed to retrieve classes.");
+			return;
+		}
+
 		std::string fnName = std::string("Script_GetDefinedClasses");
 		GetClassesFn getClassesFP = (GetClassesFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
-
 		m_Classes = *getClassesFP();
 	}
 
@@ -50,6 +55,13 @@ namespace Lavender
 		fnName = std::string("Script_SetRemoveComponentFP");
 		SetRemoveComponentFn setRemoveComponentFP = (SetRemoveComponentFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
 		setRemoveComponentFP(&RegistryInterface::Native_RemoveComponent);
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Additional functions
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		fnName = std::string("Script_GetDefinedClasses");
+		GetClassesFn getClassesFP = (GetClassesFn)GetProcAddress(m_Loader->GetHandle(), fnName.c_str());
+		m_Classes = *getClassesFP();
 	}
 
 }

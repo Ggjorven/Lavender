@@ -51,6 +51,15 @@ namespace Lavender
 
 			data << YAML::EndMap;
 		}
+		{
+			data << YAML::Key << "Extra";
+			data << YAML::Value << YAML::BeginMap;
+
+			data << YAML::Key << "ScriptConfig";
+			data << YAML::Value << ScriptConfigToString(m_Project->GetScriptConfig());
+
+			data << YAML::EndMap;
+		}
 
 		data << YAML::EndMap;
 
@@ -97,17 +106,19 @@ namespace Lavender
 				{
 					std::string scriptString = directories["Scripts"].as<std::string>();
 					m_Project->m_Directories.Scripts = std::filesystem::path(scriptString);
+				}
 
-					// Initialize script
-					// TODO: Make configuration selectable (Debug/Release/Dist) in project file/metadata
-					std::filesystem::path scriptPath = m_Project->m_Directories.ProjectDir / m_Project->m_Directories.Scripts / "bin/Debug/Script/Script.dll";
-					
-					if (std::filesystem::exists(scriptPath))
-					{
-						LV_LOG_TRACE("Loading script '{0}' into memory.", scriptPath.string());
-						Ref<ScriptLoader> script = ScriptLoader::Create(scriptPath);
-						m_Project->SetScript(script);
-					}
+				// Initialize script
+				std::filesystem::path a = Utils::ToolKit::ReplaceSlashes(m_Project->m_Directories.ProjectDir / m_Project->m_Directories.Scripts);
+				std::filesystem::path b = a / "bin";
+				std::filesystem::path c = b / (ScriptConfigToString(m_Project->GetScriptConfig()));
+				std::filesystem::path scriptPath = c / ScriptLoader::DefaultPath;
+
+				if (std::filesystem::exists(scriptPath))
+				{
+					LV_LOG_TRACE("Loading script '{0}' into memory.", scriptPath.string());
+					Ref<ScriptLoader> script = ScriptLoader::Create(scriptPath);
+					m_Project->SetScript(script);
 				}
 			}
 
@@ -118,6 +129,16 @@ namespace Lavender
 				{
 					m_Project->m_StartScenePath = std::filesystem::path(scenes["Start"].as<std::string>());
 					m_Project->InitializeStartScene();
+				}
+			}
+
+			auto extra = project["Extra"];
+			if (extra)
+			{
+				if (extra["ScriptConfig"])
+				{
+					std::string configName = extra["ScriptConfig"].as<std::string>();
+					m_Project->GetScriptConfig() = StringToScriptConfig(configName);
 				}
 			}
 		}

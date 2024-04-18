@@ -5,6 +5,8 @@
 
 #include "Lavender/ECS/Components.hpp"
 
+#include "Lavender/Workspace/Project.hpp"
+
 #include <fstream>
 
 namespace Lavender
@@ -139,6 +141,8 @@ namespace Lavender
 
 			emitter << YAML::Key << "ClassName" << script.ClassName;
 
+			// TODO: Serialize ValueFields
+
 			emitter << YAML::EndMap;
 		}
 
@@ -221,6 +225,12 @@ namespace Lavender
 		{
 			ScriptComponent& script = entity.AddOrReplaceComponent<ScriptComponent>();
 			script.ClassName = scriptComponent["ClassName"].as<std::string>();
+
+			if (Project::Get()->GetScript())
+			{
+				Ref<EntityInterface> entityInterface = EntityInterface::Create(uuid, Project::Get()->GetScript(), script.ClassName);
+				m_Scene->AddScriptedEntity(entityInterface);
+			}
 		}
 
 		// PointLightComponent
