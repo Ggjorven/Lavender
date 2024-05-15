@@ -5,6 +5,8 @@
 
 #include "Lavender/Core/Window.hpp"
 
+#include "Lavender/UI/BaseImGuiLayer.hpp"
+
 #include <vector>
 #include <memory>
 #include <queue>
@@ -54,6 +56,7 @@ namespace Lavender
 		bool m_Minimized = false;
 
 		LayerStack m_LayerStack = {};
+		BaseImGuiLayer* m_ImGuiLayer = nullptr;
 
 	private:
 		static Application* s_Instance;

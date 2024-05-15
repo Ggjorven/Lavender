@@ -20,6 +20,7 @@ namespace Lavender
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
 		virtual void OnEvent(Event& e) {}
+		virtual void OnUIRender() {}
 
 		inline const std::string& GetName() { return m_DebugName; }
 

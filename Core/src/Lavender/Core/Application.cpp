@@ -27,6 +27,9 @@ namespace Lavender
 		m_Window->SetEventCallBack(APP_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
+
+		m_ImGuiLayer = BaseImGuiLayer::Create();
+		m_LayerStack.AddOverlay((Layer*)m_ImGuiLayer);
 	}
 
 	Application::~Application()
@@ -78,12 +81,28 @@ namespace Lavender
 				Renderer::BeginFrame();
 			}
 			{
-				APP_PROFILE_SCOPE("Update & Render");
+				APP_PROFILE_SCOPE("Update & Render Submit");
 				for (Layer* layer : m_LayerStack)
 				{
 					layer->OnUpdate(deltaTime);
 					if (!m_Minimized) layer->OnRender();
 				}
+			}
+
+			// ImGui
+			{
+				APP_PROFILE_SCOPE("ImGui Submit");
+				Renderer::Submit([this]() 
+				{
+					APP_PROFILE_SCOPE("ImGui Pass");
+					m_ImGuiLayer->Begin();
+					for (Layer* layer : m_LayerStack)
+					{
+						if (!m_Minimized) 
+							layer->OnUIRender();
+					}
+					m_ImGuiLayer->End();
+				});
 			}
 
 			{
@@ -119,6 +138,7 @@ namespace Lavender
 		}
 
 		Renderer::OnResize(e.GetWidth(), e.GetHeight());
+		m_ImGuiLayer->Resize(e.GetWidth(), e.GetHeight());
 
 		m_Minimized = false;
 		return false;

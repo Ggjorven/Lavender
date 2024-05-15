@@ -30,6 +30,10 @@ project "Lavender"
 		"src/Lavender/Utils/**.hpp",
 		"src/Lavender/Utils/**.cpp",
 
+		"src/Lavender/UI/**.h",
+		"src/Lavender/UI/**.hpp",
+		"src/Lavender/UI/**.cpp",
+
 		"src/Lavender/Vulkan/**.h",
 		"src/Lavender/Vulkan/**.hpp",
 		"src/Lavender/Vulkan/**.cpp",

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Swift/Core/Layer.hpp"
+#include "Lavender/Core/Layer.hpp"
 
-namespace Swift
+namespace Lavender
 {
 
 	class Application;
@@ -20,10 +20,6 @@ namespace Swift
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		static BaseImGuiLayer* Create();
-		inline static BaseImGuiLayer* Get() { return s_Instance;}
-
-	private:
-		static BaseImGuiLayer* s_Instance;
 
 		friend class Application;
 	};

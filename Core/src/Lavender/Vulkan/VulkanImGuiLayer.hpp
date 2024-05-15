@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Swift/Utils/BaseImGuiLayer.hpp"
-#include "Swift/Utils/Utils.hpp"
+#include "Lavender/Core/Core.hpp"
+#include "Lavender/Utils/Utils.hpp"
 
-#include "Swift/Vulkan/VulkanRenderPass.hpp"
+#include "Lavender/UI/BaseImGuiLayer.hpp"
+
+#include "Lavender/Vulkan/VulkanRenderPass.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
-namespace Swift
+namespace Lavender
 {
 
 	class VulkanImGuiLayer : public BaseImGuiLayer

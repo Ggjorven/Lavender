@@ -1,24 +1,24 @@
-#include "swpch.h"
+#include "lvpch.h"
 #include "VulkanImGuiLayer.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
 
-#include "Swift/Core/Application.hpp"
-#include "Swift/Core/Logging.hpp"
-#include "Swift/Utils/Profiler.hpp"
+#include "Lavender/Core/Application.hpp"
+#include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
-#include "Swift/Renderer/Renderer.hpp"
+#include "Lavender/Renderer/Renderer.hpp"
 
-#include "Swift/Vulkan/VulkanUtils.hpp"
-#include "Swift/Vulkan/VulkanRenderer.hpp"
+#include "Lavender/Vulkan/VulkanUtils.hpp"
+#include "Lavender/Vulkan/VulkanRenderer.hpp"
 
 #include <GLFW/glfw3.h>
 
 #include <vulkan/vulkan.h>
 
-namespace Swift
+namespace Lavender
 {
 
 	static VkDescriptorPool s_ImGuiPool = VK_NULL_HANDLE;
@@ -98,7 +98,7 @@ namespace Swift
 		// Create renderpass
 		RenderPassSpecification specs = {};
 		specs.ColourAttachment = Renderer::GetSwapChainImages();
-		specs.ColourLoadOp = LoadOperation::Load; 	// To not overwrite previous colour attachments
+		specs.ColourLoadOp = LoadOperation::Clear; 	// Change based on needs
 		specs.PreviousColourImageLayout = ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 
 		m_Renderpass = RefHelper::Create<VulkanRenderPass>(specs, CommandBuffer::Create({}));

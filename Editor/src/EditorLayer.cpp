@@ -1,4 +1,4 @@
-#include "SandboxLayer.hpp"
+#include "EditorLayer.hpp"
 
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Input/Input.hpp>
@@ -7,15 +7,15 @@
 
 #include <imgui.h>
 
-void SandboxLayer::OnAttach()
+void EditorLayer::OnAttach()
 {
 }
 
-void SandboxLayer::OnDetach()
+void EditorLayer::OnDetach()
 {
 }
 
-void SandboxLayer::OnUpdate(float deltaTime)
+void EditorLayer::OnUpdate(float deltaTime)
 {
 	// Note(Jorben): All of this below is just to show some stats in the titlebar
 	static float timer = 0.0f;
@@ -27,20 +27,25 @@ void SandboxLayer::OnUpdate(float deltaTime)
 	if (timer >= 1.0f)
 	{
 		FPS = (uint32_t)((float)tempFPS / timer);
-		Application::Get().GetWindow().SetTitle(fmt::format("SandboxApp | FPS: {0} | Frametime: {1:.3f}ms", FPS, timer / (float)FPS * 1000.0f));
+		Application::Get().GetWindow().SetTitle(fmt::format("Editor | FPS: {0} | Frametime: {1:.3f}ms", FPS, timer / (float)FPS * 1000.0f));
 		timer = 0.0f;
 		tempFPS = 0u;
 	}
 }
 
-void SandboxLayer::OnRender()
+void EditorLayer::OnRender()
 {
 }
 
-void SandboxLayer::OnEvent(Event& e)
+void EditorLayer::OnEvent(Event& e)
 {
 }
 
-void SandboxLayer::OnImGuiRender() // Function doesn't do anything if ImGui is not installed.
+void EditorLayer::OnUIRender()
 {
+	ImGui::Begin("A");
+
+	ImGui::Text("Text");
+
+	ImGui::End();
 }
