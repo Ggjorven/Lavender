@@ -1,7 +1,7 @@
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Entrypoint.hpp>
 
-#include "EditorLayer.hpp"
+#include "SandboxLayer.hpp"
 
 class Sandbox : public Lavender::Application
 {
@@ -9,7 +9,7 @@ public:
 	Sandbox(const Lavender::ApplicationSpecification& appInfo)
 		: Lavender::Application(appInfo)
 	{
-		AddLayer(new EditorLayer());
+		AddLayer(new SandboxLayer());
 	}
 };
 
@@ -21,10 +21,10 @@ public:
 Lavender::Application* Lavender::CreateApplication(int argc, char* argv[])
 {
 	ApplicationSpecification appInfo = {};
-	appInfo.WindowSpecs.Name = "Custom";
+	appInfo.WindowSpecs.Name = "SandboxApp | Initializing...";
+	appInfo.WindowSpecs.Width = 1280;
+	appInfo.WindowSpecs.Height = 720;
 	appInfo.WindowSpecs.VSync = false;
-
-	appInfo.RenderSpecs.FramesInFlight = 3;
 
 	return new Sandbox(appInfo);
 }

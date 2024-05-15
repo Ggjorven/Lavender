@@ -1,4 +1,4 @@
-project "Editor"
+project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
@@ -41,7 +41,7 @@ project "Editor"
 
 	links
 	{
-		"Lavender"
+		"Swift"
 	}
 
 	disablewarnings
@@ -87,18 +87,6 @@ project "Editor"
 		defines "APP_DIST"
 		runtime "Release"
 		optimize "Full"
-
-	filter { "system:windows", "configurations:Debug" }
-		postbuildcommands
-		{
-			'{COPYFILE} "%{Dependencies.Assimp.Windows.DebugDynamicLib}" "%{cfg.targetdir}"'
-		}
-
-	filter { "system:windows", "configurations:Release or configurations:Dist" }
-		postbuildcommands
-		{
-			'{COPYFILE} "%{Dependencies.Assimp.Windows.DynamicLib}" "%{cfg.targetdir}"'
-		}
 
 	filter { "system:windows", "configurations:Dist" }
 		-- Dist filter for Windows for Windowed Applications

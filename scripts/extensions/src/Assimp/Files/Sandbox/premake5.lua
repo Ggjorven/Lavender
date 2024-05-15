@@ -1,4 +1,4 @@
-project "Editor"
+project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
@@ -41,7 +41,7 @@ project "Editor"
 
 	links
 	{
-		"Lavender"
+		"Swift"
 	}
 
 	disablewarnings
