@@ -15,6 +15,23 @@ namespace Lavender
 	{
 	}
 
+	std::string Shader::ReadGLSLFile(const std::filesystem::path& path)
+	{
+		std::ifstream file(path);
+
+		if (!file.is_open() || !file.good())
+		{
+			LV_LOG_ERROR("Failed to open file: '{0}'", path.string());
+			return {}; // Return an empty string indicating failure
+		}
+
+		std::string content((std::istreambuf_iterator<char>(file)),
+			(std::istreambuf_iterator<char>()));
+
+		file.close();
+		return content;
+	}
+
 	std::vector<char> Shader::ReadSPIRVFile(const std::filesystem::path& path)
 	{
 		std::ifstream file(path, std::ios::ate | std::ios::binary);

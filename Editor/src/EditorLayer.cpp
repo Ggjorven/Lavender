@@ -2,7 +2,10 @@
 
 #include <Lavender/Core/Application.hpp>
 #include <Lavender/Core/Logging.hpp>
+#include <Lavender/Core/Input/Input.hpp>
+
 #include <Lavender/Utils/Utils.hpp>
+#include <Lavender/Utils/Profiler.hpp>
 
 #include <Lavender/APIs/Vulkan/VulkanContext.hpp>
 #include <Lavender/APIs/Vulkan/VulkanImage.hpp>
@@ -11,127 +14,168 @@
 #include <Lavender/Renderer/Renderer.hpp>
 #include <Lavender/Renderer/Shader.hpp>
 
+#include <Lavender/UI/UI.hpp>
+#include <Lavender/UI/Style.hpp>
+#include <Lavender/UI/Colours.hpp>
+
+#include <Lavender/Workspace/Assets/MeshAsset.hpp>
+
+#include <Lavender/FileSystem/PreferencesSerializer.hpp>
+#include <Lavender/FileSystem/ProjectSerializer.hpp>
+#include <Lavender/FileSystem/SceneSerializer.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <backends/imgui_impl_vulkan.h>
-
-static float vertices[] = {
-	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-	0.5f, -0.5, 0.0f, 0.0f, 0.0f,
-	0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-	-0.5f, 0.5, 0.0f, 1.0f, 1.0f
-};
-
-static uint32_t indices[] = {
-	0, 1, 2,
-	2, 3, 0
-};
-
-struct Camera
-{
-public:
-	glm::mat4 Model = {};
-	glm::mat4 View = {};
-	glm::mat4 Projection = {};
-};
-
 void EditorLayer::OnAttach()
 {
-	m_Viewport = Viewport::Create(Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
+	m_Preferences = RefHelper::Create<UIPreferences>();
+	PreferencesSerializer serializer(m_Preferences);
+	serializer.Deserialize(Utils::ToolKit::GetEnv() + "/Editor/EditorPreferences.lvepref");
 
-	ShaderCode code = {};
-	code.VertexSPIRV = Shader::ReadSPIRVFile("assets/shaders/vert.spv");
-	code.FragmentSPIRV = Shader::ReadSPIRVFile("assets/shaders/frag.spv");
-	Ref<Shader> shader = Shader::Create(code);
+	m_Project = Project::Create();
+	ProjectSerializer projSerializer(m_Project);
+	projSerializer.Deserialize(Utils::ToolKit::GetEnv() + "/Editor/Projects/First/Project.lvproject");
 
-	m_VertexBuffer = VertexBuffer::Create((void*)vertices, sizeof(vertices));
-	m_IndexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+	m_ContentBrowserPanel = ContentBrowserPanel::Create(m_Project);
+	m_EntityPanel = EntitiesPanel::Create(m_Project);
+	m_MaterialPanel = MaterialPanel::Create(m_Project);
+	m_DebugPanel = DebugPanel::Create(m_Project);
 
-	BufferLayout bufferLayout = {
-		{ DataType::Float3, 0, "a_Position" },
-		{ DataType::Float2, 1, "a_TexCoord" }
-	};
+	m_SettingsWindow = SettingsWindow::Create(m_Project);
 
-	UniformLayout uniformLayout = {
-		{ UniformDataType::Image, 0, 0, "u_Image", UniformElement::ShaderStage::Fragment },
-		{ UniformDataType::UniformBuffer, 0, 1, "u_Camera", UniformElement::ShaderStage::Vertex }
-	};
-
-	PipelineSpecification pipelineSpecs = {};
-	pipelineSpecs.Bufferlayout = bufferLayout;
-	pipelineSpecs.Uniformlayout = uniformLayout;
-
-	pipelineSpecs.Polygonmode = PipelineSpecification::PolygonMode::Fill;
-	pipelineSpecs.LineWidth = 1.0f;
-	pipelineSpecs.Cullingmode = PipelineSpecification::CullingMode::Back;
-
-	m_Pipeline = Pipeline::Create(pipelineSpecs, shader, m_Viewport->GetRenderPass()->GetRenderPass());
-	m_Pipeline->Initialize();
-
-	m_Image = Image2D::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Image"), "assets/images/test.jpg");
-	m_CameraBuffer = UniformBuffer::Create(m_Pipeline, uniformLayout.GetElementByName(0, "u_Camera"), sizeof(Camera));
+	Application::SetInitialized(true);
 }
 
 void EditorLayer::OnDetach()
 {
+	ProjectSerializer projSerializer(m_Project);
+	projSerializer.Serialize();
+
+	SceneSerializer sceneSerializer(m_Project->GetSceneCollection().GetActive());
+	sceneSerializer.Serialize();
+
+	PreferencesSerializer prefSerializer(m_Preferences);
+	prefSerializer.Serialize(Utils::ToolKit::GetEnv() + "/Editor/EditorPreferences.lvepref");
 }
 
 void EditorLayer::OnUpdate(float deltaTime)
 {
-	auto& window = Application::Get().GetWindow();
-	if (m_Viewport->GetWidth() != 0 && m_Viewport->GetWidth() != 0) // Note(Jorben): This if state is because glm::perspective doesnt allow the aspectratio to be 0
-	{
-		auto& window = Application::Get().GetWindow();
+	LV_PROFILE_SCOPE("EditorLayer::OnUpdate");
 
-		Camera camera = {};
-		camera.Model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		camera.Projection = glm::perspective(glm::radians(45.0f), (float)m_Viewport->GetWidth() / (float)m_Viewport->GetHeight(), 0.1f, 10.0f);
+	m_Project->OnUpdate(deltaTime);
 
-		if (Renderer::GetAPI() == RenderingAPI::Vulkan)
-			camera.Projection[1][1] *= -1;
-
-		m_CameraBuffer->SetData((void*)&camera, sizeof(Camera));
-	}
+	m_ContentBrowserPanel->OnUpdate(deltaTime);
+	m_DebugPanel->OnUpdate(deltaTime);
 }
 
 void EditorLayer::OnRender()
 {
-	m_Viewport->BeginFrame();
+	LV_PROFILE_SCOPE("EditorLayer::OnRender");
 
-	m_Pipeline->Use(m_Viewport->GetRenderPass()->GetCommandBuffer());
-
-	m_VertexBuffer->Bind(m_Viewport->GetRenderPass()->GetCommandBuffer());
-	m_IndexBuffer->Bind(m_Viewport->GetRenderPass()->GetCommandBuffer());
-
-	Renderer::DrawIndexed(m_Viewport->GetRenderPass()->GetCommandBuffer(), m_IndexBuffer);
-
-	m_Viewport->EndFrame();
-
-	Renderer::WaitFor(m_Viewport->GetRenderPass()->GetCommandBuffer());
+	m_Project->OnRender();
 }
 
 void EditorLayer::OnImGuiRender()
 {
-	ImGui::DockSpaceOverViewport();
+	LV_PROFILE_SCOPE("EditorLayer::OnImGuiRender");
 
-	m_Viewport->BeginRender();
-	m_Viewport->EndRender();
+	// Setting colours
+	auto& colours = ImGui::GetStyle().Colors;
+	auto colour = UI::Colours::ConvertU32Colour(UI::Colours::LighterTint);
+	colours[ImGuiCol_SeparatorActive] = ImVec4(colour.r, colour.g, colour.b, colour.a);
+	colours[ImGuiCol_SeparatorHovered] = ImVec4(colour.r, colour.g, colour.b, colour.a);
+
+	// Rendering
+	ImGui::DockSpaceOverViewport();
+	RenderMenuBar();
+	//ImGui::ShowDemoWindow(); // TODO: Remove
+	//ImGui::ShowStyleEditor(); // TODO: Remove
+	
+	m_Project->OnImGuiRender();
+
+	//m_ContentBrowserPanel->RenderUI();
+	m_EntityPanel->RenderUI();
+	m_MaterialPanel->RenderUI();
+	m_DebugPanel->RenderUI();
+
+	m_SettingsWindow->RenderUI();
 }
 
 void EditorLayer::OnEvent(Event& e)
 {
 	EventHandler handler(e);
 
+	m_Project->OnEvent(e);
+
+	handler.Handle<KeyPressedEvent>(LV_BIND_EVENT_FN(EditorLayer::OnKeyPressEvent));
 	handler.Handle<WindowResizeEvent>(LV_BIND_EVENT_FN(EditorLayer::OnResizeEvent));
+}
+
+bool EditorLayer::OnKeyPressEvent(KeyPressedEvent& e)
+{
+	if (e.GetKeyCode() == Key::F5)
+	{
+		m_Project->GetSceneCollection().GetActive()->ReloadScript();
+	}
+
+	return false;
 }
 
 bool EditorLayer::OnResizeEvent(WindowResizeEvent& e)
 {
-	m_Viewport->Resize(e.GetWidth(), e.GetHeight());
+	m_Project->GetViewport()->Resize();
 
 	return false;
+}
+
+void EditorLayer::RenderMenuBar()
+{	
+	UI::ScopedStyleList colours = UI::StyleColourList({
+		{ UI::StyleColourType::WindowBg, UI::Colours::BackgroundDark },
+		{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+		{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+		{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint }
+	});
+
+	if (UI::BeginMainMenuBar())
+	{
+		if (UI::BeginMenu("File##LavenderUI"))
+		{
+			if (UI::MenuItem("New File##LavenderUI", "Ctrl+N"))
+			{
+				LV_LOG_TRACE("New");
+			}
+
+			UI::EndMenu();
+		}
+
+		UI::Dummy({ 1.0f, 0.0f });
+		if (UI::BeginMenu("Edit##LavenderUI"))
+		{
+			if (UI::MenuItem("Reload Script##LavenderUI"))
+			{
+				m_Project->ReloadScript();
+			}
+
+			UI::EndMenu();
+		}
+
+		UI::Dummy({ 1.0f, 0.0f });
+		if (UI::BeginMenu("View##LavenderUI"))
+		{
+			if (UI::MenuItem("MaterialPanel##LavenderUI", m_MaterialPanel->GetEnabled()))
+			{
+			}
+
+			if (UI::MenuItem("Settings##LavenderUI"))
+			{
+				m_SettingsWindow->SetEnabled(true);
+			}
+
+			UI::EndMenu();
+		}
+
+		UI::EndMainMenuBar();
+	}
 }

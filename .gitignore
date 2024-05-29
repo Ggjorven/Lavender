@@ -22,3 +22,6 @@
 # Binaries
 /bin/
 /bin-int/
+
+/Editor/Projects/**/bin/
+/Editor/Projects/**/bin-int/

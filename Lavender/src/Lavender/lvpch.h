@@ -4,13 +4,14 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <utility>
 #include <limits>
-#include <algorithm>
-#include <functional>
 #include <numeric>
 #include <thread>
 #include <chrono>
+#include <future>
+#include <utility>
+#include <algorithm>
+#include <functional>
 
 #include <cstdint>
 #include <cstdlib>
@@ -24,6 +25,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#ifdef LV_PLATFORM_WINDOWS
+#if defined(LV_PLATFORM_WINDOWS)
 	#include <Windows.h>
+#endif
+
+// TODO: Change the way we do this?
+#if defined(LV_DIST)
+	#define LV_DISABLE_IMGUI
 #endif

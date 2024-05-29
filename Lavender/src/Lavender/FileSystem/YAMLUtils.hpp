@@ -100,7 +100,6 @@ namespace Lavender
 		return out;
 	}
 
-
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec4& v)
 	{
 		out << YAML::Flow;

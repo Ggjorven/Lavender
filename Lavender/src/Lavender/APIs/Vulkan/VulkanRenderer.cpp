@@ -2,7 +2,9 @@
 #include "VulkanRenderer.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Core/Application.hpp"
 #include "Lavender/Utils/Utils.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/IndexBuffer.hpp"
@@ -13,18 +15,11 @@
 namespace Lavender
 {
 	
-	struct VulkanRenderData
-	{
-	public:
-		uint32_t DrawCalls = 0;
-		// TODO: Add more...
-	};
-	
-	VulkanRenderData* s_RenderData = nullptr;
+	RenderData* s_RenderData = nullptr;
 
-	VulkanRenderer::VulkanRenderer(const RendererSpecification& specs)
+	VulkanRenderer::VulkanRenderer()
 	{
-		s_RenderData = new VulkanRenderData();
+		s_RenderData = new RenderData();
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -32,25 +27,37 @@ namespace Lavender
 		VkDevice& device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		vkDeviceWaitIdle(device);
 
+		m_WaitForCommandBuffers.clear();
+		m_ResourceFreeQueue.Execute();
+
 		delete s_RenderData;
 	}
 
 	void VulkanRenderer::BeginFrame()
 	{
-		// TODO: Execute resourceFree queue
+		if (Application::Get().IsMinimized())
+			return;
+
+		s_RenderData->Reset();
+		m_ResourceFreeQueue.Execute();
 
 		auto context = RefHelper::RefAs<VulkanContext>(Renderer::GetContext());
+		{
+			LV_PROFILE_SCOPE("Wait for fences");
+			std::vector<VkFence> fences = { };
+			for (auto& cmd : m_WaitForCommandBuffers) // These are the WaitCommandBuffers from the last frame
+				fences.push_back(cmd->GetInFlightFence(context->GetSwapChain()->GetCurrentFrame()));
 
-		std::vector<VkFence> fences = { };
-		for (auto& cmd : m_WaitForCommandBuffers) // These are the WaitCommandBuffers from the last frame
-			fences.push_back(cmd->GetInFlightFence((context->GetSwapChain()->GetCurrentFrame() + Renderer::GetSpecification().FramesInFlight - 1) % Renderer::GetSpecification().FramesInFlight));
-		
-		// Wait for all previous fences
-		if (fences.size() > 0)
-			vkWaitForFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, UINT64_MAX);
+			// Wait for all previous fences
+			if (!fences.empty())
+			{
+				vkWaitForFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, LV_MAX_UINT64);
+				vkResetFences(context->GetLogicalDevice()->GetVulkanDevice(), (uint32_t)fences.size(), fences.data());
+			}
 
-		m_WaitForCommandBuffers.clear();
-		VulkanRenderCommandBuffer::ResetSemaphore();
+			m_WaitForCommandBuffers.clear();
+			VulkanRenderCommandBuffer::ResetSemaphore();
+		}
 
 		auto swapchain = context->GetSwapChain();
 		swapchain->BeginFrame();
@@ -58,6 +65,9 @@ namespace Lavender
 
 	void VulkanRenderer::EndFrame() // A.k.a Display/Present
 	{
+		if (Application::Get().IsMinimized())
+			return;
+
 		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->EndFrame();
 	}
@@ -67,13 +77,29 @@ namespace Lavender
 		m_RenderQueue.Add(function);
 	}
 
+	void VulkanRenderer::SubmitFree(FreeFunction function)
+	{
+		m_ResourceFreeQueue.Add(function);
+	}
+
 	void VulkanRenderer::WaitFor(Ref<RenderCommandBuffer> commandBuffer)
 	{
 		m_WaitForCommandBuffers.push_back(RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer));
 	}
 
+	void VulkanRenderer::Wait()
+	{
+		LV_PROFILE_SCOPE("VulkanRenderer::Wait");
+
+		VkDevice& device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		vkDeviceWaitIdle(device);
+	}
+
 	void VulkanRenderer::DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer)
 	{
+		LV_PROFILE_SCOPE("VulkanRenderer::DrawIndexed");
+		s_RenderData->DrawCalls++;
+
 		auto cmdBuf = RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer);
 		vkCmdDrawIndexed(cmdBuf->GetVulkanCommandBuffer(), indexBuffer->GetCount(), 1, 0, 0, 0);
 	}
@@ -82,6 +108,11 @@ namespace Lavender
 	{
 		auto swapchain = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain();
 		swapchain->OnResize(width, height, Application::Get().GetWindow().IsVSync());
+	}
+
+	RenderData VulkanRenderer::GetRenderData()
+	{
+		return *s_RenderData;
 	}
 
 }

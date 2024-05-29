@@ -32,6 +32,8 @@ namespace Lavender
 
 		ImageLayout PreviousImageLayout = ImageLayout::Undefined;
 		ImageLayout FinalImageLayout = ImageLayout::Presentation;
+
+		Ref<Image2D> ColourAttachment = nullptr;
 	};
 	DEFINE_BITWISE_OPS(RenderPassSpecification::Attachments)
 

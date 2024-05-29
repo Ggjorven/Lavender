@@ -22,6 +22,9 @@ namespace Lavender
 	class Input
 	{
 	public:
+		static void Init();
+		static void Destroy();
+
 		inline static bool IsKeyPressed(Key keycode) { return s_Instance->IsKeyPressedImplementation(keycode); }
 		inline static bool IsMousePressed(MouseButton button) { return s_Instance->IsMousePressedImplementation(button); }
 
@@ -29,6 +32,11 @@ namespace Lavender
 
 		inline static void SetCursorPosition(glm::vec2 position) { s_Instance->SetCursorPositionImplementation(position); }
 		inline static void SetCursorMode(CursorMode mode) { s_Instance->SetCursorModeImplementation(mode); }
+
+		// For Scripting
+		inline static void NullInstance() { s_Instance = nullptr; }
+		inline static Input* GetInstance() { return s_Instance; }
+		inline static void SetInstance(Input* instance) { s_Instance = instance; }
 
 	protected:
 		//Implementation functions dependent on platform
@@ -41,7 +49,8 @@ namespace Lavender
 		virtual void SetCursorModeImplementation(CursorMode mode) = 0;
 
 	private:
-		static std::unique_ptr<Input> s_Instance;
+		static Input* s_Instance;
 	};
+
 
 }

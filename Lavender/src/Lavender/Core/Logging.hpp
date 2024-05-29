@@ -18,6 +18,7 @@ namespace Lavender
 		};
 
 		static void Init();
+		static bool Initialized();
 
 		template<typename ... Args>
 		static void LogMessage(Log::Level level, Args&&... args);
@@ -35,6 +36,8 @@ namespace Lavender
 		#define LV_LOG_ERROR(...)
 		#define LV_LOG_FATAL(...)
 		#endif
+
+		static std::shared_ptr<spdlog::logger>& GetLogger();
 
 	private:
 		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_Sink;

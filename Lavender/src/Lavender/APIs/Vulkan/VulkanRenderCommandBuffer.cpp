@@ -7,6 +7,7 @@
 
 #include "Lavender/Renderer/Renderer.hpp"
 
+#include "Lavender/APIs//Vulkan/VulkanUtils.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanSwapChain.hpp"
@@ -14,15 +15,17 @@
 namespace Lavender
 {
 
-	static VkSemaphore s_Semaphore = VK_NULL_HANDLE;
+	static VkSemaphore s_LatestSemaphore = VK_NULL_HANDLE;
 
-	VulkanRenderCommandBuffer::VulkanRenderCommandBuffer(RenderCommandBuffer::Usage usage)
-		: m_Usage(usage)
+	VulkanRenderCommandBuffer::VulkanRenderCommandBuffer(CommandBufferSpecification specs)
+		: m_Specification(specs)
 	{
-		VkDevice device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		// Check if specs are set properly
+		if (!(m_Specification.Flags & CommandBufferSpecification::UsageFlags::WaitForLatest) && !(m_Specification.Flags & CommandBufferSpecification::UsageFlags::NoWaiting))
+			LV_LOG_ERROR("No proper flags set.");
 
+		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		uint32_t framesInFlight = Renderer::GetSpecification().FramesInFlight;
-
 		m_CommandBuffers.resize(framesInFlight);
 
 		VkCommandBufferAllocateInfo allocInfo = {};
@@ -56,34 +59,39 @@ namespace Lavender
 
 	VulkanRenderCommandBuffer::~VulkanRenderCommandBuffer()
 	{
-		VkDevice device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto commandBuffers = m_CommandBuffers;
+		auto renderFinishedSemaphores = m_RenderFinishedSemaphores;
+		auto inFlightFences = m_InFlightFences;
 
-		vkDeviceWaitIdle(device);
-
-		vkFreeCommandBuffers(device, RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCommandPool(), Renderer::GetSpecification().FramesInFlight, m_CommandBuffers.data());
-
-		for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+		Renderer::SubmitFree([commandBuffers, renderFinishedSemaphores, inFlightFences]() 
 		{
-			vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
-			vkDestroyFence(device, m_InFlightFences[i], nullptr);
-		}
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+
+			vkDeviceWaitIdle(device);
+
+			vkFreeCommandBuffers(device, RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCommandPool(), Renderer::GetSpecification().FramesInFlight, commandBuffers.data());
+
+			for (size_t i = 0; i < Renderer::GetSpecification().FramesInFlight; i++)
+			{
+				vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+				vkDestroyFence(device, inFlightFences[i], nullptr);
+			}
+		});
 	}
 
 	void VulkanRenderCommandBuffer::Begin()
 	{
-		VkDevice device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-
+		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
 		VkCommandBuffer commandBuffer = m_CommandBuffers[currentFrame];
 
-		vkWaitForFences(device, 1, &m_InFlightFences[currentFrame], VK_TRUE, UINT64_MAX); // TODO: Maybe check if this is correct and is not supposed to be in the renderer
 		vkResetFences(device, 1, &m_InFlightFences[currentFrame]);
 		vkResetCommandBuffer(commandBuffer, 0);
 
 		VkCommandBufferBeginInfo beginInfo = {};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		{
-			LV_PROFILE_SCOPE("BeginCmdBuf");
+			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::Begin::Begin");
 			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to begin recording command buffer!");
 		}
@@ -95,7 +103,7 @@ namespace Lavender
 		VkCommandBuffer commandBuffer = m_CommandBuffers[currentFrame];
 
 		{
-			LV_PROFILE_SCOPE("EndCmdBuf");
+			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::End::End");
 			if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 				LV_LOG_ERROR("Failed to record command buffer!");
 		}
@@ -113,12 +121,12 @@ namespace Lavender
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		if (m_Usage == RenderCommandBuffer::Usage::Sequential)
+		if (m_Specification.Flags & CommandBufferSpecification::UsageFlags::WaitForLatest)
 		{
 			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = &s_Semaphore;
+			submitInfo.pWaitSemaphores = &s_LatestSemaphore;
 		}
-		if (m_Usage == RenderCommandBuffer::Usage::Standalone)
+		if (m_Specification.Flags & CommandBufferSpecification::UsageFlags::NoWaiting)
 		{
 			submitInfo.waitSemaphoreCount = 0;
 			submitInfo.pWaitSemaphores = nullptr;
@@ -131,13 +139,16 @@ namespace Lavender
 		submitInfo.pSignalSemaphores = &m_RenderFinishedSemaphores[currentFrame];
 
 		{
-			LV_PROFILE_SCOPE("Submit Graphics Queue");
-			if (vkQueueSubmit(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[currentFrame]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to submit draw command buffer!");
+			LV_PROFILE_SCOPE("VulkanRenderCommandBuffer::Submit::Queue");
+			auto logicalDevice = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice();
+			//vkQueueWaitIdle(logicalDevice->GetGraphicsQueue());
+			VkResult result = vkQueueSubmit(logicalDevice->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[currentFrame]);
+			if (result != VK_SUCCESS)
+				LV_LOG_ERROR("Failed to submit draw command buffer! Error: {0}", VKResultToString(result));
 		}
 
-		if (m_Usage == RenderCommandBuffer::Usage::Sequential)
-			s_Semaphore = m_RenderFinishedSemaphores[currentFrame]; // For the next commandBuffer
+		if (m_Specification.Flags & CommandBufferSpecification::UsageFlags::WaitForLatest)
+			s_LatestSemaphore = m_RenderFinishedSemaphores[currentFrame]; // For the next commandBuffer
 	}
 
 	VkCommandBuffer VulkanRenderCommandBuffer::GetVulkanCommandBuffer()
@@ -149,12 +160,12 @@ namespace Lavender
 
 	void VulkanRenderCommandBuffer::ResetSemaphore()
 	{
-		s_Semaphore = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentImageAvailableSemaphore();
+		s_LatestSemaphore = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentImageAvailableSemaphore();
 	}
 
 	VkSemaphore VulkanRenderCommandBuffer::GetSemaphore()
 	{
-		return s_Semaphore;
+		return s_LatestSemaphore;
 	}
 
 }

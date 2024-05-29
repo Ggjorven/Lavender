@@ -10,12 +10,12 @@
 namespace Lavender
 {
 
-	RenderInstance* RenderInstance::Create(const RendererSpecification& specs)
+	RenderInstance* RenderInstance::Create()
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderingAPI::Vulkan:
-			return new VulkanRenderer(specs);
+			return new VulkanRenderer();
 
 		default:
 			LV_LOG_ERROR("Invalid API selected.");

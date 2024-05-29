@@ -7,6 +7,9 @@
 
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
+
+#include "Lavender/UI/UI.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/APIs/Vulkan/VulkanContext.hpp"
@@ -121,33 +124,45 @@ namespace Lavender
 
 	void VulkanImGuiLayer::OnDetach()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto pool = s_ImGuiPool;
 
-		vkDeviceWaitIdle(device);
+		Renderer::SubmitFree([pool]()
+		{
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		vkDestroyDescriptorPool(device, s_ImGuiPool, nullptr);
+			vkDeviceWaitIdle(device);
 
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
+			vkDestroyDescriptorPool(device, pool, nullptr);
+
+			ImGui_ImplVulkan_Shutdown();
+			ImGui_ImplGlfw_Shutdown();
+			ImGui::DestroyContext();
+		});
 	}
 
 	void VulkanImGuiLayer::Begin()
 	{
 		m_Renderpass->Begin();
 
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		{
+			LV_PROFILE_SCOPE("VulkanImGuiLayer::Begin::NewFrame");
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
 	}
 
 	void VulkanImGuiLayer::End()
 	{
+		UI::ResetIDs();
+
 		ImGuiIO& io = ImGui::GetIO();
 
 		io.DisplaySize = ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight());
 
 		// Rendering
+		vkDeviceWaitIdle(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice());
+
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), RefHelper::RefAs<VulkanRenderCommandBuffer>(m_Renderpass->GetCommandBuffer())->GetVulkanCommandBuffer());
 

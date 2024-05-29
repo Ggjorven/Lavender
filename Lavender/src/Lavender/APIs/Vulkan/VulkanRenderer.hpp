@@ -15,23 +15,30 @@ namespace Lavender
 	class VulkanRenderer : public RenderInstance
 	{
 	public:
-		VulkanRenderer(const RendererSpecification& specs);
+		VulkanRenderer();
 		virtual ~VulkanRenderer();
 
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		void Submit(RenderFunction function);
-		void WaitFor(Ref<RenderCommandBuffer> commandBuffer);
+		void Submit(RenderFunction function) override;
+		void SubmitFree(FreeFunction function) override;
 
-		void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer);
+		void WaitFor(Ref<RenderCommandBuffer> commandBuffer) override;
+		void Wait() override;
+
+		void DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer) override;
 
 		void OnResize(uint32_t width, uint32_t height) override;
+
+		RenderData GetRenderData() override;
 
 		std::vector<Ref<VulkanRenderCommandBuffer>> GetCommandBuffers() { return m_WaitForCommandBuffers; }
 
 	private:
 		Utils::Queue<RenderFunction> m_RenderQueue = { };
+		Utils::Queue<FreeFunction> m_ResourceFreeQueue = { };
+
 		std::vector<Ref<VulkanRenderCommandBuffer>> m_WaitForCommandBuffers = { };
 	};
 

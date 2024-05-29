@@ -62,7 +62,7 @@ namespace Lavender
 
 	enum class UniformDataType : uint8_t
 	{
-		None = 0, UniformBuffer, Image
+		None = 0, UniformBuffer, DynamicUniformBuffer, Image
 	};
 
 	// Note(Jorben): To use multiple descriptor set you need have Vulkan selected as the API
@@ -95,7 +95,7 @@ namespace Lavender
 		UniformLayout(const std::initializer_list<UniformElement>& elements);
 		virtual ~UniformLayout() = default;
 
-		inline const std::unordered_map<uint32_t, std::vector<UniformElement>>& GetElements() const { return m_Elements; }
+		inline const Dict<SetID, std::vector<UniformElement>>& GetElements() const { return m_Elements; }
 
 		UniformElement GetElementByName(SetID set, const std::string& name);
 
@@ -105,7 +105,7 @@ namespace Lavender
 
 	private:
 		// First element is the Set, second are the elements in that Set
-		std::unordered_map<SetID, std::vector<UniformElement>> m_Elements = { }; 
+		Dict<SetID, std::vector<UniformElement>> m_Elements = { }; 
 	};
 	DEFINE_BITWISE_OPS(UniformElement::ShaderStage)
 
@@ -117,12 +117,12 @@ namespace Lavender
 	public:
 		enum class CullingMode : uint8_t
 		{
-			None = LV_MAX_UINT8, Front = 1, Back, FrontAndBack
+			None = 0, Front = 1, Back, FrontAndBack
 		};
 
 		enum class PolygonMode : uint8_t
 		{
-			None = LV_MAX_UINT8, Fill = 0, Line = 1
+			None = 0, Fill = 0, Line = 1
 		};
 
 	public:
