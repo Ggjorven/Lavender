@@ -76,6 +76,18 @@ Dependencies =
 		LibName = "ImGui"
 	},
 
+	-- Custom Libs
+	Flow = 
+	{
+		LibName = "Flow",
+		IncludeDir = "%{wks.location}/vendor/Flow/Core/src",
+	},
+	Insight = 
+	{
+		LibName = "Insight",
+		IncludeDir = "%{wks.location}/vendor/Insight/Core/src",
+	},
+
 	-- Includes
 	GLM = 
 	{
@@ -88,6 +100,10 @@ Dependencies =
 	Stb_image =
 	{
 		IncludeDir = "%{wks.location}/vendor/stb/include"
+	},
+	EnTT = 
+	{
+		IncludeDir = "%{wks.location}/vendor/entt/include"
 	}
 }
 ------------------------------------------------------------------------------
@@ -118,6 +134,9 @@ group "Dependencies"
 	include "vendor/tracy"
 	include "vendor/imgui"
 	include "vendor/vma"
+
+	include "vendor/Flow/Core"
+	include "vendor/Insight/Core"
 group ""
 
 group "Lavender"

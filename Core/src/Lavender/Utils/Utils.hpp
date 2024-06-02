@@ -213,6 +213,11 @@ namespace Lavender::Utils
         double m_Start = 0.0f;
     };
 
+    template<typename ...Types>
+    struct TypeGroup
+    {
+    };
+
 }
 
 namespace Lavender

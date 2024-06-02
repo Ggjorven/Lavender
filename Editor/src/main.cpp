@@ -26,5 +26,7 @@ Lavender::Application* Lavender::CreateApplication(int argc, char* argv[])
 	appInfo.WindowSpecs.Height = 720;
 	appInfo.WindowSpecs.VSync = false;
 
+	appInfo.EnableUI = true;
+
 	return new Sandbox(appInfo);
 }

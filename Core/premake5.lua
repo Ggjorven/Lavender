@@ -21,6 +21,10 @@ project "Lavender"
 		"src/Lavender/Core/**.h",
 		"src/Lavender/Core/**.hpp",
 		"src/Lavender/Core/**.cpp",
+
+		"src/Lavender/FileSystem/**.h",
+		"src/Lavender/FileSystem/**.hpp",
+		"src/Lavender/FileSystem/**.cpp",
 		
 		"src/Lavender/Renderer/**.h",
 		"src/Lavender/Renderer/**.hpp",
@@ -38,6 +42,14 @@ project "Lavender"
 		"src/Lavender/Vulkan/**.hpp",
 		"src/Lavender/Vulkan/**.cpp",
 
+		"src/Lavender/ECS/**.h",
+		"src/Lavender/ECS/**.hpp",
+		"src/Lavender/ECS/**.cpp",
+
+		"src/Lavender/WorkSpace/**.h",
+		"src/Lavender/WorkSpace/**.hpp",
+		"src/Lavender/WorkSpace/**.cpp",
+
 		"src/Lavender/Platforms/" .. FirstToUpper("%{cfg.system}") .. "/**.h",
 		"src/Lavender/Platforms/" .. FirstToUpper("%{cfg.system}") .. "/**.hpp",
 		"src/Lavender/Platforms/" .. FirstToUpper("%{cfg.system}") .. "/**.cpp",
@@ -48,7 +60,8 @@ project "Lavender"
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"yaml_cpp_EXPORTS"
 	}
 
 	includedirs
@@ -63,14 +76,20 @@ project "Lavender"
 		"%{Dependencies.Assimp.IncludeDir}",
 		"%{Dependencies.ImGui.IncludeDir}",
 		"%{Dependencies.Tracy.IncludeDir}",
-		"%{Dependencies.VMA.IncludeDir}"
+		"%{Dependencies.EnTT.IncludeDir}",
+		"%{Dependencies.VMA.IncludeDir}",
+
+		"%{Dependencies.Flow.IncludeDir}",
+		"%{Dependencies.Insight.IncludeDir}"
 	}
 
 	links
 	{
 		"%{Dependencies.GLFW.LibName}",
 		"%{Dependencies.VMA.LibName}",
-		"%{Dependencies.ImGui.LibName}"
+		"%{Dependencies.ImGui.LibName}",
+
+		"%{Dependencies.Flow.LibName}"
 	}
 
 	disablewarnings

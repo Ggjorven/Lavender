@@ -1,0 +1,24 @@
+## Ignore Visual Studio temporary files, build results, and
+.vs/
+
+# VS Code files for those working on multiple tools
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+# Visual Studio ignores
+**.sln
+
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+
+# Binaries
+/bin/
+/bin-int/

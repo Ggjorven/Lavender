@@ -10,6 +10,8 @@
 
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/WorkSpace/EngineTracker.hpp"
+
 namespace Lavender
 {
 
@@ -74,6 +76,23 @@ namespace Lavender
 			float deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
 
+			Track::Frame::DeltaTime = deltaTime;
+
+			{
+				static float timer = 0.0f;
+				static uint32_t tempFPS = 0;
+				timer += deltaTime;
+				tempFPS += 1u;
+
+				if (timer >= Track::Frame::UpdateInterval)
+				{
+					Track::Frame::FPS = (uint32_t)((float)tempFPS / timer);
+					Track::Frame::FrameTime = timer / (float)Track::Frame::FPS * 1000.0f;
+					timer = 0.0f;
+					tempFPS = 0u;
+				}
+			}
+
 			// Update & Render
 			m_Window->OnUpdate();
 			{
@@ -89,7 +108,8 @@ namespace Lavender
 				}
 			}
 
-			// ImGui
+			// ImGui 
+			if (m_AppInfo.EnableUI)
 			{
 				APP_PROFILE_SCOPE("ImGui Submit");
 				Renderer::Submit([this]() 
@@ -136,6 +156,9 @@ namespace Lavender
 			m_Minimized = true;
 			return true;
 		}
+
+		Lavender::Track::Viewport::Width = e.GetWidth();
+		Lavender::Track::Viewport::Height = e.GetHeight();
 
 		Renderer::OnResize(e.GetWidth(), e.GetHeight());
 		m_ImGuiLayer->Resize(e.GetWidth(), e.GetHeight());

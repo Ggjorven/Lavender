@@ -36,12 +36,21 @@ project "Editor"
 		"%{Dependencies.Assimp.IncludeDir}",
 		"%{Dependencies.ImGui.IncludeDir}",
 		"%{Dependencies.Tracy.IncludeDir}",
-		"%{Dependencies.VMA.IncludeDir}"
+		"%{Dependencies.EnTT.IncludeDir}",
+		"%{Dependencies.VMA.IncludeDir}",
+
+		"%{Dependencies.Flow.IncludeDir}",
+		"%{Dependencies.Insight.IncludeDir}"
 	}
 
 	links
 	{
 		"Lavender"
+	}
+	
+	defines
+	{
+		"yaml_cpp_EXPORTS"
 	}
 
 	disablewarnings

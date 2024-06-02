@@ -40,7 +40,7 @@ namespace Lavender
 		static std::mutex s_SemaphoreMutex;
 		static Dict<uint32_t, LinkedList<VkSemaphore>> s_Semaphores;
 		static std::mutex s_FrameSemaphoreMutex;
-		static Dict<uint32_t, LinkedList<VkSemaphore>> s_FrameSemaphores;
+		static Dict<uint32_t, LinkedList<VkSemaphore>> s_FrameSemaphores; // Semaphores only used at the end of the frame, so they are executed in parallel
 
 		static std::mutex s_FenceMutex;
 		static Dict<uint32_t, LinkedList<VkFence>> s_Fences;

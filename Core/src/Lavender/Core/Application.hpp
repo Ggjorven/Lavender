@@ -19,6 +19,7 @@ namespace Lavender
 	{
 	public:
 		WindowSpecification WindowSpecs = { };
+		bool EnableUI = true;
 
 	public:
 		ApplicationSpecification() = default;

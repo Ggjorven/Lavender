@@ -2,6 +2,8 @@
 
 #include <Lavender/Core/Layer.hpp>
 
+#include <Lavender/WorkSpace/Project.hpp>
+
 using namespace Lavender;
 
 class EditorLayer : public Layer
@@ -14,4 +16,7 @@ public:
 	void OnRender() override;
 	void OnEvent(Event& e) override;
 	void OnUIRender() override;
+
+private:
+	Ref<Project> m_Project = nullptr;
 };
