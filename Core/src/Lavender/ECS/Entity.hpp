@@ -23,10 +23,11 @@ namespace Lavender
 			if (HasComponent<TComponent>())
 			{
 				APP_LOG_WARN("Tried to AddComponent when component already exists. Use AddOrReplaceComponent for this.");
-				return;
 			}
-
-			m_RegistryRef->emplace<TComponent>(m_Entity, component);
+			else
+			{
+				m_RegistryRef->emplace<TComponent>(m_Entity, component);
+			}
 			return m_RegistryRef->get<TComponent>(m_Entity);
 		}
 

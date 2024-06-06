@@ -37,15 +37,21 @@ namespace Insight
 		void* CreateClass(const std::string& className);
 		void DeleteClass(const std::string& className, void* instance);
 
+		inline bool Loaded() const { return m_Handle != nullptr; }
+		inline std::filesystem::path GetPath() { return m_Path; }
 		inline Internal::Classes& GetClasses() { return m_Classes; }
 
 		std::vector<OpaqueVariable> GetVariables(const std::string& className, void* classInstance);
 		
+		inline HMODULE GetHandle() { return m_Handle; }
+
 		template <typename TFunc>
 		inline TFunc GetCustomFunction(const std::string& cFuncName)
 		{
 			return (TFunc)GetProcAddress(m_Handle, cFuncName.c_str());
 		}
+
+		static std::shared_ptr<Dll> Create(const std::filesystem::path& path);
 
 	private:
 		HMODULE m_Handle = {};

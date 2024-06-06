@@ -61,12 +61,14 @@ namespace Lavender
 
 			file << Yaml::FileManip::EndMap;
 		}
-
 		
 		file << Yaml::FileManip::EndSeq;
 
 		file << Yaml::FileManip::Key << "StartScene";
 		file << Yaml::FileManip::Value << (uint64_t)info.StartScene;
+
+		file << Yaml::FileManip::Key << "ScriptsPath";
+		file << Yaml::FileManip::Value << info.ScriptsPath.string();
 
 		file << Yaml::FileManip::EndMap;
 
@@ -96,6 +98,8 @@ namespace Lavender
 			collection.Add(scene["Scene"].as<uint64_t>(), { scene["Path"].as<std::string>()});
 
 		info.StartScene = file["StartScene"].as<uint64_t>();
+
+		info.ScriptsPath = file["ScriptsPath"].as<std::string>();
 
 		m_Project->Init();
 	}

@@ -7,3 +7,4 @@ Scenes:
   - Scene: 1
     Path: main.lvscene
 StartScene: 1
+ScriptsPath: bin/Debug-windows/Script/Script.dll

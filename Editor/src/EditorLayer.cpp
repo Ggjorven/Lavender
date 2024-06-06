@@ -20,7 +20,7 @@ void EditorLayer::OnAttach()
 	m_Project->GetState() = WorkSpace::State::Editor;
 
 	ProjectSerializer serializer(m_Project);
-	serializer.Deserialize("Projects/Example/Example.lvproj");
+	serializer.Deserialize("Resources/Projects/Example/Example.lvproj");
 }
 
 void EditorLayer::OnDetach()

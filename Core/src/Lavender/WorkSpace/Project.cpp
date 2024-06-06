@@ -17,6 +17,22 @@ namespace Lavender
 
 	Project::~Project()
 	{
+		m_Scripting.reset();
+	}
+
+	void Project::OnUpdate(float deltaTime)
+	{
+		m_Scenes.GetActive()->OnUpdate(deltaTime);
+	}
+
+	void Project::OnRender()
+	{
+		m_Scenes.GetActive()->OnRender();
+	}
+
+	void Project::OnEvent(Event& e)
+	{
+		m_Scenes.GetActive()->OnEvent(e);
 	}
 
 	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info)
@@ -32,11 +48,22 @@ namespace Lavender
 
 	void Project::Init()
 	{
+		// Initialize startscene
 		Ref<Scene> startScene = Scene::Create(m_Info.StartScene);
 		SceneSerializer serializer(startScene);
 		serializer.Deserialize(m_Info.Directory / m_Info.Scenes / m_Scenes.GetAll()[m_Info.StartScene].Path);
 
 		m_Scenes.SetActive(m_Info.StartScene, startScene);
+
+		// Initialize script
+		if (std::filesystem::exists(m_Info.Directory / m_Info.Script / m_Info.ScriptsPath))
+		{
+			ScriptingSpecification scriptingSpecs = {};
+			scriptingSpecs.Type = ScriptingBackendType::Cpp;
+			scriptingSpecs.Path = m_Info.Directory / m_Info.Script / m_Info.ScriptsPath;
+
+			m_Scripting = ScriptingBackend::Create(scriptingSpecs);
+		}
 	}
 
 	void Project::Destroy()

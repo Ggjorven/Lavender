@@ -6,14 +6,17 @@
 
 #include <glm/glm.hpp>
 
-#include "Lavender/Utils/Utils.hpp"
-
 namespace Lavender
 {
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Components
 	//////////////////////////////////////////////////////////////////////////////////////
+	enum class ComponentType
+	{
+		None = 0, Tag, Transform
+	};
+
 	struct TagComponent
 	{
 	public:
@@ -26,6 +29,8 @@ namespace Lavender
 		{
 		}
 		TagComponent(const TagComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::Tag; }
 	};
 
 	struct TransformComponent
@@ -42,27 +47,13 @@ namespace Lavender
 		{
 		}
 		TransformComponent(const TransformComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::Transform; }
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Utilities
 	//////////////////////////////////////////////////////////////////////////////////////
-	enum class Component
-	{
-		None = 0, Tag, Transform
-	};
-
-	template<typename TComponent>
-	static Component GetComponentType()
-	{
-		if constexpr (std::is_same_v<TComponent, TagComponent>)
-			return Component::Tag;
-		else if constexpr (std::is_same_v<TComponent, TransformComponent>)
-			return Component::Transform;
-
-		return Component::None;
-	}
-
 	template<typename TComponent>
 	static std::string ComponentToString()
 	{
@@ -74,6 +65,11 @@ namespace Lavender
 		return "Undefined Component";
 	}
 
-	using AllComponents = Utils::TypeGroup<TagComponent, TransformComponent>;
+	template<typename... TComponents>
+	struct ComponentGroup
+	{
+	};
+
+	using AllComponents = ComponentGroup<TagComponent, TransformComponent>;
 
 }

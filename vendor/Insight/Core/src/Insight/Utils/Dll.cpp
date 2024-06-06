@@ -103,4 +103,10 @@ namespace Insight
 	// TODO: ...
 
 #endif
+
+	std::shared_ptr<Dll> Dll::Create(const std::filesystem::path& path)
+	{
+		return std::make_shared<Dll>(path);
+	}
+
 }

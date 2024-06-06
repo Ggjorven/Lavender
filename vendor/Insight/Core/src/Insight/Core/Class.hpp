@@ -163,8 +163,8 @@ namespace Insight::Internal
     ///////////////////////////////////////////////////////////////////////////////////
     // Exports
     ///////////////////////////////////////////////////////////////////////////////////
-    inline static Classes ClassSymbols = {};
-
+    inline Classes ClassSymbols = {};
+    
     extern "C"
     {
         inline EXPORT Insight::Internal::Classes* Insight_GetClasses()

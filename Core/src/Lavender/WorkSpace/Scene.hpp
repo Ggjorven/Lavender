@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lavender/Core/Core.hpp"
+#include "Lavender/Core/Events.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/Utils/UUID.hpp"
@@ -19,6 +20,10 @@ namespace Lavender
 	public:
 		Scene(const UUID& uuid);
 		virtual ~Scene();
+
+		void OnUpdate(float deltaTime);
+		void OnRender();
+		void OnEvent(Event& e);
 
 		inline void SetID(const UUID& uuid) { m_ID = uuid; }
 		inline const UUID& GetID() { return m_ID; }

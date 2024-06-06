@@ -34,6 +34,10 @@ project "Lavender"
 		"src/Lavender/Utils/**.hpp",
 		"src/Lavender/Utils/**.cpp",
 
+		"src/Lavender/Scripting/**.h",
+		"src/Lavender/Scripting/**.hpp",
+		"src/Lavender/Scripting/**.cpp",
+
 		"src/Lavender/UI/**.h",
 		"src/Lavender/UI/**.hpp",
 		"src/Lavender/UI/**.cpp",
@@ -89,7 +93,8 @@ project "Lavender"
 		"%{Dependencies.VMA.LibName}",
 		"%{Dependencies.ImGui.LibName}",
 
-		"%{Dependencies.Flow.LibName}"
+		"%{Dependencies.Flow.LibName}",
+		"%{Dependencies.Insight.LibName}"
 	}
 
 	disablewarnings

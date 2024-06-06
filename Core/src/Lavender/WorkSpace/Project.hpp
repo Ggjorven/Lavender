@@ -1,10 +1,13 @@
 #pragma once
  
 #include "Lavender/Core/Core.hpp"
+#include "Lavender/Core/Events.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/WorkSpace/Scene.hpp"
 #include "Lavender/WorkSpace/WorkSpace.hpp"
+
+#include "Lavender/Scripting/ScriptingBackend.hpp"
 
 namespace Lavender
 {
@@ -16,6 +19,10 @@ namespace Lavender
 	public:
 		Project(const WorkSpace::ProjectInfo& info);
 		virtual ~Project();
+
+		void OnUpdate(float deltaTime);
+		void OnRender();
+		void OnEvent(Event& e);
 
 		inline const WorkSpace::ProjectInfo& GetInfo() { return m_Info; }
 		inline WorkSpace::State& GetState() { return m_State; }
@@ -32,6 +39,8 @@ namespace Lavender
 		WorkSpace::ProjectInfo m_Info = {};
 		WorkSpace::State m_State = WorkSpace::State::None;
 		SceneCollection m_Scenes = { };
+
+		Ref<ScriptingBackend> m_Scripting = nullptr;
 
 		friend class ProjectSerializer;
 	};

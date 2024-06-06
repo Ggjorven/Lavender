@@ -48,6 +48,8 @@ namespace Lavender::WorkSpace
 		std::filesystem::path Assets = {};
 		std::filesystem::path Script = {};
 		std::filesystem::path Scenes = {};
+
+		std::filesystem::path ScriptsPath = {};
 	};
 
 }

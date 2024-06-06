@@ -17,6 +17,23 @@ namespace Lavender
 	{
 	}
 
+	void Scene::OnUpdate(float deltaTime)
+	{
+		// Update based on state
+	}
+
+	void Scene::OnRender()
+	{
+		// TODO: SceneRenderer with Editor/Runtime camera
+	}
+
+	void Scene::OnEvent(Event& e)
+	{
+		// Event Editor
+
+		// Event Runtime
+	}
+
 	Ref<Scene> Scene::Create(const UUID& uuid)
 	{
 		return RefHelper::Create<Scene>(uuid);
@@ -26,6 +43,8 @@ namespace Lavender
 	{
 		return Project::Get()->GetScenes().GetActive();
 	}
+
+
 
 	// SceneCollection
 	void SceneCollection::Add(const UUID& uuid, const WorkSpace::SceneInfo& info)

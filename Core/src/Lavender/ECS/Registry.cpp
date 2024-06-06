@@ -63,16 +63,16 @@ namespace Lavender
 	}
 
 	template<typename... TComponents>
-	void CopyComponents(Utils::TypeGroup<TComponents...> group, entt::registry& src, entt::registry& dst, SortedDict<UUID, Entity>& entityMap)
+	void CopyComponents(ComponentGroup<TComponents...> group, entt::registry& src, entt::registry& dst, SortedDict<UUID, Entity>& entityMap)
 	{
 		// Note(Jorben): Empty function for when there are no components
 	}
 
 	template<typename FirstComponent, typename ... RestComponents>
-	void CopyComponents(Utils::TypeGroup<FirstComponent, RestComponents...> group, entt::registry& src, entt::registry& dst, SortedDict<UUID, Entity>& entityMap)
+	void CopyComponents(ComponentGroup<FirstComponent, RestComponents...> group, entt::registry& src, entt::registry& dst, SortedDict<UUID, Entity>& entityMap)
 	{
 		CopyComponent<FirstComponent>(src, dst, entityMap);
-		CopyComponents<RestComponents...>(Utils::TypeGroup<RestComponents...>(), src, dst, entityMap);
+		CopyComponents<RestComponents...>(ComponentGroup<RestComponents...>(), src, dst, entityMap);
 	}
 
 
