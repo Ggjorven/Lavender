@@ -11,6 +11,11 @@
 namespace Lavender
 {
 
+	ShaderPath::ShaderPath(const std::filesystem::path& shader, const std::filesystem::path& cache)
+		: Shader(shader), Cache(cache)
+	{
+	}
+
 	ShaderSpecification::ShaderSpecification(const std::vector<char>& fragment, const std::vector<char>& vertex)
 		: Fragment(fragment), Vertex(vertex)
 	{

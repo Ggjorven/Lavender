@@ -26,7 +26,19 @@ namespace Lavender::WorkSpace
 	{
 		None = 0, Debug, Release, Dist
 	};
-	std::string ConfigToString(Configuration config);
+	std::string ConfigurationToString(Configuration config);
+
+	enum class Platform : uint8_t
+	{
+		None = 0, Windows, MacOS, Linux, Android // Only Windows is Implemented
+	};
+	std::string PlatformToString(Platform platform, bool firstUpperCase = false);
+
+	enum class ScriptingBackendType : uint8_t
+	{
+		None = 0, Cpp, Cs, Python // Cs and Python are not a thing yet. // TODO
+	};
+	std::string ScriptingBackendTypeToString(ScriptingBackendType type);
 
 	// Scene
 	struct SceneInfo
@@ -49,7 +61,14 @@ namespace Lavender::WorkSpace
 		std::filesystem::path Script = {};
 		std::filesystem::path Scenes = {};
 
+		ScriptingBackendType ScriptType = ScriptingBackendType::None;
 		std::filesystem::path ScriptsPath = {};
 	};
+
+
+	
+	// Engine Initialization
+	void Init();
+	void Destroy();
 
 }

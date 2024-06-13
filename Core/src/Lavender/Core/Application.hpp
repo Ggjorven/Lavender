@@ -39,11 +39,12 @@ namespace Lavender
 		void AddLayer(Layer* layer);
 		void AddOverlay(Layer* layer);
 
+		inline ApplicationSpecification GetSpecification() const { return m_AppInfo; }
 		inline Window& GetWindow() { return *m_Window; }
 
-		inline static Application& Get() { return *s_Instance; }
-
 		inline bool IsMinimized() const { return m_Minimized; }
+
+		inline static Application& Get() { return *s_Instance; }
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);

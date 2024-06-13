@@ -10,7 +10,7 @@ namespace Lavender
 
 	static Ref<ScriptingBackend> s_Instance = nullptr;
 
-	ScriptingSpecification::ScriptingSpecification(ScriptingBackendType type, const std::filesystem::path& path)
+	ScriptingSpecification::ScriptingSpecification(WorkSpace::ScriptingBackendType type, const std::filesystem::path& path)
 		: Type(type), Path(path)
 	{
 	}
@@ -19,12 +19,12 @@ namespace Lavender
 	{
 		switch (specs.Type)
 		{
-		case ScriptingBackendType::Cpp:
+		case WorkSpace::ScriptingBackendType::Cpp:
 			s_Instance = RefHelper::Create<CppBackend>(specs);
 			return s_Instance;
 
-		case ScriptingBackendType::Cs:		// TODO
-		case ScriptingBackendType::Python:	// TODO
+		case WorkSpace::ScriptingBackendType::Cs:		// TODO
+		case WorkSpace::ScriptingBackendType::Python:	// TODO
 		default:
 			APP_LOG_ERROR("Invalid ScriptingBackendType passed in.");
 			break;

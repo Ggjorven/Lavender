@@ -5,9 +5,9 @@
 #include "Lavender/Core/Core.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
-#include <glm/glm.hpp>
-
 #include "Lavender/Renderer/Buffers.hpp"
+
+#include <glm/glm.hpp>
 
 namespace Lavender
 {
@@ -38,7 +38,6 @@ namespace Lavender
 	private:
 		Ref<VertexBuffer> m_VertexBuffer = nullptr;
 		Ref<IndexBuffer> m_IndexBuffer = nullptr;
-
 	};
 
 }

@@ -23,20 +23,17 @@ namespace Lavender
 		virtual ~ScriptEntityInfo() = default;
 	};
 
-	/*
 	struct ScriptCache
 	{
 	public:
-		Dict<std::string, CreateClassFn> ClassFuncs = { };
-		GetUUIDFn UUIDFunc = nullptr;
+		OnCreateFn OnCreate = nullptr;
+		OnUpdateFn OnUpdate = nullptr;
+		GetUUIDFn GetUUID = nullptr;
 
 	public:
 		ScriptCache() = default;
 		virtual ~ScriptCache() = default;
-
-		inline bool Exists(const std::string& cls) { return (ClassFuncs.find(cls) != ClassFuncs.end()); }
 	};
-	*/
 	
 	
 	
@@ -55,13 +52,18 @@ namespace Lavender
 		inline Ref<Insight::Dll> GetDll() { return m_Dll; }
 		inline Dict<UUID, ScriptEntityInfo>& GetInstances() { return m_Instances; }
 
-		inline ScriptingBackendType GetBackendType() const override { return ScriptingBackendType::Cpp; }
+		inline WorkSpace::ScriptingBackendType GetBackendType() const override { return WorkSpace::ScriptingBackendType::Cpp; }
+
+	private:
+		void CopyOver();
 
 	private:
 		ScriptingSpecification m_Specification = {};
-		//ScriptCache m_Cache = {};
+		std::filesystem::path m_CopyPath = {};
 
 		Ref<Insight::Dll> m_Dll = {};
+		ScriptCache m_Cache = {};
+
 		Dict<UUID, ScriptEntityInfo> m_Instances = { };
 	};
 

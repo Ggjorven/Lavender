@@ -18,6 +18,18 @@ namespace Lavender
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Specifications 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	struct ShaderPath
+	{
+	public:
+		std::filesystem::path Shader = {};
+		std::filesystem::path Cache = {};
+
+	public:
+		ShaderPath() = default;
+		ShaderPath(const std::filesystem::path& shader, const std::filesystem::path& cache);
+		virtual ~ShaderPath() = default;
+	};
+
 	struct ShaderSpecification
 	{
 	public:

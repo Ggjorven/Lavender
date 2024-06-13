@@ -54,14 +54,29 @@ namespace Insight
 		std::string fnName = std::string("Insight_GetClasses");
 		GetClassesFn getClassesFP = (GetClassesFn)GetProcAddress(m_Handle, fnName.c_str());
 		m_Classes = *getClassesFP();
+
+		// Initialize cache
+		m_Cache.Info.clear();
+
+		for (auto& [name, info] : m_Classes.GetClasses())
+		{
+			std::string fnName = std::string("Insight_Create") + name;
+			m_Cache.Info[name].Create = (CreateClassFn)GetProcAddress(m_Handle, fnName.c_str());
+
+			fnName = std::string("Insight_Delete") + name;
+			m_Cache.Info[name].Delete = (DeleteClassFn)GetProcAddress(m_Handle, fnName.c_str());
+		}
 	}
 
 	void* Dll::CreateClass(const std::string& className)
 	{
-		std::string fnName = std::string("Insight_Create") + className;
-		CreateClassFn createClassFP = (CreateClassFn)GetProcAddress(m_Handle, fnName.c_str());
+		if (!m_Cache.Exists(className))
+		{
+			// TODO: Implement logging
+			return nullptr;
+		}
 
-		void* cls = createClassFP();
+		void* cls = m_Cache.Info[className].Create();
 		m_ActiveClasses[cls] = className;
 
 		return cls;
@@ -69,12 +84,14 @@ namespace Insight
 
 	void Dll::DeleteClass(const std::string& className, void* instance)
 	{
-		std::string fnName = std::string("Insight_Delete") + className;
-		DeleteClassFn deleteClassFP = (DeleteClassFn)GetProcAddress(m_Handle, fnName.c_str());
+		if (!m_Cache.Exists(className))
+		{
+			// TODO: Implement logging
+		}
 
 		m_ActiveClasses.erase(instance);
 
-		deleteClassFP(instance);
+		m_Cache.Info[className].Delete(instance);
 	}
 
 	std::vector<OpaqueVariable> Dll::GetVariables(const std::string& className, void* classInstance)

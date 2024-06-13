@@ -16,7 +16,6 @@ namespace Lavender
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Specifications 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Empty is for creating your own one, File is for creating an image from a file
 	enum class ImageUsage : uint8_t
 	{
 		None = 0, Size, File
@@ -53,6 +52,8 @@ namespace Lavender
 		uint32_t Width = 0;
 		uint32_t Height = 0;
 
+		bool CreateUIImage = false;
+
 	public:
 		ImageSpecification() = default;
 		ImageSpecification(uint32_t width, uint32_t height, ImageUsageFlags flags);
@@ -73,6 +74,7 @@ namespace Lavender
 		virtual void Upload(Ref<DescriptorSet> set, Descriptor element) = 0;
 		virtual void Transition(ImageLayout initial, ImageLayout final) = 0;
 
+		virtual void* GetTextureID() = 0;
 		virtual ImageSpecification& GetSpecification() = 0;
 
 		virtual uint32_t GetWidth() const = 0;

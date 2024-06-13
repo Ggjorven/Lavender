@@ -29,7 +29,7 @@ namespace Lavender
 		inline SceneCollection& GetScenes() { return m_Scenes; }
 
 		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo());
-		static Ref<Project> Get();
+		static Ref<Project>& Get(); // Returns a reference since we also use it to destroy the s_Instance
 
 	private:
 		void Init();

@@ -3,25 +3,22 @@
 #include "Lavender/Core/Core.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
+#include "Lavender/WorkSpace/WorkSpace.hpp"
+
 namespace Lavender
 {
-
-	enum class ScriptingBackendType
-	{
-		None = 0, Cpp, Cs, Python // Cs and Python are not a thing yet. // TODO
-	};
 
 	struct ScriptingSpecification
 	{
 	public:
-		ScriptingBackendType Type = ScriptingBackendType::Cpp;
+		WorkSpace::ScriptingBackendType Type = WorkSpace::ScriptingBackendType::None;
 
 		// Path is a dll for C++ and C# and a directory for Python
 		std::filesystem::path Path = {};
 
 	public:
 		ScriptingSpecification() = default;
-		ScriptingSpecification(ScriptingBackendType type, const std::filesystem::path& path);
+		ScriptingSpecification(WorkSpace::ScriptingBackendType type, const std::filesystem::path& path);
 		virtual ~ScriptingSpecification() = default;
 	};
 
@@ -35,7 +32,8 @@ namespace Lavender
 		virtual void Reload() = 0;
 		
 		virtual ScriptingSpecification& GetSpecification() = 0;
-		virtual ScriptingBackendType GetBackendType() const = 0;
+
+		virtual WorkSpace::ScriptingBackendType GetBackendType() const = 0;
 	
 		static Ref<ScriptingBackend> Create(const ScriptingSpecification& specs);
 		static Ref<ScriptingBackend> Get();

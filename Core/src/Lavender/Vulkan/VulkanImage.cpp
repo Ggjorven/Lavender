@@ -2,6 +2,7 @@
 #include "VulkanImage.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Core/Application.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
@@ -12,6 +13,8 @@
 #include "Lavender/Vulkan/VulkanDescriptors.hpp"
 
 #include <stb_image.h>
+
+#include <backends/imgui_impl_vulkan.h>
 
 namespace Lavender
 {
@@ -41,6 +44,10 @@ namespace Lavender
 			APP_LOG_ERROR("Invalid image usage selected.");
 			break;
 		}
+
+		// Create UI Image
+		if (m_Specification.CreateUIImage && Application::Get().GetSpecification().EnableUI)
+			m_TextureID = ImGui_ImplVulkan_AddTexture(m_Data.Sampler, m_Data.ImageView, (VkImageLayout)m_Specification.Layout);
 	}
 
 	VulkanImage2D::VulkanImage2D(const ImageSpecification& specs, const VulkanImageData& data)
@@ -51,8 +58,9 @@ namespace Lavender
 	VulkanImage2D::~VulkanImage2D()
 	{
 		auto data = m_Data;
+		auto textureID = m_TextureID;
 
-		Renderer::SubmitFree([data]()
+		Renderer::SubmitFree([data, textureID]()
 		{
 			auto device = ((VulkanRenderer*)Renderer::GetInstance())->GetLogicalDevice()->GetVulkanDevice();
 			Renderer::Wait();
@@ -63,6 +71,10 @@ namespace Lavender
 			VulkanAllocator allocator = {};
 			if (data.Image != VK_NULL_HANDLE && data.Allocation != VK_NULL_HANDLE)
 				allocator.DestroyImage(data.Image, data.Allocation);
+
+			// If UI Image, destroy
+			if (textureID)
+				ImGui_ImplVulkan_FreeTexture(textureID);
 		});
 	}
 
@@ -100,8 +112,9 @@ namespace Lavender
 	void VulkanImage2D::Resize(uint32_t width, uint32_t height)
 	{
 		auto data = m_Data;
+		auto textureID = m_TextureID;
 
-		Renderer::SubmitFree([data]()
+		Renderer::SubmitFree([data, textureID]()
 		{
 			auto device = ((VulkanRenderer*)Renderer::GetInstance())->GetLogicalDevice()->GetVulkanDevice();
 
@@ -111,9 +124,17 @@ namespace Lavender
 			VulkanAllocator allocator = {};
 			if (data.Image != VK_NULL_HANDLE && data.Allocation != VK_NULL_HANDLE)
 				allocator.DestroyImage(data.Image, data.Allocation);
+
+			// If UI Image, destroy
+			if (textureID)
+				ImGui_ImplVulkan_FreeTexture(textureID);
 		});
 
 		CreateImage(width, height);
+
+		// Create UI Image
+		if (m_Specification.CreateUIImage && Application::Get().GetSpecification().EnableUI)
+			m_TextureID = ImGui_ImplVulkan_AddTexture(m_Data.Sampler, m_Data.ImageView, (VkImageLayout)m_Specification.Layout);
 	}
 
 	void VulkanImage2D::Upload(Ref<DescriptorSet> set, Descriptor element)
@@ -168,7 +189,7 @@ namespace Lavender
 			m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 		VulkanAllocator allocator = {};
-		m_Data.Allocation = allocator.AllocateImage(width, height, m_Miplevels, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_TILING_OPTIMAL, GetVulkanImageUsageFromImageUsage(m_Specification.Flags), VMA_MEMORY_USAGE_GPU_ONLY, m_Data.Image);
+		m_Data.Allocation = allocator.AllocateImage(width, height, m_Miplevels, GetVulkanFormatFromImageFormat(m_Specification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | GetVulkanImageUsageFromImageUsage(m_Specification.Flags), VMA_MEMORY_USAGE_GPU_ONLY, m_Data.Image);
 
 		m_Data.ImageView = allocator.CreateImageView(m_Data.Image, GetVulkanFormatFromImageFormat(m_Specification.Format), GetVulkanImageAspectFromImageUsage(m_Specification.Flags), m_Miplevels);
 		m_Data.Sampler = allocator.CreateSampler(m_Miplevels);

@@ -4,6 +4,8 @@
 
 #include <Lavender/WorkSpace/Project.hpp>
 
+#include "Panels/Viewport.hpp"
+
 using namespace Lavender;
 
 class EditorLayer : public Layer
@@ -18,5 +20,10 @@ public:
 	void OnUIRender() override;
 
 private:
+	void CreateProject(const std::string& name, const std::filesystem::path& directory);
+
+private:
 	Ref<Project> m_Project = nullptr;
+
+	UI::Viewport m_Viewport = {};
 };

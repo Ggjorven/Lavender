@@ -49,6 +49,8 @@ namespace Lavender
 		void SetImageData(const ImageSpecification& specs, const VulkanImageData& data);
 
 		inline ImageSpecification& GetSpecification() override { return m_Specification; }
+		inline void* GetTextureID() override { return m_TextureID; }
+
 		inline uint32_t GetWidth() const override { return m_Specification.Width; }
 		inline uint32_t GetHeight() const override { return m_Specification.Height; }
 
@@ -69,6 +71,7 @@ namespace Lavender
 
 	private:
 		ImageSpecification m_Specification = {};
+		void* m_TextureID = nullptr; // Only able to be used when ApplicationSpecification.EnableUI == true
 
 		VulkanImageData m_Data = {};
 

@@ -9,7 +9,7 @@ namespace Lavender
 {
 
 	Scene::Scene(const UUID& uuid)
-		: m_ID(uuid)
+		: m_ID(uuid), m_Renderer(SceneRenderer::Create(this))
 	{
 	}
 

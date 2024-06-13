@@ -22,6 +22,7 @@ namespace Lavender
 		: m_Specification(specs)
 	{
 		Reload();
+
 		APP_LOG_TRACE("Initialized C++ script: {0}", specs.Path.string());
 	}
 
@@ -35,30 +36,64 @@ namespace Lavender
 	{
 		if (!m_Dll)
 		{
-			// TODO: Load a copied dll and move the PDB
-			m_Dll = Insight::Dll::Create(m_Specification.Path);
+			CopyOver();
+			m_Dll = Insight::Dll::Create(m_CopyPath / m_Specification.Path.filename());
 		}
 		else
 			m_Dll->Reload();
+
+		m_Cache.OnCreate = m_Dll->GetCustomFunction<OnCreateFn>("Lavender_ScriptableEntityOnCreate");
+		m_Cache.OnUpdate = m_Dll->GetCustomFunction<OnUpdateFn>("Lavender_ScriptableEntityOnUpdate");
+		m_Cache.GetUUID = m_Dll->GetCustomFunction<GetUUIDFn>("Lavender_ScriptableEntityGetUUID");
 
 		CppFunctions::OutSource(m_Dll);
 	}
 
 	void CppBackend::AddInstance(const std::string& classname, const UUID& entity)
 	{
-		/*
-		if (m_Cache.Exists(classname))
-		{
-			m_Instances[entity] = ScriptEntityInfo(classname, (ScriptableEntity*)m_Dll->CreateClass(classname));
-		}
-		*/
-
 		m_Instances[entity] = ScriptEntityInfo(classname, (ScriptableEntity*)m_Dll->CreateClass(classname));
+		
+		UUID& uuid = *m_Cache.GetUUID(m_Instances[entity].Instance);
+		uuid = entity;
 	}
 
 	void CppBackend::RemoveInstance(const std::string& classname, const UUID& entity)
 	{
 		m_Dll->DeleteClass(classname, m_Instances[entity].Instance);
+	}
+
+	void CppBackend::CopyOver()
+	{
+		// Note(Jorben): We have so many copies of paths since most std::filesystem functions not only return the outcome but apply it to the parameter/variable
+		std::filesystem::path oldPath = m_Specification.Path;
+		oldPath = oldPath.remove_filename();
+
+		std::filesystem::path newPath = m_Specification.Path;
+		m_CopyPath = newPath.remove_filename();
+		m_CopyPath = m_CopyPath / "Engine-Script";
+
+		std::filesystem::create_directory(m_CopyPath);
+
+		std::filesystem::path dllOld = m_Specification.Path;
+		std::filesystem::path dllNew = m_CopyPath / m_Specification.Path.filename();
+
+		// Note(Jorben): PDB is used for debugging.
+		std::filesystem::path pdbOld = oldPath / m_Specification.Path.filename();
+		pdbOld = pdbOld.replace_extension(".pdb");
+		std::filesystem::path pdbNew = m_CopyPath / m_Specification.Path.filename();
+		pdbNew = pdbNew.replace_extension(".pdb");
+
+		std::filesystem::copy_file(m_Specification.Path, (m_CopyPath / m_Specification.Path.filename()), std::filesystem::copy_options::overwrite_existing);
+
+		if (std::filesystem::exists(pdbOld))
+			std::filesystem::copy_file(pdbOld, pdbNew, std::filesystem::copy_options::overwrite_existing);
+
+		// Check if PDB file is present
+		if (!std::filesystem::exists(pdbNew) && !std::filesystem::exists(pdbOld))
+			APP_LOG_WARN("Failed to find PDB file for script ({0}), this is not critical. It only means debugging the script is not possible.", m_Specification.Path.string());
+
+		// Note(Jorben): We delete the old one, since the debugger likes to use that one instead of the copied one and then we can't change the .pdb file while the app is running a.k.a we have to detach before we can compile our script.
+		std::filesystem::remove(pdbOld);
 	}
 
 }

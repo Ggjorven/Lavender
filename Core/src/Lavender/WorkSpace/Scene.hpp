@@ -9,6 +9,7 @@
 #include "Lavender/ECS/Registry.hpp"
 
 #include "Lavender/WorkSpace/WorkSpace.hpp"
+#include "Lavender/WorkSpace/Rendering/SceneRenderer.hpp"
 
 namespace Lavender
 {
@@ -28,6 +29,7 @@ namespace Lavender
 		inline void SetID(const UUID& uuid) { m_ID = uuid; }
 		inline const UUID& GetID() { return m_ID; }
 		inline Registry& GetRegistry(WorkSpace::State state) { return m_Registries[state]; }
+		inline Ref<SceneRenderer> GetRenderer() { return m_Renderer; }
 
 		static Ref<Scene> Create(const UUID& uuid = UUID());
 		static Ref<Scene> Get(); // Returns the active scene
@@ -37,6 +39,8 @@ namespace Lavender
 		WorkSpace::SceneInfo m_Info = {};
 
 		Dict<WorkSpace::State, Registry> m_Registries = { };
+
+		Ref<SceneRenderer> m_Renderer = nullptr;
 
 		friend class SceneSerializer;
 	};

@@ -12,6 +12,7 @@ namespace Lavender
 {
 
 	static RenderInstance* s_RenderInstance = nullptr;
+	static bool s_Initialized = false;
 	RendererSpecification Renderer::s_Specification = {};
 	RenderData Renderer::s_Data = {};
 
@@ -19,16 +20,19 @@ namespace Lavender
 	{
 		s_RenderInstance = RenderInstance::Create();
 		s_RenderInstance->Init();
+
+		s_Initialized = true;
 	}
 
 	bool Renderer::Initialized()
 	{
-		return s_RenderInstance != nullptr;
+		return s_Initialized;
 	}
 
 	void Renderer::Destroy()
 	{
 		delete s_RenderInstance;
+		s_Initialized = false;
 	}
 
 	void Renderer::BeginFrame()

@@ -296,6 +296,7 @@ namespace Lavender
 			specs.Width = width;
 			specs.Height = height;
 			specs.Layout = ImageLayout::Presentation;
+			specs.CreateUIImage = false;
 
 			if (!m_Images[i]) m_Images[i] = RefHelper::Create<VulkanImage2D>(specs, data);
 			else RefHelper::RefAs<VulkanImage2D>(m_Images[i])->SetImageData(specs, data);
@@ -310,6 +311,7 @@ namespace Lavender
 			specs.Width = width;
 			specs.Height = height;
 			specs.Layout = ImageLayout::Depth;
+			specs.CreateUIImage = false;
 
 			m_DepthStencil = Image2D::Create(specs);
 		}

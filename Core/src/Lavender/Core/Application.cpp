@@ -10,6 +10,8 @@
 
 #include "Lavender/Utils/Profiler.hpp"
 
+#include "Lavender/WorkSpace/Project.hpp" // TODO: Remove
+#include "Lavender/WorkSpace/WorkSpace.hpp"
 #include "Lavender/WorkSpace/EngineTracker.hpp"
 
 namespace Lavender
@@ -21,6 +23,13 @@ namespace Lavender
 		: m_AppInfo(appInfo)
 	{
 		s_Instance = this;
+
+		if constexpr (Track::Lavender::Config == WorkSpace::Configuration::Dist)
+		{
+			// TODO: Change based on whether it's Dist or not
+		}
+		else
+			Track::Lavender::Directory = std::filesystem::path(__argv[0]).parent_path().parent_path().parent_path().parent_path();
 	
 		Input::Init();
 		Log::Init();
@@ -29,9 +38,13 @@ namespace Lavender
 		m_Window->SetEventCallBack(APP_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
+		Track::Viewport::Width = appInfo.WindowSpecs.Width;
+		Track::Viewport::Height = appInfo.WindowSpecs.Height;
 
 		m_ImGuiLayer = BaseImGuiLayer::Create();
 		m_LayerStack.AddOverlay((Layer*)m_ImGuiLayer);
+
+		WorkSpace::Init();
 	}
 
 	Application::~Application()
@@ -45,6 +58,8 @@ namespace Lavender
 			layer->OnDetach();
 			delete layer;
 		}
+
+		WorkSpace::Destroy();
 
 		Renderer::Destroy();
 		m_Window.reset();
@@ -77,7 +92,6 @@ namespace Lavender
 			lastTime = currentTime;
 
 			Track::Frame::DeltaTime = deltaTime;
-
 			{
 				static float timer = 0.0f;
 				static uint32_t tempFPS = 0;

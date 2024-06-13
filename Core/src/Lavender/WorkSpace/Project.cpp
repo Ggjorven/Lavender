@@ -41,7 +41,7 @@ namespace Lavender
 		return s_Project;
 	}
 
-	Ref<Project> Project::Get()
+	Ref<Project>& Project::Get()
 	{
 		return s_Project;
 	}
@@ -59,7 +59,7 @@ namespace Lavender
 		if (std::filesystem::exists(m_Info.Directory / m_Info.Script / m_Info.ScriptsPath))
 		{
 			ScriptingSpecification scriptingSpecs = {};
-			scriptingSpecs.Type = ScriptingBackendType::Cpp;
+			scriptingSpecs.Type = m_Info.ScriptType;
 			scriptingSpecs.Path = m_Info.Directory / m_Info.Script / m_Info.ScriptsPath;
 
 			m_Scripting = ScriptingBackend::Create(scriptingSpecs);

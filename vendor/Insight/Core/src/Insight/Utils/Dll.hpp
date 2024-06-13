@@ -23,6 +23,25 @@ namespace Insight
 	typedef void* (*CreateClassFn)();
 	typedef void (*DeleteClassFn)(void* instance);
 
+	struct ClassCache
+	{
+	public:
+		struct ClassInfo
+		{
+		public:
+			CreateClassFn Create = nullptr;
+			DeleteClassFn Delete = nullptr;
+		};
+	public:
+		std::unordered_map<std::string, ClassCache::ClassInfo> Info = { };
+
+	public:
+		ClassCache() = default;
+		virtual ~ClassCache() = default;
+
+		inline bool Exists(const std::string& name) { return (Info.find(name) != Info.end()); }
+	};
+
 #if defined(APP_PLATFORM_WINDOWS)
 	class Dll
 	{
@@ -58,6 +77,7 @@ namespace Insight
 
 		std::filesystem::path m_Path = {};
 
+		ClassCache m_Cache = {};
 		Internal::Classes m_Classes = {};
 		std::unordered_map<void*, std::string> m_ActiveClasses = { };
 	};

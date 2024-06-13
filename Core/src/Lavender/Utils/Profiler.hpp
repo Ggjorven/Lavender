@@ -11,7 +11,7 @@
 #define APP_ENABLE_PROFILING 1
 #define APP_MEM_PROFILING 0
 
-#if !defined(APP_DIST) && APP_ENABLE_PROFILING
+#if (!defined(APP_DIST)) && APP_ENABLE_PROFILING
 
 #define APP_MARK_FRAME FrameMark
 #define APP_PROFILE_SCOPE(name) ZoneScopedN(name)

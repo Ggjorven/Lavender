@@ -67,8 +67,18 @@ namespace Lavender
 		file << Yaml::FileManip::Key << "StartScene";
 		file << Yaml::FileManip::Value << (uint64_t)info.StartScene;
 
-		file << Yaml::FileManip::Key << "ScriptsPath";
+		// Scripting
+		file << Yaml::FileManip::Key << "Scripting";
+		file << Yaml::FileManip::Value << Yaml::FileManip::BeginMap;
+
+		file << Yaml::FileManip::Key << "Type";
+		file << Yaml::FileManip::Value << (uint32_t)info.ScriptType;
+
+		file << Yaml::FileManip::Key << "Path";
 		file << Yaml::FileManip::Value << info.ScriptsPath.string();
+
+		file << Yaml::FileManip::EndMap;
+
 
 		file << Yaml::FileManip::EndMap;
 
@@ -99,7 +109,10 @@ namespace Lavender
 
 		info.StartScene = file["StartScene"].as<uint64_t>();
 
-		info.ScriptsPath = file["ScriptsPath"].as<std::string>();
+		// Scripting
+		auto scripting = file["Scripting"];
+		info.ScriptType = (WorkSpace::ScriptingBackendType)scripting["Type"].as<uint32_t>();
+		info.ScriptsPath = scripting["Path"].as<std::string>();
 
 		m_Project->Init();
 	}

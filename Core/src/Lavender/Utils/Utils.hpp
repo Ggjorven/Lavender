@@ -45,13 +45,17 @@ constexpr Type operator ^ (Type lhs, Type rhs) \
 #define MAX_FLOAT 3.402823466e+38F 
 #define MAX_DOUBLE 1.7976931348623158e+308
 
-#define PUBLIC_PADDING(index, size) \
+#define PUBLIC_PADDING_RESOLVE(index, size) \
 private: \
     char Padding##index[size] = {}; \
 public:
+#define PUBLIC_PADDING_HELPER(index, size) PUBLIC_PADDING_RESOLVE(index, size)
+#define PUBLIC_PADDING(size) PUBLIC_PADDING_HELPER(__COUNTER__, size)
 
-#define PRIVATE_PADDING(index, size) \
+#define PRIVATE_PADDING_RESOLVE(index, size) \
 char Padding##index[size] = {}; 
+#define PRIVATE_PADDING_HELPER(index, size) PRIVATE_PADDING_RESOLVE(index, size)
+#define PRIVATE_PADDING(size) PRIVATE_PADDING_HELPER(__COUNTER__, size)
 
 namespace Lavender::Utils
 {
@@ -88,6 +92,21 @@ namespace Lavender::Utils
 
     private:
         static std::unique_ptr<ToolKit> s_Instance;
+    };
+
+    struct Timer
+    {
+    public:
+        double Start = 0.0;
+
+    public:
+        Timer()
+            : Start(ToolKit::GetTime())
+        {
+        }
+
+        inline double GetElapsedSeconds() const { return ToolKit::GetTime() - Start; }
+        inline double GetElapsedMilliSeconds() const { return (ToolKit::GetTime() - Start) * 1000.0; }
     };
 
     // A threadsafe class to be used for function queues
@@ -191,26 +210,6 @@ namespace Lavender::Utils
     private:
         std::mutex m_Mutex = {};
         std::queue<Func> m_Queue = { };
-    };
-
-    class Timer
-    {
-    public:
-        Timer()
-            : m_Start(ToolKit::GetTime())
-        {
-        }
-
-        inline double GetPassedTime() const 
-        { 
-            double end = ToolKit::GetTime();
-            double result = end - m_Start;
-
-            return result; 
-        }
-
-    private:
-        double m_Start = 0.0f;
     };
 
     template<typename ...Types>

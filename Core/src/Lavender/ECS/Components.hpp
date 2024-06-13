@@ -6,6 +6,9 @@
 
 #include <glm/glm.hpp>
 
+#include "Lavender/WorkSpace/Assets/MeshAsset.hpp"
+#include "Lavender/WorkSpace/Assets/MaterialAsset.hpp"
+
 namespace Lavender
 {
 
@@ -14,7 +17,7 @@ namespace Lavender
 	//////////////////////////////////////////////////////////////////////////////////////
 	enum class ComponentType
 	{
-		None = 0, Tag, Transform
+		None = 0, Tag, Transform, Mesh, PointLight
 	};
 
 	struct TagComponent
@@ -51,6 +54,41 @@ namespace Lavender
 		inline static ComponentType GetStaticType() { return ComponentType::Transform; }
 	};
 
+	struct MeshComponent
+	{
+	public:
+		Ref<MeshAsset> Mesh = nullptr;
+		Ref<MaterialAsset> Material = nullptr;
+
+	public:
+		MeshComponent() = default;
+		MeshComponent(Ref<MeshAsset> mesh, Ref<MaterialAsset> material)
+			: Mesh(mesh), Material(material)
+		{
+		}
+		MeshComponent(const MeshComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::Mesh; }
+	};
+
+	struct PointLightComponent
+	{
+	public:
+		glm::vec3 Colour = { 1.0f, 1.0f, 1.0f };
+		float Radius = 5.0f;
+		float Intensity = 1.0f;
+
+	public:
+		PointLightComponent() = default;
+		PointLightComponent(const glm::vec3& colour, float radius, float intensity)
+			: Colour(colour), Radius(radius), Intensity(intensity)
+		{
+		}
+		PointLightComponent(const PointLightComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::PointLight; }
+	};
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Utilities
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -61,15 +99,21 @@ namespace Lavender
 			return "TagComponent";
 		else if constexpr (std::is_same_v<TComponent, TransformComponent>)
 			return "TransformComponent";
+		else if constexpr (std::is_same_v<TComponent, MeshComponent>)
+			return "MeshComponent";
+		else if constexpr (std::is_same_v<TComponent, PointLightComponent>)
+			return "PointLightComponent";
 
 		return "Undefined Component";
 	}
 
+	// Note(Jorben): Since I want this header file to also be able to be used on the scripting side
+	// We can't really use Utils::TypeGroup, So we create a custom struct here as well.
 	template<typename... TComponents>
 	struct ComponentGroup
 	{
 	};
 
-	using AllComponents = ComponentGroup<TagComponent, TransformComponent>;
+	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent>;
 
 }
