@@ -5,7 +5,9 @@
 
 #include <Lavender/Scripting/C++/Mutual/Functions.hpp>
 
-#include <Insight/Insight.hpp> // Make sure the dll is linked against Insight
+#include <Insight/Insight.hpp>
+
+#include <iostream> // TODO: Remove
 
 namespace Lavender
 {
@@ -19,7 +21,40 @@ namespace Lavender
 		virtual void OnCreate() = 0;
 		virtual void OnUpdate(float deltaTime) = 0;
 
-		// TODO: Component functions
+		template<typename TComponent>
+		TComponent& AddComponent(TComponent component = TComponent())
+		{
+			TComponent tempComp = component;
+			TComponent* newComp = (TComponent*)ComponentFunctions::Add(TComponent::GetStaticType(), m_UUID, (void*)&tempComp);
+			return *newComp;
+		}
+
+		template<typename TComponent>
+		TComponent& AddOrReplaceComponent(TComponent component = TComponent())
+		{
+			TComponent tempComp = component;
+			TComponent* newComp = (TComponent*)ComponentFunctions::AddOrReplace(TComponent::GetStaticType(), m_UUID, (void*)&tempComp);
+			return *newComp;
+		}
+
+		template<typename TComponent>
+		bool HasComponent()
+		{
+			return ComponentFunctions::Has(TComponent::GetStaticType(), m_UUID);
+		}
+
+		template<typename TComponent>
+		TComponent& GetComponent()
+		{
+			TComponent* newComp = (TComponent*)ComponentFunctions::Get(TComponent::GetStaticType(), m_UUID);
+			return *newComp;
+		}
+
+		template<typename TComponent>
+		void RemoveComponent()
+		{
+			ComponentFunctions::Remove(TComponent::GetStaticType(), m_UUID);
+		}
 
 		inline UUID& GetUUID() { return m_UUID; }
 
@@ -56,7 +91,7 @@ InsightClass(name)
 	/*
 	Example: 
 
-	class Spider
+	class Spider : public Lavender::ScriptableEntity
 	{
 	public:
 		void OnCreate()

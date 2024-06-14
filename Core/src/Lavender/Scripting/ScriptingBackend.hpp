@@ -31,8 +31,14 @@ namespace Lavender
 
 		virtual void Reload() = 0;
 		
-		virtual ScriptingSpecification& GetSpecification() = 0;
+		virtual void OnCreateAll() = 0;
+		virtual void OnUpdateAll(float deltaTime) = 0;
 
+		virtual void AddInstance(const std::string& classname, const UUID& entity) = 0;
+		virtual void RemoveInstance(const std::string& classname, const UUID& entity) = 0;
+
+		virtual std::vector<std::string> GetClasses() = 0;
+		virtual ScriptingSpecification& GetSpecification() = 0;
 		virtual WorkSpace::ScriptingBackendType GetBackendType() const = 0;
 	
 		static Ref<ScriptingBackend> Create(const ScriptingSpecification& specs);

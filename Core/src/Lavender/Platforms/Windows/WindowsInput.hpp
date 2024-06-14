@@ -14,9 +14,9 @@ namespace Lavender
 		bool IsKeyPressedImplementation(Key keycode) override;
 		bool IsMousePressedImplementation(MouseButton button) override;
 
-		glm::vec2 GetMousePositionImplementation() override;
-
+		glm::vec2 GetCursorPositionImplementation() override;
 		void SetCursorPositionImplementation(glm::vec2 position) override;
+
 		void SetCursorModeImplementation(CursorMode mode) override;
 	};
 

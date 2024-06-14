@@ -85,6 +85,7 @@ void EditorLayer::OnUIRender()
 /////////////////////////////////////////////////////////////////
 // Custom Functionality
 /////////////////////////////////////////////////////////////////
+// TODO: Update + clean
 void EditorLayer::CreateProject(const std::string& name, const std::filesystem::path& directory)
 {
 	std::filesystem::path projectPath = directory / name;

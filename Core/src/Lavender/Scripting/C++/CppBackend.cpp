@@ -49,6 +49,18 @@ namespace Lavender
 		CppFunctions::OutSource(m_Dll);
 	}
 
+	void CppBackend::OnCreateAll()
+	{
+		for (auto& [uuid, info] : m_Instances)
+			m_Cache.OnCreate(info.Instance);
+	}
+
+	void CppBackend::OnUpdateAll(float deltaTime)
+	{
+		for (auto& [uuid, info] : m_Instances)
+			m_Cache.OnUpdate(info.Instance, deltaTime);
+	}
+
 	void CppBackend::AddInstance(const std::string& classname, const UUID& entity)
 	{
 		m_Instances[entity] = ScriptEntityInfo(classname, (ScriptableEntity*)m_Dll->CreateClass(classname));
@@ -60,6 +72,20 @@ namespace Lavender
 	void CppBackend::RemoveInstance(const std::string& classname, const UUID& entity)
 	{
 		m_Dll->DeleteClass(classname, m_Instances[entity].Instance);
+	}
+
+	std::vector<std::string> CppBackend::GetClasses()
+	{
+		std::vector<std::string> cls(m_Dll->GetClasses().GetClasses().size()); 
+
+		size_t i = 0;
+		for (auto& [name, info] : m_Dll->GetClasses().GetClasses())
+		{
+			cls[i] = name;
+			i++;
+		}
+
+		return cls;
 	}
 
 	void CppBackend::CopyOver()

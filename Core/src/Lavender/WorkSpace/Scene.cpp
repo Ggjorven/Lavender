@@ -20,6 +20,40 @@ namespace Lavender
 	void Scene::OnUpdate(float deltaTime)
 	{
 		// Update based on state
+
+		// TODO: Remove
+		auto script = Project::Get()->GetScript();
+		
+		static bool done = false;
+		if (!done)
+		{
+			Entity entity = {};
+
+			for (auto& [uuid, interface] : m_Registries[Project::Get()->GetState()].GetDict())
+			{
+				entity = m_Registries[Project::Get()->GetState()].GetEntity(uuid);
+				if (!entity.HasComponent<TagComponent>())
+				{
+					entity.AddComponent<TagComponent>(TagComponent("Random Tag or something"));
+				}
+
+				if (!script->GetClasses().empty())
+				{
+					APP_LOG_TRACE("Giving entity with uuid: ({0}) a class instance of '{1}'", (uint64_t)uuid, script->GetClasses()[0]);
+					script->AddInstance(script->GetClasses()[0], uuid);
+				}
+
+				break; // Stop after one
+			}
+
+			script->OnCreateAll();
+			
+			APP_LOG_TRACE("New Tag?: {0}", entity.GetComponent<TagComponent>().Tag);
+
+			done = true;
+		}
+
+		script->OnUpdateAll(deltaTime);
 	}
 
 	void Scene::OnRender()

@@ -11,7 +11,48 @@ end
 ------------------------------------------------------------------------------
 Dependencies = 
 {
-	-- Libs
+	GLFW = 
+	{
+		LibName = "GLFW",
+		IncludeDir = "../../../../../vendor/GLFW/include"
+	},
+	Tracy = 
+	{
+		LibName = "Tracy",
+		IncludeDir = "../../../../../vendor/tracy/tracy/public"
+	},
+
+	Assimp = 
+	{
+		IncludeDir = "../../../../../vendor/assimp/include",
+
+		Windows = 
+		{
+			LibName = "assimp-vc143-mt",
+			DebugLibName = "assimp-vc143-mtd",
+			LibDir = "../../../../../vendor/assimp/bin/windows/",
+			DynamicLib = "%{Dependencies.Assimp.Windows.LibDir}" .. "assimp-vc143-mt.dll",
+			DebugDynamicLib = "%{Dependencies.Assimp.Windows.LibDir}" .. "assimp-vc143-mtd.dll",
+		},
+		Linux =  
+		{
+			LibName = "libassimp.so",				-- TODO: Check this out
+			DebugDynamicLibName = "libassimp.so.5",	-- TODO: Check this out
+			LibDir = "../../../../../vendor/assimp/bin/linux/",
+		}
+	},
+	ImGui = 
+	{
+		IncludeDir = "../../../../../vendor/imgui",
+		LibName = "ImGui"
+	},
+
+	-- Custom Libs
+	Flow = 
+	{
+		LibName = "Flow",
+		IncludeDir = "../../../../../vendor/Flow/Core/src",
+	},
 	Insight = 
 	{
 		LibName = "Insight",
@@ -23,6 +64,18 @@ Dependencies =
 	{
 		IncludeDir = "../../../../../vendor/glm"
 	},
+	Spdlog = 
+	{
+		IncludeDir = "../../../../../vendor/spdlog/include"
+	},
+	Stb_image =
+	{
+		IncludeDir = "../../../../../vendor/stb/include"
+	},
+	EnTT = 
+	{
+		IncludeDir = "../../../../../vendor/entt/include"
+	}
 }
 ------------------------------------------------------------------------------
 
@@ -46,10 +99,6 @@ workspace "Example"
 	{
 		"MultiProcessorCompile"
 	}
-
-group "Dependencies"
-	include "../../../../../vendor/Insight/Core"
-group ""
 
 ------------------------------------------------------------------------------
 -- Project
@@ -80,15 +129,19 @@ project "Script"
 
 		"../../../../../Core/src",
 
-		"%{Dependencies.Insight.IncludeDir}",
-		"%{Dependencies.GLM.IncludeDir}"
+		"%{Dependencies.GLFW.IncludeDir}",
+		"%{Dependencies.GLM.IncludeDir}",
+		"%{Dependencies.Spdlog.IncludeDir}",
+		"%{Dependencies.Stb_image.IncludeDir}",
+		"%{Dependencies.Assimp.IncludeDir}",
+		"%{Dependencies.ImGui.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
+		"%{Dependencies.EnTT.IncludeDir}",
+
+		"%{Dependencies.Flow.IncludeDir}",
+		"%{Dependencies.Insight.IncludeDir}"
 	}
 
-	links
-	{
-		"Insight"
-	}
-	
 	defines
 	{
 		"LAVENDER_DLL"
@@ -109,6 +162,7 @@ project "Script"
 			"APP_PLATFORM_WINDOWS"
 		}
 
+		
 	filter "configurations:Debug"
 		defines "APP_DEBUG"
 		runtime "Debug"
@@ -119,10 +173,18 @@ project "Script"
 		defines "APP_RELEASE"
 		runtime "Release"
 		optimize "on"
-
+	
 	filter "configurations:Dist"
 		defines "APP_DIST"
 		runtime "Release"
 		optimize "Full"
+			
+			
+	-- TODO: Change the way we do linking on actual dist/binary builds
+	filter { "system:windows" }
+		links
+		{
+			"../../../../../bin/%{cfg.buildcfg}-windows/Lavender/Lavender.lib"
+		}
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------

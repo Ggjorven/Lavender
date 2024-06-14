@@ -45,10 +45,14 @@ namespace Lavender
 
 		void Reload() override;
 
-		void AddInstance(const std::string& classname, const UUID& entity);
-		void RemoveInstance(const std::string& classname, const UUID& entity);
+		void OnCreateAll() override;
+		void OnUpdateAll(float deltaTime) override;
 
-		inline ScriptingSpecification& GetSpecification() { return m_Specification; }
+		void AddInstance(const std::string& classname, const UUID& entity) override;
+		void RemoveInstance(const std::string& classname, const UUID& entity) override;
+
+		std::vector<std::string> GetClasses() override;
+		inline ScriptingSpecification& GetSpecification() override { return m_Specification; }
 		inline Ref<Insight::Dll> GetDll() { return m_Dll; }
 		inline Dict<UUID, ScriptEntityInfo>& GetInstances() { return m_Instances; }
 

@@ -1,7 +1,18 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Lavender
 {
+
+	// From glfw3.h
+	enum class CursorMode : uint32_t
+	{
+		Shown = 0x00034001,
+		Hidden = 0x00034002,
+		Disabled = 0x00034003,
+		Captured = 0x00034004
+	};
 
 	// From glfw3.h
 	enum class MouseButton : uint8_t

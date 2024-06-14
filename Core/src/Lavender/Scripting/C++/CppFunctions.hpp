@@ -2,6 +2,7 @@
 
 #include "Lavender/Core/Core.hpp"
 #include "Lavender/Utils/Utils.hpp"
+#include "Lavender/Core/Input/Input.hpp"
 
 #include "Lavender/ECS/Components.hpp"
 
@@ -21,26 +22,28 @@ namespace Lavender
 		static void OutSource(Ref<Insight::Dll> dll);
 
 	public:
+		/////////////////////////////////////////////////////
+		// Components
+		/////////////////////////////////////////////////////
 		inline static void* Internal_AddComponent(ComponentType type, UUID uuid, void* data)
 		{
 			Entity entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(uuid);
 
 			switch (type)
 			{
-			case ComponentType::Tag:
-			{
-				TagComponent component = *((TagComponent*)data);
-				entity.AddComponent<TagComponent>(component);
 
-				return (void*)(&entity.GetComponent<TagComponent>());
+			#define ADDCOMPONENT_INTERNAL_HELP(name) \
+			case ComponentType::name: \
+			{ \
+				name##Component component = *((name##Component*)data); \
+				entity.AddComponent<name##Component>(component); \
+				return (void*)(&entity.GetComponent<name##Component>()); \
 			}
-			case ComponentType::Transform:
-			{
-				TransformComponent component = *((TransformComponent*)data);
-				entity.AddComponent<TransformComponent>(component);
 
-				return (void*)(&entity.GetComponent<TransformComponent>());
-			}
+			ADDCOMPONENT_INTERNAL_HELP(Tag)
+			ADDCOMPONENT_INTERNAL_HELP(Transform)
+			ADDCOMPONENT_INTERNAL_HELP(Mesh)
+			ADDCOMPONENT_INTERNAL_HELP(PointLight)
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -56,20 +59,19 @@ namespace Lavender
 
 			switch (type)
 			{
-			case ComponentType::Tag:
-			{
-				TagComponent component = *((TagComponent*)data);
-				entity.AddOrReplaceComponent<TagComponent>(component);
 
-				return (void*)(&entity.GetComponent<TagComponent>());
+			#define ADDORREPLACECOMPONENT_INTERNAL_HELP(name) \
+			case ComponentType::name: \
+			{ \
+				name##Component component = *((name##Component*)data); \
+				entity.AddOrReplaceComponent<name##Component>(component); \
+				return (void*)(&entity.GetComponent<name##Component>()); \
 			}
-			case ComponentType::Transform:
-			{
-				TransformComponent component = *((TransformComponent*)data);
-				entity.AddOrReplaceComponent<TransformComponent>(component);
 
-				return (void*)(&entity.GetComponent<TransformComponent>());
-			}
+			ADDORREPLACECOMPONENT_INTERNAL_HELP(Tag)
+			ADDORREPLACECOMPONENT_INTERNAL_HELP(Transform)
+			ADDORREPLACECOMPONENT_INTERNAL_HELP(Mesh)
+			ADDORREPLACECOMPONENT_INTERNAL_HELP(PointLight)
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -85,8 +87,14 @@ namespace Lavender
 
 			switch (type)
 			{
-			case ComponentType::Tag:		return entity.HasComponent<TagComponent>();
-			case ComponentType::Transform:	return entity.HasComponent<TransformComponent>();
+
+			#define HASCOMPONENT_INTERNAL_HELP(name) \
+			case ComponentType::name: return entity.HasComponent<name##Component>();
+
+			HASCOMPONENT_INTERNAL_HELP(Tag)
+			HASCOMPONENT_INTERNAL_HELP(Transform)
+			HASCOMPONENT_INTERNAL_HELP(Mesh)
+			HASCOMPONENT_INTERNAL_HELP(PointLight)
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -102,8 +110,14 @@ namespace Lavender
 
 			switch (type)
 			{
-			case ComponentType::Tag:		return (void*)(&entity.GetComponent<TagComponent>());
-			case ComponentType::Transform:	return (void*)(&entity.GetComponent<TransformComponent>());
+
+			#define GETCOMPONENT_INTERNAL_HELP(name) \
+			case ComponentType::name: return (void*)(&entity.GetComponent<name##Component>());
+
+			GETCOMPONENT_INTERNAL_HELP(Tag)
+			GETCOMPONENT_INTERNAL_HELP(Transform)
+			GETCOMPONENT_INTERNAL_HELP(Mesh)
+			GETCOMPONENT_INTERNAL_HELP(PointLight)
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -119,17 +133,60 @@ namespace Lavender
 
 			switch (type)
 			{
-			case ComponentType::Tag:	
-				entity.RemoveComponent<TagComponent>();
+
+			#define REMOVECOMPONENT_INTERNAL_HELP(name) \
+			case ComponentType::name: \
+				entity.RemoveComponent<name##Component>(); \
 				break;
-			case ComponentType::Transform:
-				entity.RemoveComponent<TransformComponent>();
-				break;
+
+			REMOVECOMPONENT_INTERNAL_HELP(Tag)
+			REMOVECOMPONENT_INTERNAL_HELP(Transform)
+			REMOVECOMPONENT_INTERNAL_HELP(Mesh)
+			REMOVECOMPONENT_INTERNAL_HELP(PointLight)
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
 				break;
 			}
+		}
+
+		/////////////////////////////////////////////////////
+		// Logging
+		/////////////////////////////////////////////////////
+		inline static void Internal_LogMessage(uint8_t level, const char* str)
+		{
+			Log::LogMessage((Log::Level)level, str);
+		}
+
+		/////////////////////////////////////////////////////
+		// Input
+		/////////////////////////////////////////////////////
+		inline static bool Internal_IsKeyPressed(Key key)
+		{
+			return Input::IsKeyPressed(key);
+		}
+
+		inline static bool Internal_IsMousePressed(MouseButton button)
+		{
+			return Input::IsMousePressed(button);
+		}
+
+		inline static glm::vec2* Internal_GetCursorPosition()
+		{
+			static glm::vec2 lastPosition = {};
+			lastPosition = Input::GetCursorPosition();
+
+			return &lastPosition;
+		}
+
+		inline static void Internal_SetCursorPosition(glm::vec2* position)
+		{
+			Input::SetCursorPosition(*position);
+		}
+
+		inline static void Internal_SetCursorMode(CursorMode mode)
+		{
+			Input::SetCursorMode(mode);
 		}
 	};
 

@@ -27,6 +27,7 @@ namespace Lavender
 		inline const WorkSpace::ProjectInfo& GetInfo() { return m_Info; }
 		inline WorkSpace::State& GetState() { return m_State; }
 		inline SceneCollection& GetScenes() { return m_Scenes; }
+		inline Ref<ScriptingBackend> GetScript() { return m_Scripting; }
 
 		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo());
 		static Ref<Project>& Get(); // Returns a reference since we also use it to destroy the s_Instance

@@ -24,7 +24,7 @@ namespace Lavender
         return state == GLFW_PRESS;
     }
 
-    glm::vec2 WindowsInput::GetMousePositionImplementation()
+    glm::vec2 WindowsInput::GetCursorPositionImplementation()
     {
         GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
