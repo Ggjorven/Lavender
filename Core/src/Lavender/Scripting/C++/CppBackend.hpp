@@ -4,7 +4,7 @@
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/Scripting/ScriptingBackend.hpp"
-#include "Lavender/Scripting/C++/Mutual/ScriptableEntity.hpp"
+#include "Lavender/Scripting/C++/Mutual/ECS/Entity.hpp"
 
 #include <Insight/Insight.hpp>
 
@@ -15,20 +15,20 @@ namespace Lavender
 	{
 	public:
 		std::string Name = {};
-		ScriptableEntity* Instance = nullptr;
+		Script::Entity* Instance = nullptr;
 
 	public:
 		ScriptEntityInfo() = default;
-		ScriptEntityInfo(const std::string& name, ScriptableEntity* instance);
+		ScriptEntityInfo(const std::string& name, Script::Entity* instance);
 		virtual ~ScriptEntityInfo() = default;
 	};
 
 	struct ScriptCache
 	{
 	public:
-		OnCreateFn OnCreate = nullptr;
-		OnUpdateFn OnUpdate = nullptr;
-		GetUUIDFn GetUUID = nullptr;
+		Script::OnCreateFn OnCreate = nullptr;
+		Script::OnUpdateFn OnUpdate = nullptr;
+		Script::GetUUIDFn GetUUID = nullptr;
 
 	public:
 		ScriptCache() = default;

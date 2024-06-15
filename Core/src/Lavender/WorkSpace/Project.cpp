@@ -17,7 +17,10 @@ namespace Lavender
 
 	Project::~Project()
 	{
-		m_Scripting.reset();
+		// Reset scripting
+		m_Scripting = nullptr;
+		ScriptingBackend::Get().reset();
+		ScriptingBackend::Get() = nullptr;
 	}
 
 	void Project::OnUpdate(float deltaTime)

@@ -1,29 +1,29 @@
-#include <Lavender/Scripting/C++/Mutual/ScriptableEntity.hpp>
-#include <Lavender/Scripting/C++/Mutual/ScriptLogger.hpp>
-#include <Lavender/Scripting/C++/Mutual/ScriptInput.hpp>
+#include <Lavender/Scripting/C++/Mutual/Core/Core.hpp>
 
-#include <iostream>
+#include <Lavender/Scripting/C++/Mutual/Core/Logger.hpp>
+#include <Lavender/Scripting/C++/Mutual/Input/Input.hpp>
+#include <Lavender/Scripting/C++/Mutual/ECS/Entity.hpp>
 
-using namespace Lavender;
+using namespace Lavender::Script;
 
-class MyEntity : public Lavender::ScriptableEntity
+class MyEntity : public Entity
 {
 public:
 	void OnCreate() override
 	{
-		ScriptLogger::Log(ScriptLogger::Level::Trace, "OnCreate: {0}", (uint64_t)m_UUID);
+		Logger::Log(Logger::Level::Trace, "OnCreate: {0}", (uint64_t)m_UUID);
 
 		if (HasComponent<TagComponent>())
 		{
-			TagComponent& tag = GetComponent<TagComponent>();
-			ScriptLogger::Log(ScriptLogger::Level::Trace, "Tag: {0}", tag.Tag);
+			TagComponent tag = GetComponent<TagComponent>();
+			Logger::Log(Logger::Level::Trace, "Script: Tag: {0}", (std::string)tag.Tag);
 
-			tag.Tag = "Script Tag??";
+			tag.Tag = "New Script Tag??";
 		}
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
-		ScriptLogger::Log(ScriptLogger::Level::Trace, "A is pressed == {0}", ScriptInput::IsKeyPressed(Key::A));
+		Logger::Log(Logger::Level::Trace, "A is pressed == {0}", Input::IsKeyPressed(Key::A));
 	}
 } LavenderEntity(MyEntity);

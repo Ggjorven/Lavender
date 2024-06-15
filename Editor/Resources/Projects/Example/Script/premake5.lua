@@ -181,10 +181,10 @@ project "Script"
 			
 			
 	-- TODO: Change the way we do linking on actual dist/binary builds
-	filter { "system:windows" }
-		links
-		{
-			"../../../../../bin/%{cfg.buildcfg}-windows/Lavender/Lavender.lib"
-		}
+	-- filter { "system:windows" }
+	-- 	links
+	-- 	{
+	-- 		"../../../../../bin/%{cfg.buildcfg}-windows/Lavender/Lavender.lib"
+	-- 	}
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------

@@ -6,7 +6,10 @@
 
 #include "Lavender/ECS/Components.hpp"
 
-#include "Lavender/Scripting/C++/Mutual/Functions.hpp"
+#include "Lavender/Scripting/C++/Mutual/Core/Functions.hpp"
+#include "Lavender/Scripting/C++/Mutual/Core/Logger.hpp"
+#include "Lavender/Scripting/C++/Mutual/ECS/Components.hpp"
+#include "Lavender/Scripting/C++/Mutual/Input/Input.hpp"
 
 #include "Lavender/WorkSpace/Project.hpp"
 
@@ -25,25 +28,23 @@ namespace Lavender
 		/////////////////////////////////////////////////////
 		// Components
 		/////////////////////////////////////////////////////
-		inline static void* Internal_AddComponent(ComponentType type, UUID uuid, void* data)
+		// TODO: Give Script::Component(s)
+		inline static void* Internal_AddComponent(Script::ComponentType type, UUID uuid, void* data)
 		{
 			Entity entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(uuid);
 
 			switch (type)
 			{
+			case Script::ComponentType::Tag:
+			{
+				Script::TagComponent& input = *((Script::TagComponent*)data);
+				
+				TagComponent& newComponent = entity.AddComponent<TagComponent>();
+				newComponent.Tag = input.Tag;
 
-			#define ADDCOMPONENT_INTERNAL_HELP(name) \
-			case ComponentType::name: \
-			{ \
-				name##Component component = *((name##Component*)data); \
-				entity.AddComponent<name##Component>(component); \
-				return (void*)(&entity.GetComponent<name##Component>()); \
+				return Internal_GetComponent(type, uuid);
 			}
-
-			ADDCOMPONENT_INTERNAL_HELP(Tag)
-			ADDCOMPONENT_INTERNAL_HELP(Transform)
-			ADDCOMPONENT_INTERNAL_HELP(Mesh)
-			ADDCOMPONENT_INTERNAL_HELP(PointLight)
+			// TODO: ...
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -53,25 +54,14 @@ namespace Lavender
 			return nullptr;
 		}
 
-		inline static void* Internal_AddOrReplaceComponent(ComponentType type, UUID uuid, void* data)
+		inline static void* Internal_AddOrReplaceComponent(Script::ComponentType type, UUID uuid, void* data)
 		{
 			Entity entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(uuid);
 
 			switch (type)
 			{
 
-			#define ADDORREPLACECOMPONENT_INTERNAL_HELP(name) \
-			case ComponentType::name: \
-			{ \
-				name##Component component = *((name##Component*)data); \
-				entity.AddOrReplaceComponent<name##Component>(component); \
-				return (void*)(&entity.GetComponent<name##Component>()); \
-			}
-
-			ADDORREPLACECOMPONENT_INTERNAL_HELP(Tag)
-			ADDORREPLACECOMPONENT_INTERNAL_HELP(Transform)
-			ADDORREPLACECOMPONENT_INTERNAL_HELP(Mesh)
-			ADDORREPLACECOMPONENT_INTERNAL_HELP(PointLight)
+			// TODO: ...
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -81,7 +71,7 @@ namespace Lavender
 			return nullptr;
 		}
 
-		inline static bool Internal_HasComponent(ComponentType type, UUID uuid)
+		inline static bool Internal_HasComponent(Script::ComponentType type, UUID uuid)
 		{
 			Entity entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(uuid);
 
@@ -89,7 +79,7 @@ namespace Lavender
 			{
 
 			#define HASCOMPONENT_INTERNAL_HELP(name) \
-			case ComponentType::name: return entity.HasComponent<name##Component>();
+			case Script::ComponentType::name: return entity.HasComponent<name##Component>();
 
 			HASCOMPONENT_INTERNAL_HELP(Tag)
 			HASCOMPONENT_INTERNAL_HELP(Transform)
@@ -104,20 +94,22 @@ namespace Lavender
 			return false;
 		}
 
-		inline static void* Internal_GetComponent(ComponentType type, UUID uuid)
+		inline static void* Internal_GetComponent(Script::ComponentType type, UUID uuid)
 		{
 			Entity entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(uuid);
 
 			switch (type)
 			{
+			case Script::ComponentType::Tag:
+			{
+				static Script::TagComponent lastComponent = {};
+				TagComponent& tag = entity.GetComponent<TagComponent>();
 
-			#define GETCOMPONENT_INTERNAL_HELP(name) \
-			case ComponentType::name: return (void*)(&entity.GetComponent<name##Component>());
-
-			GETCOMPONENT_INTERNAL_HELP(Tag)
-			GETCOMPONENT_INTERNAL_HELP(Transform)
-			GETCOMPONENT_INTERNAL_HELP(Mesh)
-			GETCOMPONENT_INTERNAL_HELP(PointLight)
+				lastComponent.Tag = Script::Handle<std::string>(&tag.Tag);
+				
+				return (void*)&lastComponent;
+			}
+			// TODO: ...
 
 			default:
 				APP_LOG_ERROR("Invalid ComponentType passed in.");
@@ -127,7 +119,7 @@ namespace Lavender
 			return nullptr;
 		}
 
-		inline static void Internal_RemoveComponent(ComponentType type, UUID uuid)
+		inline static void Internal_RemoveComponent(Script::ComponentType type, UUID uuid)
 		{
 			Entity entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(uuid);
 
@@ -135,7 +127,7 @@ namespace Lavender
 			{
 
 			#define REMOVECOMPONENT_INTERNAL_HELP(name) \
-			case ComponentType::name: \
+			case Script::ComponentType::name: \
 				entity.RemoveComponent<name##Component>(); \
 				break;
 
@@ -161,14 +153,14 @@ namespace Lavender
 		/////////////////////////////////////////////////////
 		// Input
 		/////////////////////////////////////////////////////
-		inline static bool Internal_IsKeyPressed(Key key)
+		inline static bool Internal_IsKeyPressed(Script::Key key)
 		{
-			return Input::IsKeyPressed(key);
+			return Input::IsKeyPressed((Key)key);
 		}
 
-		inline static bool Internal_IsMousePressed(MouseButton button)
+		inline static bool Internal_IsMousePressed(Script::MouseButton button)
 		{
-			return Input::IsMousePressed(button);
+			return Input::IsMousePressed((MouseButton)button);
 		}
 
 		inline static glm::vec2* Internal_GetCursorPosition()
@@ -184,9 +176,9 @@ namespace Lavender
 			Input::SetCursorPosition(*position);
 		}
 
-		inline static void Internal_SetCursorMode(CursorMode mode)
+		inline static void Internal_SetCursorMode(Script::CursorMode mode)
 		{
-			Input::SetCursorMode(mode);
+			Input::SetCursorMode((CursorMode)mode);
 		}
 	};
 

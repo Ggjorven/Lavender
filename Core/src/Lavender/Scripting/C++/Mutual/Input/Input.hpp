@@ -1,13 +1,16 @@
 #pragma once
 
-#include <Lavender/Scripting/C++/Mutual/Functions.hpp>
+#include "Lavender/Scripting/C++/Mutual/Core/Functions.hpp"
 
-#include <Insight/Insight.hpp>
+#include "Lavender/Scripting/C++/Mutual/Input/KeyCodes.hpp"
+#include "Lavender/Scripting/C++/Mutual/Input/MouseCodes.hpp"
 
-namespace Lavender
+#include <glm/glm.hpp>
+
+namespace Lavender::Script
 {
 
-	class ScriptInput
+	class Input
 	{
 	public:
 		inline static bool IsKeyPressed(Key key)

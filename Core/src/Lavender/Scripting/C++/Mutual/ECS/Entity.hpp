@@ -1,22 +1,17 @@
 #pragma once
 
-#include <Lavender/Utils/UUID.hpp>
-#include <Lavender/ECS/Components.hpp>
+#include "Lavender/Utils/UUID.hpp"
 
-#include <Lavender/Scripting/C++/Mutual/Functions.hpp>
+#include "Lavender/Scripting/C++/Mutual/Core/Functions.hpp"
 
-#include <Insight/Insight.hpp>
-
-#include <iostream> // TODO: Remove
-
-namespace Lavender
+namespace Lavender::Script
 {
 
-	class ScriptableEntity
+	class Entity
 	{
 	public:
-		ScriptableEntity() = default;
-		virtual ~ScriptableEntity() = default;
+		Entity() = default;
+		virtual ~Entity() = default;
 
 		virtual void OnCreate() = 0;
 		virtual void OnUpdate(float deltaTime) = 0;
@@ -62,25 +57,25 @@ namespace Lavender
 		UUID m_UUID = UUID::Empty;
 	};
 
-	typedef void (*OnCreateFn)(ScriptableEntity*);
-	typedef void (*OnUpdateFn)(ScriptableEntity*, float);
-	typedef UUID* (*GetUUIDFn)(ScriptableEntity*);
+	typedef void (*OnCreateFn)(Entity*);
+	typedef void (*OnUpdateFn)(Entity*, float);
+	typedef UUID* (*GetUUIDFn)(Entity*);
 
 #define LavenderEntity(name) \
 InsightClass(name)
 
 #if defined(LAVENDER_DLL)
-	extern "C" inline __declspec(dllexport) void Lavender_ScriptableEntityOnCreate(Lavender::ScriptableEntity* entity)
+	extern "C" inline __declspec(dllexport) void Lavender_ScriptEntityOnCreate(Lavender::Script::Entity* entity)
 	{
 		entity->OnCreate();
 	}
 
-	extern "C" inline __declspec(dllexport) void Lavender_ScriptableEntityOnUpdate(Lavender::ScriptableEntity* entity, float deltaTime)
+	extern "C" inline __declspec(dllexport) void Lavender_ScriptEntityOnUpdate(Lavender::Script::Entity* entity, float deltaTime)
 	{
 		entity->OnUpdate(deltaTime);
 	}
 
-	extern "C" inline __declspec(dllexport) UUID* Lavender_ScriptableEntityGetUUID(Lavender::ScriptableEntity* entity)
+	extern "C" inline __declspec(dllexport) UUID* Lavender_ScriptEntityGetUUID(Lavender::Script::Entity* entity)
 	{
 		return &entity->GetUUID();
 	}
@@ -91,7 +86,7 @@ InsightClass(name)
 	/*
 	Example: 
 
-	class Spider : public Lavender::ScriptableEntity
+	class Spider : public Lavender::Script::Entity
 	{
 	public:
 		void OnCreate()

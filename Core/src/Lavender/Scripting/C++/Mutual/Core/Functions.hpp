@@ -1,13 +1,15 @@
 #pragma once
 
-#include <Lavender/Utils/UUID.hpp>
+#include "Lavender/Utils/UUID.hpp"
 
-#include <Lavender/ECS/Components.hpp>
+#include "Lavender/Scripting/C++/Mutual/Input/KeyCodes.hpp"
+#include "Lavender/Scripting/C++/Mutual/Input/MouseCodes.hpp"
 
-#include <Lavender/Core/Input/KeyCodes.hpp>
-#include <Lavender/Core/Input/MouseCodes.hpp>
+#include "Lavender/Scripting/C++/Mutual/ECS/Components.hpp"
 
-namespace Lavender
+#include <glm/glm.hpp>
+
+namespace Lavender::Script
 {
 
 	// Functions on the Engine side

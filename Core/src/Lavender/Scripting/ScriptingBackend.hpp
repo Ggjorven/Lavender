@@ -42,7 +42,7 @@ namespace Lavender
 		virtual WorkSpace::ScriptingBackendType GetBackendType() const = 0;
 	
 		static Ref<ScriptingBackend> Create(const ScriptingSpecification& specs);
-		static Ref<ScriptingBackend> Get();
+		static Ref<ScriptingBackend>& Get();
 	};
 
 }

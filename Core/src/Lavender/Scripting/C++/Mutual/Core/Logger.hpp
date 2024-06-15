@@ -2,14 +2,12 @@
 
 #include <spdlog/spdlog.h>
 
-#include <Lavender/Scripting/C++/Mutual/Functions.hpp>
+#include "Lavender/Scripting/C++/Mutual/Core/Functions.hpp"
 
-#include <Insight/Insight.hpp>
-
-namespace Lavender
+namespace Lavender::Script
 {
 
-	class ScriptLogger
+	class Logger
 	{
 	public:
 		enum class Level : uint8_t

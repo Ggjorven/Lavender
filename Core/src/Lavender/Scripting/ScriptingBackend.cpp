@@ -33,7 +33,7 @@ namespace Lavender
 		return nullptr;
 	}
 
-	Ref<ScriptingBackend> ScriptingBackend::Get()
+	Ref<ScriptingBackend>& ScriptingBackend::Get()
 	{
 		return s_Instance;
 	}

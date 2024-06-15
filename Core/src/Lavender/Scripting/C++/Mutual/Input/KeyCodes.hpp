@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace Lavender
+namespace Lavender::Script
 {
 
     enum class Key : uint16_t
