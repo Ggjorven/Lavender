@@ -123,7 +123,7 @@ namespace Lavender
 			}
 
 			// ImGui 
-			if (m_AppInfo.EnableUI)
+			if (m_AppInfo.EnableUI && !m_Minimized)
 			{
 				APP_PROFILE_SCOPE("ImGui Submit");
 				Renderer::Submit([this]() 
@@ -132,8 +132,7 @@ namespace Lavender
 					m_ImGuiLayer->Begin();
 					for (Layer* layer : m_LayerStack)
 					{
-						if (!m_Minimized) 
-							layer->OnUIRender();
+						layer->OnUIRender();
 					}
 					m_ImGuiLayer->End();
 				});

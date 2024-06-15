@@ -21,4 +21,9 @@ namespace Lavender
 		// TODO: ...
 	}
 
+	Ref<MaterialAsset> MaterialAsset::Create(const AssetData& data)
+	{
+		return RefHelper::Create<MaterialAsset>(data);
+	}
+
 }

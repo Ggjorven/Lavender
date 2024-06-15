@@ -23,4 +23,9 @@ namespace Lavender
 		// TODO: ...
 	}
 
+	Ref<MeshAsset> MeshAsset::Create(const AssetData& data)
+	{
+		return RefHelper::Create<MeshAsset>(data);
+	}
+
 }

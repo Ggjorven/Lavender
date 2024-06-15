@@ -20,6 +20,9 @@ namespace Lavender
 		void Deserialize(const std::filesystem::path& file) override;
 
 		inline Ref<Material> GetMaterial() { return m_Material; }
+		inline void SetMaterial(Ref<Material> material) { m_Material = material; }
+
+		static Ref<MaterialAsset> Create(const AssetData& data);
 
 		inline virtual AssetType GetStaticType() const { return AssetType::Material; }
 
