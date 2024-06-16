@@ -20,10 +20,19 @@ public:
 
 			tag.Tag = "New Script Tag??";
 		}
+
+		if (HasComponent<TransformComponent>())
+		{
+			m_Transform = GetComponent<TransformComponent>();
+		}
 	}
 
 	void OnUpdate(float deltaTime) override
 	{
-		Logger::Log(Logger::Level::Trace, "A is pressed == {0}", Input::IsKeyPressed(Key::A));
+		//Logger::Log(Logger::Level::Trace, "A is pressed == {0}", Input::IsKeyPressed(Key::A));
+
+		m_Transform.Position->x += deltaTime * 0.1f;
 	}
+private:
+	TransformComponent m_Transform = {};
 } LavenderEntity(MyEntity);

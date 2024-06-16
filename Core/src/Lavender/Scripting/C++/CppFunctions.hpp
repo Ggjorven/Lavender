@@ -18,7 +18,7 @@
 namespace Lavender
 {
 
-	// Note(Jorben): This class is far from perfect, we have to implement every component seperately
+	// Note(Jorben): This class is far from perfect, we have to implement every component manually
 	class CppFunctions
 	{
 	public:
@@ -40,7 +40,29 @@ namespace Lavender
 				Script::TagComponent& input = *((Script::TagComponent*)data);
 				
 				TagComponent& newComponent = entity.AddComponent<TagComponent>();
-				newComponent.Tag = input.Tag;
+				newComponent.Tag = (std::string)input.Tag;
+
+				return Internal_GetComponent(type, uuid);
+			}
+			case Script::ComponentType::Transform:
+			{
+				Script::TransformComponent& input = *((Script::TransformComponent*)data);
+
+				TransformComponent& newComponent = entity.AddComponent<TransformComponent>();
+				newComponent.Position = (glm::vec3)input.Position;
+				newComponent.Size = (glm::vec3)input.Size;
+				newComponent.Rotation = (glm::vec3)input.Rotation;
+
+				return Internal_GetComponent(type, uuid);
+			}
+			case Script::ComponentType::PointLight:
+			{
+				Script::PointLightComponent & input = *((Script::PointLightComponent*)data);
+
+				PointLightComponent& newComponent = entity.AddComponent<PointLightComponent>();
+				newComponent.Colour = (glm::vec3)input.Colour;
+				newComponent.Intensity = (float)input.Intensity;
+				newComponent.Radius = (float)input.Radius;
 
 				return Internal_GetComponent(type, uuid);
 			}
@@ -60,7 +82,37 @@ namespace Lavender
 
 			switch (type)
 			{
+			case Script::ComponentType::Tag:
+			{
+				Script::TagComponent& input = *((Script::TagComponent*)data);
 
+				TagComponent& newComponent = entity.AddOrReplaceComponent<TagComponent>();
+				newComponent.Tag = (std::string)input.Tag;
+
+				return Internal_GetComponent(type, uuid);
+			}
+			case Script::ComponentType::Transform:
+			{
+				Script::TransformComponent& input = *((Script::TransformComponent*)data);
+
+				TransformComponent& newComponent = entity.AddOrReplaceComponent<TransformComponent>();
+				newComponent.Position = (glm::vec3)input.Position;
+				newComponent.Size = (glm::vec3)input.Size;
+				newComponent.Rotation = (glm::vec3)input.Rotation;
+
+				return Internal_GetComponent(type, uuid);
+			}
+			case Script::ComponentType::PointLight:
+			{
+				Script::PointLightComponent& input = *((Script::PointLightComponent*)data);
+
+				PointLightComponent& newComponent = entity.AddOrReplaceComponent<PointLightComponent>();
+				newComponent.Colour = (glm::vec3)input.Colour;
+				newComponent.Intensity = (float)input.Intensity;
+				newComponent.Radius = (float)input.Radius;
+
+				return Internal_GetComponent(type, uuid);
+			}
 			// TODO: ...
 
 			default:
@@ -107,6 +159,28 @@ namespace Lavender
 
 				lastComponent.Tag = Script::Handle<std::string>(&tag.Tag);
 				
+				return (void*)&lastComponent;
+			}
+			case Script::ComponentType::Transform:
+			{
+				static Script::TransformComponent lastComponent = {};
+				TransformComponent& transform = entity.GetComponent<TransformComponent>();
+
+				lastComponent.Position = Script::Handle<Script::Vec3>(&transform.Position);
+				lastComponent.Size = Script::Handle<Script::Vec3>(&transform.Size);
+				lastComponent.Rotation = Script::Handle<Script::Vec3>(&transform.Rotation);
+
+				return (void*)&lastComponent;
+			}
+			case Script::ComponentType::PointLight:
+			{
+				static Script::PointLightComponent lastComponent = {};
+				PointLightComponent& pointLight = entity.GetComponent<PointLightComponent>();
+
+				lastComponent.Colour = Script::Handle<Script::Vec3>(&pointLight.Colour);
+				lastComponent.Intensity = Script::Handle<float>(&pointLight.Intensity);
+				lastComponent.Radius = Script::Handle<float>(&pointLight.Radius);
+
 				return (void*)&lastComponent;
 			}
 			// TODO: ...

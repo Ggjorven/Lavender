@@ -9,7 +9,6 @@ namespace Lavender::Script
 	struct Handle
 	{
 	public:
-	public:
 		Handle() = default;
 		Handle(T* value)
 			: m_Value(value)
@@ -23,7 +22,24 @@ namespace Lavender::Script
 			return *this;
 		}
 
-		inline operator T()
+		inline operator T ()
+		{
+			return *m_Value;
+		}
+
+		/*
+		inline operator T& ()
+		{
+			return *m_Value;
+		}
+		*/
+
+		inline T* operator -> ()
+		{
+			return m_Value;
+		}
+
+		inline T& operator * ()
 		{
 			return *m_Value;
 		}

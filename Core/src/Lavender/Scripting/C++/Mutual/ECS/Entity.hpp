@@ -16,16 +16,18 @@ namespace Lavender::Script
 		virtual void OnCreate() = 0;
 		virtual void OnUpdate(float deltaTime) = 0;
 
+		// Note(Jorben): Doesn't return & because all parts inside are pointers anyways
 		template<typename TComponent>
-		TComponent& AddComponent(TComponent component = TComponent())
+		TComponent AddComponent(TComponent component = TComponent())
 		{
 			TComponent tempComp = component;
 			TComponent* newComp = (TComponent*)ComponentFunctions::Add(TComponent::GetStaticType(), m_UUID, (void*)&tempComp);
 			return *newComp;
 		}
 
+		// Note(Jorben): Doesn't return & because all parts inside are pointers anyways
 		template<typename TComponent>
-		TComponent& AddOrReplaceComponent(TComponent component = TComponent())
+		TComponent AddOrReplaceComponent(TComponent component = TComponent())
 		{
 			TComponent tempComp = component;
 			TComponent* newComp = (TComponent*)ComponentFunctions::AddOrReplace(TComponent::GetStaticType(), m_UUID, (void*)&tempComp);
@@ -38,8 +40,9 @@ namespace Lavender::Script
 			return ComponentFunctions::Has(TComponent::GetStaticType(), m_UUID);
 		}
 
+		// Note(Jorben): Doesn't return & because all parts inside are pointers anyways
 		template<typename TComponent>
-		TComponent& GetComponent()
+		TComponent GetComponent()
 		{
 			TComponent* newComp = (TComponent*)ComponentFunctions::Get(TComponent::GetStaticType(), m_UUID);
 			return *newComp;

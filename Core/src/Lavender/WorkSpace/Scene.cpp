@@ -25,10 +25,9 @@ namespace Lavender
 		auto script = Project::Get()->GetScript();
 		
 		static bool done = false;
+		static Entity entity = {};
 		if (!done)
 		{
-			Entity entity = {};
-
 			for (auto& [uuid, interface] : m_Registries[Project::Get()->GetState()].GetDict())
 			{
 				entity = m_Registries[Project::Get()->GetState()].GetEntity(uuid);
@@ -54,6 +53,8 @@ namespace Lavender
 		}
 
 		script->OnUpdateAll(deltaTime);
+
+		APP_LOG_TRACE("X pos: {0}", entity.GetComponent<TransformComponent>().Position.x);
 	}
 
 	void Scene::OnRender()
