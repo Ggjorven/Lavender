@@ -34,6 +34,7 @@ namespace Lavender
 		TagComponent(const TagComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::Tag; }
+		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
 	struct TransformComponent
@@ -52,6 +53,7 @@ namespace Lavender
 		TransformComponent(const TransformComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::Transform; }
+		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
 	struct MeshComponent
@@ -69,6 +71,7 @@ namespace Lavender
 		MeshComponent(const MeshComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::Mesh; }
+		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
 	struct PointLightComponent
@@ -87,6 +90,7 @@ namespace Lavender
 		PointLightComponent(const PointLightComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::PointLight; }
+		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////

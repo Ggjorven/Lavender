@@ -30,6 +30,7 @@ namespace Lavender::Script
 		TagComponent(const TagComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::Tag; }
+		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
 	// Handle doesn't need to be a & since everything inside is based on pointers
@@ -49,6 +50,7 @@ namespace Lavender::Script
 		TransformComponent(const TransformComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::Transform; }
+		inline ComponentType GetType() { return GetStaticType();  }
 	};
 
 	// Handle doesn't need to be a & since everything inside is based on pointers
@@ -68,6 +70,7 @@ namespace Lavender::Script
 		PointLightComponent(const PointLightComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::PointLight; }
+		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
 }

@@ -24,7 +24,12 @@ namespace Lavender
 
 		static Ref<MeshAsset> Create(const AssetData& data);
 
-		inline virtual AssetType GetStaticType() const { return AssetType::Mesh; }
+		inline static AssetType GetStaticType() { return AssetType::Mesh; }
+		inline virtual AssetType GetType() const { return GetStaticType(); }
+		inline static std::string GetStaticExtension() { return ".lvmesh"; }
+		inline std::string GetExtension() const override { return GetStaticExtension(); }
+
+		Ref<Asset> Copy() override;
 
 	private:
 		Ref<Mesh> m_Mesh = nullptr;

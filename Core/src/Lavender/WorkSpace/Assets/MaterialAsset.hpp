@@ -24,7 +24,12 @@ namespace Lavender
 
 		static Ref<MaterialAsset> Create(const AssetData& data);
 
-		inline virtual AssetType GetStaticType() const { return AssetType::Material; }
+		inline static AssetType GetStaticType() { return AssetType::Material; }
+		inline virtual AssetType GetType() const { return GetStaticType(); }
+		inline static std::string GetStaticExtension() { return ".lvmaterial"; }
+		inline std::string GetExtension() const override { return GetStaticExtension(); }
+
+		Ref<Asset> Copy() override;
 
 	private:
 		Ref<Material> m_Material = nullptr;

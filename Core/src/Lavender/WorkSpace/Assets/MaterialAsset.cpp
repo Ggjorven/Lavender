@@ -26,4 +26,9 @@ namespace Lavender
 		return RefHelper::Create<MaterialAsset>(data);
 	}
 
+	Ref<Asset> MaterialAsset::Copy()
+	{
+		return Ref<Asset>();
+	}
+
 }

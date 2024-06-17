@@ -7,6 +7,8 @@
 #include "Lavender/WorkSpace/Scene.hpp"
 #include "Lavender/WorkSpace/WorkSpace.hpp"
 
+#include "Lavender/WorkSpace/Assets/AssetManager.hpp"
+
 #include "Lavender/Scripting/ScriptingBackend.hpp"
 
 namespace Lavender
@@ -27,6 +29,7 @@ namespace Lavender
 		inline const WorkSpace::ProjectInfo& GetInfo() { return m_Info; }
 		inline WorkSpace::State& GetState() { return m_State; }
 		inline SceneCollection& GetScenes() { return m_Scenes; }
+		inline Ref<AssetManager> GetAssets() { return m_Assets; }
 		inline Ref<ScriptingBackend> GetScript() { return m_Scripting; }
 
 		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo());
@@ -41,6 +44,7 @@ namespace Lavender
 		WorkSpace::State m_State = WorkSpace::State::None;
 		SceneCollection m_Scenes = { };
 
+		Ref<AssetManager> m_Assets = nullptr;
 		Ref<ScriptingBackend> m_Scripting = nullptr;
 
 		friend class ProjectSerializer;

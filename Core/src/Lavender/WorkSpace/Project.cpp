@@ -11,7 +11,7 @@ namespace Lavender
 	static Ref<Project> s_Project = nullptr;
 
 	Project::Project(const WorkSpace::ProjectInfo& info)
-		: m_Info(info)
+		: m_Info(info), m_Assets(AssetManager::Create())
 	{
 	}
 
@@ -51,6 +51,9 @@ namespace Lavender
 
 	void Project::Init()
 	{
+		// Update Asset Cache
+		m_Assets->UpdateCache(m_Info.Directory / m_Info.Assets);
+
 		// Initialize startscene
 		Ref<Scene> startScene = Scene::Create(m_Info.StartScene);
 		SceneSerializer serializer(startScene);

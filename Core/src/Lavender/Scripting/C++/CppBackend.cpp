@@ -23,7 +23,7 @@ namespace Lavender
 	{
 		Reload();
 
-		APP_LOG_TRACE("Initialized C++ script: {0}", specs.Path.string());
+		APP_LOG_INFO("[ScriptingBackend] Initialized C++ script: {0}", specs.Path.string());
 	}
 
 	CppBackend::~CppBackend()

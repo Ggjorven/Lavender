@@ -22,6 +22,10 @@ namespace Lavender
 		
 		AssetHandle Handle = AssetHandle::Empty;
 		AssetType Type = AssetType::None;
+
+	public:
+		AssetData() = default;
+		AssetData(const std::filesystem::path& file);
 	};
 
 	class Asset
@@ -42,13 +46,19 @@ namespace Lavender
 		inline AssetData GetAssetData() const
 		{
 			AssetData data = {};
-			data.Handle = m_Handle;
+			data.Name = m_Name;
 			data.Path = m_Path;
+			data.Handle = m_Handle;
 
 			return data;
 		}
 
-		inline virtual AssetType GetStaticType() const { return AssetType::None; }
+		inline static AssetType GetStaticType() { return AssetType::None; }
+		inline virtual AssetType GetType() const { return GetStaticType(); }
+		inline static std::string GetStaticExtension() { return ".lvasset"; } // Default handle
+		inline virtual std::string GetExtension() const { return GetStaticExtension(); }
+
+		virtual Ref<Asset> Copy() = 0; // Copies this to the return value
 
 	protected:
 		AssetHandle m_Handle = AssetHandle::Empty;
