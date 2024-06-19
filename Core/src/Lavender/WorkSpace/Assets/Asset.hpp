@@ -26,6 +26,8 @@ namespace Lavender
 	public:
 		AssetData() = default;
 		AssetData(const std::filesystem::path& file);
+
+		void UpdateHandle(); // Retrieves AssetHandle from file
 	};
 
 	class Asset
@@ -34,7 +36,8 @@ namespace Lavender
 		Asset(const AssetData& data);
 		virtual ~Asset() = default;
 
-		virtual void Serialize() = 0;
+		virtual void Serialize() = 0; // Must serialize AssetHandle: *id* globally
+		inline void Deserialize() { Deserialize(m_Path); }
 		virtual void Deserialize(const std::filesystem::path& file) = 0;
 
 		inline void SetHandle(const AssetHandle& handle) { m_Handle = handle; }

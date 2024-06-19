@@ -1,1 +1,0 @@
-This file exists so the assets folder gets committed to the repo.

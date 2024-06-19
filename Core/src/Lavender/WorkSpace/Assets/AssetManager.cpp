@@ -27,6 +27,11 @@ namespace Lavender
 		return (m_Assets.find(handle) != m_Assets.end());
 	}
 
+	Ref<Asset> AssetCollection::GetAsset(const AssetHandle& handle)
+	{
+		return m_Assets[handle];
+	}
+
 	void AssetCollection::CopyCollection(AssetCollection& collection)
 	{
 		for (auto& [handle, asset] : m_Assets)
@@ -62,7 +67,7 @@ namespace Lavender
 		for (auto path : GetPathsFromExtension(directory, TAsset::GetStaticExtension()))
 		{
 			instance->AddToCache({ path });
-			APP_LOG_TRACE("[AssetManager] Found path: {0}", path.string());
+			APP_LOG_TRACE("[AssetManager] Found asset: {0}", path.string());
 		}
 	}
 
@@ -89,7 +94,11 @@ namespace Lavender
 
 	void AssetManager::AddToCache(const AssetData& data)
 	{
-		m_Cache.Add(data);
+		AssetData newData = data;
+		if (newData.Handle == AssetHandle::Empty)
+			newData.UpdateHandle();
+
+		m_Cache.Add(newData);
 	}
 
 	void AssetManager::UpdateCache(const std::filesystem::path& directory)
@@ -97,9 +106,66 @@ namespace Lavender
 		DeserializeAssets(AllAssets(), this, directory);
 	}
 
+	bool AssetManager::Exists(const AssetHandle& handle)
+	{
+		return (m_Cache.Exists(handle) || m_Assets[Project::Get()->GetState()].Exists(handle));
+	}
+
+	bool AssetManager::Loaded(const AssetHandle& handle)
+	{
+		return m_Assets[Project::Get()->GetState()].Exists(handle);
+	}
+
+	Ref<Asset> AssetManager::GetAsset(const AssetHandle& handle)
+	{
+		if (handle == AssetHandle::Empty)
+			return nullptr;
+
+		if (!Exists(handle))
+		{
+			APP_LOG_ERROR("Asset by ID: {0} does not exist.", (uint64_t)handle);
+			return nullptr;
+		}
+
+		// Load it into memory if not yet loaded
+		if (!Loaded(handle))
+			Load(m_Cache.GetAssetData(handle));
+
+		return m_Assets[Project::Get()->GetState()].GetAsset(handle);
+	}
+
 	Ref<AssetManager> AssetManager::Create()
 	{
 		return RefHelper::Create<AssetManager>();
+	}
+
+	void AssetManager::Load(const AssetData& data)
+	{
+		auto state = Project::Get()->GetState();
+
+		switch (data.Type)
+		{
+		case AssetType::Mesh:
+		{
+			Ref<Asset> asset = MeshAsset::Create(data);
+			asset->Deserialize();
+
+			m_Assets[state].Add(data.Handle, asset);
+			break;
+		}
+		case AssetType::Material:
+		{
+			Ref<Asset> asset = MaterialAsset::Create(data);
+			asset->Deserialize();
+
+			m_Assets[state].Add(data.Handle, asset);
+			break;
+		}
+
+		default:
+			APP_LOG_ERROR("Invalid AssetType to load.");
+			break;
+		}
 	}
 
 }

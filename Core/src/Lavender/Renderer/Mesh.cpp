@@ -29,6 +29,12 @@ namespace Lavender
 
 	Mesh::Mesh(const std::filesystem::path& path)
 	{
+		if (!std::filesystem::exists(path))
+		{
+			APP_LOG_WARN("Mesh by path: '{0}' doesn't exist.", path.string());
+			return;
+		}
+
 		std::vector<MeshVertex> vertices = { };
 		std::vector<uint32_t> indices = { };
 

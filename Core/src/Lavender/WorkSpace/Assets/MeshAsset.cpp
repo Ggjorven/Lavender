@@ -3,7 +3,11 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/WorkSpace/Project.hpp"
+
 #include <Flow/Flow.hpp>
+
+using namespace Flow;
 
 namespace Lavender
 {
@@ -15,12 +19,31 @@ namespace Lavender
 
 	void MeshAsset::Serialize()
 	{
-		// TODO: ...
+		Yaml::File file = Yaml::File(m_Path, FileMode::Write);
+		file << Yaml::FileManip::BeginMap;
+
+		file << Yaml::FileManip::Key << "AssetHandle" << Yaml::FileManip::Value << (uint64_t)m_Handle;
+
+		file << Yaml::FileManip::Key << "MeshAsset" << Yaml::FileManip::Value << Yaml::FileManip::BeginMap;
+		file << Yaml::FileManip::Key << "Mesh" << Yaml::FileManip::Value << m_MeshPath.string();
+
+		file << Yaml::FileManip::EndMap;
+		file << Yaml::FileManip::EndMap;
 	}
 
 	void MeshAsset::Deserialize(const std::filesystem::path& file)
 	{
-		// TODO: ...
+		Yaml::File flowFile = Yaml::File(m_Path, FileMode::Read);
+		
+		auto asset = flowFile["MeshAsset"];
+		if (asset)
+		{
+			m_MeshPath = asset["Mesh"].as<std::string>();
+		}
+
+		// Initialize
+		auto& projectDirs = Project::Get()->GetInfo();
+		m_Mesh = Mesh::Create(projectDirs.Directory / projectDirs.Assets / m_MeshPath);
 	}
 
 	Ref<MeshAsset> MeshAsset::Create(const AssetData& data)

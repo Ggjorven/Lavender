@@ -5,6 +5,8 @@
 
 #include "Lavender/WorkSpace/Assets/AssetManager.hpp"
 
+#include <Flow/Flow.hpp>
+
 namespace Lavender
 {
 
@@ -39,6 +41,19 @@ namespace Lavender
 	AssetData::AssetData(const std::filesystem::path& file)
 		: Name(file.filename().string()), Path(file), Type(GetAssetType(AllAssets(), file.extension()))
 	{
+	}
+
+	void AssetData::UpdateHandle()
+	{
+		Flow::Yaml::File file = Flow::Yaml::File(Path, Flow::FileMode::Read);
+
+		if (!file["AssetHandle"])
+		{
+			APP_LOG_ERROR("File '{0}' doesn't have an AssetHandle stored.", Path.string());
+			return;
+		}
+
+		Handle = file["AssetHandle"].as<uint64_t>();
 	}
 
 	Asset::Asset(const AssetData& data)

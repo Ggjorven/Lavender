@@ -8,3 +8,6 @@ Data:
         Position: [0.188308001, 0, 0]
         Size: [1, 1, 1]
         Rotation: [0, 0, 0]
+      MeshComponent:
+        Mesh: 0
+        Material: 0

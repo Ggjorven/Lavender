@@ -212,9 +212,36 @@ namespace Lavender
 			emitter << YAML::Key << "TransformComponent";
 			emitter << YAML::BeginMap;
 
-			emitter << YAML::Key << "Position" << transform.Position;
+			emitter << YAML::Key << "Position" << YAML::Value << transform.Position;
 			emitter << YAML::Key << "Size" << YAML::Value << transform.Size;
 			emitter << YAML::Key << "Rotation" << YAML::Value << transform.Rotation;
+
+			emitter << YAML::EndMap;
+		}
+
+		// MeshComponent
+		if (entity.HasComponent<MeshComponent>())
+		{
+			MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+			emitter << YAML::Key << "MeshComponent";
+			emitter << YAML::BeginMap;
+
+			emitter << YAML::Key << "Mesh" << YAML::Value << (mesh.Material ? (uint64_t)mesh.Mesh->GetHandle() : 0ul);
+			emitter << YAML::Key << "Material" << YAML::Value << (mesh.Material ? (uint64_t)mesh.Material->GetHandle() : 0ul);
+
+			emitter << YAML::EndMap;
+		}
+
+		// PointLightComponent
+		if (entity.HasComponent<PointLightComponent>())
+		{
+			PointLightComponent& pointLight = entity.GetComponent<PointLightComponent>();
+			emitter << YAML::Key << "PointLightComponent";
+			emitter << YAML::BeginMap;
+
+			emitter << YAML::Key << "Colour" << YAML::Value << pointLight.Colour;
+			emitter << YAML::Key << "Radius" << YAML::Value << pointLight.Radius;
+			emitter << YAML::Key << "Intensity" << YAML::Value << pointLight.Intensity;
 
 			emitter << YAML::EndMap;
 		}
@@ -244,6 +271,31 @@ namespace Lavender
 			transform.Position = transformComponent["Position"].as<glm::vec3>();
 			transform.Size = transformComponent["Size"].as<glm::vec3>();
 			transform.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+		}
+
+		// MeshComponent
+		auto meshComponent = node["MeshComponent"];
+		if (meshComponent)
+		{
+			MeshComponent& mesh = entity.AddOrReplaceComponent<MeshComponent>();
+
+			Ref<Asset> tempAsset = Project::Get()->GetAssets()->GetAsset(meshComponent["Mesh"].as<uint64_t>());
+			if (tempAsset)
+				mesh.Mesh = RefHelper::RefAs<MeshAsset>(tempAsset);
+
+			tempAsset = Project::Get()->GetAssets()->GetAsset(meshComponent["Material"].as<uint64_t>());
+			if (tempAsset)
+				mesh.Material = RefHelper::RefAs<MaterialAsset>(tempAsset);
+		}
+
+		// PointLightComponent
+		auto pointLightComponent = node["PointLightComponent"];
+		if (pointLightComponent)
+		{
+			PointLightComponent& pointLight = entity.AddOrReplaceComponent<PointLightComponent>();
+			pointLight.Colour = pointLightComponent["Colour"].as<glm::vec3>();
+			pointLight.Intensity = pointLightComponent["Intensity"].as<float>();
+			pointLight.Radius = pointLightComponent["Radius"].as<float>();
 		}
 	}
 

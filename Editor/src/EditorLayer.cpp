@@ -56,7 +56,7 @@ void EditorLayer::OnDetach()
 void EditorLayer::OnUpdate(float deltaTime)
 {
 	APP_PROFILE_SCOPE("Editor::Update");
-	Application::Get().GetWindow().SetTitle(fmt::format("Editor | FPS: {0} | Frametime: {1:.3f}ms", Track::Frame::FPS, Track::Frame::FrameTime)); // TODO: Remove takes 300microsecs
+	//Application::Get().GetWindow().SetTitle(fmt::format("Editor | FPS: {0} | Frametime: {1:.3f}ms", Track::Frame::FPS, Track::Frame::FrameTime)); // TODO: Remove takes 300microsecs
 
 	m_Project->OnUpdate(deltaTime);
 }

@@ -33,6 +33,8 @@ namespace Lavender
 
 	private:
 		Ref<Material> m_Material = nullptr;
+
+		std::filesystem::path m_AlbedoPath = {};
 	};
 
 }
