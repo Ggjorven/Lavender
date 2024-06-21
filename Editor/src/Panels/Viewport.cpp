@@ -1,58 +1,27 @@
 #include "Viewport.hpp"
 
 #include "Lavender/Utils/Profiler.hpp"
+#include "Lavender/Core/Application.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/CommandBuffer.hpp"
 
+#include "Lavender/WorkSpace/Scene.hpp"
 #include "Lavender/WorkSpace/EngineTracker.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 namespace Lavender::UI
 {
 
 	Viewport::Viewport()
 	{
-		ImageSpecification imageSpecs = {};
-		imageSpecs.Usage = ImageUsage::Size;
-		imageSpecs.Width = Track::Viewport::Width;
-		imageSpecs.Height = Track::Viewport::Height;
-		imageSpecs.Format = Renderer::GetSwapChainImages()[0]->GetSpecification().Format; 
-		imageSpecs.Layout = ImageLayout::ShaderRead;
-		imageSpecs.Flags = ImageUsageFlags::Colour | ImageUsageFlags::Sampled | ImageUsageFlags::NoMipMaps;
-		imageSpecs.CreateUIImage = true;
-
-		m_Attachment = Image2D::Create(imageSpecs);
-
-		RenderPassSpecification renderpassSpecs = {};
-		renderpassSpecs.ColourAttachment = { m_Attachment };
-		renderpassSpecs.ColourLoadOp = LoadOperation::Clear;
-		renderpassSpecs.PreviousColourImageLayout = ImageLayout::Undefined;
-		renderpassSpecs.FinalColourImageLayout = ImageLayout::ShaderRead;
-
-		renderpassSpecs.DepthAttachment = Renderer::GetDepthImage();
-		renderpassSpecs.DepthLoadOp = LoadOperation::Clear;
-
-		m_RenderPass = RenderPass::Create(renderpassSpecs, CommandBuffer::Create());
+		//FrameResources& resources = Scene::Get()->GetRenderer()->GetResources();
 	}
 
 	Viewport::~Viewport()
 	{
-	}
-
-	void Viewport::StartRecording()
-	{
-		APP_PROFILE_SCOPE("Viewport::Start");
-		m_RenderPass->Begin();
-	}
-
-	void Viewport::EndRecording()
-	{
-		APP_PROFILE_SCOPE("Viewport::End");
-
-		m_RenderPass->End();
-		m_RenderPass->Submit();
 	}
 
 	void Viewport::RenderUI()
@@ -63,7 +32,23 @@ namespace Lavender::UI
 
 		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_None);
 
-		ImGui::Image(m_Attachment->GetTextureID(), { (float)m_Attachment->GetWidth(), (float)m_Attachment->GetHeight() });
+		//s_TopLeftCursorPos = glm::vec2(ImGui::GetCursorPos().x, ImGui::GetCursorPos().y);
+
+		auto imWindow = ImGui::GetCurrentWindow();
+		auto& position = imWindow->Pos;
+		auto& size = imWindow->Size;
+		if ((uint32_t)size.x != Track::Viewport::Width || (uint32_t)size.y != Track::Viewport::Height)
+		{
+			Resize((uint32_t)size.x, (uint32_t)size.y);
+		}
+
+		auto& mainWindow = Application::Get().GetWindow();
+		Track::Viewport::Position.x = (uint32_t)position.x - mainWindow.GetPositionX();
+		Track::Viewport::Position.y = (uint32_t)position.y - mainWindow.GetPositionY();
+
+		auto region = ImGui::GetContentRegionAvail();
+		ImGui::Image(Scene::Get()->GetRenderer()->GetResources().Shading.Attachment->GetTextureID(), { region.x, region.y }, { 1.0f, 0.0f }, { 0.0f, 1.0f });
+		
 		ImGui::End();
 
 		ImGui::PopStyleVar(1);
@@ -76,8 +61,7 @@ namespace Lavender::UI
 		Track::Viewport::Height = height;
 
 		// Resize
-		m_Attachment->Resize(width, height);
-		m_RenderPass->Resize(width, height);
+		Scene::Get()->GetRenderer()->Resize(width, height);
 	}
 
 }

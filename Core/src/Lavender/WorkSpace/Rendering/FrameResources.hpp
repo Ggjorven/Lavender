@@ -47,6 +47,7 @@ namespace Lavender
 		struct
 		{
 			Ref<Pipeline>				Pipeline = nullptr;
+			Ref<Image2D>				Attachment = nullptr;
 			Ref<RenderPass>				RenderPass = nullptr;
 			Ref<DescriptorSets>			DescriptorSets = nullptr;
 		} Shading;

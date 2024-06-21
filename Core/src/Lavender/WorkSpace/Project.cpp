@@ -77,6 +77,8 @@ namespace Lavender
 		// TODO: Maybe save all scenes??
 		SceneSerializer serializer(m_Scenes.GetActive());
 		serializer.Serialize();
+
+		m_Assets->Serialize();
 	}
 
 }

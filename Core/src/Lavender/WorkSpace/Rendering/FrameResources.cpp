@@ -55,6 +55,7 @@ namespace Lavender
 
 		// Shading
 		Shading.Pipeline.reset();
+		Shading.Attachment.reset();
 		Shading.RenderPass.reset();
 		Shading.DescriptorSets.reset();
 
@@ -66,6 +67,9 @@ namespace Lavender
 
 	void FrameResources::Resize(uint32_t width, uint32_t height)
 	{
+		Renderer::GetDepthImage()->Resize(width, height);
+		Renderer::GetDepthImage()->Transition(ImageLayout::Undefined, ImageLayout::Depth);
+
 		// Depth
 		{
 			Depth.RenderPass->Resize(width, height);
@@ -80,6 +84,7 @@ namespace Lavender
 
 		// Shading
 		{
+			Shading.Attachment->Resize(width, height);
 			Shading.RenderPass->Resize(width, height);
 		}
 	}
@@ -186,17 +191,31 @@ namespace Lavender
 			}}}
 		});
 
+		ImageSpecification imageSpecs = {};
+		imageSpecs.Usage = ImageUsage::Size;
+		imageSpecs.Width = Track::Viewport::Width;
+		imageSpecs.Height = Track::Viewport::Height;
+		imageSpecs.Format = Renderer::GetSwapChainImages()[0]->GetSpecification().Format;
+		imageSpecs.Layout = ImageLayout::ShaderRead;
+		imageSpecs.Flags = ImageUsageFlags::Colour | ImageUsageFlags::Sampled | ImageUsageFlags::NoMipMaps;
+		imageSpecs.CreateUIImage = true;
+
+		Shading.Attachment = Image2D::Create(imageSpecs);
+
 		CommandBufferSpecification cmdBufSpecs = {};
 		cmdBufSpecs.Usage = CommandBufferUsage::Sequence;
 
 		auto cmdBuf = CommandBuffer::Create(cmdBufSpecs);
 
 		RenderPassSpecification renderPassSpecs = {};
-		renderPassSpecs.ColourAttachment = Renderer::GetSwapChainImages();
+		// TODO: Add a different way to specify Editor or Runtime
+		//renderPassSpecs.ColourAttachment = Renderer::GetSwapChainImages();
+		renderPassSpecs.ColourAttachment = { Shading.Attachment };
 		renderPassSpecs.ColourLoadOp = LoadOperation::Clear;
 		renderPassSpecs.ColourClearColour = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderPassSpecs.PreviousColourImageLayout = ImageLayout::Undefined;
-		renderPassSpecs.FinalColourImageLayout = ImageLayout::Presentation;
+		//renderPassSpecs.FinalColourImageLayout = ImageLayout::Presentation;
+		renderPassSpecs.FinalColourImageLayout = ImageLayout::ShaderRead;
 
 		renderPassSpecs.DepthLoadOp = LoadOperation::Clear;
 		renderPassSpecs.DepthAttachment = Renderer::GetDepthImage();

@@ -28,7 +28,10 @@ namespace Lavender::Track
 		inline static uint32_t Width = 0u;
 		inline static uint32_t Height = 0u;
 
-		inline static glm::uvec2 Position = { 0.0f, 0.0f };
+		inline static glm::uvec2 Position = { 0u, 0u };
+
+	public:
+		static bool InView(const glm::uvec2& mainWindowPosition);
 	};
 
 	struct Lavender

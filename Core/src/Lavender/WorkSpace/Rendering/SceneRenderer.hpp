@@ -22,6 +22,11 @@ namespace Lavender
 		virtual ~SceneRenderer();
 
 		void Render(Ref<Camera> view);
+
+		void OnEvent(Event& e);
+		void Resize(uint32_t width, uint32_t height);
+
+		inline FrameResources& GetResources() { return m_Resources; }
 		
 		static Ref<SceneRenderer> Create(Scene* scene);
 
@@ -37,6 +42,8 @@ namespace Lavender
 
 		glm::uvec2 GetTileCount();
 		glm::mat4 CalculateModelMatrix(const TransformComponent& component);
+
+		bool OnResize(WindowResizeEvent& e);
 
 	private:
 		FrameResources m_Resources = {};

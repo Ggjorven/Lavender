@@ -27,6 +27,8 @@ namespace Lavender
 
 		void CopyCollection(AssetCollection& collection); // Copies this into 'collection'
 
+		inline Dict<AssetHandle, Ref<Asset>> GetAssets() { return m_Assets; }
+
 	private:
 		Dict<AssetHandle, Ref<Asset>> m_Assets = { };
 	};
@@ -57,7 +59,7 @@ namespace Lavender
 		AssetManager() = default;
 		virtual ~AssetManager() = default;
 
-		// !TODO: Serialize
+		void Serialize();
 
 		void AddAsset(Ref<Asset> asset);
 		void AddToCache(const AssetData& data);

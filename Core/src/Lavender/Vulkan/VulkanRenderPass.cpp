@@ -6,6 +6,8 @@
 
 #include "Lavender/Renderer/Renderer.hpp"
 
+#include "Lavender/WorkSpace/EngineTracker.hpp"
+
 #include "Lavender/Vulkan/VulkanUtils.hpp"
 #include "Lavender/Vulkan/VulkanImage.hpp"
 #include "Lavender/Vulkan/VulkanRenderer.hpp"
@@ -36,7 +38,11 @@ namespace Lavender
         m_CommandBuffer->Begin();
 
         auto renderer = (VulkanRenderer*)Renderer::GetInstance();
-        VkExtent2D extent = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
+        VkExtent2D extent = { Track::Viewport::Width, Track::Viewport::Height };
+        if (!m_Specification.ColourAttachment.empty())
+            extent = { m_Specification.ColourAttachment[0]->GetWidth(), m_Specification.ColourAttachment[0]->GetHeight() };
+        else if (m_Specification.DepthAttachment)
+            extent = { m_Specification.DepthAttachment->GetWidth(), m_Specification.DepthAttachment->GetHeight() };
 
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -264,8 +270,8 @@ namespace Lavender
             framebufferInfo.renderPass = m_RenderPass;
             framebufferInfo.attachmentCount = (uint32_t)attachments.size();
             framebufferInfo.pAttachments = attachments.data();
-            framebufferInfo.width = Application::Get().GetWindow().GetWidth();
-            framebufferInfo.height = Application::Get().GetWindow().GetHeight();
+            framebufferInfo.width = Track::Viewport::Width;
+            framebufferInfo.height = Track::Viewport::Height;
             framebufferInfo.layers = 1;
 
             if (vkCreateFramebuffer(renderer->GetLogicalDevice()->GetVulkanDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)

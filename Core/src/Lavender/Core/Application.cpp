@@ -42,7 +42,8 @@ namespace Lavender
 		Track::Viewport::Height = appInfo.WindowSpecs.Height;
 
 		m_ImGuiLayer = BaseImGuiLayer::Create();
-		m_LayerStack.AddOverlay((Layer*)m_ImGuiLayer);
+		m_ImGuiLayer->OnAttach();
+		//m_LayerStack.AddOverlay((Layer*)m_ImGuiLayer);
 
 		WorkSpace::Init();
 	}
@@ -60,6 +61,12 @@ namespace Lavender
 		}
 
 		WorkSpace::Destroy();
+
+		// TODO: Change how we use ImGui
+		{
+			m_ImGuiLayer->OnDetach();
+			delete m_ImGuiLayer;
+		}
 
 		Renderer::Destroy();
 		m_Window.reset();
@@ -120,6 +127,10 @@ namespace Lavender
 					layer->OnUpdate(deltaTime);
 					if (!m_Minimized) layer->OnRender();
 				}
+
+				// TODO: Fix how we use ImGui
+				m_ImGuiLayer->OnUpdate(deltaTime);
+				m_ImGuiLayer->OnRender();
 			}
 
 			// ImGui 
@@ -134,6 +145,10 @@ namespace Lavender
 					{
 						layer->OnUIRender();
 					}
+
+					// TODO: Fix how we use ImGui
+					m_ImGuiLayer->OnUIRender();
+
 					m_ImGuiLayer->End();
 				});
 			}

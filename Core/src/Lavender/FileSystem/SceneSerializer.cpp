@@ -226,7 +226,7 @@ namespace Lavender
 			emitter << YAML::Key << "MeshComponent";
 			emitter << YAML::BeginMap;
 
-			emitter << YAML::Key << "Mesh" << YAML::Value << (mesh.Material ? (uint64_t)mesh.Mesh->GetHandle() : 0ul);
+			emitter << YAML::Key << "Mesh" << YAML::Value << (mesh.Mesh ? (uint64_t)mesh.Mesh->GetHandle() : 0ul);
 			emitter << YAML::Key << "Material" << YAML::Value << (mesh.Material ? (uint64_t)mesh.Material->GetHandle() : 0ul);
 
 			emitter << YAML::EndMap;

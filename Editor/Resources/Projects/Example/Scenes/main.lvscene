@@ -9,5 +9,5 @@ Data:
         Size: [1, 1, 1]
         Rotation: [0, 0, 0]
       MeshComponent:
-        Mesh: 0
+        Mesh: 69
         Material: 0

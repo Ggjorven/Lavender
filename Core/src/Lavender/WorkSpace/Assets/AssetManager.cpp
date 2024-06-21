@@ -87,6 +87,12 @@ namespace Lavender
 	/////////////////////////////////////////////////////////////////////////
 	// Main Functions
 	/////////////////////////////////////////////////////////////////////////
+	void AssetManager::Serialize()
+	{
+		for (auto& [handle, asset] : m_Assets[WorkSpace::State::Editor].GetAssets())
+			asset->Serialize();
+	}
+
 	void AssetManager::AddAsset(Ref<Asset> asset)
 	{
 		m_Assets[Project::Get()->GetState()].Add(asset->GetHandle(), asset);
@@ -142,30 +148,24 @@ namespace Lavender
 	void AssetManager::Load(const AssetData& data)
 	{
 		auto state = Project::Get()->GetState();
+		Ref<Asset> asset = nullptr;
 
 		switch (data.Type)
 		{
 		case AssetType::Mesh:
-		{
-			Ref<Asset> asset = MeshAsset::Create(data);
-			asset->Deserialize();
-
-			m_Assets[state].Add(data.Handle, asset);
+			asset = MeshAsset::Create(data);
 			break;
-		}
 		case AssetType::Material:
-		{
-			Ref<Asset> asset = MaterialAsset::Create(data);
-			asset->Deserialize();
-
-			m_Assets[state].Add(data.Handle, asset);
+			asset = MaterialAsset::Create(data);
 			break;
-		}
 
 		default:
 			APP_LOG_ERROR("Invalid AssetType to load.");
 			break;
 		}
+
+		asset->Deserialize();
+		m_Assets[state].Add(data.Handle, asset);
 	}
 
 }

@@ -9,7 +9,7 @@ namespace Lavender
 {
 
 	Scene::Scene(const UUID& uuid)
-		: m_ID(uuid), m_Renderer(SceneRenderer::Create(this))
+		: m_ID(uuid), m_Renderer(SceneRenderer::Create(this)), m_Camera(EditorCamera::Create())
 	{
 	}
 
@@ -19,19 +19,43 @@ namespace Lavender
 
 	void Scene::OnUpdate(float deltaTime)
 	{
-		// Update based on state
+		switch (Project::Get()->GetState())
+		{
+		case WorkSpace::State::Editor:
+			m_Camera->OnUpdate(deltaTime);
+			break;
+		case WorkSpace::State::Runtime:
+			// TODO: Runtime updates
+			break;
+		}
 	}
 
 	void Scene::OnRender()
 	{
-		// TODO: SceneRenderer with Editor/Runtime camera
+		switch (Project::Get()->GetState())
+		{
+		case WorkSpace::State::Editor:
+			m_Renderer->Render(m_Camera);
+			break;
+		case WorkSpace::State::Runtime:
+			// TODO: Runtime camera
+			break;
+		}
 	}
 
 	void Scene::OnEvent(Event& e)
 	{
-		// Event Editor
+		m_Renderer->OnEvent(e);
 
-		// Event Runtime
+		switch (Project::Get()->GetState())
+		{
+		case WorkSpace::State::Editor:
+			m_Camera->OnEvent(e);
+			break;
+		case WorkSpace::State::Runtime:
+			// TODO: Runtime camera
+			break;
+		}
 	}
 
 	Ref<Scene> Scene::Create(const UUID& uuid)

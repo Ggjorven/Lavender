@@ -3,9 +3,8 @@
 
 #include "Lavender/Core/Logging.hpp"
 
-#include "Lavender/Renderer/Material.hpp"
-
 #include "Lavender/WorkSpace/Project.hpp"
+#include "Lavender/WorkSpace/SharedResources.hpp"
 
 namespace Lavender::WorkSpace
 {
@@ -82,12 +81,12 @@ namespace Lavender::WorkSpace
 	// Engine Initialization
 	void Init()
 	{
-		Material::Init();
+		Shared::Init();
 	}
 
 	void Destroy()
 	{
-		Material::Destroy();
+		Shared::Destroy();
 
 		// Release the static project handle
 		Project::Get().reset();

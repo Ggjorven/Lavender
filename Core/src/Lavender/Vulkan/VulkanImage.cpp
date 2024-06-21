@@ -59,8 +59,9 @@ namespace Lavender
 	{
 		auto data = m_Data;
 		auto textureID = m_TextureID;
+		auto specs = m_Specification;
 
-		Renderer::SubmitFree([data, textureID]()
+		Renderer::SubmitFree([specs, data, textureID]()
 		{
 			auto device = ((VulkanRenderer*)Renderer::GetInstance())->GetLogicalDevice()->GetVulkanDevice();
 			Renderer::Wait();

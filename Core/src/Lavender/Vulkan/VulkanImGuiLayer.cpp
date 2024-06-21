@@ -23,6 +23,8 @@ namespace Lavender
 
 	static VkDescriptorPool s_ImGuiPool = VK_NULL_HANDLE;
 
+
+
 	void VulkanImGuiLayer::OnAttach()
 	{
 		auto context = (VulkanRenderer*)Renderer::GetInstance();
@@ -99,7 +101,7 @@ namespace Lavender
 		// Create renderpass
 		RenderPassSpecification specs = {};
 		specs.ColourAttachment = Renderer::GetSwapChainImages();
-		specs.ColourLoadOp = LoadOperation::Clear; 	// Change based on needs
+		specs.ColourLoadOp = LoadOperation::Load; 	// Change based on needs
 		specs.PreviousColourImageLayout = ImageLayout::Presentation; // Because before this pass there is pretty much always a renderpass with Presentation
 
 		m_Renderpass = RefHelper::Create<VulkanRenderPass>(specs, CommandBuffer::Create({}));

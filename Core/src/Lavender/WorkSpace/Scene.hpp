@@ -10,6 +10,7 @@
 
 #include "Lavender/WorkSpace/WorkSpace.hpp"
 #include "Lavender/WorkSpace/Rendering/SceneRenderer.hpp"
+#include "Lavender/WorkSpace/Rendering/EditorCamera.hpp"
 
 namespace Lavender
 {
@@ -40,6 +41,7 @@ namespace Lavender
 
 		Dict<WorkSpace::State, Registry> m_Registries = { };
 
+		Ref<EditorCamera> m_Camera = nullptr;
 		Ref<SceneRenderer> m_Renderer = nullptr;
 
 		friend class SceneSerializer;

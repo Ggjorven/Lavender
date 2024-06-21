@@ -5,6 +5,7 @@
 
 #include "Lavender/WorkSpace/Project.hpp"
 #include "Lavender/WorkSpace/EngineTracker.hpp"
+#include "Lavender/WorkSpace/SharedResources.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 
@@ -33,6 +34,17 @@ namespace Lavender
         LightCulling();
         FinalShading();
     }
+
+	void SceneRenderer::OnEvent(Event& e)
+	{
+		EventHandler handler(e);
+		handler.Handle<WindowResizeEvent>(APP_BIND_EVENT_FN(SceneRenderer::OnResize));
+	}
+
+	void SceneRenderer::Resize(uint32_t width, uint32_t height)
+	{
+		m_Resources.Resize(width, height);
+	}
 
     Ref<SceneRenderer> SceneRenderer::Create(Scene* scene)
     {
@@ -141,10 +153,13 @@ namespace Lavender
 				m_Resources.ModelBuffer->Upload(modelSets[i], m_Resources.Depth.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Model"), sizeof(ShaderResource::Model) * i);
 				modelSets[i]->Bind(m_Resources.Depth.Pipeline, m_Resources.Depth.RenderPass->GetCommandBuffer(), PipelineBindPoint::Graphics, { 0 });
 
-				mesh.Mesh->GetMesh()->GetVertexBuffer()->Bind(m_Resources.Depth.RenderPass->GetCommandBuffer());
-				mesh.Mesh->GetMesh()->GetIndexBuffer()->Bind(m_Resources.Depth.RenderPass->GetCommandBuffer());
+				if (mesh.Mesh)
+				{
+					mesh.Mesh->GetMesh()->GetVertexBuffer()->Bind(m_Resources.Depth.RenderPass->GetCommandBuffer());
+					mesh.Mesh->GetMesh()->GetIndexBuffer()->Bind(m_Resources.Depth.RenderPass->GetCommandBuffer());
 
-				Renderer::DrawIndexed(m_Resources.Depth.RenderPass->GetCommandBuffer(), mesh.Mesh->GetMesh()->GetIndexBuffer());
+					Renderer::DrawIndexed(m_Resources.Depth.RenderPass->GetCommandBuffer(), mesh.Mesh->GetMesh()->GetIndexBuffer());
+				}
 
 				i++;
 			}
@@ -201,16 +216,24 @@ namespace Lavender
 				MeshComponent mesh = view.get<MeshComponent>(entity);
 
 				m_Resources.ModelBuffer->Upload(set0[i], m_Resources.Shading.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Model"), sizeof(ShaderResource::Model) * i);
-				mesh.Material->GetMaterial()->GetAlbedo()->Upload(set0[i], m_Resources.Shading.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Albedo"));
+
+				if (mesh.Material)
+					mesh.Material->GetMaterial()->GetAlbedo()->Upload(set0[i], m_Resources.Shading.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Albedo"));
+				else
+					Shared::WhiteTexture->Upload(set0[i], m_Resources.Shading.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Albedo"));
+
 				m_Resources.LightCulling.LightsBuffer->Upload(set0[i], m_Resources.Shading.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Lights"));
 				m_Resources.LightCulling.LightVisibilityBuffer->Upload(set0[i], m_Resources.Shading.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Visibility"));
 
 				set0[i]->Bind(m_Resources.Shading.Pipeline, m_Resources.Shading.RenderPass->GetCommandBuffer(), PipelineBindPoint::Graphics, { 0 });
 
-				mesh.Mesh->GetMesh()->GetVertexBuffer()->Bind(m_Resources.Shading.RenderPass->GetCommandBuffer());
-				mesh.Mesh->GetMesh()->GetIndexBuffer()->Bind(m_Resources.Shading.RenderPass->GetCommandBuffer());
+				if (mesh.Mesh)
+				{
+					mesh.Mesh->GetMesh()->GetVertexBuffer()->Bind(m_Resources.Shading.RenderPass->GetCommandBuffer());
+					mesh.Mesh->GetMesh()->GetIndexBuffer()->Bind(m_Resources.Shading.RenderPass->GetCommandBuffer());
 
-				Renderer::DrawIndexed(m_Resources.Shading.RenderPass->GetCommandBuffer(), mesh.Mesh->GetMesh()->GetIndexBuffer());
+					Renderer::DrawIndexed(m_Resources.Shading.RenderPass->GetCommandBuffer(), mesh.Mesh->GetMesh()->GetIndexBuffer());
+				}
 
 				i++;
 			}
@@ -240,6 +263,12 @@ namespace Lavender
 		matrix = glm::rotate(matrix, glm::radians(component.Rotation.z), { 0.0f, 0.0f, 1.0f });
 
 		return matrix;
+	}
+
+	bool SceneRenderer::OnResize(WindowResizeEvent& e)
+	{
+		Resize(e.GetWidth(), e.GetHeight());
+		return false;
 	}
 
 }

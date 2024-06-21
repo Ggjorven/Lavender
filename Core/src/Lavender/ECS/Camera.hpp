@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lavender/Core/Core.hpp"
+#include "Lavender/Core/Events.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/ECS/ShaderResources.hpp"
@@ -17,6 +18,7 @@ namespace Lavender
 		virtual ~Camera() = default;
 
 		virtual void OnUpdate(float deltaTime) = 0;
+		virtual void OnEvent(Event& e) = 0;
 
 		inline glm::vec3& GetPosition() { return m_Position; }
 		inline float& GetFOV() { return m_FOV; }

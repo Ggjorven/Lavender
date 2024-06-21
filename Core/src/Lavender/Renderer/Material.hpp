@@ -25,10 +25,6 @@ namespace Lavender
 
 		static Ref<Material> Create(const MaterialSpecification& specs = MaterialSpecification());
 
-	public:
-		static void Init();		// Just to initialize shared resources
-		static void Destroy();	// And of course destroy
-
 	private:
 		MaterialSpecification m_Specification = {};
 
