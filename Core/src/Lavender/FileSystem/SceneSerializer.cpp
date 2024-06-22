@@ -240,8 +240,8 @@ namespace Lavender
 			emitter << YAML::BeginMap;
 
 			emitter << YAML::Key << "Colour" << YAML::Value << pointLight.Colour;
-			emitter << YAML::Key << "Radius" << YAML::Value << pointLight.Radius;
 			emitter << YAML::Key << "Intensity" << YAML::Value << pointLight.Intensity;
+			emitter << YAML::Key << "Radius" << YAML::Value << pointLight.Radius;
 
 			emitter << YAML::EndMap;
 		}

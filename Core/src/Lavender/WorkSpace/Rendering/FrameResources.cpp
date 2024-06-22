@@ -9,6 +9,7 @@
 
 #include "Lavender/ECS/ShaderResources.hpp"
 
+#include "Lavender/WorkSpace/Project.hpp"
 #include "Lavender/WorkSpace/EngineTracker.hpp"
 
 namespace Lavender
@@ -169,6 +170,7 @@ namespace Lavender
 		shaderSpecs.Compute = cacher->GetLatest(compiler, Constants::LightCulling.Cache, Constants::LightCulling.Shader, ShaderStage::Compute);
 
 		LightCulling.ComputeShader = ComputeShader::Create(shaderSpecs);
+
 		LightCulling.Pipeline = Pipeline::Create({ }, LightCulling.DescriptorSets, LightCulling.ComputeShader);
 	}
 
@@ -208,14 +210,20 @@ namespace Lavender
 		auto cmdBuf = CommandBuffer::Create(cmdBufSpecs);
 
 		RenderPassSpecification renderPassSpecs = {};
-		// TODO: Add a different way to specify Editor or Runtime
-		//renderPassSpecs.ColourAttachment = Renderer::GetSwapChainImages();
-		renderPassSpecs.ColourAttachment = { Shading.Attachment };
+
+		if (Project::Get()->GetState() == WorkSpace::State::Editor)
+			renderPassSpecs.ColourAttachment = { Shading.Attachment };
+		else
+			renderPassSpecs.ColourAttachment = Renderer::GetSwapChainImages();
+
 		renderPassSpecs.ColourLoadOp = LoadOperation::Clear;
 		renderPassSpecs.ColourClearColour = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderPassSpecs.PreviousColourImageLayout = ImageLayout::Undefined;
-		//renderPassSpecs.FinalColourImageLayout = ImageLayout::Presentation;
-		renderPassSpecs.FinalColourImageLayout = ImageLayout::ShaderRead;
+
+		if (Project::Get()->GetState() == WorkSpace::State::Editor)
+			renderPassSpecs.FinalColourImageLayout = ImageLayout::ShaderRead;
+		else
+			renderPassSpecs.FinalColourImageLayout = ImageLayout::Presentation;
 
 		renderPassSpecs.DepthLoadOp = LoadOperation::Clear;
 		renderPassSpecs.DepthAttachment = Renderer::GetDepthImage();

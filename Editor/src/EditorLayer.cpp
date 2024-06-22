@@ -24,8 +24,7 @@
 /////////////////////////////////////////////////////////////////
 void EditorLayer::OnAttach()
 {
-	m_Project = Project::Create();
-	m_Project->GetState() = WorkSpace::State::Editor;
+	m_Project = Project::Create({}, WorkSpace::State::Editor);
 
 	// Load a project from .lvproj file
 	if (__argc == 2)
@@ -49,7 +48,7 @@ void EditorLayer::OnAttach()
 	}
 
 	// Get Editor Preferences
-	UI::PreferencesSerializer serializer(Track::Lavender::Directory / "Editor" / "Preferences.lvepref");
+	UI::PreferencesSerializer serializer(Track::Lavender::Directory / "Editor/Preferences.lvepref");
 	serializer.Deserialize();
 
 	Application::Get().GetWindow().SetTitle(Track::Lavender::VersionTitle);
@@ -62,7 +61,7 @@ void EditorLayer::OnDetach()
 	projectSerializer.Serialize();
 
 	// Save preferences.
-	UI::PreferencesSerializer preferencesSerializer(Track::Lavender::Directory / "Editor" / "Preferences.lvepref");
+	UI::PreferencesSerializer preferencesSerializer(Track::Lavender::Directory / "Editor/Preferences.lvepref");
 	preferencesSerializer.Serialize();
 }
 

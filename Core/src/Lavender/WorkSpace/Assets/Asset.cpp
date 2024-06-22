@@ -43,7 +43,7 @@ namespace Lavender
 	{
 	}
 
-	void AssetData::UpdateHandle()
+	void AssetData::UpdateData()
 	{
 		Flow::Yaml::File file = Flow::Yaml::File(Path, Flow::FileMode::Read);
 
@@ -54,6 +54,14 @@ namespace Lavender
 		}
 
 		Handle = file["AssetHandle"].as<uint64_t>();
+
+		if (!file["AssetName"])
+		{
+			APP_LOG_ERROR("File '{0}' doesn't have an AssetName stored.", Path.string());
+			return;
+		}
+
+		Name = file["AssetName"].as<std::string>();
 	}
 
 	Asset::Asset(const AssetData& data)

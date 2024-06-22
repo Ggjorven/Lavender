@@ -27,7 +27,7 @@ namespace Lavender
 		AssetData() = default;
 		AssetData(const std::filesystem::path& file);
 
-		void UpdateHandle(); // Retrieves AssetHandle from file
+		void UpdateData(); // Retrieves AssetHandle from file
 	};
 
 	class Asset

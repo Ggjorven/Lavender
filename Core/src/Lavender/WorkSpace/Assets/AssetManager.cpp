@@ -102,7 +102,7 @@ namespace Lavender
 	{
 		AssetData newData = data;
 		if (newData.Handle == AssetHandle::Empty)
-			newData.UpdateHandle();
+			newData.UpdateData();
 
 		m_Cache.Add(newData);
 	}

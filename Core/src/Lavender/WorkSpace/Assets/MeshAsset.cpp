@@ -23,6 +23,7 @@ namespace Lavender
 		file << Yaml::FileManip::BeginMap;
 
 		file << Yaml::FileManip::Key << "AssetHandle" << Yaml::FileManip::Value << (uint64_t)m_Handle;
+		file << Yaml::FileManip::Key << "AssetName" << Yaml::FileManip::Value << m_Name;
 
 		file << Yaml::FileManip::Key << "MeshAsset" << Yaml::FileManip::Value << Yaml::FileManip::BeginMap;
 		file << Yaml::FileManip::Key << "Mesh" << Yaml::FileManip::Value << m_MeshPath.string();

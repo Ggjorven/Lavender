@@ -128,6 +128,12 @@ namespace Lavender::Utils
             m_Queue.push(func); 
         }
 
+        inline void AddToBack(Func func) // Adds it to the back log
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+            m_BackLog.push_back(func);
+        }
+
         inline Func Front()
         {
             std::scoped_lock<std::mutex> lock(m_Mutex);
@@ -142,6 +148,12 @@ namespace Lavender::Utils
         {
             std::scoped_lock<std::mutex> lock(m_Mutex);
 
+            // Add backlog to queue
+            for (const auto& func : m_BackLog)
+                m_Queue.push(func);
+            m_BackLog.clear();
+
+            // Check for ExecutionStyle
             switch (style)
             {
             case ExecutionStyle::InOrder:
@@ -181,7 +193,7 @@ namespace Lavender::Utils
         inline size_t Size() const
         { 
             std::scoped_lock<std::mutex> lock(m_Mutex);
-            return m_Queue.size(); 
+            return (m_Queue.size() + m_BackLog.size()); 
         }
 
         inline void Clear()
@@ -190,6 +202,8 @@ namespace Lavender::Utils
 
             while (!m_Queue.empty())
                 m_Queue.pop();
+
+            m_BackLog.clear();
         }
 
         inline std::vector<Func> AsVector() const
@@ -197,11 +211,13 @@ namespace Lavender::Utils
             std::vector<Func> funcs = { };
 
             std::scoped_lock<std::mutex> lock(m_Mutex);
-            funcs.reserve(m_Queue.size());
+            funcs.reserve(m_Queue.size() + m_BackLog.size());
+
             for (const auto& func : m_Queue)
-            {
                 funcs.push_back(func);
-            }
+
+            for (const auto& func : m_BackLog)
+                funcs.push_back(func);
 
             return funcs;
         }
@@ -209,7 +225,9 @@ namespace Lavender::Utils
 
     private:
         std::mutex m_Mutex = {};
+
         std::queue<Func> m_Queue = { };
+        std::vector<Func> m_BackLog = { };
     };
 
     template<typename ...Types>

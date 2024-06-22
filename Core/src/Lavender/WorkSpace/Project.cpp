@@ -10,8 +10,8 @@ namespace Lavender
 
 	static Ref<Project> s_Project = nullptr;
 
-	Project::Project(const WorkSpace::ProjectInfo& info)
-		: m_Info(info), m_Assets(AssetManager::Create())
+	Project::Project(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
+		: m_Info(info), m_State(initialState), m_Assets(AssetManager::Create())
 	{
 	}
 
@@ -38,9 +38,9 @@ namespace Lavender
 		m_Scenes.GetActive()->OnEvent(e);
 	}
 
-	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info)
+	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
 	{
-		s_Project = RefHelper::Create<Project>(info);
+		s_Project = RefHelper::Create<Project>(info, initialState);
 		return s_Project;
 	}
 

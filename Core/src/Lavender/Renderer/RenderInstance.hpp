@@ -27,6 +27,7 @@ namespace Lavender
 
 		virtual void Submit(RenderFunction function) = 0;
 		virtual void SubmitFree(FreeFunction function) = 0;
+		virtual void SubmitFreeToBack(FreeFunction function) = 0;
 
 		virtual void Wait() = 0;
 

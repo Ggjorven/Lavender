@@ -123,7 +123,7 @@ namespace Lavender
 	{
 		auto pool = s_ImGuiPool;
 
-		Renderer::SubmitFree([pool]()
+		Renderer::SubmitFreeToBack([pool]()
 		{
 			auto device = ((VulkanRenderer*)Renderer::GetInstance())->GetLogicalDevice()->GetVulkanDevice();
 

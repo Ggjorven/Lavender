@@ -3,11 +3,22 @@ Data:
   Entities:
     - Entity: 888128036446523593
       TagComponent:
-        Tag: New Script Tag??
+        Tag: VikingRoom
       TransformComponent:
-        Position: [0.188308001, 0, 0]
+        Position: [0, 0, 0]
         Size: [1, 1, 1]
-        Rotation: [0, 0, 0]
+        Rotation: [270, 0, 270]
       MeshComponent:
         Mesh: 69
-        Material: 0
+        Material: 70
+    - Entity: 888028036446523593
+      TagComponent:
+        Tag: Light
+      TransformComponent:
+        Position: [0, 0, 0]
+        Size: [1, 1, 1]
+        Rotation: [0, 0, 0]
+      PointLightComponent:
+        Colour: [1, 0, 0]
+        Intensity: 1
+        Radius: 5

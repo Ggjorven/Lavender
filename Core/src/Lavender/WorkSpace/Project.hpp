@@ -19,7 +19,7 @@ namespace Lavender
 	class Project
 	{
 	public:
-		Project(const WorkSpace::ProjectInfo& info);
+		Project(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState);
 		virtual ~Project();
 
 		void OnUpdate(float deltaTime);
@@ -32,7 +32,7 @@ namespace Lavender
 		inline Ref<AssetManager> GetAssets() { return m_Assets; }
 		inline Ref<ScriptingBackend> GetScript() { return m_Scripting; }
 
-		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo());
+		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo(), WorkSpace::State initialState = WorkSpace::State::Runtime);
 		static Ref<Project>& Get(); // Returns a reference since we also use it to destroy the s_Instance
 
 	private:
