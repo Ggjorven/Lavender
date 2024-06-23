@@ -27,6 +27,7 @@ namespace Lavender
 		if constexpr (Track::Lavender::Config == WorkSpace::Configuration::Dist)
 		{
 			// TODO: Change based on whether it's Dist or not
+			Track::Lavender::Directory = std::filesystem::path(__argv[0]).parent_path().parent_path().parent_path().parent_path();
 		}
 		else
 			Track::Lavender::Directory = std::filesystem::path(__argv[0]).parent_path().parent_path().parent_path().parent_path();
@@ -117,8 +118,11 @@ namespace Lavender
 				APP_PROFILE_SCOPE("Update & Render Submit");
 				for (Layer* layer : m_LayerStack)
 				{
-					layer->OnUpdate(deltaTime);
-					if (!m_Minimized) layer->OnRender();
+					if (!m_Minimized)
+					{
+						layer->OnUpdate(deltaTime);
+						layer->OnRender();
+					}
 				}
 			}
 

@@ -25,6 +25,10 @@ namespace Lavender
 			m_Camera->OnUpdate(deltaTime);
 			break;
 		case WorkSpace::State::Runtime:
+
+			// Remove
+			m_Camera->OnUpdate(deltaTime);
+
 			// TODO: Runtime updates
 			break;
 		}
@@ -38,6 +42,10 @@ namespace Lavender
 			m_Renderer->Render(m_Camera);
 			break;
 		case WorkSpace::State::Runtime:
+
+			// Remove
+			m_Renderer->Render(m_Camera);
+
 			// TODO: Runtime camera
 			break;
 		}
@@ -53,6 +61,10 @@ namespace Lavender
 			m_Camera->OnEvent(e);
 			break;
 		case WorkSpace::State::Runtime:
+
+			// Remove
+			m_Camera->OnEvent(e);
+
 			// TODO: Runtime camera
 			break;
 		}

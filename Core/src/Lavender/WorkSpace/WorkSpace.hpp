@@ -62,7 +62,7 @@ namespace Lavender::WorkSpace
 		std::filesystem::path Scenes = {};
 
 		ScriptingBackendType ScriptType = ScriptingBackendType::None;
-		std::filesystem::path ScriptsPath = {};
+		std::filesystem::path ScriptsPath = {}; // TODO: Change how we load scripts with Configuration and Platform from Track::Lavender, since now it has to be manually updated
 	};
 
 

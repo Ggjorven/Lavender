@@ -47,7 +47,7 @@ namespace Lavender::UI
 		Track::Viewport::Position.y = (uint32_t)position.y - mainWindow.GetPositionY();
 
 		auto region = ImGui::GetContentRegionAvail();
-		ImGui::Image(Scene::Get()->GetRenderer()->GetResources().Shading.Attachment->GetTextureID(), { region.x, region.y }, { 1.0f, 0.0f }, { 0.0f, 1.0f });
+		ImGui::Image(Scene::Get()->GetRenderer()->GetResources().Shading.Attachment->GetTextureID(), { region.x, region.y }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 		
 		ImGui::End();
 

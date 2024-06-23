@@ -144,4 +144,5 @@ group "Lavender"
 group ""
 
 include "Editor"
+include "Runtime"
 ------------------------------------------------------------------------------

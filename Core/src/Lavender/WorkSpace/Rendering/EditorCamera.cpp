@@ -111,7 +111,7 @@ namespace Lavender
 				float dTheta = delta.x * m_Speed;
 				float dPhi = delta.y * m_Speed;
 
-				theta += dTheta;
+				theta -= dTheta;
 				phi += dPhi;
 
 				float epsilon = 0.001f; // To prevent the camera from flipping
