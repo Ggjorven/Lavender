@@ -15,6 +15,7 @@ namespace Lavender::UI::Colours
 	// TODO: Colours
 	inline constexpr const uint32_t Accent =					LV_U32_COLOUR(236, 158, 36, 255);
 
+	inline constexpr const uint32_t Background =				LV_U32_COLOUR(36, 36, 36, 255);
 	inline constexpr const uint32_t BackgroundDark =			LV_U32_COLOUR(26, 26, 26, 255);
 
 	inline constexpr static glm::vec4 ConvertU32Colour(uint32_t colour)

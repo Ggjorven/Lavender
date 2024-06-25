@@ -146,4 +146,30 @@ namespace Lavender::Utils
 		return glfwGetTime();
 	}
 
+	size_t WindowsToolKit::GetMemoryUsageImpl() const
+	{
+		size_t used = 0;
+
+		PROCESS_MEMORY_COUNTERS_EX pmc = {};
+		if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
+			used = pmc.WorkingSetSize;
+		else
+			APP_LOG_ERROR("Failed to retrieve used memory usage");
+
+		return used;
+	}
+
+	size_t WindowsToolKit::GetHeapMemoryUsageImpl() const
+	{
+		size_t used = 0;
+
+		// Heap memory usage
+		HANDLE hProcessHeap = GetProcessHeap();
+		used = HeapSize(hProcessHeap, 0, NULL);
+		if (used == -1)
+			APP_LOG_ERROR("Failed to retrieve heap memory");
+
+		return used;
+	}
+
 }

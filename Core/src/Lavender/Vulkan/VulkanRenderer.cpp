@@ -232,4 +232,18 @@ namespace Lavender
 		m_SwapChain->OnResize(width, height, Application::Get().GetWindow().IsVSync());
 	}
 
+	void VulkanRenderer::RemoveFromQueues(Ref<CommandBuffer> commandBuffer)
+	{
+		Ref<VulkanCommandBuffer> cmdBuf = RefHelper::RefAs<VulkanCommandBuffer>(commandBuffer);
+
+		constexpr const uint32_t framesInFlight = (uint32_t)RendererSpecification::BufferCount;
+		for (uint32_t frame = 0; frame < framesInFlight; frame++)
+		{
+			if (VulkanTaskManager::HasSemaphore(cmdBuf->GetRenderFinishedSemaphore(frame), frame))
+				VulkanTaskManager::RemoveSemaphore(cmdBuf->GetRenderFinishedSemaphore(frame), frame);
+			if (VulkanTaskManager::HasFence(cmdBuf->GetInFlightFence(frame), frame))
+				VulkanTaskManager::RemoveFence(cmdBuf->GetInFlightFence(frame), frame);
+		}
+	}
+
 }

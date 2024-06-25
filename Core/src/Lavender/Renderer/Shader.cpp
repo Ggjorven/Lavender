@@ -112,6 +112,8 @@ namespace Lavender
 			return Retrieve(cache);
 
 		auto result = compiler->Compile(ShaderSpecification::ReadGLSLFile(shader), stage);
+		APP_LOG_TRACE("Shader: '{0}' compiled.", shader.string());
+
 		Cache(cache, result);
 		return result;
 	}

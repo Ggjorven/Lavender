@@ -120,11 +120,25 @@ namespace Lavender::UI
 
 	void BeginWindow(const std::string& name, WindowFlags flags)
 	{
+		if (flags & WindowFlags::NoTabBar)
+		{
+			ImGuiWindowClass window = {};
+			window.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+			ImGui::SetNextWindowClass(&window);
+		}
+
 		ImGui::Begin(name.c_str(), (bool*)0, (ImGuiWindowFlags)flags);
 	}
 
 	void BeginWindow(const std::string& name, bool& open, WindowFlags flags)
 	{
+		if (flags & WindowFlags::NoTabBar)
+		{
+			ImGuiWindowClass window = {};
+			window.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+			ImGui::SetNextWindowClass(&window);
+		}
+
 		ImGui::Begin(name.c_str(), &open, (ImGuiWindowFlags)flags);
 	}
 
@@ -156,6 +170,20 @@ namespace Lavender::UI
 	void TreeNodePop()
 	{
 		ImGui::TreePop();
+	}
+
+	bool Tree(const std::string& name, TreeNodeFlags flags)
+	{
+		bool open = false;
+
+		if (UI::TreeNode(name, flags))
+		{
+			open = true;
+			UI::TreeNodePop();
+		}
+		UI::ShiftCursorY(-1.0f);
+
+		return open;
 	}
 
 	bool Selectable(const std::string& name, bool* selected, const glm::vec2& size, SelectableFlags flags)

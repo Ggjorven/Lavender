@@ -48,6 +48,8 @@ namespace Lavender
 
 		void OnResize(uint32_t width, uint32_t height) override;
 
+		void RemoveFromQueues(Ref<CommandBuffer> commandBuffer) override;
+
 		inline Utils::Queue<RenderFunction>& GetRenderQueue() override { return m_RenderQueue; }
 		inline Utils::Queue<FreeFunction>& GetFreeQueue() override { return m_ResourceFreeQueue; }
 

@@ -2,6 +2,7 @@
 #include "SceneRenderer.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/WorkSpace/Project.hpp"
 #include "Lavender/WorkSpace/EngineTracker.hpp"
@@ -25,14 +26,21 @@ namespace Lavender
 
     void SceneRenderer::Render(Ref<Camera> view)
     {
-		UpdateCamera(view);
-		UpdateModels();
-		UpdateLights();
-		UpdateSceneData();
+		APP_PROFILE_SCOPE("SceneRenderer");
 
-        DepthPrePass();
-        LightCulling();
-        FinalShading();
+		{
+			APP_PROFILE_SCOPE("SceneRenderer::Update");
+			UpdateCamera(view);
+			UpdateModels();
+			UpdateLights();
+			UpdateSceneData();
+		}
+		{
+			APP_PROFILE_SCOPE("SceneRenderer::Render");
+			DepthPrePass();
+			LightCulling();
+			FinalShading();
+		}
     }
 
 	void SceneRenderer::OnEvent(Event& e)
@@ -53,6 +61,7 @@ namespace Lavender
 
 	void SceneRenderer::UpdateCamera(Ref<Camera> view)
 	{
+		APP_PROFILE_SCOPE("SceneRenderer::UpdateCamera");
 		// Note(Jorben): Note that the camera's OnUpdate has to be called in the scene loop
 
 		ShaderResource::Camera cam = view->AsResource();
@@ -65,6 +74,8 @@ namespace Lavender
 
 	void SceneRenderer::UpdateModels()
 	{
+		APP_PROFILE_SCOPE("SceneRenderer::UpdateModels");
+
 		auto view = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<MeshComponent>();
 		
 		if (view.size() > (size_t)m_Resources.AllocatedModels)
@@ -91,6 +102,8 @@ namespace Lavender
 
 	void SceneRenderer::UpdateLights()
 	{
+		APP_PROFILE_SCOPE("SceneRenderer::UpdateLights");
+
 		auto view = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<PointLightComponent>();
 		std::vector<ShaderResource::PointLight> lights(view.size());
 
@@ -123,6 +136,8 @@ namespace Lavender
 
 	void SceneRenderer::UpdateSceneData()
 	{
+		APP_PROFILE_SCOPE("SceneRenderer::UpdateSceneData");
+
 		ShaderResource::Scene uniform = { { Track::Viewport::Width, Track::Viewport::Height } };
 		m_Resources.SceneBuffer->SetData((void*)&uniform, sizeof(ShaderResource::Scene));
 		m_Resources.SceneBuffer->Upload(m_Resources.LightCulling.DescriptorSets->GetSets(1)[0], m_Resources.LightCulling.DescriptorSets->GetLayout(1).GetDescriptorByName("u_Scene"));
@@ -134,6 +149,8 @@ namespace Lavender
 		// Depth pre pass
 		Renderer::Submit([this]()
 		{
+			APP_PROFILE_SCOPE("SceneRenderer::DepthPrePass");
+
 			auto modelSets = m_Resources.Depth.DescriptorSets->GetSets(0);
 			auto cameraSet = m_Resources.Depth.DescriptorSets->GetSets(1)[0];
 
@@ -174,21 +191,29 @@ namespace Lavender
 		// Light culling
 		Renderer::Submit([this]()
 		{
+			APP_PROFILE_SCOPE("SceneRenderer::LightCulling");
+			
 			const glm::uvec2 tiles = GetTileCount();
 			auto& set0 = m_Resources.LightCulling.DescriptorSets->GetSets(0)[0];
 			auto& set1 = m_Resources.LightCulling.DescriptorSets->GetSets(1)[0];
 
 			m_Resources.LightCulling.CommandBuffer->Begin();
 
-			Renderer::GetDepthImage()->Transition(ImageLayout::Depth, ImageLayout::DepthRead);
-			Renderer::GetDepthImage()->Upload(set0, m_Resources.LightCulling.DescriptorSets->GetLayout(0).GetDescriptorByName("u_DepthBuffer"));
+			{
+				APP_PROFILE_SCOPE("SceneRenderer::LightCulling::Transition");
+				Renderer::GetDepthImage()->Transition(ImageLayout::Depth, ImageLayout::DepthRead);
+				Renderer::GetDepthImage()->Upload(set0, m_Resources.LightCulling.DescriptorSets->GetLayout(0).GetDescriptorByName("u_DepthBuffer"));
+			}
 
 			m_Resources.LightCulling.Pipeline->Use(m_Resources.LightCulling.CommandBuffer, PipelineBindPoint::Compute);
 
 			set0->Bind(m_Resources.LightCulling.Pipeline, m_Resources.LightCulling.CommandBuffer, PipelineBindPoint::Compute);
 			set1->Bind(m_Resources.LightCulling.Pipeline, m_Resources.LightCulling.CommandBuffer, PipelineBindPoint::Compute);
 
-			m_Resources.LightCulling.ComputeShader->Dispatch(m_Resources.LightCulling.CommandBuffer, tiles.x, tiles.y, 1);
+			{
+				APP_PROFILE_SCOPE("SceneRenderer::LightCulling::Dispatch");
+				m_Resources.LightCulling.ComputeShader->Dispatch(m_Resources.LightCulling.CommandBuffer, tiles.x, tiles.y, 1);
+			}
 
 			m_Resources.LightCulling.CommandBuffer->End();
 			m_Resources.LightCulling.CommandBuffer->Submit(Queue::Compute);
@@ -200,6 +225,8 @@ namespace Lavender
 		// Final shading
 		Renderer::Submit([this]()
 		{
+			APP_PROFILE_SCOPE("SceneRenderer::FinalShading");
+
 			auto& set0 = m_Resources.Shading.DescriptorSets->GetSets(0);
 			auto& set1 = m_Resources.Shading.DescriptorSets->GetSets(1)[0];
 

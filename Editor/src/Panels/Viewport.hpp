@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Lavender/Core/Core.hpp"
-#include "Lavender/Utils/Utils.hpp"
-
-#include "Lavender/Renderer/RenderPass.hpp"
+#include <Lavender/Core/Core.hpp>
+#include <Lavender/Utils/Utils.hpp>
 
 namespace Lavender::UI
 {
@@ -17,5 +15,8 @@ namespace Lavender::UI
 		void RenderUI();
 
 		void Resize(uint32_t width, uint32_t height);
+
+		static Ref<Viewport> Create();
 	};
+
 }

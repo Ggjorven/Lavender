@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstdint>
+#include <string>
 #include <random>
+#include <cstdint>
 #include <type_traits>
 
 namespace Lavender
@@ -21,9 +22,19 @@ namespace Lavender
         }
         virtual ~UUID() = default;
 
+        inline std::string String() const
+        {
+            return std::to_string((uint64_t)m_UUID);
+        }
+
         inline operator uint64_t() const 
         { 
             return m_UUID; 
+        }
+
+        inline operator std::string() const
+        {
+            return String();
         }
 
         inline bool operator == (const UUID& other) const

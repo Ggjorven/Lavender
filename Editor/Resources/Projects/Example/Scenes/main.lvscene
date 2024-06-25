@@ -19,6 +19,6 @@ Data:
         Size: [1, 1, 1]
         Rotation: [0, 0, 0]
       PointLightComponent:
-        Colour: [1, 0, 0]
+        Colour: [0.430999994, 0, 0.638999999]
         Intensity: 1
-        Radius: 5
+        Radius: 2

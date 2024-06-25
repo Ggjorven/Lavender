@@ -2,6 +2,7 @@
 #include "Scene.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/WorkSpace/Project.hpp"
 
@@ -19,6 +20,8 @@ namespace Lavender
 
 	void Scene::OnUpdate(float deltaTime)
 	{
+		APP_PROFILE_SCOPE("Scene::OnUpdate");
+
 		switch (Project::Get()->GetState())
 		{
 		case WorkSpace::State::Editor:
@@ -36,6 +39,8 @@ namespace Lavender
 
 	void Scene::OnRender()
 	{
+		APP_PROFILE_SCOPE("Scene::OnRender");
+
 		switch (Project::Get()->GetState())
 		{
 		case WorkSpace::State::Editor:

@@ -41,7 +41,10 @@ namespace Lavender
 	{
 		// Depth
 		Depth.Pipeline.reset();
+		
+		Renderer::RemoveFromQueues(Depth.RenderPass->GetCommandBuffer());
 		Depth.RenderPass.reset();
+
 		Depth.DescriptorSets.reset();
 
 		// LightCulling
@@ -49,6 +52,8 @@ namespace Lavender
 		LightCulling.DescriptorSets.reset();
 
 		LightCulling.ComputeShader.reset();
+
+		Renderer::RemoveFromQueues(LightCulling.CommandBuffer);
 		LightCulling.CommandBuffer.reset();
 
 		LightCulling.LightsBuffer.reset();
@@ -56,8 +61,11 @@ namespace Lavender
 
 		// Shading
 		Shading.Pipeline.reset();
-		Shading.Attachment.reset();
+		if (Shading.Attachment) Shading.Attachment.reset();
+
+		Renderer::RemoveFromQueues(Shading.RenderPass->GetCommandBuffer());
 		Shading.RenderPass.reset();
+
 		Shading.DescriptorSets.reset();
 
 		// FrameResources
@@ -193,16 +201,19 @@ namespace Lavender
 			}}}
 		});
 
-		ImageSpecification imageSpecs = {};
-		imageSpecs.Usage = ImageUsage::Size;
-		imageSpecs.Width = Track::Viewport::Width;
-		imageSpecs.Height = Track::Viewport::Height;
-		imageSpecs.Format = Renderer::GetSwapChainImages()[0]->GetSpecification().Format;
-		imageSpecs.Layout = ImageLayout::ShaderRead;
-		imageSpecs.Flags = ImageUsageFlags::Colour | ImageUsageFlags::Sampled | ImageUsageFlags::NoMipMaps;
-		imageSpecs.CreateUIImage = true;
+		if (Project::Get()->GetState() == WorkSpace::State::Editor)
+		{
+			ImageSpecification imageSpecs = {};
+			imageSpecs.Usage = ImageUsage::Size;
+			imageSpecs.Width = Track::Viewport::Width;
+			imageSpecs.Height = Track::Viewport::Height;
+			imageSpecs.Format = Renderer::GetSwapChainImages()[0]->GetSpecification().Format;
+			imageSpecs.Layout = ImageLayout::ShaderRead;
+			imageSpecs.Flags = ImageUsageFlags::Colour | ImageUsageFlags::Sampled | ImageUsageFlags::NoMipMaps;
+			imageSpecs.CreateUIImage = true;
 
-		Shading.Attachment = Image2D::Create(imageSpecs);
+			Shading.Attachment = Image2D::Create(imageSpecs);
+		}
 
 		CommandBufferSpecification cmdBufSpecs = {};
 		cmdBufSpecs.Usage = CommandBufferUsage::Sequence;

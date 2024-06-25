@@ -109,20 +109,26 @@ namespace Lavender
 
 	bool VulkanTaskManager::HasSemaphore(VkSemaphore semaphore)
 	{
+		return HasSemaphore(semaphore, Renderer::GetCurrentFrame());
+	}
+
+	bool VulkanTaskManager::HasSemaphore(VkSemaphore semaphore, uint32_t frame)
+	{
 		std::scoped_lock<std::mutex> lock(s_SemaphoreMutex);
 		std::scoped_lock<std::mutex> lock2(s_FrameSemaphoreMutex);
-
-		uint32_t frame = Renderer::GetCurrentFrame();
 
 		return s_Semaphores[frame].HasItem(semaphore) || s_FrameSemaphores[frame].HasItem(semaphore);
 	}
 
 	void VulkanTaskManager::RemoveSemaphore(VkSemaphore semaphore)
 	{
+		RemoveSemaphore(semaphore, Renderer::GetCurrentFrame());
+	}
+
+	void VulkanTaskManager::RemoveSemaphore(VkSemaphore semaphore, uint32_t frame)
+	{
 		std::scoped_lock<std::mutex> lock(s_SemaphoreMutex);
 		std::scoped_lock<std::mutex> lock2(s_FrameSemaphoreMutex);
-
-		uint32_t frame = Renderer::GetCurrentFrame();
 
 		if (s_Semaphores[frame].HasItem(semaphore))
 			s_Semaphores[frame].Remove(semaphore);
@@ -137,18 +143,24 @@ namespace Lavender
 
 	bool VulkanTaskManager::HasFence(VkFence fence)
 	{
-		std::scoped_lock<std::mutex> lock(s_FenceMutex);
+		return HasFence(fence, Renderer::GetCurrentFrame());
+	}
 
-		uint32_t frame = Renderer::GetCurrentFrame();
+	bool VulkanTaskManager::HasFence(VkFence fence, uint32_t frame)
+	{
+		std::scoped_lock<std::mutex> lock(s_FenceMutex);
 
 		return s_Fences[frame].HasItem(fence);
 	}
 
 	void VulkanTaskManager::RemoveFence(VkFence fence)
 	{
-		std::scoped_lock<std::mutex> lock(s_FenceMutex);
+		RemoveFence(fence, Renderer::GetCurrentFrame());
+	}
 
-		uint32_t frame = Renderer::GetCurrentFrame();
+	void VulkanTaskManager::RemoveFence(VkFence fence, uint32_t frame)
+	{
+		std::scoped_lock<std::mutex> lock(s_FenceMutex);
 
 		if (s_Fences[frame].HasItem(fence))
 			s_Fences[frame].Remove(fence);

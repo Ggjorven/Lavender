@@ -12,11 +12,21 @@
 namespace Lavender
 {
 
-	ShaderResource::Camera Camera::AsResource() const
+	ShaderResource::Camera Camera::AsResource()
 	{
 		ShaderResource::Camera camera = {};
 		camera.View = m_View;
 		camera.Projection = m_Projection;
+
+		{
+			float depthLinearizeMul = (-m_Projection[3][2]);
+			float depthLinearizeAdd = (m_Projection[2][2]);
+			// Correct the handedness issue.
+			if (depthLinearizeMul * depthLinearizeAdd < 0)
+				depthLinearizeAdd = -depthLinearizeAdd;
+			m_DepthUnpackConsts = { depthLinearizeMul, depthLinearizeAdd };
+		}
+
 		camera.DepthUnpackConsts = m_DepthUnpackConsts;
 
 		return camera;

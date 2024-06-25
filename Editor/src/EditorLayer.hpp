@@ -7,7 +7,11 @@
 #include <Lavender/UI/Style.hpp>
 
 #include "Panels/UIEditor.hpp"
+
 #include "Panels/Viewport.hpp"
+#include "Panels/Entities.hpp"
+#include "Panels/Components.hpp"
+#include "Panels/Debug.hpp"
 
 using namespace Lavender;
 
@@ -25,15 +29,22 @@ public:
 private:
 	void LoadProject();
 	void InitStyles();
+	void InitUI();
 
 	void CreateProject(const std::string& name, const std::filesystem::path& directory);
+
+	bool OnKeyPress(KeyPressedEvent& e);
 
 private:
 	Ref<Project> m_Project = nullptr;
 
-	UI::Editor m_Editor = {};
+	UI::Editor m_Editor = {}; // TODO: Remove
 
 	UI::StyleList m_GlobalUIStyles = {};
 	UI::StyleList m_GlobalUIColours = {};
-	UI::Viewport m_Viewport = {};
+
+	Ref<UI::Viewport> m_Viewport = {};
+	Ref<UI::Entities> m_Entities = {};
+	Ref<UI::Components> m_Components = {};
+	Ref<UI::Debug> m_Debug = {};
 };

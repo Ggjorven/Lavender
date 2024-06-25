@@ -84,6 +84,8 @@ namespace Lavender::UI
         UnsavedDocument = BIT(20),
         NoDocking = BIT(21),
 
+        NoTabBar = BIT(22), // Custom
+
         NoNav = NoNavInputs | NoNavFocus,
         NoDecoration = NoTitleBar | NoResize | NoScrollbar | NoCollapse,
         NoInputs = NoMouseInputs | NoNavInputs | NoNavFocus
@@ -98,7 +100,7 @@ namespace Lavender::UI
 	void EndChild();
 
     template<typename ... Args>
-    static void Text(const std::string& fmt, Args&& ...args)
+    static void Text(const std::string& fmt, Args ...args)
     {
         auto fmtStr = fmt::format(fmt.c_str(), std::forward<Args>(args)...);
         ImGui::Text(fmtStr.c_str());
@@ -130,6 +132,7 @@ namespace Lavender::UI
 
     bool TreeNode(const std::string& name, TreeNodeFlags flags = TreeNodeFlags::None);
     void TreeNodePop();
+	bool Tree(const std::string& name, TreeNodeFlags flags = UI::TreeNodeFlags::Framed | UI::TreeNodeFlags::SpanAvailWidth | UI::TreeNodeFlags::FramePadding | UI::TreeNodeFlags::DefaultOpen); // Custom tree
 
     enum class SelectableFlags : uint8_t
     {
@@ -336,7 +339,7 @@ namespace Lavender::UI
 	void EndCustomProperty();
 
 	template<typename ... Args>
-	bool Property(const std::string& label, const std::string& helpText = "", const std::string& fmt = "", Args&& ...args);
+	bool Property(const std::string& label, const std::string& helpText = "", const std::string& fmt = "", Args ...args);
 
 	bool Property(const std::string& label, float& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
 	bool Property(const std::string& label, glm::vec2& value, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& helpText = "");
@@ -366,7 +369,7 @@ namespace Lavender::UI
 
 	// Templated functions
 	template<typename ... Args>
-	bool Property(const std::string& label, const std::string& helpText, const std::string& fmt, Args&& ...args)
+	bool Property(const std::string& label, const std::string& helpText, const std::string& fmt, Args ...args)
 	{
 		UI::ShiftCursor(10.0f, 9.0f);
 		UI::Text(label);

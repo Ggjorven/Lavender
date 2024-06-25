@@ -37,8 +37,8 @@ namespace Lavender
 		inline glm::mat4& GetProjectionMatrix() { return m_Projection; }
 		inline glm::vec2& GetDepthUnPackConsts() { return m_DepthUnpackConsts; }
 
-		ShaderResource::Camera AsResource() const;
-		inline operator ShaderResource::Camera() const { return AsResource(); }
+		ShaderResource::Camera AsResource();
+		inline operator ShaderResource::Camera() { return AsResource(); }
 
 	protected:
 		void UpdateMatrices();

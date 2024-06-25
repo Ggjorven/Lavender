@@ -36,6 +36,8 @@ namespace Lavender
 
 		virtual void OnResize(uint32_t width, uint32_t height) = 0;
 
+		virtual void RemoveFromQueues(Ref<CommandBuffer> commandBuffer) = 0;
+
 		virtual Utils::Queue<RenderFunction>& GetRenderQueue() = 0;
 		virtual Utils::Queue<FreeFunction>& GetFreeQueue() = 0;
 

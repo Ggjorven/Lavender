@@ -30,6 +30,7 @@ void EditorLayer::OnAttach()
 
 	LoadProject();
 	InitStyles();
+	InitUI();
 
 	// Get Editor Preferences
 	UI::PreferencesSerializer serializer(Track::Lavender::Directory / "Editor/Preferences.lvepref");
@@ -50,7 +51,6 @@ void EditorLayer::OnDetach()
 void EditorLayer::OnUpdate(float deltaTime)
 {
 	APP_PROFILE_SCOPE("Editor::Update");
-	Application::Get().GetWindow().SetTitle(fmt::format("Editor | FPS: {0} | Frametime: {1:.3f}ms", Track::Frame::FPS, Track::Frame::FrameTime)); // TODO: Remove takes 300microsecs
 
 	m_Project->OnUpdate(deltaTime);
 }
@@ -64,6 +64,10 @@ void EditorLayer::OnRender()
 
 void EditorLayer::OnEvent(Event& e)
 {
+	EventHandler handler(e);
+
+	handler.Handle<KeyPressedEvent>(APP_BIND_EVENT_FN(EditorLayer::OnKeyPress));
+
 	m_Project->OnEvent(e);
 }
 
@@ -73,16 +77,36 @@ void EditorLayer::OnUIRender()
 
 	ImGui::DockSpaceOverViewport();
 
-	m_Editor.RenderWindow();
+	//m_Editor.RenderWindow();
 	//ImGui::ShowStyleEditor();
 
 	m_GlobalUIStyles.Push();
 	m_GlobalUIColours.Push();
 
-	m_Viewport.RenderUI();
+	m_Viewport->RenderUI();
+	m_Entities->RenderUI();
+	m_Components->RenderUI();
+	m_Debug->RenderUI();
 
 	m_GlobalUIStyles.Pop();
 	m_GlobalUIColours.Pop();
+}
+
+bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
+{
+	if (e.GetKeyCode() == Key::F5)
+	{
+		// Reload the project
+		Project::Get() = nullptr;
+		std::filesystem::path path = m_Project->GetInfo().Path;
+
+		m_Project = Project::Create({}, WorkSpace::State::Editor);
+
+		ProjectSerializer serializer(m_Project);
+		serializer.Deserialize(path);
+	}
+
+	return false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -224,6 +248,14 @@ void EditorLayer::InitStyles()
 
 		{ UI::StyleColourType::ModalWindowDimBg, { 0.80f, 0.80f, 0.80f, 0.35f } }
 	});
+}
+
+void EditorLayer::InitUI()
+{
+	m_Viewport = UI::Viewport::Create();
+	m_Entities = UI::Entities::Create();
+	m_Components = UI::Components::Create(m_Entities);
+	m_Debug = UI::Debug::Create();
 }
 
 // TODO: Update + clean

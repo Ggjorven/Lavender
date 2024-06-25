@@ -80,6 +80,11 @@ namespace Lavender
 		s_RenderInstance->OnResize(width, height);
 	}
 
+	void Renderer::RemoveFromQueues(Ref<CommandBuffer> commandBuffer)
+	{
+		s_RenderInstance->RemoveFromQueues(commandBuffer);
+	}
+
 	Utils::Queue<RenderFunction>& Renderer::GetRenderQueue()
 	{
 		return s_RenderInstance->GetRenderQueue();

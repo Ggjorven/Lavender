@@ -2,6 +2,7 @@
 #include "Project.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/FileSystem/SceneSerializer.hpp"
 
@@ -25,11 +26,13 @@ namespace Lavender
 
 	void Project::OnUpdate(float deltaTime)
 	{
+		APP_PROFILE_SCOPE("Project::OnUpdate");
 		m_Scenes.GetActive()->OnUpdate(deltaTime);
 	}
 
 	void Project::OnRender()
 	{
+		APP_PROFILE_SCOPE("Project::OnRender");
 		m_Scenes.GetActive()->OnRender();
 	}
 

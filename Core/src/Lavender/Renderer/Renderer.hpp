@@ -37,6 +37,8 @@ namespace Lavender
 
 		static void OnResize(uint32_t width, uint32_t height);
 
+		static void RemoveFromQueues(Ref<CommandBuffer> commandBuffer);
+
 		static Utils::Queue<RenderFunction>& GetRenderQueue();
 		static Utils::Queue<FreeFunction>& GetFreeQueue();
 

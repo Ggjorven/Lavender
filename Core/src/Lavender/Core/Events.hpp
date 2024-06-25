@@ -74,7 +74,7 @@ namespace Lavender
 		template<typename TEvent, typename F>
 		bool Handle(const F& func)
 		{
-			static_assert(std::is_base_of<Event, TEvent>::value, "Not an event type.");
+			static_assert(std::is_base_of<Event, TEvent>::value, "TEvent is not an event type.");
 
 			if (m_event.GetEventType() == TEvent::GetStaticType())
 			{

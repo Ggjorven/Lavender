@@ -48,7 +48,7 @@ namespace Lavender
 
 	private:
 		// Main
-		State m_State = State::ArcBall;
+		State m_State = State::ArcBall; // Set default here
 
 		// Flycam
 		float m_MovementSpeed = 5.0f;

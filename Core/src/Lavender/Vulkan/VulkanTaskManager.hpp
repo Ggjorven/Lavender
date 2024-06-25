@@ -28,10 +28,14 @@ namespace Lavender
 		static std::vector<VkFence>& GetFences();
 
 		static bool HasSemaphore(VkSemaphore semaphore);
+		static bool HasSemaphore(VkSemaphore semaphore, uint32_t frame);
 		static void RemoveSemaphore(VkSemaphore semaphore);
+		static void RemoveSemaphore(VkSemaphore semaphore, uint32_t frame);
 
 		static bool HasFence(VkFence fence);
+		static bool HasFence(VkFence fence, uint32_t frame);
 		static void RemoveFence(VkFence fence);
+		static void RemoveFence(VkFence fence, uint32_t frame);
 
 		// Note(Jorben): This function should generally not be used by the user unless debugging.
 		static void Reset();
