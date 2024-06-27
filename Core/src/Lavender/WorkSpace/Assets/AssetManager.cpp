@@ -140,6 +140,11 @@ namespace Lavender
 		return m_Assets[Project::Get()->GetState()].GetAsset(handle);
 	}
 
+	AssetCollection& AssetManager::GetCollection()
+	{
+		return m_Assets[Project::Get()->GetState()];
+	}
+
 	Ref<AssetManager> AssetManager::Create()
 	{
 		return RefHelper::Create<AssetManager>();

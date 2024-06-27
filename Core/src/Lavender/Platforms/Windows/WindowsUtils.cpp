@@ -17,6 +17,11 @@ namespace Lavender::Utils
 
 	std::unique_ptr<ToolKit> ToolKit::s_Instance = std::make_unique<WindowsToolKit>();
 	
+	WindowsToolKit::WindowsToolKit()
+	{
+		Random::Init();
+	}
+
 	std::string WindowsToolKit::OpenFileImpl(const std::string& filter, const std::string& dir) const
 	{
 		OPENFILENAMEA ofn;

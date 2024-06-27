@@ -23,11 +23,11 @@ namespace Lavender
 		// Initialize constants
 		if (Constants::DepthVert.Shader.empty())
 		{
-			Constants::DepthVert = { Track::Lavender::Directory / "Editor/assets/shaders/Depth.vert.glsl", Track::Lavender::Directory / "Editor/assets/shaders/caches/Depth.vert.cache" };
-			Constants::DepthFrag = { Track::Lavender::Directory / "Editor/assets/shaders/Depth.frag.glsl", Track::Lavender::Directory / "Editor/assets/shaders/caches/Depth.frag.cache" };
-			Constants::LightCulling = { Track::Lavender::Directory / "Editor/assets/shaders/LightCulling.comp.glsl", Track::Lavender::Directory / "Editor/assets/shaders/caches/LightCulling.comp.cache" };
-			Constants::ShadingVert = { Track::Lavender::Directory / "Editor/assets/shaders/Shading.vert.glsl", Track::Lavender::Directory / "Editor/assets/shaders/caches/Shading.vert.cache" };
-			Constants::ShadingFrag = { Track::Lavender::Directory / "Editor/assets/shaders/Shading.frag.glsl", Track::Lavender::Directory / "Editor/assets/shaders/caches/Shading.frag.cache" };
+			Constants::DepthVert = { Track::Lavender::Directory / "Editor/Resources/Shaders/Depth.vert.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Depth.vert.cache" };
+			Constants::DepthFrag = { Track::Lavender::Directory / "Editor/Resources/Shaders/Depth.frag.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Depth.frag.cache" };
+			Constants::LightCulling = { Track::Lavender::Directory / "Editor/Resources/Shaders/LightCulling.comp.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/LightCulling.comp.cache" };
+			Constants::ShadingVert = { Track::Lavender::Directory / "Editor/Resources/Shaders/Shading.vert.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Shading.vert.cache" };
+			Constants::ShadingFrag = { Track::Lavender::Directory / "Editor/Resources/Shaders/Shading.frag.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Shading.frag.cache" };
 		}
 
 		// Initialize all resources

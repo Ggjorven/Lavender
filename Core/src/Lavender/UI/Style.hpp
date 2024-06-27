@@ -15,7 +15,7 @@
 namespace Lavender::UI
 {
 
-    enum class StyleType
+    enum class StyleType : uint8_t
     {
         Alpha,               
         DisabledAlpha,       
@@ -64,7 +64,7 @@ namespace Lavender::UI
         static void PopStyles(uint32_t count);
     };
 
-    enum class StyleColourType
+    enum class StyleColourType : uint8_t
     {
         Text,
         TextDisabled,

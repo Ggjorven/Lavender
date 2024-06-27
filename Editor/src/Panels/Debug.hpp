@@ -5,6 +5,8 @@
 
 #include <Lavender/UI/Style.hpp>
 
+#include <glm/glm.hpp>
+
 namespace Lavender::UI
 {
 
@@ -24,6 +26,11 @@ namespace Lavender::UI
 	private:
 		UI::StyleList m_Styles = {};
 		UI::StyleList m_Colours = {};
+
+		// Window Data
+		uint32_t m_Width = 0;
+		uint32_t m_Height = 0;
+		glm::uvec2 m_Position = { 0u, 0u };
 	};
 
 }

@@ -234,6 +234,22 @@ namespace Lavender::Utils
         std::vector<Func> m_BackLog = { };
     };
 
+    class Random
+    {
+    public:
+        // Gets initialized in the ToolKit instance
+        inline static void Init()
+        {
+            std::srand(static_cast<unsigned>(std::time(0)));
+        }
+
+    public:
+        inline static int32_t Int(int32_t min = 0, int32_t max = MAX_INT32)
+        {
+            return (min + std::rand() % (max - min + 1));
+        }
+    };
+
     template<typename ...Types>
     struct TypeGroup
     {

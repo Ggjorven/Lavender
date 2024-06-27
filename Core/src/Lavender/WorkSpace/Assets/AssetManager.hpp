@@ -70,6 +70,7 @@ namespace Lavender
 		bool Loaded(const AssetHandle& handle); 
 
 		Ref<Asset> GetAsset(const AssetHandle& handle);
+		AssetCollection& GetCollection();
 
 		static Ref<AssetManager> Create();
 

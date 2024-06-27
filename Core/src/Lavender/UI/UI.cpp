@@ -12,24 +12,25 @@
 namespace Lavender::UI
 {
 
-	static uint32_t s_CurrentID = 0;
-
-	void PushID(uint32_t id)
+	void PushID()
 	{
-		if (id == MAX_UINT32)
-			ImGui::PushID((int)s_CurrentID++);
-		else
-			ImGui::PushID(id);
+		UI::PushID(Utils::Random::Int());
 	}
 
-	void PopID()
+	void PushID(int32_t id) // Leaks memory somehow
 	{
-		ImGui::PopID();
+		ImGuiWindow& window = *ImGui::GetCurrentWindow();
+		//if (window.IDStack.Size == 0) id = 0;
+
+		//window.IDStack.push_back(id);
 	}
 
-	void ResetIDs()
+	void PopID() // Leaks memory somehow
 	{
-		s_CurrentID = 0;
+		ImGuiWindow& window = *ImGui::GetCurrentWindow();
+		//if (window.IDStack.Size == 0) id = 0;
+
+		//window.IDStack.pop_back();
 	}
 
 	void ShiftCursor(float x, float y)
@@ -266,7 +267,7 @@ namespace Lavender::UI
 		UI::Draw::Underline();
 		UI::ShiftCursorY(18.0f);
 		
-		PopID();
+		UI::PopID();
 		UI::Style::PopStyles(2); // ItemSpacing, FramePadding
 	}
 
@@ -584,6 +585,11 @@ namespace Lavender::UI
 
 		UI::BeginWindow("FullScreenOverlay##LavenderUI", UI::WindowFlags::NoSavedSettings | UI::WindowFlags::NoDecoration);
 		UI::EndWindow();
+	}
+
+	void Combo::Add(const std::pair<std::string, SelectionFunc>& item)
+	{
+		Items.push_back(item);
 	}
 
 	void Combo::Render(const std::string& label, UI::ComboFlags flags)

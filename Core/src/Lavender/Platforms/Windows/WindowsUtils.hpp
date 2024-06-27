@@ -8,7 +8,8 @@ namespace Lavender::Utils
 	class WindowsToolKit : public ToolKit
 	{
 	public:
-		WindowsToolKit() = default;
+		WindowsToolKit();
+		virtual ~WindowsToolKit() = default;
 
 	private:
 		std::string OpenFileImpl(const std::string& filter, const std::string& dir) const override;

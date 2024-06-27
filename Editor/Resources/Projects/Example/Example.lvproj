@@ -9,4 +9,4 @@ Scenes:
 StartScene: 1
 Scripting:
   Type: 1
-  Path: bin/Dist-windows/Script/Script.dll
+  Path: bin/Debug-windows/Script/Script.dll

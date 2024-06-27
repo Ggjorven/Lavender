@@ -1,5 +1,7 @@
 #include "Debug.hpp"
 
+#include <Lavender/Core/Application.hpp>
+
 #include <Lavender/UI/UI.hpp>
 
 #include <Lavender/WorkSpace/EngineTracker.hpp>
@@ -23,13 +25,27 @@ namespace Lavender::UI
 
 		UI::BeginWindow("Debug", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove | UI::WindowFlags::NoTabBar);
 		
+		// Update Window Data
+		{
+			auto imWindow = ImGui::GetCurrentWindow();
+			auto& position = imWindow->Pos;
+			auto& size = imWindow->Size;
+
+			m_Width = (uint32_t)size.x;
+			m_Height = (uint32_t)size.y;
+
+			auto& mainWindow = Application::Get().GetWindow();
+			m_Position.x = (uint32_t)position.x - mainWindow.GetPositionX();
+			m_Position.y = (uint32_t)position.y - mainWindow.GetPositionY();
+		}
+
 		if (UI::Tree("Debug"))
 		{
 			UI::BeginPropertyGrid(2);
-
+			
 			UI::Property("FPS", "", "{0}", Track::Frame::FPS);
 			UI::Property("Frametime", "", "{0:.3f} ms", Track::Frame::FrameTime);
-			UI::Property("Memory", "Can differ from taskmanager.", "{0:.1f} MB", (float)((double)Utils::ToolKit::GetMemoryUsage() / (1024.0 * 1024.0))/* - 67.0f*/);
+			UI::Property("Memory", "", "{0:.1f} MB", (float)((double)Utils::ToolKit::GetMemoryUsage() / (1024.0 * 1024.0)));
 
 			UI::EndPropertyGrid();
 		}

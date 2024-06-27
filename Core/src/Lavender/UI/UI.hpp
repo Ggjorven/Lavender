@@ -15,6 +15,7 @@
 
 #include <spdlog/formatter.h>
 
+#include "Lavender/UI/Style.hpp"
 #include "Lavender/UI/Colours.hpp"
 
 #include "Lavender/Renderer/Image.hpp"
@@ -27,9 +28,9 @@ namespace Lavender::UI
 		void Underline(bool fullWidth = false, float offsetX = 0.0f, float offsetY = -1.0f);
 	}
 
-	void PushID(uint32_t id = MAX_UINT32);
+	void PushID();
+	void PushID(int32_t id);
 	void PopID();
-	void ResetIDs();
 
 	void ShiftCursor(float x, float y);
     void ShiftCursorX(float distance);
@@ -273,11 +274,13 @@ namespace Lavender::UI
 	public:
 		typedef std::function<void()> SelectionFunc;
 	public:
-		std::string Preview = {};
-		std::string Selected = {};
+		std::string Preview = "Select";
+		std::string Selected = "None";
 		std::vector<std::pair<std::string, SelectionFunc>> Items = { };
 
 	public:
+		void Add(const std::pair<std::string, SelectionFunc>& item);
+
 		void Render(const std::string& label, UI::ComboFlags flags = UI::ComboFlags::None);
 	};
 
@@ -332,8 +335,8 @@ namespace Lavender::UI
 		void Render();
 	};
 
-    void BeginPropertyGrid(uint32_t columns = 2);
-    void EndPropertyGrid();
+	void BeginPropertyGrid(uint32_t columns = 2);
+	void EndPropertyGrid();
 
 	void BeginCustomProperty(const std::string& label, const std::string& helpText = "");
 	void EndCustomProperty();

@@ -41,7 +41,7 @@ namespace Lavender::UI
 			if (!entity.HasComponent<TagComponent>())
 			{
 				APP_LOG_WARN("[Entities-UI] Entity by UUID: {0} doesn't have a TagComponent.", (uint64_t)uuid);
-				entity.AddComponent<TagComponent>({ "Unnamed Entity" });
+				entity.AddComponent<TagComponent>();
 			}
 			TagComponent& tag = entity.GetComponent<TagComponent>();
 
