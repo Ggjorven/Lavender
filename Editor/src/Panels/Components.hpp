@@ -71,6 +71,8 @@ namespace Lavender::UI
 		inline void RenderComponent<MeshComponent>(Entity& entity);
 		template<>
 		inline void RenderComponent<PointLightComponent>(Entity& entity);
+		template<>
+		inline void RenderComponent<ScriptComponent>(Entity& entity);
 
 	private:
 		void InitStyles();

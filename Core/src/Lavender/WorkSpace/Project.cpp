@@ -6,6 +6,8 @@
 
 #include "Lavender/FileSystem/SceneSerializer.hpp"
 
+#include "Lavender/WorkSpace/EngineTracker.hpp"
+
 namespace Lavender
 {
 
@@ -65,11 +67,12 @@ namespace Lavender
 		m_Scenes.SetActive(m_Info.StartScene, startScene);
 
 		// Initialize script
-		if (std::filesystem::exists(m_Info.Directory / m_Info.Script / m_Info.ScriptsPath))
+		std::filesystem::path path = m_Info.Directory / m_Info.Script / "bin" / fmt::format("{0}-{1}", ConfigurationToString(Track::Lavender::Config), PlatformToString(Track::Lavender::Platform, false)) / "Script/Script.dll";
+		if (std::filesystem::exists(path))
 		{
 			ScriptingSpecification scriptingSpecs = {};
 			scriptingSpecs.Type = m_Info.ScriptType;
-			scriptingSpecs.Path = m_Info.Directory / m_Info.Script / m_Info.ScriptsPath;
+			scriptingSpecs.Path = path;
 
 			m_Scripting = ScriptingBackend::Create(scriptingSpecs);
 		}

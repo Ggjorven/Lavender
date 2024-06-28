@@ -1387,9 +1387,14 @@ SPDLOG_INLINE void pattern_formatter::compile_pattern_(const std::string &patter
             user_chars->add_ch(*it);
         }
     }
-    if (user_chars) // append raw chars found so far
+
+#pragma warning(push)            
+#pragma warning(disable : 26800)  
+    if (user_chars) 
     {
         formatters_.push_back(std::move(user_chars));
     }
+#pragma warning(pop)
+
 }
 } // namespace spdlog

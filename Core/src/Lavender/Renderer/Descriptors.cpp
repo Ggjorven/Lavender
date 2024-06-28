@@ -79,7 +79,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanDescriptorSets>(sets);
 
 		default:

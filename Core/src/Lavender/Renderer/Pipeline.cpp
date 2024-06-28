@@ -17,7 +17,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanPipeline>(specs, sets, shader, renderpass);
 
 		default:
@@ -32,7 +32,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanPipeline>(specs, sets, shader);
 
 		default:

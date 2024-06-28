@@ -203,7 +203,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			break;
 

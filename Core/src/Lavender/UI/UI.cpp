@@ -23,6 +23,7 @@ namespace Lavender::UI
 		//if (window.IDStack.Size == 0) id = 0;
 
 		//window.IDStack.push_back(id);
+		ImGui::PushID(id);
 	}
 
 	void PopID() // Leaks memory somehow
@@ -31,6 +32,7 @@ namespace Lavender::UI
 		//if (window.IDStack.Size == 0) id = 0;
 
 		//window.IDStack.pop_back();
+		ImGui::PopID();
 	}
 
 	void ShiftCursor(float x, float y)
@@ -252,22 +254,22 @@ namespace Lavender::UI
 		return ImGui::InputText(label.c_str(), buffer, size, (ImGuiInputTextFlags)flags);
 	}
 
-	void BeginPropertyGrid(uint32_t columns)
+	void BeginPropertyGrid(const std::string& id, uint32_t columns)
 	{
 		UI::Style(UI::StyleType::ItemSpacing, { 8.0f, 8.0f }).Push();
 		UI::Style(UI::StyleType::FramePadding, { 4.0f, 4.0f }).Push();
 
-		UI::PushID();
-		ImGui::Columns(columns);
+		//UI::PushID();
+		ImGui::Columns(columns, id.c_str());
 	}
 
-	void EndPropertyGrid()
+	void EndPropertyGrid(const std::string& id)
 	{
-		ImGui::Columns(1);
+		ImGui::Columns(1, id.c_str());
 		UI::Draw::Underline();
 		UI::ShiftCursorY(18.0f);
 		
-		UI::PopID();
+		//UI::PopID();
 		UI::Style::PopStyles(2); // ItemSpacing, FramePadding
 	}
 
@@ -417,7 +419,7 @@ namespace Lavender::UI
 
 	bool Property(const std::string& label, ClickAbleImage& value, const std::string& helpText)
 	{
-		UI::ShiftCursor(16.0f, value.Size.y / 2.0f - 2.0f);
+		UI::ShiftCursor(16.0f, 9.0f);
 		UI::Text(label);
 
 		if (!helpText.empty())
@@ -441,7 +443,7 @@ namespace Lavender::UI
 
 	bool Property(const std::string& label, ColourPicker& value, const std::string& helpText)
 	{
-		UI::ShiftCursor(16.0f, value.Size / 2.0f - 2.0f);
+		UI::ShiftCursor(16.0f, 9.0f);
 		UI::Text(label);
 
 		if (!helpText.empty())
@@ -454,6 +456,7 @@ namespace Lavender::UI
 		UI::ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
+		UI::ShiftCursorX(6.0f); // TODO: Maybe change based on size
 		value.Render();
 
 		ImGui::PopItemWidth();
@@ -465,7 +468,7 @@ namespace Lavender::UI
 
 	bool Property(const std::string& label, ColourPicker& picker, ClickAbleImage& image, const std::string& helpText)
 	{
-		UI::ShiftCursor(16.0f, picker.Size / 2.0f - 2.0f);
+		UI::ShiftCursor(16.0f, 9.0f);
 		UI::Text(label);
 
 		if (!helpText.empty())
@@ -492,6 +495,31 @@ namespace Lavender::UI
 		UI::Draw::Underline();
 
 		return false;
+	}
+
+	bool Property(const std::string& label, const std::string& buttonName, ButtonClickFn clickAction, const std::string& helpText)
+	{
+		UI::ShiftCursor(10.0f, 9.0f);
+		UI::Text(label);
+
+		if (!helpText.empty())
+		{
+			UI::SameLine();
+			UI::HelpMarker(helpText);
+		}
+
+		ImGui::NextColumn();
+		UI::ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		bool pressed = UI::Button(buttonName);
+		if (pressed) clickAction();
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		UI::Draw::Underline();
+
+		return pressed;
 	}
 
 	bool UniformProperty(const std::string& label, glm::vec3& value, bool& uniform, float delta, float min, float max, const std::string& format, const std::string& hoverText)

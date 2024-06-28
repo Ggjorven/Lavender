@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Lavender/Utils/Utils.hpp"
+
 #include "Lavender/WorkSpace/Assets/MeshAsset.hpp"
 #include "Lavender/WorkSpace/Assets/MaterialAsset.hpp"
 
@@ -17,7 +19,7 @@ namespace Lavender
 	//////////////////////////////////////////////////////////////////////////////////////
 	enum class ComponentType
 	{
-		None = 0, Tag, Transform, Mesh, PointLight
+		None = 0, Tag, Transform, Mesh, PointLight, Script
 	};
 
 	struct TagComponent
@@ -93,6 +95,23 @@ namespace Lavender
 		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
+	struct ScriptComponent
+	{
+	public:
+		std::string Class = {};
+
+	public:
+		ScriptComponent() = default;
+		ScriptComponent(const std::string& className)
+			: Class(className)
+		{
+		}
+		ScriptComponent(const ScriptComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::Script; }
+		inline ComponentType GetType() { return GetStaticType(); }
+	};
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Utilities
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -107,17 +126,12 @@ namespace Lavender
 			return "MeshComponent";
 		else if constexpr (std::is_same_v<TComponent, PointLightComponent>)
 			return "PointLightComponent";
-
+		else if constexpr (std::is_same_v<TComponent, ScriptComponent>)
+			return "ScriptComponent";
+		
 		return "Undefined Component";
 	}
 
-	// Note(Jorben): Since I want this header file to also be able to be used on the scripting side
-	// We can't really use Utils::TypeGroup, So we create a custom struct here as well.
-	template<typename... TComponents>
-	struct ComponentGroup
-	{
-	};
-
-	using AllComponents = ComponentGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent>;
+	using AllComponents = Utils::TypeGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent, ScriptComponent>;
 
 }

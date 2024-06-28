@@ -37,7 +37,7 @@ namespace Lavender
 		virtual ~Asset() = default;
 
 		virtual void Serialize() = 0; // Must serialize AssetHandle: *id* globally
-		inline void Deserialize() { Deserialize(m_Path); }
+		inline virtual void Deserialize() { Deserialize(m_Path); }
 		virtual void Deserialize(const std::filesystem::path& file) = 0;
 
 		inline void SetHandle(const AssetHandle& handle) { m_Handle = handle; }

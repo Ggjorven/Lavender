@@ -14,7 +14,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return new VulkanImGuiLayer();
 
 		default:

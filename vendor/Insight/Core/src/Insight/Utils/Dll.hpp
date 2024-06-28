@@ -50,6 +50,8 @@ namespace Insight
 		Dll(const std::filesystem::path& path);
 		virtual ~Dll();
 
+		void Unload();
+
 		void Reload();
 		void Reload(const std::filesystem::path& path);
 

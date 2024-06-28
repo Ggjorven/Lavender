@@ -187,11 +187,11 @@ RUN_FUNCTION(INSIGHT_CONC(name, __COUNTER__), Insight::Internal::ClassSymbols.Ad
 INSIGHT_CLASS_GENERIC(name) \
 extern "C" \
 { \
-EXPORT name* Insight_Create##name() \
+inline EXPORT name* Insight_Create##name() \
 { \
     return new name(); \
 } \
-EXPORT void Insight_Delete##name(name* instance) \
+inline EXPORT void Insight_Delete##name(name* instance) \
 { \
     delete instance; \
 } \

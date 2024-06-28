@@ -1601,6 +1601,7 @@ template <typename OutputIt, typename Char, typename UInt> struct int_writer {
         locale(loc),
         specs(s),
         abs_value(static_cast<UInt>(value)),
+        prefix(),
         prefix_size(0) {
     static_assert(std::is_same<uint32_or_64_or_128_t<Int>, UInt>::value, "");
     if (is_negative(value)) {
@@ -1958,7 +1959,10 @@ OutputIt write(OutputIt out, T value) {
   }
 
   static const auto specs = basic_format_specs<Char>();
+#pragma warning(push)            
+#pragma warning(disable : 26498)  
   uint mask = exponent_mask<floaty>();
+#pragma warning(pop) 
   if ((bits & mask) == mask)
     return write_nonfinite(out, std::isinf(value), specs, fspecs);
 

@@ -246,6 +246,18 @@ namespace Lavender
 			emitter << YAML::EndMap;
 		}
 
+		// ScriptComponent
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			ScriptComponent& script = entity.GetComponent<ScriptComponent>();
+			emitter << YAML::Key << "ScriptComponent";
+			emitter << YAML::BeginMap;
+
+			emitter << YAML::Key << "Class" << YAML::Value << script.Class;
+
+			emitter << YAML::EndMap;
+		}
+
 		emitter << YAML::EndMap;
 	}
 
@@ -296,6 +308,18 @@ namespace Lavender
 			pointLight.Colour = pointLightComponent["Colour"].as<glm::vec3>();
 			pointLight.Intensity = pointLightComponent["Intensity"].as<float>();
 			pointLight.Radius = pointLightComponent["Radius"].as<float>();
+		}
+
+		// ScriptComponent
+		auto scriptComponent = node["ScriptComponent"];
+		if (scriptComponent)
+		{
+			ScriptComponent& script = entity.AddOrReplaceComponent<ScriptComponent>();
+
+			if (Project::Get()->GetScript())
+				Project::Get()->GetScript()->AddInstance(scriptComponent["Class"].as<std::string>(), uuid);
+
+			script.Class = scriptComponent["Class"].as<std::string>();
 		}
 	}
 

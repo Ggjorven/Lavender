@@ -34,19 +34,32 @@ namespace Lavender
 
 	void CppBackend::Reload()
 	{
+		// Copy classes to recreate
+		Dict<UUID, ScriptEntityInfo> classes = m_Instances;
+		m_Instances.clear();
+		
+		
 		if (!m_Dll)
 		{
 			CopyOver();
 			m_Dll = Insight::Dll::Create(m_CopyPath / m_Specification.Path.filename());
 		}
 		else
+		{
+			m_Dll->Unload();
+			CopyOver();
 			m_Dll->Reload();
+		}
 
 		m_Cache.OnCreate = m_Dll->GetCustomFunction<Script::OnCreateFn>("Lavender_ScriptEntityOnCreate");
 		m_Cache.OnUpdate = m_Dll->GetCustomFunction<Script::OnUpdateFn>("Lavender_ScriptEntityOnUpdate");
 		m_Cache.GetUUID = m_Dll->GetCustomFunction<Script::GetUUIDFn>("Lavender_ScriptEntityGetUUID");
 
 		CppFunctions::OutSource(m_Dll);
+
+		// Reload previous class instances
+		for (auto& [uuid, info] : classes)
+			AddInstance(info.Name, uuid);
 	}
 
 	void CppBackend::OnCreateAll()

@@ -54,7 +54,7 @@ namespace Lavender
 		Assimp::Importer importer = {};
 
 		uint32_t flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace;
-		if (RendererSpecification::API == RendererSpecification::RenderingAPI::Vulkan)
+		if (RendererSpecification::API == RenderingAPI::Vulkan)
 			flags |= aiProcess_FlipUVs;
 
 		const aiScene* scene = importer.ReadFile(path.string(), flags);

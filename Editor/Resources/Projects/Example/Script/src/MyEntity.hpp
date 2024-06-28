@@ -17,8 +17,6 @@ public:
 		{
 			TagComponent tag = GetComponent<TagComponent>();
 			Logger::Log(Logger::Level::Trace, "Script: Tag: {0}", (std::string)tag.Tag);
-
-			tag.Tag = "New Script Tag??";
 		}
 
 		if (HasComponent<TransformComponent>())

@@ -1864,7 +1864,7 @@ template <typename Context> class basic_format_args {
       : desc_(desc), args_(args) {}
 
  public:
-  basic_format_args() : desc_(0) {}
+  basic_format_args() : desc_(0), values_()  {}
 
   /**
    \rst

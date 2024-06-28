@@ -3,13 +3,15 @@
 #include "Lavender/Core/Core.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
-#include "Lavender/UI/UI.hpp"
 #include "Lavender/UI/Colours.hpp"
+
+#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace Lavender::UI::Draw
 {
 
-	void Underline(bool fullWidth, float offsetX, float offsetY);
+	void Underline(bool fullWidth = false, float offsetX = 0.0f, float offsetY = -1.0f);
 
 	enum class OutlineFlags
 	{

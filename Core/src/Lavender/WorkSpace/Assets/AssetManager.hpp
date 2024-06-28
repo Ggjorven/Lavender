@@ -71,6 +71,7 @@ namespace Lavender
 
 		Ref<Asset> GetAsset(const AssetHandle& handle);
 		AssetCollection& GetCollection();
+		inline AssetCache& GetCache() { return m_Cache; }
 
 		static Ref<AssetManager> Create();
 

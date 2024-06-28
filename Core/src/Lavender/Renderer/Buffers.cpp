@@ -86,7 +86,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanVertexBuffer>(data, size);
 
 		default:
@@ -101,7 +101,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanIndexBuffer>(indices, count);
 
 		default:
@@ -116,7 +116,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanUniformBuffer>(dataSize);
 
 		default:
@@ -131,7 +131,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanDynamicUniformBuffer>(elements, sizeOfOneElement);
 
 		default:
@@ -146,7 +146,7 @@ namespace Lavender
 	{
 		switch (RendererSpecification::API)
 		{
-		case RendererSpecification::RenderingAPI::Vulkan:
+		case RenderingAPI::Vulkan:
 			return RefHelper::Create<VulkanStorageBuffer>(dataSize);
 
 		default:

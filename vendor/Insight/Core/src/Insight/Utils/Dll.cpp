@@ -13,6 +13,11 @@ namespace Insight
 
 	Dll::~Dll()
 	{
+		Unload();
+	}
+
+	void Dll::Unload()
+	{
 		if (!m_ActiveClasses.empty())
 		{
 			// TODO: Implement logging
@@ -23,7 +28,8 @@ namespace Insight
 				DeleteClass(name, instance);
 		}
 
-		FreeLibrary(m_Handle);
+		if (m_Handle)
+			FreeLibrary(m_Handle);
 	}
 
 	void Dll::Reload()
@@ -39,9 +45,7 @@ namespace Insight
 			return;
 		}
 		if (m_Handle)
-		{
 			FreeLibrary(m_Handle);
-		}
 
 		m_Handle = LoadLibraryA(m_Path.string().c_str());
 		if (!m_Handle)

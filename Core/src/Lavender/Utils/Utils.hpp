@@ -84,6 +84,17 @@ namespace Lavender::Utils
             std::replace(str.begin(), str.end(), replace, with);
         }
 
+/*
+#pragma warning(push)         
+#pragma warning(disable: 4172)
+        inline static uintptr_t GetStackPointer()
+        {
+            void* address = nullptr;
+            return reinterpret_cast<uintptr_t>(&address);
+        }
+#pragma warning(pop)
+*/
+
     private:
         virtual std::string OpenFileImpl(const std::string& filter, const std::string& dir) const = 0;
         virtual std::string SaveFileImpl(const std::string& filter, const std::string& dir) const = 0;
@@ -247,6 +258,14 @@ namespace Lavender::Utils
         inline static int32_t Int(int32_t min = 0, int32_t max = MAX_INT32)
         {
             return (min + std::rand() % (max - min + 1));
+        }
+
+        inline static const char* CStr()
+        {
+            static std::string str = {};
+            str = std::to_string(Int());
+
+            return str.c_str();
         }
     };
 

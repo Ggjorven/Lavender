@@ -4,6 +4,8 @@
 #include "Lavender/Core/Logging.hpp"
 #include "Draw.hpp"
 
+#include "Lavender/UI/UI.hpp"
+
 namespace Lavender::UI::Draw
 {
 

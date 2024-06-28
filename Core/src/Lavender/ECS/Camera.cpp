@@ -46,7 +46,7 @@ namespace Lavender
 		m_View = glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 		m_Projection = glm::perspective(glm::radians(m_FOV), (float)Track::Viewport::Width / (float)Track::Viewport::Height, m_Near, m_Far);
 		
-		if constexpr (RendererSpecification::API == RendererSpecification::RenderingAPI::Vulkan)
+		if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
 			m_Projection[1][1] *= -1;
 	}
 

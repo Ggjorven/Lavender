@@ -7,18 +7,20 @@ Data:
       TransformComponent:
         Position: [0, 0, 0]
         Size: [1, 1, 1]
-        Rotation: [270, 0, 270]
+        Rotation: [270.100006, 0, 270]
       MeshComponent:
-        Mesh: 69
+        Mesh: 71
         Material: 70
+      ScriptComponent:
+        Class: MyEntity
     - Entity: 888028036446523593
       TagComponent:
         Tag: Light
       TransformComponent:
-        Position: [0, 0, 0]
+        Position: [0, 0, 0.25]
         Size: [1, 1, 1]
         Rotation: [0, 0, 0]
       PointLightComponent:
-        Colour: [0.430999994, 0, 0.638999999]
-        Intensity: 1
-        Radius: 2
+        Colour: [0.549450517, 0.0573602319, 0.0573602319]
+        Intensity: 0.699999988
+        Radius: 0.899999976

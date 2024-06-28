@@ -95,6 +95,9 @@ namespace Lavender
 
 	void AssetManager::AddAsset(Ref<Asset> asset)
 	{
+		if (m_Cache.Exists(asset->GetHandle()))
+			m_Cache.Remove(asset->GetHandle());
+
 		m_Assets[Project::Get()->GetState()].Add(asset->GetHandle(), asset);
 	}
 
@@ -125,7 +128,10 @@ namespace Lavender
 	Ref<Asset> AssetManager::GetAsset(const AssetHandle& handle)
 	{
 		if (handle == AssetHandle::Empty)
+		{
+			APP_LOG_ERROR("Tried to retrieve asset with an empty handle.");
 			return nullptr;
+		}
 
 		if (!Exists(handle))
 		{
@@ -170,7 +176,9 @@ namespace Lavender
 		}
 
 		asset->Deserialize();
+
 		m_Assets[state].Add(data.Handle, asset);
+		m_Cache.Remove(data.Handle);
 	}
 
 }

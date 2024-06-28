@@ -129,7 +129,7 @@ namespace Lavender
 			m_View = glm::lookAt(m_Position, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 			m_Projection = glm::perspective(glm::radians(m_FOV), (float)Track::Viewport::Width / (float)Track::Viewport::Height, m_Near, m_Far);
-			if (RendererSpecification::API == RendererSpecification::RenderingAPI::Vulkan)
+			if (RendererSpecification::API == RenderingAPI::Vulkan)
 				m_Projection[1][1] *= -1;
 		}
 	}

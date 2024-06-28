@@ -30,6 +30,7 @@ namespace Lavender
 		inline void SetID(const UUID& uuid) { m_ID = uuid; }
 		inline const UUID& GetID() { return m_ID; }
 		inline Registry& GetRegistry(WorkSpace::State state) { return m_Registries[state]; }
+		inline Ref<EditorCamera> GetEditorCamera() { return m_Camera; }
 		inline Ref<SceneRenderer> GetRenderer() { return m_Renderer; }
 
 		static Ref<Scene> Create(const UUID& uuid = UUID());

@@ -15,6 +15,7 @@
 
 #include <spdlog/formatter.h>
 
+#include "Lavender/UI/Draw.hpp"
 #include "Lavender/UI/Style.hpp"
 #include "Lavender/UI/Colours.hpp"
 
@@ -23,14 +24,9 @@
 namespace Lavender::UI
 {
 
-	namespace Draw
-	{
-		void Underline(bool fullWidth = false, float offsetX = 0.0f, float offsetY = -1.0f);
-	}
-
-	void PushID();
-	void PushID(int32_t id);
-	void PopID();
+	void PushID();					// Note(Jorben): These leak memory
+	void PushID(int32_t id);		// Note(Jorben): These leak memory
+	void PopID();					// Note(Jorben): These leak memory
 
 	void ShiftCursor(float x, float y);
     void ShiftCursorX(float distance);
@@ -102,7 +98,7 @@ namespace Lavender::UI
 
     template<typename ... Args>
     static void Text(const std::string& fmt, Args ...args)
-    {
+	{
         auto fmtStr = fmt::format(fmt.c_str(), std::forward<Args>(args)...);
         ImGui::Text(fmtStr.c_str());
     }
@@ -328,15 +324,15 @@ namespace Lavender::UI
 	public:
 		std::string Label = {};
 		glm::vec4& Colour;
-		float Size = 1.8f; // Is Uniform for X and Y
+		float Size = 30.0f; // Is Uniform for X and Y
 
 	public:
 		ColourPicker(glm::vec4& colour);
 		void Render();
 	};
 
-	void BeginPropertyGrid(uint32_t columns = 2);
-	void EndPropertyGrid();
+	void BeginPropertyGrid(const std::string& id, uint32_t columns = 2);
+	void EndPropertyGrid(const std::string& id);
 
 	void BeginCustomProperty(const std::string& label, const std::string& helpText = "");
 	void EndCustomProperty();
@@ -353,6 +349,9 @@ namespace Lavender::UI
 	bool Property(const std::string& label, ClickAbleImage& value, const std::string& helpText = "");
 	bool Property(const std::string& label, ColourPicker& value, const std::string& helpText = "");
 	bool Property(const std::string& label, ColourPicker& picker, ClickAbleImage& image, const std::string& helpText = "");
+
+	typedef std::function<void()> ButtonClickFn;
+	bool Property(const std::string& label, const std::string& buttonName, ButtonClickFn clickAction, const std::string& helpText = "");
 
 	// Custom property for entity size
 	bool UniformProperty(const std::string& label, glm::vec3& value, bool& uniform, float delta = 0.1f, float min = 0.0f, float max = 0.0f, const std::string& format = "%.2f", const std::string& hoverText = "");

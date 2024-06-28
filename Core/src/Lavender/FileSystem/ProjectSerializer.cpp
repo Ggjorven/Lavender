@@ -74,9 +74,6 @@ namespace Lavender
 		file << Yaml::FileManip::Key << "Type";
 		file << Yaml::FileManip::Value << (uint32_t)info.ScriptType;
 
-		file << Yaml::FileManip::Key << "Path";
-		file << Yaml::FileManip::Value << info.ScriptsPath.string();
-
 		file << Yaml::FileManip::EndMap;
 
 
@@ -112,7 +109,6 @@ namespace Lavender
 		// Scripting
 		auto scripting = file["Scripting"];
 		info.ScriptType = (WorkSpace::ScriptingBackendType)scripting["Type"].as<uint32_t>();
-		info.ScriptsPath = scripting["Path"].as<std::string>(); // TODO: Change how we load scripts with Configuration and Platform from Track::Lavender, since now it has to be manually updated
 
 		m_Project->Init();
 	}

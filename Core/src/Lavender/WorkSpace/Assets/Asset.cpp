@@ -62,6 +62,7 @@ namespace Lavender
 		}
 
 		Name = file["AssetName"].as<std::string>();
+		Type = GetAssetType(AllAssets(), Path.extension());
 	}
 
 	Asset::Asset(const AssetData& data)
