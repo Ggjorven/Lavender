@@ -1,5 +1,7 @@
 #include "Entities.hpp"
 
+#include <Lavender/Core/Input/Input.hpp>
+
 #include <Lavender/UI/UI.hpp>
 
 #include <Lavender/WorkSpace/Project.hpp>
@@ -13,7 +15,7 @@ namespace Lavender::UI
 
 		// Select the first entity as the selected on startup
 		{
-			auto& entities = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetDict();
+			auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
 			for (auto& [uuid, entity] : entities)
 			{
 				m_SelectedEntity = uuid;
@@ -33,7 +35,22 @@ namespace Lavender::UI
 
 		UI::BeginWindow("Entities", UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDecoration | UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoMove | UI::WindowFlags::NoTabBar);
 
-		auto& entities = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetDict();
+		// Check for pop-up
+		static UUID entityHovered = UUID::Empty;
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+		{
+			glm::vec2 windowPos = { ImGui::GetCurrentWindow()->Pos.x - ImGui::GetMainViewport()->Pos.x, ImGui::GetCurrentWindow()->Pos.y - ImGui::GetMainViewport()->Pos.y };
+			glm::vec2 windowSize = { ImGui::GetCurrentWindow()->Size.x, ImGui::GetCurrentWindow()->Size.y };
+
+			if (Utils::ToolKit::PositionInRect(Input::GetCursorPosition(), windowPos, windowSize))
+			{
+				ImGui::OpenPopup("New Object");
+				entityHovered = UUID::Empty;
+			}
+		}
+
+		// All Entities
+		auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
 		for (auto& [uuid, entity] : entities)
 		{
 			if (uuid == UUID::Empty) break;
@@ -49,9 +66,41 @@ namespace Lavender::UI
 			UI::Selectable(fmt::format("{0}##{1}", tag.Tag, uuid.String()), &selected);
 
 			if (selected) m_SelectedEntity = uuid;
+
+			// Extra data for popup
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+				entityHovered = uuid;
 		}
 
-		// TODO: Popup
+		// Actual pop-up
+		if (ImGui::BeginPopupContextItem("New Object"))
+		{
+			if (ImGui::BeginMenu(" New        "))
+			{
+				// Entity creation
+				if (ImGui::MenuItem("Entity"))
+					m_SelectedEntity = Scene::Get()->GetRegistry(Project::Get()->GetState()).CreateEntity();
+
+				ImGui::EndMenu();
+			}
+
+			if (entityHovered != UUID::Empty && ImGui::MenuItem(" Delete"))
+			{
+				// Select the first entity as the selected
+				{
+					auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
+					for (auto& [uuid, entity] : entities)
+					{
+						m_SelectedEntity = uuid;
+						break;
+					}
+				}
+
+				Scene::Get()->GetRegistry(Project::Get()->GetState()).RemoveEntity(entityHovered);
+			}
+
+			ImGui::EndMenu();
+		}
 
 		UI::EndWindow();
 

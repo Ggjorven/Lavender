@@ -38,7 +38,6 @@ namespace Lavender
 		Dict<UUID, ScriptEntityInfo> classes = m_Instances;
 		m_Instances.clear();
 		
-		
 		if (!m_Dll)
 		{
 			CopyOver();

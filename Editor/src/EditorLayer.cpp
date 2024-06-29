@@ -204,7 +204,7 @@ void EditorLayer::InitStyles()
 		{ UI::StyleColourType::SliderGrab, { 0.24f, 0.52f, 0.88f, 1.00f } },
 		{ UI::StyleColourType::SliderGrabActive, { 0.26f, 0.59f, 0.98f, 1.00f } },
 
-		{ UI::StyleColourType::Button, { 0.26f, 0.59f, 0.98f, 1.00f } },
+		{ UI::StyleColourType::Button, { 0.26f, 0.59f, 0.98f, 0.40f } },
 		{ UI::StyleColourType::ButtonHovered, { 0.26f, 0.59f, 0.98f, 1.00f } },
 		{ UI::StyleColourType::ButtonActive, { 0.06f, 0.53f, 0.98f, 1.00f } },
 

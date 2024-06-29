@@ -97,7 +97,7 @@ namespace Lavender::UI
 			return;
 		}
 
-		Entity& entity = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(m_EntitiesRef->m_SelectedEntity);
+		Entity& entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(m_EntitiesRef->m_SelectedEntity);
 		if (!entity.HasComponent<TagComponent>())
 			entity.AddComponent<TagComponent>();
 
@@ -157,7 +157,7 @@ namespace Lavender::UI
 		specs.Usage = ImageUsage::File;
 		specs.Layout = ImageLayout::ShaderRead;
 		specs.Flags = ImageUsageFlags::Sampled | ImageUsageFlags::Colour;
-		specs.Path = std::filesystem::path(Track::Lavender::Directory / "Editor/Resources/Images/grey-plus.png");
+		specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/grey-plus.png";
 		specs.CreateUIImage = true;
 
 		m_PlusIcon = Image2D::Create(specs);
@@ -264,7 +264,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(asset->GetName(), [asset, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
 						mesh.Mesh = RefHelper::RefAs<MeshAsset>(asset);
 					});
 					meshes.Add(item);
@@ -284,7 +284,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(data.Name, [data, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
 
 						Ref<Asset> newMesh = MeshAsset::Create(data);
 						newMesh->Deserialize();
@@ -310,7 +310,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(asset->GetName(), [asset, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
 						mesh.Material = RefHelper::RefAs<MaterialAsset>(asset);
 					});
 					materials.Add(item);
@@ -330,7 +330,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(data.Name, [data, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
 
 						Ref<Asset> newMaterial = MaterialAsset::Create(data);
 						newMaterial->Deserialize();
@@ -407,7 +407,7 @@ namespace Lavender::UI
 				{
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(cls, [cls, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						ScriptComponent& script = Project::Get()->GetScenes().GetActive()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<ScriptComponent>();
+						ScriptComponent& script = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<ScriptComponent>();
 
 						if (Project::Get()->GetScript())
 							Project::Get()->GetScript()->AddInstance(cls, selected);

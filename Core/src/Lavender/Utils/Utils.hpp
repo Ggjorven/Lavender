@@ -15,6 +15,8 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include <glm/glm.hpp>
+
 #include "Lavender/Core/Logging.hpp"
 
 #define BIT(x) (1 << x)
@@ -84,16 +86,16 @@ namespace Lavender::Utils
             std::replace(str.begin(), str.end(), replace, with);
         }
 
-/*
-#pragma warning(push)         
-#pragma warning(disable: 4172)
-        inline static uintptr_t GetStackPointer()
+        inline static bool PositionInRect(const glm::vec2& pos, const glm::vec2& rectPos, const glm::vec2& rectSize)
         {
-            void* address = nullptr;
-            return reinterpret_cast<uintptr_t>(&address);
+            if (pos.x >= rectPos.x && pos.x <= rectPos.x + rectSize.x &&
+                pos.y >= rectPos.y && pos.y <= rectPos.y + rectSize.y)
+            {
+                return true;
+            }
+
+            return false;
         }
-#pragma warning(pop)
-*/
 
     private:
         virtual std::string OpenFileImpl(const std::string& filter, const std::string& dir) const = 0;
@@ -316,11 +318,25 @@ namespace Lavender
 
         inline void erase(const Key& key)
         {
-            if (m_Indices.find(key) != m_Indices.end())
+            auto it = m_Indices.find(key);
+            if (it != m_Indices.end())
             {
-                m_Items.erase(m_Items.begin() + m_Indices[key]);
-                m_Indices.erase(key);
+                size_t index = it->second;
+                m_Items.erase(m_Items.begin() + index);
+                m_Indices.erase(it);
+
+                // Update the indices of the elements that come after the erased element
+                for (size_t i = index; i < m_Items.size(); ++i)
+                {
+                    m_Indices[m_Items[i].first] = i;
+                }
             }
+        }
+
+        inline void clear()
+        {
+            m_Items.clear();
+            m_Indices.clear();
         }
 
         inline auto begin() { return m_Items.begin(); }
@@ -332,6 +348,7 @@ namespace Lavender
         std::unordered_map<Key, size_t> m_Indices = { };
         std::vector<std::pair<Key, Value>> m_Items = { };
     };
+
 
 
     // A threadsafe linked list class

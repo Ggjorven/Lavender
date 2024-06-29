@@ -53,6 +53,8 @@ namespace Lavender::Script
 		inline ComponentType GetType() { return GetStaticType();  }
 	};
 
+	// TODO: MeshComponent
+
 	// Handle doesn't need to be a & since everything inside is based on pointers
 	struct PointLightComponent
 	{

@@ -43,6 +43,25 @@ namespace Lavender
 		m_Scenes.GetActive()->OnEvent(e);
 	}
 
+	void Project::SwitchState()
+	{
+		switch (m_State)
+		{
+		case WorkSpace::State::Editor:
+			m_State = WorkSpace::State::Runtime;
+			m_Scenes.GetActive()->StartRuntime();
+			break;
+		case WorkSpace::State::Runtime:
+			m_State = WorkSpace::State::Editor;
+			m_Scenes.GetActive()->EndRuntime();
+			break;
+
+		default:
+			APP_LOG_ERROR("Invalid State passed in.");
+			break;
+		}
+	}
+
 	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
 	{
 		s_Project = RefHelper::Create<Project>(info, initialState);
@@ -59,13 +78,6 @@ namespace Lavender
 		// Update Asset Cache
 		m_Assets->UpdateCache(m_Info.Directory / m_Info.Assets);
 
-		// Initialize startscene
-		Ref<Scene> startScene = Scene::Create(m_Info.StartScene);
-		SceneSerializer serializer(startScene);
-		serializer.Deserialize(m_Info.Directory / m_Info.Scenes / m_Scenes.GetAll()[m_Info.StartScene].Path);
-
-		m_Scenes.SetActive(m_Info.StartScene, startScene);
-
 		// Initialize script
 		std::filesystem::path path = m_Info.Directory / m_Info.Script / "bin" / fmt::format("{0}-{1}", ConfigurationToString(Track::Lavender::Config), PlatformToString(Track::Lavender::Platform, false)) / "Script/Script.dll";
 		if (std::filesystem::exists(path))
@@ -76,6 +88,13 @@ namespace Lavender
 
 			m_Scripting = ScriptingBackend::Create(scriptingSpecs);
 		}
+
+		// Initialize startscene
+		Ref<Scene> startScene = Scene::Create(m_Info.StartScene);
+		SceneSerializer serializer(startScene);
+		serializer.Deserialize(m_Info.Directory / m_Info.Scenes / m_Scenes.GetAll()[m_Info.StartScene].Path);
+
+		m_Scenes.SetActive(m_Info.StartScene, startScene);
 	}
 
 	void Project::Destroy()

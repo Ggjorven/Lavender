@@ -83,7 +83,7 @@ namespace Lavender::UI
 
 		if (UI::Tree("EditorCamera"))
 		{
-			auto camera = Project::Get()->GetScenes().GetActive()->GetEditorCamera();
+			auto camera = Scene::Get()->GetEditorCamera();
 
 			UI::BeginPropertyGrid("##CameraGrid", 2);
 

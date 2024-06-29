@@ -121,7 +121,7 @@ namespace Lavender::UI
 		}
 	}
 
-	void BeginWindow(const std::string& name, WindowFlags flags)
+	bool BeginWindow(const std::string& name, WindowFlags flags)
 	{
 		if (flags & WindowFlags::NoTabBar)
 		{
@@ -130,10 +130,10 @@ namespace Lavender::UI
 			ImGui::SetNextWindowClass(&window);
 		}
 
-		ImGui::Begin(name.c_str(), (bool*)0, (ImGuiWindowFlags)flags);
+		return ImGui::Begin(name.c_str(), (bool*)0, (ImGuiWindowFlags)flags);
 	}
 
-	void BeginWindow(const std::string& name, bool& open, WindowFlags flags)
+	bool BeginWindow(const std::string& name, bool& open, WindowFlags flags)
 	{
 		if (flags & WindowFlags::NoTabBar)
 		{
@@ -142,7 +142,7 @@ namespace Lavender::UI
 			ImGui::SetNextWindowClass(&window);
 		}
 
-		ImGui::Begin(name.c_str(), &open, (ImGuiWindowFlags)flags);
+		return ImGui::Begin(name.c_str(), &open, (ImGuiWindowFlags)flags);
 	}
 
 	void EndWindow()

@@ -32,6 +32,7 @@ namespace Lavender
 	void Registry::Clear()
 	{
 		m_Registry.clear();
+		m_Entities.clear();
 	}
 
 	////////////////////////////////////////////////////////////////////////////

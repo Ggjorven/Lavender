@@ -89,8 +89,8 @@ namespace Lavender::UI
     };
     DEFINE_BITWISE_OPS(WindowFlags)
 
-    void BeginWindow(const std::string& name = "Unnamed Window", WindowFlags flags = WindowFlags::None);
-    void BeginWindow(const std::string& name, bool& open, WindowFlags flags = WindowFlags::None);
+    bool BeginWindow(const std::string& name = "Unnamed Window", WindowFlags flags = WindowFlags::None);
+	bool BeginWindow(const std::string& name, bool& open, WindowFlags flags = WindowFlags::None);
     void EndWindow();
 
 	void BeginChild(const std::string& name, const glm::vec2& size = { 0.0f, 0.0f }, bool border = false, WindowFlags flags = WindowFlags::None);
