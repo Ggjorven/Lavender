@@ -8,8 +8,6 @@
 namespace Lavender
 {
 
-	static Ref<ScriptingBackend> s_Instance = nullptr;
-
 	ScriptingSpecification::ScriptingSpecification(WorkSpace::ScriptingBackendType type, const std::filesystem::path& path)
 		: Type(type), Path(path)
 	{
@@ -20,8 +18,7 @@ namespace Lavender
 		switch (specs.Type)
 		{
 		case WorkSpace::ScriptingBackendType::Cpp:
-			s_Instance = RefHelper::Create<CppBackend>(specs);
-			return s_Instance;
+			return RefHelper::Create<CppBackend>(specs);
 
 		case WorkSpace::ScriptingBackendType::Cs:		// TODO
 		case WorkSpace::ScriptingBackendType::Python:	// TODO
@@ -31,11 +28,6 @@ namespace Lavender
 		}
 
 		return nullptr;
-	}
-
-	Ref<ScriptingBackend>& ScriptingBackend::Get()
-	{
-		return s_Instance;
 	}
 
 }

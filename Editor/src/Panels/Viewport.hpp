@@ -8,20 +8,24 @@
 #include <Lavender/UI/UI.hpp>
 #include <Lavender/UI/Style.hpp>
 
+#include <ImGuizmo.h>
+
+#include "Panels/Entities.hpp"
+
 namespace Lavender::UI
 {
 
 	class Viewport
 	{
 	public:
-		Viewport();
+		Viewport(Ref<Entities> entities);
 		virtual ~Viewport();
 
 		void RenderUI();
 
 		void Resize(uint32_t width, uint32_t height);
 
-		static Ref<Viewport> Create();
+		static Ref<Viewport> Create(Ref<Entities> entities);
 
 	private:
 		void InitStyles();
@@ -30,10 +34,16 @@ namespace Lavender::UI
 		void RenderTopUI();
 
 	private:
+		Ref<Entities> m_EntitiesRef = nullptr;
+
 		UI::StyleList m_Styles = {};
 		UI::StyleList m_Colours = { };
 
 		glm::vec2 m_TopLeftCursorPos = {};
+
+		// ImGuizmo state
+		ImGuizmo::MODE m_Mode = ImGuizmo::MODE::WORLD;
+		ImGuizmo::OPERATION m_Operation = ImGuizmo::OPERATION::TRANSLATE;
 
 		// Resources
 		Ref<Image2D> m_PlayButton = nullptr;

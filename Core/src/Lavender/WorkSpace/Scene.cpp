@@ -37,10 +37,7 @@ namespace Lavender
 				script->OnUpdateAll(deltaTime);
 			}
 
-			// Remove
-			m_Camera->OnUpdate(deltaTime);
-
-			// TODO: Runtime updates
+			GetActiveCamera()->OnUpdate(deltaTime);
 			break;
 		}
 
@@ -60,11 +57,7 @@ namespace Lavender
 			m_Renderer->Render(m_Camera);
 			break;
 		case WorkSpace::State::Runtime:
-
-			// Remove
-			m_Renderer->Render(m_Camera);
-
-			// TODO: Runtime camera
+			m_Renderer->Render(GetActiveCamera());
 			break;
 
 		default:
@@ -83,11 +76,7 @@ namespace Lavender
 			m_Camera->OnEvent(e);
 			break;
 		case WorkSpace::State::Runtime:
-
-			// Remove
-			m_Camera->OnEvent(e);
-
-			// TODO: Runtime camera
+			GetActiveCamera()->OnEvent(e);
 			break;
 
 		default:
@@ -112,6 +101,25 @@ namespace Lavender
 	void Scene::EndRuntime()
 	{
 		m_Registries[WorkSpace::State::Runtime].Clear();
+	}
+
+	Ref<Camera> Scene::GetActiveCamera()
+	{
+		switch (Project::Get()->GetState())
+		{
+		case WorkSpace::State::Editor:		return m_Camera;
+		case WorkSpace::State::Runtime:
+		{
+			// TODO: Runtime camera
+			break;
+		}
+
+		default:
+			APP_LOG_ERROR("Invalid State passed in");
+			break;
+		}
+
+		return nullptr;
 	}
 
 	Ref<Scene> Scene::Create(const UUID& uuid)

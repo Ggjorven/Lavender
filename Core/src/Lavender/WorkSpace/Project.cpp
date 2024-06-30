@@ -11,7 +11,7 @@
 namespace Lavender
 {
 
-	static Ref<Project> s_Project = nullptr;
+	static WeakRef<Project> s_Project = {};
 
 	Project::Project(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
 		: m_Info(info), m_State(initialState), m_Assets(AssetManager::Create())
@@ -20,10 +20,6 @@ namespace Lavender
 
 	Project::~Project()
 	{
-		// Reset scripting
-		m_Scripting = nullptr;
-		ScriptingBackend::Get().reset();
-		ScriptingBackend::Get() = nullptr;
 	}
 
 	void Project::OnUpdate(float deltaTime)
@@ -64,13 +60,17 @@ namespace Lavender
 
 	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
 	{
-		s_Project = RefHelper::Create<Project>(info, initialState);
-		return s_Project;
+		Ref<Project> project = RefHelper::Create<Project>(info, initialState);
+		s_Project = project;
+		return project;
 	}
 
-	Ref<Project>& Project::Get()
+	Ref<Project> Project::Get()
 	{
-		return s_Project;
+		if (auto proj = s_Project.lock())
+			return proj;
+
+		return nullptr;
 	}
 
 	void Project::Init()

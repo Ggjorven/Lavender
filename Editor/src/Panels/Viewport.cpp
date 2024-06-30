@@ -16,10 +16,15 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Lavender::UI
 {
 
-	Viewport::Viewport()
+	Viewport::Viewport(Ref<Entities> entities)
+		: m_EntitiesRef(entities)
 	{
 		InitStyles();
 		InitResources();
@@ -71,9 +76,9 @@ namespace Lavender::UI
 		Scene::Get()->GetRenderer()->Resize(width, height);
 	}
 
-	Ref<Viewport> Viewport::Create()
+	Ref<Viewport> Viewport::Create(Ref<Entities> entities)
 	{
-		return RefHelper::Create<Viewport>();
+		return RefHelper::Create<Viewport>(entities);
 	}
 
 	void Viewport::InitStyles()
@@ -112,12 +117,53 @@ namespace Lavender::UI
 
 		UI::SetCursorPos(m_TopLeftCursorPos);
 
-		Ref<Image2D> playButton = ((Project::Get()->GetState() == WorkSpace::State::Editor) ? m_PlayButton: m_StopButton);
-		UI::ShiftCursorX(((float)Track::Viewport::Width / 2.0f) - ((32.0f / 2.0f)));
-		UI::ShiftCursorY(1.0f);
+		// Buttons
+		{
+			Ref<Image2D> playButton = ((Project::Get()->GetState() == WorkSpace::State::Editor) ? m_PlayButton : m_StopButton);
+			UI::ShiftCursorX(((float)Track::Viewport::Width / 2.0f) - ((32.0f / 2.0f)));
+			UI::ShiftCursorY(1.0f);
 
-		if (ImGui::ImageButton((ImTextureID)playButton->GetTextureID(), { 32.0f, 32.0f }))
-			Project::Get()->SwitchState();
+			if (ImGui::ImageButton((ImTextureID)playButton->GetTextureID(), { 32.0f, 32.0f }))
+				Project::Get()->SwitchState();
+		}
+
+		// ImGuizmo
+		{
+			auto scene = Scene::Get();
+			auto camera = scene->GetActiveCamera();
+
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			
+			// Set Rect
+			{
+				auto imWindow = ImGui::GetCurrentWindow();
+				ImGuizmo::SetRect(imWindow->Pos.x, imWindow->Pos.y, imWindow->Size.x, imWindow->Size.y);
+			}
+
+			if (m_EntitiesRef->m_SelectedEntity != UUID::Empty)
+			{
+				Entity& entity = scene->GetRegistry(Project::Get()->GetState()).GetEntity(m_EntitiesRef->m_SelectedEntity);
+
+				if (entity.HasComponent<TransformComponent>())
+				{
+					TransformComponent& transform = entity.GetComponent<TransformComponent>();
+
+					float model[16] = {};
+					ImGuizmo::RecomposeMatrixFromComponents(glm::value_ptr(transform.Position), glm::value_ptr(transform.Rotation), glm::value_ptr(transform.Size), model);
+
+					// ImGuizmo is made for OpenGL so we have to transform it back
+					glm::mat4 projection = camera->GetProjectionMatrix();
+					if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
+						projection[1][1] *= -1;
+
+					ImGuizmo::Manipulate(glm::value_ptr(camera->GetViewMatrix()), glm::value_ptr(projection), m_Operation, m_Mode, model);
+				
+					if (ImGuizmo::IsUsing())
+						ImGuizmo::DecomposeMatrixToComponents(model, glm::value_ptr(transform.Position), glm::value_ptr(transform.Rotation), glm::value_ptr(transform.Size));
+				}
+			}
+		}
 
 		m_Styles.Pop();
 		m_Colours.Pop();

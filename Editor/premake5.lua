@@ -35,6 +35,7 @@ project "Editor"
 		"%{Dependencies.Stb_image.IncludeDir}",
 		"%{Dependencies.Assimp.IncludeDir}",
 		"%{Dependencies.ImGui.IncludeDir}",
+		"%{Dependencies.ImGuizmo.IncludeDir}",
 		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.EnTT.IncludeDir}",
 		"%{Dependencies.VMA.IncludeDir}",

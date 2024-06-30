@@ -9,6 +9,7 @@
 namespace Lavender::UI
 {
 
+	class Viewport;
 	class Components;
 
 	class Entities
@@ -30,6 +31,7 @@ namespace Lavender::UI
 
 		UUID m_SelectedEntity = UUID::Empty;
 
+		friend class Viewport;
 		friend class Components;
 	};
 

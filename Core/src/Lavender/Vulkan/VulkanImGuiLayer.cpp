@@ -5,6 +5,8 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
 
+#include <ImGuizmo.h>
+
 #include "Lavender/Core/Application.hpp"
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Utils/Profiler.hpp"
@@ -144,6 +146,10 @@ namespace Lavender
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+		}
+		{
+			APP_PROFILE_SCOPE("VulkanImGuiLayer::Begin::ImGuizmo");
+			ImGuizmo::BeginFrame();
 		}
 	}
 

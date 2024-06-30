@@ -30,6 +30,8 @@ namespace Lavender
 		void StartRuntime();
 		void EndRuntime();
 
+		Ref<Camera> GetActiveCamera();
+
 		inline void SetID(const UUID& uuid) { m_ID = uuid; }
 		inline const UUID& GetID() { return m_ID; }
 		inline Registry& GetRegistry(WorkSpace::State state) { return m_Registries[state]; }

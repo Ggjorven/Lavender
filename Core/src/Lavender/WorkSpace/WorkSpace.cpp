@@ -87,10 +87,6 @@ namespace Lavender::WorkSpace
 	void Destroy()
 	{
 		Shared::Destroy();
-
-		// Release the static project handle
-		Project::Get().reset();
-		Project::Get() = nullptr;
 	}
 
 }

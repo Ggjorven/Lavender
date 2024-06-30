@@ -35,7 +35,7 @@ namespace Lavender
 		inline Ref<ScriptingBackend> GetScript() { return m_Scripting; }
 
 		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo(), WorkSpace::State initialState = WorkSpace::State::Runtime);
-		static Ref<Project>& Get(); // Returns a reference since we also use it to destroy the s_Instance
+		static Ref<Project> Get();
 
 	private:
 		void Init();

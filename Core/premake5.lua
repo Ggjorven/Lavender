@@ -79,6 +79,7 @@ project "Lavender"
 		"%{Dependencies.Stb_image.IncludeDir}",
 		"%{Dependencies.Assimp.IncludeDir}",
 		"%{Dependencies.ImGui.IncludeDir}",
+		"%{Dependencies.ImGuizmo.IncludeDir}",
 		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.EnTT.IncludeDir}",
 		"%{Dependencies.VMA.IncludeDir}",
@@ -92,6 +93,7 @@ project "Lavender"
 		"%{Dependencies.GLFW.LibName}",
 		"%{Dependencies.VMA.LibName}",
 		"%{Dependencies.ImGui.LibName}",
+		"%{Dependencies.ImGuizmo.LibName}",
 
 		"%{Dependencies.Flow.LibName}",
 		"%{Dependencies.Insight.LibName}"

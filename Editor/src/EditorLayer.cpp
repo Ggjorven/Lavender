@@ -83,10 +83,10 @@ void EditorLayer::OnUIRender()
 	m_GlobalUIStyles.Push();
 	m_GlobalUIColours.Push();
 
-	m_Viewport->RenderUI();
 	m_Entities->RenderUI();
 	m_Components->RenderUI();
 	m_Debug->RenderUI();
+	m_Viewport->RenderUI();
 
 	m_GlobalUIStyles.Pop();
 	m_GlobalUIColours.Pop();
@@ -252,10 +252,10 @@ void EditorLayer::InitStyles()
 
 void EditorLayer::InitUI()
 {
-	m_Viewport = UI::Viewport::Create();
 	m_Entities = UI::Entities::Create();
 	m_Components = UI::Components::Create(m_Entities);
 	m_Debug = UI::Debug::Create();
+	m_Viewport = UI::Viewport::Create(m_Entities);
 }
 
 // TODO: Update + clean

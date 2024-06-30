@@ -72,8 +72,13 @@ Dependencies =
 	},
 	ImGui = 
 	{
-		IncludeDir = "%{wks.location}/vendor/imgui",
+		IncludeDir = "%{wks.location}/vendor/ImGui",
 		LibName = "ImGui"
+	},
+	ImGuizmo = 
+	{
+		IncludeDir = "%{wks.location}/vendor/ImGuizmo",
+		LibName = "ImGuizmo"
 	},
 
 	-- Custom Libs
@@ -132,7 +137,8 @@ workspace "Lavender"
 group "Dependencies"
 	include "vendor/glfw"
 	include "vendor/tracy"
-	include "vendor/imgui"
+	include "vendor/ImGui"
+	include "vendor/ImGuizmo"
 	include "vendor/vma"
 
 	include "vendor/Flow/Core"
