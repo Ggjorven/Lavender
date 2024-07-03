@@ -189,9 +189,9 @@ namespace Lavender::UI
 		return open;
 	}
 
-	bool Selectable(const std::string& name, bool* selected, const glm::vec2& size, SelectableFlags flags)
+	bool Selectable(const std::string& name, bool& selected, const glm::vec2& size, SelectableFlags flags)
 	{
-		return ImGui::Selectable(name.c_str(), selected, (ImGuiSelectableFlags)flags, ImVec2(size.x, size.y));
+		return ImGui::Selectable(name.c_str(), &selected, (ImGuiSelectableFlags)flags, ImVec2(size.x, size.y));
 	}
 
 	bool DragFloat(const std::string& name, float& value, float speed, float minValue, float maxValue, const std::string& format, SliderFlags flags)
@@ -267,7 +267,7 @@ namespace Lavender::UI
 	{
 		ImGui::Columns(1, id.c_str());
 		UI::Draw::Underline();
-		UI::ShiftCursorY(18.0f);
+		UI::ShiftCursorY(16.0f);
 		
 		//UI::PopID();
 		UI::Style::PopStyles(2); // ItemSpacing, FramePadding
@@ -627,7 +627,7 @@ namespace Lavender::UI
 			for (auto& item : Items)
 			{
 				bool selected = item.first == Selected;
-				if (UI::Selectable(item.first, &selected))
+				if (UI::Selectable(item.first, selected))
 				{
 					if (item.second)
 						item.second();

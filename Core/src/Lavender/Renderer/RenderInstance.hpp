@@ -26,6 +26,7 @@ namespace Lavender
 		virtual void EndFrame() = 0;
 
 		virtual void Submit(RenderFunction function) = 0;
+		virtual void SubmitToBack(RenderFunction function) = 0;
 		virtual void SubmitFree(FreeFunction function) = 0;
 		virtual void SubmitFreeToBack(FreeFunction function) = 0;
 

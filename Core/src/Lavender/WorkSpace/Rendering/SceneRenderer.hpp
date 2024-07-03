@@ -39,9 +39,9 @@ namespace Lavender
 		void DepthPrePass();
 		void LightCulling();
 		void FinalShading();
+		void UIOverlay();
 
 		glm::uvec2 GetTileCount();
-		glm::mat4 CalculateModelMatrix(const TransformComponent& component);
 
 		bool OnResize(WindowResizeEvent& e);
 

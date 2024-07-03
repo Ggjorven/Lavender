@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lavender/Core/Core.hpp"
+#include "Lavender/Core/Events.hpp"
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/WorkSpace/WorkSpace.hpp"
@@ -33,6 +34,7 @@ namespace Lavender
 		
 		virtual void OnCreateAll() = 0;
 		virtual void OnUpdateAll(float deltaTime) = 0;
+		virtual void OnEventAll(Event& event) = 0;
 
 		virtual void AddInstance(const std::string& classname, const UUID& entity) = 0;
 		virtual void RemoveInstance(const std::string& classname, const UUID& entity) = 0;

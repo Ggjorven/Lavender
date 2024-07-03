@@ -12,7 +12,7 @@ namespace Lavender::Script
 
 	enum class ComponentType
 	{
-		None = 0, Tag, Transform, Mesh, PointLight
+		None = 0, Tag, Transform, Mesh, PointLight, Script, Camera
 	};
 
 	// Handle doesn't need to be a & since everything inside is based on pointers
@@ -72,6 +72,33 @@ namespace Lavender::Script
 		PointLightComponent(const PointLightComponent& other) = default;
 
 		inline static ComponentType GetStaticType() { return ComponentType::PointLight; }
+		inline ComponentType GetType() { return GetStaticType(); }
+	};
+
+	// TODO: ScriptComponent
+
+	// Handle doesn't need to be a & since everything inside is based on pointers
+	struct CameraComponent
+	{
+	public:
+		Handle<float> Yaw = {};
+		Handle<float> Pitch = {};
+		Handle<float> FOV = {};
+
+		Handle<float> Near = {};
+		Handle<float> Far = {};
+
+		Handle<bool> Active = {};
+
+	public:
+		CameraComponent() = default;
+		CameraComponent(const Handle<float>& yaw, const Handle<float>& pitch, const Handle<float>& fov, const Handle<float>& nearr, const Handle<float>& farr, const Handle<bool>& active) // Naming sucks because of Windows #define near & far #undef doesn't work
+			: Yaw(yaw), Pitch(pitch), FOV(fov), Near(nearr), Far(farr), Active(active)
+		{
+		}
+		CameraComponent(const CameraComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::Camera; }
 		inline ComponentType GetType() { return GetStaticType(); }
 	};
 

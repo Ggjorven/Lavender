@@ -27,6 +27,7 @@ namespace Lavender
 		static void EndFrame();
 
 		static void Submit(RenderFunction function);
+		static void SubmitToBack(RenderFunction function);
 		static void SubmitFree(FreeFunction function);
 		static void SubmitFreeToBack(FreeFunction function); // Adds a FreeFunction to the backlog of the queue
 

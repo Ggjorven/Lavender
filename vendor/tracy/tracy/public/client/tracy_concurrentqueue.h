@@ -754,7 +754,7 @@ private:
 	struct Block
 	{
 		Block()
-			: next(nullptr), elementsCompletelyDequeued(0), freeListRefs(0), freeListNext(nullptr), shouldBeOnFreeList(false), dynamicallyAllocated(true)
+			: next(nullptr), elementsCompletelyDequeued(0), freeListRefs(0), freeListNext(nullptr), shouldBeOnFreeList(false), dynamicallyAllocated(true), elements()
 		{
 		}
 
@@ -1148,10 +1148,10 @@ private:
 
 		struct BlockIndexHeader
 		{
-			size_t size;
-			std::atomic<size_t> front;		// Current slot (not next, like pr_blockIndexFront)
-			BlockIndexEntry* entries;
-			void* prev;
+			size_t size = 0;
+			std::atomic<size_t> front = {};		// Current slot (not next, like pr_blockIndexFront)
+			BlockIndexEntry* entries = nullptr;
+			void* prev = nullptr;
 		};
 
 

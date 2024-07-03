@@ -22,7 +22,7 @@ namespace Lavender::Utils
 		Random::Init();
 	}
 
-	std::string WindowsToolKit::OpenFileImpl(const std::string& filter, const std::string& dir) const
+	std::filesystem::path WindowsToolKit::OpenFileImpl(const std::string& filter, const std::filesystem::path& dir) const
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -35,7 +35,7 @@ namespace Lavender::Utils
 
 		if (!dir.empty())
 		{
-			ofn.lpstrInitialDir = dir.c_str();
+			ofn.lpstrInitialDir = dir.string().c_str();
 		}
 		else if (GetCurrentDirectoryA(256, currentDir))
 		{
@@ -47,12 +47,12 @@ namespace Lavender::Utils
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
-			return std::string(ofn.lpstrFile);
+			return std::filesystem::path(std::string(ofn.lpstrFile));
 
-		return std::string();
+		return std::filesystem::path();
 	}
 
-	std::string WindowsToolKit::SaveFileImpl(const std::string& filter, const std::string& dir) const
+	std::filesystem::path WindowsToolKit::SaveFileImpl(const std::string& filter, const std::filesystem::path& dir) const
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -65,7 +65,7 @@ namespace Lavender::Utils
 
 		if (!dir.empty())
 		{
-			ofn.lpstrInitialDir = dir.c_str();
+			ofn.lpstrInitialDir = dir.string().c_str();
 		}
 		else if (GetCurrentDirectoryA(256, currentDir))
 		{
@@ -80,12 +80,12 @@ namespace Lavender::Utils
 		ofn.lpstrDefExt = strchr(filter.c_str(), '\0') + 1;
 
 		if (GetSaveFileNameA(&ofn) == TRUE)
-			return std::string(ofn.lpstrFile);
+			return std::filesystem::path(std::string(ofn.lpstrFile));
 
-		return std::string();
+		return std::filesystem::path();
 	}
 
-	std::string WindowsToolKit::OpenDirectoryImpl(const std::string& dir) const
+	std::filesystem::path WindowsToolKit::OpenDirectoryImpl(const std::string& dir) const
 	{
 		IFileOpenDialog* fileDialog;
 		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog))))
@@ -131,7 +131,7 @@ namespace Lavender::Utils
 							CoTaskMemFree(path);
 							resultItem->Release();
 
-							return narrowPath;
+							return std::filesystem::path(narrowPath);
 						}
 					}
 
@@ -143,7 +143,7 @@ namespace Lavender::Utils
 			fileDialog->Release();
 		}
 
-		return std::string();
+		return std::filesystem::path();
 	}
 
 	double WindowsToolKit::GetTimeImpl() const

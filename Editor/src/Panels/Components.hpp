@@ -17,7 +17,7 @@ namespace Lavender::UI
 
 	enum class ComponentUsage
 	{
-		None = 0, Opened = BIT(0), Remove = BIT(1)
+		None = 0, Opened = BIT(0), Reset = BIT(1), Remove = BIT(2)
 	};
 	DEFINE_BITWISE_OPS(ComponentUsage)
 
@@ -32,33 +32,7 @@ namespace Lavender::UI
 		static Ref<Components> Create(Ref<Entities> entities);
 
 	public:
-		// TODO: Maybe add icons
-		template<typename TComponent>
-		inline ComponentUsage BeginComponent(const std::string& customName = {})
-		{
-			ComponentUsage usage = ComponentUsage::None;
-
-			UI::ScopedStyleList styles = UI::StyleList({
-				{ UI::StyleType::FrameRounding, 1.0f },
-				{ UI::StyleType::FramePadding, { 15.0f, 6.0f } },
-				{ UI::StyleType::FrameBorderSize, 1.0f }
-			});
-
-			UI::ScopedStyleList colours = UI::StyleList({
-				//{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
-				//{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
-				//{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint },
-				{ UI::StyleColourType::Border, UI::Colours::BackgroundDark }
-			});
-
-			// TODO: Add ComponentUsage::Remove
-			if (UI::Tree((customName.empty() ? ComponentToString<TComponent>() : customName)))
-				usage = usage | ComponentUsage::Opened;
-			
-			UI::ShiftCursorY(-1.0f);
-
-			return usage;
-		}
+		ComponentUsage BeginComponent(const std::string& name = "Unnamed Component", Ref<Image2D> icon = nullptr);
 
 		template<typename TComponent>
 		inline void RenderComponent(Entity& entity) { APP_LOG_ERROR("Trying to render {0}, but has not been implemented.", ComponentToString<TComponent>()); }
@@ -73,6 +47,8 @@ namespace Lavender::UI
 		inline void RenderComponent<PointLightComponent>(Entity& entity);
 		template<>
 		inline void RenderComponent<ScriptComponent>(Entity& entity);
+		template<>
+		inline void RenderComponent<CameraComponent>(Entity& entity);
 
 	private:
 		void InitStyles();
@@ -90,6 +66,7 @@ namespace Lavender::UI
 		glm::uvec2 m_Position = { 0u, 0u };
 
 		// Images
+		Ref<Image2D> m_DotsIcon = nullptr;
 		Ref<Image2D> m_PlusIcon = nullptr;
 	};
 

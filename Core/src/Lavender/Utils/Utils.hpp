@@ -66,10 +66,11 @@ namespace Lavender::Utils
     class ToolKit
     {
     public:
-        static std::string OpenFile(const std::string& filter, const std::string& dir = "") { return s_Instance ? s_Instance->OpenFileImpl(filter, dir) : ""; }
-        static std::string SaveFile(const std::string& filter, const std::string& dir = "") { return s_Instance ? s_Instance->SaveFileImpl(filter, dir) : ""; }
+        static std::filesystem::path OpenFile(const std::string& filter, const std::filesystem::path& dir = "") { return s_Instance ? s_Instance->OpenFileImpl(filter, dir) : ""; }
+        static std::filesystem::path SaveFile(const std::string& filter, const std::filesystem::path& dir = "") { return s_Instance ? s_Instance->SaveFileImpl(filter, dir) : ""; }
 
-        static std::string OpenDirectory(const std::string& dir = "") { return s_Instance ? s_Instance->OpenDirectoryImpl(dir) : ""; }
+        static std::filesystem::path OpenDirectory(const std::string& dir = "") { return s_Instance ? s_Instance->OpenDirectoryImpl(dir) : ""; }
+
         static size_t GetMemoryUsage() { return s_Instance ? s_Instance->GetMemoryUsageImpl() : 0; }
         static size_t GetHeapMemoryUsage() { return s_Instance ? s_Instance->GetHeapMemoryUsageImpl() : 0; }
 
@@ -98,10 +99,10 @@ namespace Lavender::Utils
         }
 
     private:
-        virtual std::string OpenFileImpl(const std::string& filter, const std::string& dir) const = 0;
-        virtual std::string SaveFileImpl(const std::string& filter, const std::string& dir) const = 0;
+        virtual std::filesystem::path OpenFileImpl(const std::string& filter, const std::filesystem::path& dir) const = 0;
+        virtual std::filesystem::path SaveFileImpl(const std::string& filter, const std::filesystem::path& dir) const = 0;
         
-        virtual std::string OpenDirectoryImpl(const std::string& dir) const = 0;
+        virtual std::filesystem::path OpenDirectoryImpl(const std::string& dir) const = 0;
 
         virtual double GetTimeImpl() const = 0;
         virtual size_t GetMemoryUsageImpl() const = 0;

@@ -38,6 +38,8 @@ namespace Lavender
 
 		inline State GetState() const { return m_State; }
 
+		void Reset();
+
 		static Ref<EditorCamera> Create();
 
 	private:

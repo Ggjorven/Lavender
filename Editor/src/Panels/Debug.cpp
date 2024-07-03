@@ -114,6 +114,15 @@ namespace Lavender::UI
 			UI::Property("FOV", camera->GetFOV(), 1.0f);
 
 			UI::EndPropertyGrid("##CameraGrid");
+
+			UI::ShiftCursorY(-4.0f);
+
+			// Reset camera
+			float spacing = 5.0f;
+			auto avail = ImGui::GetContentRegionAvail();
+			UI::ShiftCursorX(spacing);
+			if (UI::Button("Reset Camera", { avail.x - (spacing * 2.0f), 0.0f}))
+				camera->Reset();
 		}
 		
 		UI::EndWindow();

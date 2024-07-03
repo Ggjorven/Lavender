@@ -19,7 +19,7 @@ namespace Lavender
 	//////////////////////////////////////////////////////////////////////////////////////
 	enum class ComponentType
 	{
-		None = 0, Tag, Transform, Mesh, PointLight, Script
+		None = 0, Tag, Transform, Mesh, PointLight, Script, Camera
 	};
 
 	struct TagComponent
@@ -112,6 +112,30 @@ namespace Lavender
 		inline ComponentType GetType() { return GetStaticType(); }
 	};
 
+	struct CameraComponent
+	{
+	public:
+		float Yaw = 0.0f;
+		float Pitch = 0.0f;
+		float FOV = 45.0f;
+
+		float Near = 0.1f;
+		float Far = 1000.0f;
+
+		bool Active = true;
+
+	public:
+		CameraComponent() = default;
+		CameraComponent(float yaw, float pitch, float fov, bool active = true, float nearr = 0.1f, float farr = 1000.0f) // Naming sucks because of Windows #define near & far #undef doesn't work
+			: Yaw(yaw), Pitch(pitch), FOV(fov), Near(nearr), Far(farr), Active(active)
+		{
+		}
+		CameraComponent(const CameraComponent& other) = default;
+
+		inline static ComponentType GetStaticType() { return ComponentType::Camera; }
+		inline ComponentType GetType() { return GetStaticType(); }
+	};
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Utilities
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -128,10 +152,12 @@ namespace Lavender
 			return "PointLightComponent";
 		else if constexpr (std::is_same_v<TComponent, ScriptComponent>)
 			return "ScriptComponent";
+		else if constexpr (std::is_same_v<TComponent, CameraComponent>)
+			return "CameraComponent";
 		
 		return "Undefined Component";
 	}
 
-	using AllComponents = Utils::TypeGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent, ScriptComponent>;
+	using AllComponents = Utils::TypeGroup<TagComponent, TransformComponent, MeshComponent, PointLightComponent, ScriptComponent, CameraComponent>;
 
 }

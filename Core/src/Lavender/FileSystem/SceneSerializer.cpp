@@ -258,6 +258,23 @@ namespace Lavender
 			emitter << YAML::EndMap;
 		}
 
+		// CameraComponent
+		if (entity.HasComponent<CameraComponent>())
+		{
+			CameraComponent& camera = entity.GetComponent<CameraComponent>();
+			emitter << YAML::Key << "CameraComponent";
+			emitter << YAML::BeginMap;
+
+			emitter << YAML::Key << "Yaw" << YAML::Value << camera.Yaw;
+			emitter << YAML::Key << "Pitch" << YAML::Value << camera.Pitch;
+			emitter << YAML::Key << "FOV" << YAML::Value << camera.FOV;
+			emitter << YAML::Key << "Active" << YAML::Value << camera.Active;
+			emitter << YAML::Key << "Near" << YAML::Value << camera.Near;
+			emitter << YAML::Key << "Far" << YAML::Value << camera.Far;
+
+			emitter << YAML::EndMap;
+		}
+
 		emitter << YAML::EndMap;
 	}
 
@@ -320,6 +337,20 @@ namespace Lavender
 				Project::Get()->GetScript()->AddInstance(scriptComponent["Class"].as<std::string>(), uuid);
 
 			script.Class = scriptComponent["Class"].as<std::string>();
+		}
+
+		// CameraComponent
+		auto cameraComponent = node["CameraComponent"];
+		if (cameraComponent)
+		{
+			CameraComponent& camera = entity.AddOrReplaceComponent<CameraComponent>();
+
+			camera.Yaw = cameraComponent["Yaw"].as<float>();
+			camera.Pitch = cameraComponent["Pitch"].as<float>();
+			camera.FOV = cameraComponent["FOV"].as<float>();
+			camera.Active = cameraComponent["Active"].as<bool>();
+			camera.Near = cameraComponent["Near"].as<float>();
+			camera.Far = cameraComponent["Far"].as<float>();
 		}
 	}
 

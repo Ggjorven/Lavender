@@ -3,6 +3,7 @@
 
 #include "Lavender/Core/Logging.hpp"
 #include "Lavender/Utils/Profiler.hpp"
+#include "Lavender/Core/Input/Input.hpp"
 
 #include "Lavender/WorkSpace/Project.hpp"
 
@@ -73,11 +74,21 @@ namespace Lavender
 		switch (Project::Get()->GetState())
 		{
 		case WorkSpace::State::Editor:
+		{
 			m_Camera->OnEvent(e);
 			break;
+		}
 		case WorkSpace::State::Runtime:
+		{
+			Ref<ScriptingBackend> script = Project::Get()->GetScript();
+			if (script)
+			{
+				script->OnEventAll(e);
+			}
+
 			GetActiveCamera()->OnEvent(e);
 			break;
+		}
 
 		default:
 			APP_LOG_ERROR("Invalid State passed in.");
@@ -101,6 +112,9 @@ namespace Lavender
 	void Scene::EndRuntime()
 	{
 		m_Registries[WorkSpace::State::Runtime].Clear();
+
+		// Reset things
+		Input::SetCursorMode(CursorMode::Shown);
 	}
 
 	Ref<Camera> Scene::GetActiveCamera()
@@ -110,8 +124,30 @@ namespace Lavender
 		case WorkSpace::State::Editor:		return m_Camera;
 		case WorkSpace::State::Runtime:
 		{
-			// TODO: Runtime camera
-			break;
+			auto view = m_Registries[WorkSpace::State::Runtime].GetRegistry().view<CameraComponent>();
+			
+			// TODO: ScriptAble Camera
+			// TODO: Create a better system
+			for (auto& entity : view)
+			{
+				CameraComponent& camera = view.get<CameraComponent>(entity);
+				if (!camera.Active) continue;
+
+				auto transformView = m_Registries[WorkSpace::State::Runtime].GetRegistry().view<TransformComponent>();
+				if (!transformView.contains(entity))
+				{
+					APP_LOG_WARN("Found active camera, but camera has no TransformComponent. Resorting to EditorCamera.");
+					return m_Camera;
+				}
+
+				TransformComponent& transform = transformView.get<TransformComponent>(entity);
+				
+				// TODO: Improve this system, damn this sucks
+				return Camera::Create(camera.Yaw, camera.Pitch, camera.FOV, transform.Position, camera.Near, camera.Far);
+			}
+
+			APP_LOG_WARN("No runtime camera exists (or is set as Active). Resorting to EditorCamera.");
+			return m_Camera;
 		}
 
 		default:

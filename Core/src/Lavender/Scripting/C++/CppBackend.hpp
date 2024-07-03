@@ -28,6 +28,7 @@ namespace Lavender
 	public:
 		Script::OnCreateFn OnCreate = nullptr;
 		Script::OnUpdateFn OnUpdate = nullptr;
+		Script::OnEventFn OnEvent = nullptr;
 		Script::GetUUIDFn GetUUID = nullptr;
 
 	public:
@@ -47,6 +48,7 @@ namespace Lavender
 
 		void OnCreateAll() override;
 		void OnUpdateAll(float deltaTime) override;
+		void OnEventAll(Event& event) override;
 
 		void AddInstance(const std::string& classname, const UUID& entity) override;
 		void RemoveInstance(const std::string& classname, const UUID& entity) override;

@@ -89,6 +89,26 @@ namespace Lavender
 		}
 	}
 
+	void EditorCamera::Reset()
+	{
+		Camera::Reset();
+
+		// EditorCamera settings
+		m_State = State::ArcBall;
+
+		// FlyCam
+		m_MovementSpeed = 5.0f;
+		m_MouseSensitivity = 0.1f;
+
+		m_FirstUpdate = true;
+
+		// ArcBall
+		m_Radius = 4.0f;
+		m_Change = 0.5f;
+
+		m_Speed = 0.005f;
+	}
+
 	Ref<EditorCamera> EditorCamera::Create()
 	{
 		return RefHelper::Create<EditorCamera>();

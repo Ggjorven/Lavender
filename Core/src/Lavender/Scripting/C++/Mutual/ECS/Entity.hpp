@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Lavender/Utils/UUID.hpp"
-
+#include "Lavender/Scripting/C++/Mutual/Utils/UUID.hpp"
+#include "Lavender/Scripting/C++/Mutual/Core/Events.hpp"
 #include "Lavender/Scripting/C++/Mutual/Core/Functions.hpp"
+
+#include <Insight/Insight.hpp>
 
 namespace Lavender::Script
 {
@@ -13,8 +15,9 @@ namespace Lavender::Script
 		Entity() = default;
 		virtual ~Entity() = default;
 
-		virtual void OnCreate() = 0;
-		virtual void OnUpdate(float deltaTime) = 0;
+		virtual void OnCreate() {}
+		virtual void OnUpdate(float deltaTime) {}
+		virtual void OnEvent(Event& event) {};
 
 		// Note(Jorben): Doesn't return & because all parts inside are pointers anyways
 		template<typename TComponent>
@@ -62,6 +65,7 @@ namespace Lavender::Script
 
 	typedef void (*OnCreateFn)(Entity*);
 	typedef void (*OnUpdateFn)(Entity*, float);
+	typedef void (*OnEventFn)(Entity*, Event*);
 	typedef UUID* (*GetUUIDFn)(Entity*);
 
 #define LavenderEntity(name) \
@@ -76,6 +80,11 @@ InsightClass(name)
 	extern "C" inline __declspec(dllexport) void Lavender_ScriptEntityOnUpdate(Lavender::Script::Entity* entity, float deltaTime)
 	{
 		entity->OnUpdate(deltaTime);
+	}
+
+	extern "C" inline __declspec(dllexport) void Lavender_ScriptEntityOnEvent(Lavender::Script::Entity* entity, Lavender::Script::Event* e)
+	{
+		entity->OnEvent(*e);
 	}
 
 	extern "C" inline __declspec(dllexport) UUID* Lavender_ScriptEntityGetUUID(Lavender::Script::Entity* entity)
@@ -98,6 +107,11 @@ InsightClass(name)
 		}
 
 		void OnUpdate(float deltaTime)
+		{
+
+		}
+
+		void OnEvent(Event& event)
 		{
 
 		}

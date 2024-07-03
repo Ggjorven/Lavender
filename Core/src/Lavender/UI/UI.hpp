@@ -143,7 +143,7 @@ namespace Lavender::UI
     DEFINE_BITWISE_OPS(SelectableFlags)
 
     // Returns true is was pressed (can be used to select and unselect), 'state' is used to highlight or not highlight the selectable and also sets it to true if the selectable has been pressed never back to false
-    bool Selectable(const std::string& name, bool* state, const glm::vec2& size = { 0.0f, 0.0f }, SelectableFlags flags = SelectableFlags::None);
+    bool Selectable(const std::string& name, bool& state, const glm::vec2& size = { 0.0f, 0.0f }, SelectableFlags flags = SelectableFlags::None);
 
     enum class SliderFlags : uint8_t
     {

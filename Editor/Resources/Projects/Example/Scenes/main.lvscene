@@ -1,46 +1,33 @@
 Scene: 1
 Data:
   Entities:
-    - Entity: 888128036446523593
-      TagComponent:
-        Tag: VikingRoom
-      TransformComponent:
-        Position: [0.899799347, 1.2086364, 0.710605383]
-        Size: [1, 0.998686016, 0.999828875]
-        Rotation: [-89.8999863, -0, -90]
-      MeshComponent:
-        Mesh: 69
-        Material: 70
-      ScriptComponent:
-        Class: MyEntity
-    - Entity: 888028036446523593
-      TagComponent:
-        Tag: Light
-      TransformComponent:
-        Position: [0, 0, 0.25]
-        Size: [1, 1, 1]
-        Rotation: [0, 0, 0]
-      PointLightComponent:
-        Colour: [0.197957397, 0.0573602319, 0.549450517]
-        Intensity: 1.70000005
-        Radius: 1.5
     - Entity: 1299817918129305625
       TagComponent:
-        Tag: Patat
+        Tag: Viking Room
       TransformComponent:
-        Position: [-1.20000005, -0.400000006, 0]
+        Position: [0, 0, 0]
         Size: [1, 1, 1]
-        Rotation: [270, 0, 180]
+        Rotation: [-90, -90, 0]
       MeshComponent:
         Mesh: 69
         Material: 70
       PointLightComponent:
-        Colour: [0.758241773, 0.145815745, 0.145815745]
-        Intensity: 1.39999998
-        Radius: 0.899999976
-    - Entity: 7278447301010291737
-      TagComponent:
-        Tag: Unnamed Entity
+        Colour: [0.48907125, 0, 0.890109897]
+        Intensity: 0.300000012
+        Radius: 1
     - Entity: 16642217280472734722
       TagComponent:
-        Tag: Unnamed Entity
+        Tag: Camera
+      TransformComponent:
+        Position: [0, 1.24415994, 2.48717856]
+        Size: [1, 1, 1]
+        Rotation: [0, -0, 0]
+      ScriptComponent:
+        Class: MyCamera
+      CameraComponent:
+        Yaw: -90
+        Pitch: -30
+        FOV: 45
+        Active: true
+        Near: 0.100000001
+        Far: 1000

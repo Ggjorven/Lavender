@@ -135,6 +135,79 @@ namespace Lavender::UI
 		return RefHelper::Create<Components>(entities);
 	}
 
+	ComponentUsage Components::BeginComponent(const std::string& name, Ref<Image2D> icon)
+	{
+		static const ImVec2 iconSize = { 16.0f, 16.0f };
+
+		ComponentUsage usage = ComponentUsage::None;
+
+		UI::ScopedStyleList styles = UI::StyleList({
+			{ UI::StyleType::FrameRounding, 1.0f },
+			{ UI::StyleType::FramePadding, { 15.0f, 6.0f } },
+			{ UI::StyleType::FrameBorderSize, 1.0f }
+		});
+
+		UI::ScopedStyleList colours = UI::StyleList({
+			//{ UI::StyleColourType::Header, UI::Colours::BackgroundPopup },
+			//{ UI::StyleColourType::HeaderHovered, UI::Colours::LightTint },
+			//{ UI::StyleColourType::HeaderActive, UI::Colours::LighterTint },
+			{ UI::StyleColourType::Button, { 0.0f, 0.0f, 0.0f, 0.0f } }
+			//{ UI::StyleColourType::ButtonActive, { 0.0f, 0.0f, 0.0f, 0.0f } },
+			//{ UI::StyleColourType::ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f } }
+		});
+
+		// TODO: Icon
+	
+		// Positions
+		glm::vec2 startCursorPos = { ImGui::GetCursorPosX(), ImGui::GetCursorPosY() };
+		UI::SetCursorPos({ startCursorPos.x + ImGui::GetContentRegionAvail().x - iconSize.x - 2.0f, startCursorPos.y + (ImGui::GetStyle().FramePadding.y / 2.0f) + 1.0f });
+		glm::vec2 componentOptionsPos = { ImGui::GetCursorPosX(), ImGui::GetCursorPosY() };
+			
+		// Button to trigger pop-up
+		{
+			UI::ScopedStyleList treeStyles = UI::StyleList({
+				{ UI::StyleColourType::Border, { 0.0f, 0.0f, 0.0f, 0.0f } },
+				{ UI::StyleColourType::BorderShadow, { 0.0f, 0.0f, 0.0f, 0.0f } }
+			});
+
+			if (UI::Button(fmt::format("##{0}_ComponentOptions", name), { iconSize.x, iconSize.y }))
+				ImGui::OpenPopup(fmt::format("Component Options##{0}", name).c_str());
+		}
+
+		// Actual Tree
+		UI::SetCursorPos(startCursorPos);
+		{
+			UI::ScopedStyleList treeStyles = UI::StyleList({
+				{ UI::StyleColourType::Border, UI::Colours::BackgroundDark }
+			});
+
+			if (UI::Tree(name))
+				usage = usage | ComponentUsage::Opened;
+		}
+
+		auto afterTreePos = ImGui::GetCursorPos();
+
+		// Component Options image
+		UI::SetCursorPos(componentOptionsPos);
+		ImGui::Image((ImTextureID)m_DotsIcon->GetTextureID(), { iconSize.x, iconSize.y });
+		
+		// Actual pop-up
+		if (ImGui::BeginPopup(fmt::format("Component Options##{0}", name).c_str()))
+		{
+			if (UI::MenuItem("Reset"))
+				usage = usage | ComponentUsage::Reset;
+
+			else if (UI::MenuItem("Remove"))
+				usage = usage | ComponentUsage::Remove;
+
+			ImGui::EndPopup();
+		}
+
+		UI::SetCursorPos({ afterTreePos.x, afterTreePos.y - 1.0f });
+
+		return usage;
+	}
+
 	void Components::InitStyles()
 	{
 		m_Styles = UI::StyleList({
@@ -157,9 +230,12 @@ namespace Lavender::UI
 		specs.Usage = ImageUsage::File;
 		specs.Layout = ImageLayout::ShaderRead;
 		specs.Flags = ImageUsageFlags::Sampled | ImageUsageFlags::Colour;
-		specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/grey-plus.png";
 		specs.CreateUIImage = true;
 
+		specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/3-dots.png";
+		m_DotsIcon = Image2D::Create(specs);
+
+		specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/grey-plus.png";
 		m_PlusIcon = Image2D::Create(specs);
 	}
 
@@ -209,11 +285,17 @@ namespace Lavender::UI
 	{
 		TransformComponent& transform = entity.GetComponent<TransformComponent>();
 
-		ComponentUsage usage = BeginComponent<TransformComponent>("Transform");
+		ComponentUsage usage = BeginComponent("Transform");
+		if (usage & ComponentUsage::Remove)
+		{
+			entity.RemoveComponent<TransformComponent>();
+			return;
+		}
+		else if (usage & ComponentUsage::Reset)
+			entity.AddOrReplaceComponent<TransformComponent>();
+
 		if (usage & ComponentUsage::Opened)
 		{
-			static bool uniformSize = false;
-
 			// TODO: Look into ImGui tables, so the user doesn't have to move the column line every time.
 			UI::BeginPropertyGrid("##TransformGrid", 2);
 
@@ -224,7 +306,7 @@ namespace Lavender::UI
 			}*/);
 
 			UI::Property("Position", transform.Position);
-			UI::UniformProperty("Size", transform.Size, uniformSize, 0.1f, 0.0f, 0.0f, "%.2f", "Uniform Scaling");
+			UI::Property("Size", transform.Size);
 			UI::Property("Rotation", transform.Rotation);
 
 			UI::EndPropertyGrid("##TransformGrid");
@@ -236,7 +318,15 @@ namespace Lavender::UI
 	{
 		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 
-		ComponentUsage usage = BeginComponent<MeshComponent>("Mesh");
+		ComponentUsage usage = BeginComponent("Mesh");
+		if (usage & ComponentUsage::Remove)
+		{
+			entity.RemoveComponent<MeshComponent>();
+			return;
+		}
+		else if (usage & ComponentUsage::Reset)
+			entity.AddOrReplaceComponent<MeshComponent>();
+
 		if (usage & ComponentUsage::Opened)
 		{
 			UI::ScopedStyleList colours = UI::StyleList(/*{
@@ -354,7 +444,15 @@ namespace Lavender::UI
 	{
 		PointLightComponent& pointLight = entity.GetComponent<PointLightComponent>();
 
-		ComponentUsage usage = BeginComponent<PointLightComponent>("PointLight");
+		ComponentUsage usage = BeginComponent("PointLight");
+		if (usage & ComponentUsage::Remove)
+		{
+			entity.RemoveComponent<PointLightComponent>();
+			return;
+		}
+		else if (usage & ComponentUsage::Reset)
+			entity.AddOrReplaceComponent<PointLightComponent>();
+
 		if (usage & ComponentUsage::Opened)
 		{
 			UI::ScopedStyleList colours = UI::StyleList(/*{
@@ -389,7 +487,15 @@ namespace Lavender::UI
 	{
 		ScriptComponent& script = entity.GetComponent<ScriptComponent>();
 
-		ComponentUsage usage = BeginComponent<ScriptComponent>("Script");
+		ComponentUsage usage = BeginComponent("Script");
+		if (usage & ComponentUsage::Remove)
+		{
+			entity.RemoveComponent<ScriptComponent>();
+			return;
+		}
+		else if (usage & ComponentUsage::Reset)
+			entity.AddOrReplaceComponent<ScriptComponent>();
+
 		if (usage & ComponentUsage::Opened)
 		{
 			UI::ScopedStyleList colours = UI::StyleList(/*{
@@ -428,6 +534,61 @@ namespace Lavender::UI
 			}
 
 			UI::EndPropertyGrid("##ScriptGrid");
+		}
+	}
+
+	template<>
+	void Components::RenderComponent<CameraComponent>(Entity& entity)
+	{
+		CameraComponent& camera = entity.GetComponent<CameraComponent>();
+
+		ComponentUsage usage = BeginComponent("Camera");
+		if (usage & ComponentUsage::Remove)
+		{
+			entity.RemoveComponent<CameraComponent>();
+			return;
+		}
+		else if (usage & ComponentUsage::Reset)
+			entity.AddOrReplaceComponent<CameraComponent>();
+
+		if (usage & ComponentUsage::Opened)
+		{
+			UI::BeginPropertyGrid("##CameraGrid", 2);
+
+			UI::Property("Yaw", camera.Yaw);
+			UI::Property("Pitch", camera.Pitch);
+			UI::Property("FOV", camera.FOV);
+
+			// Active
+			{
+				UI::Combo active = {};
+				active.Add(std::make_pair("True", [selected = m_EntitiesRef->m_SelectedEntity]() {
+					CameraComponent& camera = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<CameraComponent>();
+					camera.Active = true;
+				}));
+				active.Add(std::make_pair("False", [selected = m_EntitiesRef->m_SelectedEntity]() {
+					CameraComponent& camera = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<CameraComponent>();
+					camera.Active = false;
+				}));
+
+				if (camera.Active == true)
+				{
+					active.Selected = "True";
+					active.Preview = "True";
+				}
+				else
+				{
+					active.Selected = "False";
+					active.Preview = "False";
+				}
+
+				UI::Property("Active", active);
+			}
+
+			UI::Property("Near", camera.Near);
+			UI::Property("Far", camera.Far);
+
+			UI::EndPropertyGrid("##CameraGrid");
 		}
 	}
 

@@ -73,7 +73,7 @@ namespace Lavender
 		return nullptr;
 	}
 
-	void Project::Init()
+	void Project::Init() // TODO: Load differently based on WorkSpace::State AKA runtime or editor
 	{
 		// Update Asset Cache
 		m_Assets->UpdateCache(m_Info.Directory / m_Info.Assets);
@@ -95,11 +95,13 @@ namespace Lavender
 		serializer.Deserialize(m_Info.Directory / m_Info.Scenes / m_Scenes.GetAll()[m_Info.StartScene].Path);
 
 		m_Scenes.SetActive(m_Info.StartScene, startScene);
+
+		if (m_State == WorkSpace::State::Runtime)
+			m_Scenes.GetActive()->StartRuntime();
 	}
 
 	void Project::Destroy()
 	{
-		// TODO: Maybe save all scenes??
 		SceneSerializer serializer(m_Scenes.GetActive());
 		serializer.Serialize();
 

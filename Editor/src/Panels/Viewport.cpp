@@ -1,7 +1,9 @@
 #include "Viewport.hpp"
 
-#include "Lavender/Utils/Profiler.hpp"
 #include "Lavender/Core/Application.hpp"
+#include "Lavender/Core/Input/Input.hpp"
+#include "Lavender/Utils/Profiler.hpp"
+#include "Lavender/Utils/Math.hpp"
 
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/CommandBuffer.hpp"
@@ -103,11 +105,23 @@ namespace Lavender::UI
 		specs.Flags = ImageUsageFlags::Sampled | ImageUsageFlags::Colour;
 		specs.CreateUIImage = true;
 
-		specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/Play.png";
-		m_PlayButton = Image2D::Create(specs);
+		{
+			specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/Play.png";
+			m_PlayButton = Image2D::Create(specs);
 
-		specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/Stop.png";
-		m_StopButton = Image2D::Create(specs);
+			specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/Stop.png";
+			m_StopButton = Image2D::Create(specs);
+		}
+		{
+			specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/MoveTool.png";
+			m_MoveButton = Image2D::Create(specs);
+
+			specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/ScaleTool.png";
+			m_ScaleButton = Image2D::Create(specs);
+
+			specs.Path = Track::Lavender::Directory / "Editor/Resources/Images/RotateTool.png";
+			m_RotateButton = Image2D::Create(specs);
+		}
 	}
 
 	void Viewport::RenderTopUI()
@@ -123,23 +137,43 @@ namespace Lavender::UI
 			UI::ShiftCursorX(((float)Track::Viewport::Width / 2.0f) - ((32.0f / 2.0f)));
 			UI::ShiftCursorY(1.0f);
 
+			// Play/Stop Button
 			if (ImGui::ImageButton((ImTextureID)playButton->GetTextureID(), { 32.0f, 32.0f }))
 				Project::Get()->SwitchState();
+
+
+			// ImGuizmo buttons
+			{
+				static const ImVec2 guizmoButtonSize = { 24.0f, 24.0f };
+				static const float paddingBetween = 7.0f;
+
+				UI::ScopedStyleList styles = UI::StyleList({
+					{ UI::StyleColourType::Button, { 0.0f, 0.0f, 0.0f, 0.0f } },
+					{ UI::StyleColourType::ButtonActive, { 0.0f, 0.0f, 0.0f, 0.0f } },
+					{ UI::StyleColourType::ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f } }
+				});
+
+				UI::SetCursorPos({ m_TopLeftCursorPos.x + Track::Viewport::Width - (guizmoButtonSize.x + paddingBetween) * 3.0f, m_TopLeftCursorPos.y + 1.0f});
+				if (ImGui::ImageButton((ImTextureID)m_MoveButton->GetTextureID(), guizmoButtonSize)) m_Operation = ImGuizmo::OPERATION::TRANSLATE;
+
+				UI::SetCursorPos({ m_TopLeftCursorPos.x + Track::Viewport::Width - (guizmoButtonSize.x + paddingBetween) * 2.0f, m_TopLeftCursorPos.y + 1.0f});
+				if (ImGui::ImageButton((ImTextureID)m_ScaleButton->GetTextureID(), guizmoButtonSize)) m_Operation = ImGuizmo::OPERATION::SCALE;
+
+				UI::SetCursorPos({ m_TopLeftCursorPos.x + Track::Viewport::Width - (guizmoButtonSize.x + paddingBetween), m_TopLeftCursorPos.y + 1.0f});
+				if (ImGui::ImageButton((ImTextureID)m_RotateButton->GetTextureID(), guizmoButtonSize)) m_Operation = ImGuizmo::OPERATION::ROTATE;
+			}
 		}
 
 		// ImGuizmo
+		if (!(Project::Get()->GetState() == WorkSpace::State::Runtime))
 		{
 			auto scene = Scene::Get();
 			auto camera = scene->GetActiveCamera();
 
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
-			
-			// Set Rect
-			{
-				auto imWindow = ImGui::GetCurrentWindow();
-				ImGuizmo::SetRect(imWindow->Pos.x, imWindow->Pos.y, imWindow->Size.x, imWindow->Size.y);
-			}
+			auto imWindow = ImGui::GetCurrentWindow();
+			ImGuizmo::SetRect(imWindow->Pos.x, imWindow->Pos.y, imWindow->Size.x, imWindow->Size.y);
 
 			if (m_EntitiesRef->m_SelectedEntity != UUID::Empty)
 			{
@@ -149,18 +183,49 @@ namespace Lavender::UI
 				{
 					TransformComponent& transform = entity.GetComponent<TransformComponent>();
 
-					float model[16] = {};
-					ImGuizmo::RecomposeMatrixFromComponents(glm::value_ptr(transform.Position), glm::value_ptr(transform.Rotation), glm::value_ptr(transform.Size), model);
+					glm::mat4 model = {};
+					Math::ComposeTransform(model, transform.Position, glm::radians(transform.Rotation), transform.Size);
 
 					// ImGuizmo is made for OpenGL so we have to transform it back
 					glm::mat4 projection = camera->GetProjectionMatrix();
 					if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
 						projection[1][1] *= -1;
 
-					ImGuizmo::Manipulate(glm::value_ptr(camera->GetViewMatrix()), glm::value_ptr(projection), m_Operation, m_Mode, model);
-				
+					// Snap values
+					bool snap = Input::IsKeyPressed(Key::LeftControl);
+					float snapValue = 0.1f;
+					if (m_Operation == ImGuizmo::OPERATION::ROTATE) 
+						snapValue = 1.0f;
+					float snapValues[3] = { snapValue, snapValue, snapValue };
+
+					// Actually start
+					ImGuizmo::Manipulate(glm::value_ptr(camera->GetViewMatrix()), glm::value_ptr(projection), m_Operation, m_Mode, glm::value_ptr(model), nullptr, snap ? snapValues : nullptr);
 					if (ImGuizmo::IsUsing())
-						ImGuizmo::DecomposeMatrixToComponents(model, glm::value_ptr(transform.Position), glm::value_ptr(transform.Rotation), glm::value_ptr(transform.Size));
+					{
+						glm::vec3 translation = {};
+						glm::quat rotation = {};
+						glm::vec3 scale = {};
+						Math::DecomposeTransform(model, translation, rotation, scale);
+
+						switch (m_Operation)
+						{
+						case ImGuizmo::OPERATION::TRANSLATE:
+						{
+							transform.Position = translation;
+							break;
+						}
+						case ImGuizmo::OPERATION::ROTATE: // TODO: Implement
+						{
+							APP_LOG_TRACE("TODO");
+							break;
+						}
+						case ImGuizmo::OPERATION::SCALE:
+						{
+							transform.Size = scale;
+							break;
+						}
+						}
+					}
 				}
 			}
 		}

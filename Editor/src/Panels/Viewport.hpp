@@ -42,12 +42,16 @@ namespace Lavender::UI
 		glm::vec2 m_TopLeftCursorPos = {};
 
 		// ImGuizmo state
-		ImGuizmo::MODE m_Mode = ImGuizmo::MODE::WORLD;
+		ImGuizmo::MODE m_Mode = ImGuizmo::MODE::LOCAL;
 		ImGuizmo::OPERATION m_Operation = ImGuizmo::OPERATION::TRANSLATE;
 
 		// Resources
 		Ref<Image2D> m_PlayButton = nullptr;
 		Ref<Image2D> m_StopButton = nullptr;
+
+		Ref<Image2D> m_MoveButton = nullptr;
+		Ref<Image2D> m_ScaleButton = nullptr;
+		Ref<Image2D> m_RotateButton = nullptr;
 	};
 
 }

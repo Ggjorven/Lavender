@@ -12,7 +12,8 @@
 namespace Lavender
 {
 
-	typedef std::function<void(Event&)> EventCallBackFunction;
+	typedef std::function<void(Event&)> EventCallBackFn;
+	typedef std::function<void(const std::vector<std::filesystem::path>&)> DragDropCallBackFn;
 
 	struct WindowSpecification
 	{
@@ -40,7 +41,9 @@ namespace Lavender
 		uint32_t Height;
 
 		bool VSync = false;
-		EventCallBackFunction CallBack;
+
+		EventCallBackFn EventCallBack = nullptr;
+		DragDropCallBackFn DragDropCallBack = nullptr;
 
 		WindowData(std::string name = "Lavender Window", uint32_t width = 1280u, uint32_t height = 720u)
 			: Name(name), Width(width), Height(height)
@@ -54,7 +57,8 @@ namespace Lavender
 		Window() = default;
 		virtual ~Window() = default;
 
-		virtual void SetEventCallBack(EventCallBackFunction func) = 0;
+		virtual void SetEventCallBack(EventCallBackFn func) = 0;
+		virtual void SetDragDropCallBack(DragDropCallBackFn func) = 0;
 
 		virtual void OnUpdate() = 0;
 		virtual void OnRender() = 0;

@@ -52,19 +52,33 @@ namespace Lavender
 			Ref<DescriptorSets>			DescriptorSets = nullptr;
 		} Shading;
 
+		struct // Uses Shading.Attachment if Editor
+		{
+			Ref<Pipeline>				Pipeline = nullptr;
+			Ref<RenderPass>				RenderPass = nullptr;
+			Ref<DescriptorSets>			DescriptorSets = nullptr;
+		} UI;
+
 		struct Constants
 		{
-			inline static constexpr const uint32_t PreAllocatedModels = 10u;
+			inline static constexpr const uint32_t PreAllocatedModels = 100u;
+			inline static constexpr const uint32_t PreAllocatedUISets = 10u;
 
 			// To be set at runtime.
 			inline static ShaderPath DepthVert = {};
 			inline static ShaderPath DepthFrag = {};
+
 			inline static ShaderPath LightCulling = {};
+
 			inline static ShaderPath ShadingVert = {};
 			inline static ShaderPath ShadingFrag = {};
+
+			inline static ShaderPath UIVert = {};
+			inline static ShaderPath UIFrag = {};
 		};
 
 		uint32_t AllocatedModels = Constants::PreAllocatedModels;
+		uint32_t AllocatedUISets = Constants::PreAllocatedUISets;
 		
 		Ref<UniformBuffer>				SceneBuffer = nullptr;
 		Ref<DynamicUniformBuffer>		ModelBuffer = nullptr;
@@ -77,6 +91,7 @@ namespace Lavender
 		void InitDepth(Ref<ShaderCompiler> compiler, Ref<ShaderCacher> cacher);
 		void InitLightCulling(Ref<ShaderCompiler> compiler, Ref<ShaderCacher> cacher);
 		void InitShading(Ref<ShaderCompiler> compiler, Ref<ShaderCacher> cacher);
+		void InitUI(Ref<ShaderCompiler> compiler, Ref<ShaderCacher> cacher);
 		void InitResources();
 	};
 

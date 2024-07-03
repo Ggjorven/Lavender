@@ -25,6 +25,12 @@
 void EditorLayer::OnAttach()
 {
 	Application::Get().GetWindow().SetTitle(Track::Lavender::VersionTitle);
+
+	Application::Get().GetWindow().SetDragDropCallBack([](const std::vector<std::filesystem::path>& paths)
+	{
+		for (auto& path : paths)
+			APP_LOG_TRACE("Dropped file: '{0}'", path.string());
+	});
 	
 	m_Project = Project::Create({}, WorkSpace::State::Editor);
 
@@ -83,6 +89,8 @@ void EditorLayer::OnUIRender()
 	m_GlobalUIStyles.Push();
 	m_GlobalUIColours.Push();
 
+	MenuBar();
+
 	m_Entities->RenderUI();
 	m_Components->RenderUI();
 	m_Debug->RenderUI();
@@ -94,16 +102,41 @@ void EditorLayer::OnUIRender()
 
 bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
 {
+	// Reload
 	if (e.GetKeyCode() == Key::F5)
 	{
-		// Reload the project
-		Project::Get() = nullptr;
+		if (m_Project->GetState() == WorkSpace::State::Runtime)
+		{
+			APP_LOG_WARN("Tried to reload project while it is running.");
+			return false;
+		}
+
 		std::filesystem::path path = m_Project->GetInfo().Path;
 
 		m_Project = Project::Create({}, WorkSpace::State::Editor);
 
 		ProjectSerializer serializer(m_Project);
 		serializer.Deserialize(path);
+	}
+	// Save
+	else if (e.GetKeyCode() == Key::S && Input::IsKeyPressed(Key::LeftControl))
+	{
+		if (m_Project->GetState() == WorkSpace::State::Runtime)
+		{
+			APP_LOG_WARN("Tried to save project while it is running.");
+			return false;
+		}
+
+		ProjectSerializer serializer(m_Project);
+		serializer.Serialize();
+	}
+	// Stop running
+	else if (e.GetKeyCode() == Key::Q && Input::IsKeyPressed(Key::LeftControl))
+	{
+		if (m_Project->GetState() == WorkSpace::State::Runtime)
+			Project::Get()->SwitchState();
+		else
+			APP_LOG_WARN("Tried to stop execution, but no project is running.");
 	}
 
 	return false;
@@ -112,7 +145,7 @@ bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
 /////////////////////////////////////////////////////////////////
 // Custom Functionality
 /////////////////////////////////////////////////////////////////
-void EditorLayer::LoadProject()
+void EditorLayer::LoadProject(const std::filesystem::path& file)
 {
 	// Load a project from .lvproj file
 	if (__argc >= 2)
@@ -132,7 +165,7 @@ void EditorLayer::LoadProject()
 	else
 	{
 		ProjectSerializer serializer(m_Project);
-		serializer.Deserialize(Track::Lavender::Directory / "Editor/Resources/Projects/Example/Example.lvproj");
+		serializer.Deserialize(Track::Lavender::Directory / file);
 	}
 }
 
@@ -256,6 +289,93 @@ void EditorLayer::InitUI()
 	m_Components = UI::Components::Create(m_Entities);
 	m_Debug = UI::Debug::Create();
 	m_Viewport = UI::Viewport::Create(m_Entities);
+}
+
+void EditorLayer::MenuBar()
+{
+	ImGui::BeginMainMenuBar();
+
+	if (ImGui::BeginMenu("File"))
+	{
+		if (ImGui::MenuItem("New project", "Ctrl+N"))
+		{
+			// TODO: ...
+		}
+
+		if (ImGui::MenuItem("Open project", "Ctrl+O"))
+		{
+			if (m_Project->GetState() == WorkSpace::State::Runtime)
+			{
+				APP_LOG_WARN("Tried to open a project while another project is running.");
+			}
+			else
+			{
+				auto file = Utils::ToolKit::OpenFile(".lvproj\0*.lvproj\0All Files\0*.*\0", m_Project->GetInfo().Directory);
+
+				if (!file.empty())
+				{
+					// Save old project
+					{
+						ProjectSerializer serializer(m_Project);
+						serializer.Serialize();
+					}
+
+					m_Project = Project::Create({}, WorkSpace::State::Editor);
+
+					LoadProject(file);
+				}
+			}
+		}
+
+		if (ImGui::MenuItem("Save project", "Ctrl+S"))
+		{
+			if (m_Project->GetState() == WorkSpace::State::Runtime)
+			{
+				APP_LOG_WARN("Tried to save a project while it is running.");
+			}
+			else
+			{
+				ProjectSerializer serializer(m_Project);
+				serializer.Serialize();
+			}
+		}
+
+		ImGui::EndMenu();
+	}
+
+	if (ImGui::BeginMenu("Edit"))
+	{
+		// TODO: ...
+
+		ImGui::EndMenu();
+	}
+
+	if (ImGui::BeginMenu("Unnamed"))
+	{
+		switch (Project::Get()->GetState())
+		{
+		case WorkSpace::State::Editor:
+		{
+			if (ImGui::MenuItem("Start running"))
+				Project::Get()->SwitchState();
+			break;
+		}
+		case WorkSpace::State::Runtime:
+		{
+			if (ImGui::MenuItem("Stop running", "Ctrl+Q"))
+				Project::Get()->SwitchState();
+			break;
+		}
+
+		default:
+			APP_LOG_ERROR("Invalid state passed in");
+			break;
+		}
+
+		ImGui::EndMenu();
+	}
+
+	ImGui::EndMainMenuBar();
 }
 
 // TODO: Update + clean

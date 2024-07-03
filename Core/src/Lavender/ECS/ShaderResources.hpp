@@ -15,6 +15,11 @@ namespace Lavender::ShaderResource
 		glm::mat4 Projection = {};
 		glm::vec2 DepthUnpackConsts = {};
 		PUBLIC_PADDING(8)
+
+	public:
+		Camera() = default;
+		Camera(float yaw, float pitch, float fov, const glm::vec3& position, float nearr = 0.1f, float farr = 1000.0f);  // Naming sucks because of Windows #define near & far #undef doesn't work
+		~Camera() = default;
 	};
 
 	struct PointLight

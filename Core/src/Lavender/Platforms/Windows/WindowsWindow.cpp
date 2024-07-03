@@ -49,7 +49,7 @@ namespace Lavender
 			data.Height = height;
 
 			WindowResizeEvent event = WindowResizeEvent(width, height);
-			data.CallBack(event);
+			data.EventCallBack(event);
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
@@ -57,7 +57,7 @@ namespace Lavender
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			WindowCloseEvent event = WindowCloseEvent();
-			data.CallBack(event);
+			data.EventCallBack(event);
 		});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -69,19 +69,19 @@ namespace Lavender
 			case GLFW_PRESS:
 			{
 				KeyPressedEvent event = KeyPressedEvent(key, 0);
-				data.CallBack(event);
+				data.EventCallBack(event);
 				break;
 			}
 			case GLFW_RELEASE:
 			{
 				KeyReleasedEvent event = KeyReleasedEvent(key);
-				data.CallBack(event);
+				data.EventCallBack(event);
 				break;
 			}
 			case GLFW_REPEAT:
 			{
 				KeyPressedEvent event = KeyPressedEvent(key, 1);
-				data.CallBack(event);
+				data.EventCallBack(event);
 				break;
 			}
 			}
@@ -92,7 +92,7 @@ namespace Lavender
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			KeyTypedEvent event = KeyTypedEvent(keycode);
-			data.CallBack(event);
+			data.EventCallBack(event);
 		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
@@ -104,13 +104,13 @@ namespace Lavender
 			case GLFW_PRESS:
 			{
 				MouseButtonPressedEvent event = MouseButtonPressedEvent(button);
-				data.CallBack(event);
+				data.EventCallBack(event);
 				break;
 			}
 			case GLFW_RELEASE:
 			{
 				MouseButtonReleasedEvent event = MouseButtonReleasedEvent(button);
-				data.CallBack(event);
+				data.EventCallBack(event);
 				break;
 			}
 			}
@@ -121,7 +121,7 @@ namespace Lavender
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			MouseScrolledEvent event = MouseScrolledEvent((float)xOffset, (float)yOffset);
-			data.CallBack(event);
+			data.EventCallBack(event);
 		});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
@@ -129,7 +129,19 @@ namespace Lavender
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
-			data.CallBack(event);
+			data.EventCallBack(event);
+		});
+
+		glfwSetDropCallback(m_Window, [](GLFWwindow* window, int count, const char* paths[])
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+			std::vector<std::filesystem::path> dropped((size_t)count);
+			for (int i = 0; i < count; i++)
+				dropped[i] = std::filesystem::path(paths[i]);
+
+			if (data.DragDropCallBack)
+				data.DragDropCallBack(dropped);
 		});
 	}
 

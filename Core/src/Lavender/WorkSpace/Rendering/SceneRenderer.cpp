@@ -2,6 +2,7 @@
 #include "SceneRenderer.hpp"
 
 #include "Lavender/Core/Logging.hpp"
+#include "Lavender/Utils/Math.hpp"
 #include "Lavender/Utils/Profiler.hpp"
 
 #include "Lavender/WorkSpace/Project.hpp"
@@ -90,9 +91,15 @@ namespace Lavender
 		for (auto& entity : view)
 		{
 			auto transforms = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<TransformComponent>();
-			APP_ASSERT(transforms.contains(entity), "Entity with MeshComponent doesn't have TransformComponent.");
 
-			matrices[i] = { CalculateModelMatrix(transforms.get<TransformComponent>(entity)) };
+			if (!transforms.contains(entity))
+			{
+				APP_LOG_WARN("Entity with MeshComponent doesn't have TransformComponent.");
+				continue;
+			}
+
+			TransformComponent& transform = transforms.get<TransformComponent>(entity);
+			Math::ComposeTransform(matrices[i].Matrix, transform.Position, glm::radians(transform.Rotation), transform.Size);
 			m_Resources.ModelBuffer->SetDataIndexed((uint32_t)i, &matrices[i], sizeof(ShaderResource::Model));
 
 			i++;
@@ -113,7 +120,12 @@ namespace Lavender
 			PointLightComponent pointLight = view.get<PointLightComponent>(entity);
 
 			auto transforms = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<TransformComponent>();
-			APP_ASSERT(transforms.contains(entity), "Entity with PointLightComponent doesn't have TransformComponent.");
+
+			if (!transforms.contains(entity))
+			{
+				APP_LOG_WARN("Entity with PointLightComponent doesn't have TransformComponent.");
+				continue;
+			}
 
 			ShaderResource::PointLight light = {};
 			light.Position = transforms.get<TransformComponent>(entity).Position;
@@ -270,26 +282,17 @@ namespace Lavender
 		});
     }
 
+	void SceneRenderer::UIOverlay()
+	{
+		// TODO: Implement
+	}
+
 	glm::uvec2 SceneRenderer::GetTileCount()
 	{
 		glm::uvec2 tiles = {};
 		tiles.x = (Track::Viewport::Width + TILE_SIZE - 1) / TILE_SIZE;
 		tiles.y = (Track::Viewport::Height + TILE_SIZE - 1) / TILE_SIZE;
 		return tiles;
-	}
-
-	glm::mat4 SceneRenderer::CalculateModelMatrix(const TransformComponent& component)
-	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::translate(matrix, component.Position);
-		matrix = glm::scale(matrix, component.Size);
-
-		// Note(Jorben): There is probably a better way to do rotation
-		matrix = glm::rotate(matrix, glm::radians(component.Rotation.x), { 1.0f, 0.0f, 0.0f });
-		matrix = glm::rotate(matrix, glm::radians(component.Rotation.y), { 0.0f, 1.0f, 0.0f });
-		matrix = glm::rotate(matrix, glm::radians(component.Rotation.z), { 0.0f, 0.0f, 1.0f });
-
-		return matrix;
 	}
 
 	bool SceneRenderer::OnResize(WindowResizeEvent& e)

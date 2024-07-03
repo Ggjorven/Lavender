@@ -38,6 +38,7 @@ namespace Lavender
 		void EndFrame() override;
 
 		inline void Submit(RenderFunction function) override { m_RenderQueue.Add(function); }
+		inline void SubmitToBack(RenderFunction function) override { m_RenderQueue.AddToBack(function); }
 		inline void SubmitFree(FreeFunction function) override { m_ResourceFreeQueue.Add(function); }
 		inline void SubmitFreeToBack(FreeFunction function) override { m_ResourceFreeQueue.AddToBack(function); }
 

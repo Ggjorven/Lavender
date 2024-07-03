@@ -13,7 +13,8 @@ namespace Lavender
 		WindowsWindow(const WindowSpecification& properties);
 		virtual ~WindowsWindow();
 
-		void SetEventCallBack(EventCallBackFunction func) override { m_Data.CallBack = func; }
+		void SetEventCallBack(EventCallBackFn func) override { m_Data.EventCallBack = func; }
+		void SetDragDropCallBack(DragDropCallBackFn func) override { m_Data.DragDropCallBack = func; }
 
 		void OnUpdate() override;
 		void OnRender() override;

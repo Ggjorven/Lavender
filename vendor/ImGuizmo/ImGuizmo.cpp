@@ -670,80 +670,80 @@ namespace IMGUIZMO_NAMESPACE
       {
       }
 
-      ImDrawList* mDrawList;
-      Style mStyle;
+      ImDrawList* mDrawList = nullptr;
+      Style mStyle = {};
 
-      MODE mMode;
-      matrix_t mViewMat;
-      matrix_t mProjectionMat;
-      matrix_t mModel;
-      matrix_t mModelLocal; // orthonormalized model
-      matrix_t mModelInverse;
-      matrix_t mModelSource;
-      matrix_t mModelSourceInverse;
-      matrix_t mMVP;
-      matrix_t mMVPLocal; // MVP with full model matrix whereas mMVP's model matrix might only be translation in case of World space edition
-      matrix_t mViewProjection;
+      MODE mMode = {};
+      matrix_t mViewMat = {};
+      matrix_t mProjectionMat = {};
+      matrix_t mModel = {};
+      matrix_t mModelLocal = {}; // orthonormalized model
+      matrix_t mModelInverse = {};
+      matrix_t mModelSource = {};
+      matrix_t mModelSourceInverse = {};
+      matrix_t mMVP = {};
+      matrix_t mMVPLocal = {}; // MVP with full model matrix whereas mMVP's model matrix might only be translation in case of World space edition
+      matrix_t mViewProjection = {};
 
-      vec_t mModelScaleOrigin;
-      vec_t mCameraEye;
-      vec_t mCameraRight;
-      vec_t mCameraDir;
-      vec_t mCameraUp;
-      vec_t mRayOrigin;
-      vec_t mRayVector;
+      vec_t mModelScaleOrigin = {};
+      vec_t mCameraEye = {};
+      vec_t mCameraRight = {};
+      vec_t mCameraDir = {};
+      vec_t mCameraUp = {};
+      vec_t mRayOrigin = {};
+      vec_t mRayVector = {};
 
-      float  mRadiusSquareCenter;
-      ImVec2 mScreenSquareCenter;
-      ImVec2 mScreenSquareMin;
-      ImVec2 mScreenSquareMax;
+      float  mRadiusSquareCenter = {};
+      ImVec2 mScreenSquareCenter = {};
+      ImVec2 mScreenSquareMin = {};
+      ImVec2 mScreenSquareMax = {};
 
-      float mScreenFactor;
-      vec_t mRelativeOrigin;
+      float mScreenFactor = {};
+      vec_t mRelativeOrigin = {};
 
       bool mbUsing;
       bool mbEnable;
-      bool mbMouseOver;
-      bool mReversed; // reversed projection matrix
+      bool mbMouseOver = {};
+      bool mReversed = {}; // reversed projection matrix
 
       // translation
-      vec_t mTranslationPlan;
-      vec_t mTranslationPlanOrigin;
-      vec_t mMatrixOrigin;
-      vec_t mTranslationLastDelta;
+      vec_t mTranslationPlan = {};
+      vec_t mTranslationPlanOrigin = {};
+      vec_t mMatrixOrigin = {};
+      vec_t mTranslationLastDelta = {};
 
       // rotation
-      vec_t mRotationVectorSource;
-      float mRotationAngle;
-      float mRotationAngleOrigin;
+      vec_t mRotationVectorSource = {};
+      float mRotationAngle = {};
+      float mRotationAngleOrigin = {};
       //vec_t mWorldToLocalAxis;
 
       // scale
-      vec_t mScale;
-      vec_t mScaleValueOrigin;
-      vec_t mScaleLast;
-      float mSaveMousePosx;
+      vec_t mScale = {};
+      vec_t mScaleValueOrigin = {};
+      vec_t mScaleLast = {};
+      float mSaveMousePosx = {};
 
       // save axis factor when using gizmo
-      bool mBelowAxisLimit[3];
-      bool mBelowPlaneLimit[3];
-      float mAxisFactor[3];
+      bool mBelowAxisLimit[3] = {};
+      bool mBelowPlaneLimit[3] = {};
+      float mAxisFactor[3] = {};
 
       float mAxisLimit=0.0025f;
       float mPlaneLimit=0.02f;
 
       // bounds stretching
-      vec_t mBoundsPivot;
-      vec_t mBoundsAnchor;
-      vec_t mBoundsPlan;
-      vec_t mBoundsLocalPivot;
-      int mBoundsBestAxis;
-      int mBoundsAxis[2];
+      vec_t mBoundsPivot = {};
+      vec_t mBoundsAnchor = {};
+      vec_t mBoundsPlan = {};
+      vec_t mBoundsLocalPivot = {};
+      int mBoundsBestAxis = {};
+      int mBoundsAxis[2] = {};
       bool mbUsingBounds;
-      matrix_t mBoundsMatrix;
+      matrix_t mBoundsMatrix = {};
 
       //
-      int mCurrentOperation;
+      int mCurrentOperation = {};
 
       float mX = 0.f;
       float mY = 0.f;

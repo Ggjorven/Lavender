@@ -27,9 +27,11 @@ public:
 	void OnUIRender() override;
 
 private:
-	void LoadProject();
+	void LoadProject(const std::filesystem::path& file = "Editor/Resources/Projects/Example/Example.lvproj");
 	void InitStyles();
 	void InitUI();
+
+	void MenuBar();
 
 	void CreateProject(const std::string& name, const std::filesystem::path& directory);
 

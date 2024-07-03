@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Lavender/Utils/UUID.hpp"
+#include "Lavender/Scripting/C++/Mutual/Utils/UUID.hpp"
 
 #include "Lavender/Scripting/C++/Mutual/Input/KeyCodes.hpp"
 #include "Lavender/Scripting/C++/Mutual/Input/MouseCodes.hpp"
@@ -14,18 +14,27 @@ namespace Lavender::Script
 
 	// Functions on the Engine side
 	///////////////////////////////////////////////////////////////////////////////
-	// Components
+	// Window
 	///////////////////////////////////////////////////////////////////////////////
-	typedef void*		(*AddComponentFn)			(ComponentType, UUID, void*);
-	typedef void*		(*AddOrReplaceComponentFn)	(ComponentType, UUID, void*);
-	typedef bool		(*HasComponentFn)			(ComponentType, UUID);
-	typedef void*		(*GetComponentFn)			(ComponentType, UUID);
-	typedef void		(*RemoveComponentFn)		(ComponentType, UUID);
+	typedef uint32_t	(*GetWidthFn)				();
+	typedef uint32_t	(*GetHeightFn)				();
+	typedef uint32_t	(*GetXPositionFn)			();
+	typedef uint32_t	(*GetYPositionFn)			();
+	typedef uint32_t	(*GetMonitorWidthFn)		();
+	typedef uint32_t	(*GetMonitorHeightFn)		();
+	typedef void		(*SetVSyncFn)				(bool);
+	typedef bool		(*IsVSyncFn)				();
+	typedef void		(*SetTitleFn)				(const char*);
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Logging
 	///////////////////////////////////////////////////////////////////////////////
 	typedef void		(*ScriptLogMessageFn)		(uint8_t, const char*);
+
+	///////////////////////////////////////////////////////////////////////////////
+	// Tools
+	///////////////////////////////////////////////////////////////////////////////
+	typedef void		(*ToolsInitFn)				();
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Input
@@ -36,23 +45,36 @@ namespace Lavender::Script
 	typedef void		(*SetCursorPositionFn)		(glm::vec2*);
 	typedef void		(*SetCursorModeFn)			(CursorMode);
 
-	// Gets set when a dll is loaded, these functions are used on the User side
 	///////////////////////////////////////////////////////////////////////////////
 	// Components
 	///////////////////////////////////////////////////////////////////////////////
-	struct ComponentFunctions
+	typedef void*		(*AddComponentFn)			(ComponentType, UUID, void*);
+	typedef void*		(*AddOrReplaceComponentFn)	(ComponentType, UUID, void*);
+	typedef bool		(*HasComponentFn)			(ComponentType, UUID);
+	typedef void*		(*GetComponentFn)			(ComponentType, UUID);
+	typedef void		(*RemoveComponentFn)		(ComponentType, UUID);
+
+	// Gets set when a dll is loaded, these functions are used on the User side
+	///////////////////////////////////////////////////////////////////////////////
+	// Window
+	///////////////////////////////////////////////////////////////////////////////
+	struct WindowFunctions
 	{
 	public:
-		inline static AddComponentFn			Add = nullptr;
-		inline static AddOrReplaceComponentFn	AddOrReplace = nullptr;
-		inline static HasComponentFn			Has = nullptr;
-		inline static GetComponentFn			Get = nullptr;
-		inline static RemoveComponentFn			Remove = nullptr;
+		inline static GetWidthFn				GetWidth = nullptr;
+		inline static GetHeightFn				GetHeight = nullptr;
+		inline static GetXPositionFn			GetXPosition = nullptr;
+		inline static GetYPositionFn			GetYPosition = nullptr;
+		inline static GetMonitorWidthFn			GetMonitorWidth = nullptr;
+		inline static GetMonitorWidthFn			GetMonitorHeight = nullptr;
+		inline static SetVSyncFn				SetVSync = nullptr;
+		inline static IsVSyncFn					IsVSync = nullptr;
+		inline static SetTitleFn				SetTitle = nullptr;
 
 	public:
 		inline static bool Initialized()
 		{
-			return (Add && AddOrReplace && Has && Get && Remove);
+			return (GetWidth && GetHeight);
 		}
 	};
 
@@ -90,19 +112,43 @@ namespace Lavender::Script
 		}
 	};
 
+	///////////////////////////////////////////////////////////////////////////////
+	// Components
+	///////////////////////////////////////////////////////////////////////////////
+	struct ComponentFunctions
+	{
+	public:
+		inline static AddComponentFn			Add = nullptr;
+		inline static AddOrReplaceComponentFn	AddOrReplace = nullptr;
+		inline static HasComponentFn			Has = nullptr;
+		inline static GetComponentFn			Get = nullptr;
+		inline static RemoveComponentFn			Remove = nullptr;
+
+	public:
+		inline static bool Initialized()
+		{
+			return (Add && AddOrReplace && Has && Get && Remove);
+		}
+	};
+
 	// This gets exported from the Dll from the User side
-	typedef void (*Internal_SetComponentFunctionsFn)	(AddComponentFn, AddOrReplaceComponentFn, HasComponentFn, GetComponentFn, RemoveComponentFn);
+	typedef void (*Internal_SetWindowFunctionsFn)		(GetWidthFn, GetHeightFn, GetXPositionFn, GetYPositionFn, GetMonitorWidthFn, GetMonitorHeightFn, SetVSyncFn, IsVSyncFn, SetTitleFn);
 	typedef void (*Internal_SetLoggingFunctionsFn)		(ScriptLogMessageFn);
 	typedef void (*Internal_SetInputFunctionsFn)		(IsKeyPressedFn, IsMousePressedFn, GetCursorPositionFn, SetCursorPositionFn, SetCursorModeFn);
+	typedef void (*Internal_SetComponentFunctionsFn)	(AddComponentFn, AddOrReplaceComponentFn, HasComponentFn, GetComponentFn, RemoveComponentFn);
 
 #if defined(LAVENDER_DLL)
-	extern "C" inline __declspec(dllexport) void Lavender_SetComponentFunctions(AddComponentFn add, AddOrReplaceComponentFn addOrReplace, HasComponentFn has, GetComponentFn get, RemoveComponentFn remove)
+	extern "C" inline __declspec(dllexport) void Lavender_SetWindowFunctions(GetWidthFn getWidth, GetHeightFn getHeight, GetXPositionFn getXPosition, GetYPositionFn getYPosition, GetMonitorWidthFn getMonitorWidth, GetMonitorHeightFn getMonitorHeight, SetVSyncFn setVSync, IsVSyncFn isVSync, SetTitleFn setTitle)
 	{
-		ComponentFunctions::Add = add;
-		ComponentFunctions::AddOrReplace = addOrReplace;
-		ComponentFunctions::Has = has;
-		ComponentFunctions::Get = get;
-		ComponentFunctions::Remove = remove;
+		WindowFunctions::GetWidth = getWidth;
+		WindowFunctions::GetHeight = getHeight;
+		WindowFunctions::GetXPosition = getXPosition;
+		WindowFunctions::GetYPosition = getYPosition;
+		WindowFunctions::GetMonitorWidth = getMonitorWidth;
+		WindowFunctions::GetMonitorHeight = getMonitorHeight;
+		WindowFunctions::SetVSync = setVSync;
+		WindowFunctions::IsVSync = isVSync;
+		WindowFunctions::SetTitle = setTitle;
 	}
 
 	extern "C" inline __declspec(dllexport) void Lavender_SetLoggingFunctions(ScriptLogMessageFn logMessage)
@@ -117,6 +163,15 @@ namespace Lavender::Script
 		InputFunctions::GetCursorPosition = getCursorPosition;
 		InputFunctions::SetCursorPosition = setCursorPosition;
 		InputFunctions::SetCursorMode = setCursorMode;
+	}
+
+	extern "C" inline __declspec(dllexport) void Lavender_SetComponentFunctions(AddComponentFn add, AddOrReplaceComponentFn addOrReplace, HasComponentFn has, GetComponentFn get, RemoveComponentFn remove)
+	{
+		ComponentFunctions::Add = add;
+		ComponentFunctions::AddOrReplace = addOrReplace;
+		ComponentFunctions::Has = has;
+		ComponentFunctions::Get = get;
+		ComponentFunctions::Remove = remove;
 	}
 #endif
 

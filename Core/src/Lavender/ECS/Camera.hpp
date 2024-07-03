@@ -15,10 +15,12 @@ namespace Lavender
 	{
 	public:
 		Camera() = default;
+		Camera(const ShaderResource::Camera& camera);
+		Camera(float yaw, float pitch, float fov, const glm::vec3& position, float nearr = 0.1f, float farr = 1000.0f); // Naming sucks because of Windows #define near & far #undef doesn't work
 		virtual ~Camera() = default;
 
-		virtual void OnUpdate(float deltaTime) = 0;
-		virtual void OnEvent(Event& e) = 0;
+		virtual void OnUpdate(float deltaTime) {}
+		virtual void OnEvent(Event& e) {}
 
 		inline glm::vec3& GetPosition() { return m_Position; }
 		inline float& GetFOV() { return m_FOV; }
@@ -39,6 +41,11 @@ namespace Lavender
 
 		ShaderResource::Camera AsResource();
 		inline operator ShaderResource::Camera() { return AsResource(); }
+
+		void Reset();
+
+		static Ref<Camera> Create(const ShaderResource::Camera& camera = {});
+		static Ref<Camera> Create(float yaw, float pitch, float fov, const glm::vec3& position, float nearr = 0.1f, float farr = 1000.0f);
 
 	protected:
 		void UpdateMatrices();

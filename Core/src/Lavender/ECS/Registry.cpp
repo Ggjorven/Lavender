@@ -5,35 +5,10 @@
 
 #include "Lavender/ECS/Components.hpp"
 
+#include <entt/entt.hpp>
+
 namespace Lavender
 {
-
-	void Registry::AddEntity(const UUID& uuid, const Entity& entity)
-	{
-		m_Registry.emplace_or_replace<UUID>(entity.GetHandle(), uuid);
-
-		m_Entities[uuid] = entity;
-	}
-
-	void Registry::RemoveEntity(const UUID& uuid)
-	{
-		m_Entities.erase(uuid);
-	}
-
-	UUID Registry::CreateEntity(const UUID& uuid)
-	{
-		Entity entity = Entity(m_Registry);
-		
-		AddEntity(uuid, entity);
-		
-		return uuid;
-	}
-
-	void Registry::Clear()
-	{
-		m_Registry.clear();
-		m_Entities.clear();
-	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Helper functions
@@ -49,17 +24,6 @@ namespace Lavender
 			auto dstEntity = entityMap[uuid].GetHandle();
 			auto& component = src.get<TComponent>(entity);
 			dst.emplace_or_replace<TComponent>(dstEntity, component);
-
-			// Note(Jorben): For some reason the MeshComponent doesn't copy properly
-			/*
-			if constexpr (std::is_same_v<TComponent, MeshComponent>)
-			{
-				MeshComponent& srcMesh = component;
-				MeshComponent& dstMesh = dst.get<MeshComponent>(dstEntity);
-				dstMesh.MeshObject = srcMesh.MeshObject;
-				dstMesh.Material = srcMesh.Material;
-			}
-			*/
 		}
 	}
 
@@ -76,6 +40,64 @@ namespace Lavender
 		CopyComponents<RestComponents...>(Utils::TypeGroup<RestComponents...>(), src, dst, entityMap);
 	}
 
+	/////////////////////////////////////////////////////////////////////////////
+
+	template<typename TComponent>
+	void RemoveComponent(entt::registry& registry, const entt::entity& entity)
+	{
+		auto view = registry.view<TComponent>();
+
+		if (view.contains(entity))
+			registry.remove<TComponent>(entity);
+	}
+
+	template<typename... TComponents>
+	void RemoveComponents(Utils::TypeGroup<TComponents...> group, entt::registry& registry, const entt::entity& entity)
+	{
+		// Note(Jorben): Empty function for when there are no components
+	}
+
+	template<typename FirstComponent, typename ... RestComponents>
+	void RemoveComponents(Utils::TypeGroup<FirstComponent, RestComponents...> group, entt::registry& registry, const entt::entity& entity)
+	{
+		RemoveComponent<FirstComponent>(registry, entity);
+		RemoveComponents<RestComponents...>(Utils::TypeGroup<RestComponents...>(), registry, entity);
+	}
+
+	////////////////////////////////////////////////////////////////////////////
+	// Core functions
+	////////////////////////////////////////////////////////////////////////////
+	void Registry::AddEntity(const UUID& uuid, const Entity& entity)
+	{
+		m_Registry.emplace_or_replace<UUID>(entity.GetHandle(), uuid);
+
+		m_Entities[uuid] = entity;
+	}
+
+	void Registry::RemoveEntity(const UUID& uuid)
+	{
+		entt::entity entity = m_Entities[uuid].GetHandle();
+
+		RemoveComponents(AllComponents(), m_Registry, entity);
+
+		m_Registry.destroy(entity);
+		m_Entities.erase(uuid);
+	}
+
+	UUID Registry::CreateEntity(const UUID& uuid)
+	{
+		Entity entity = Entity(m_Registry);
+
+		AddEntity(uuid, entity);
+
+		return uuid;
+	}
+
+	void Registry::Clear()
+	{
+		m_Registry.clear();
+		m_Entities.clear();
+	}
 
 	void Registry::CopyRegistry(Registry& registry)
 	{

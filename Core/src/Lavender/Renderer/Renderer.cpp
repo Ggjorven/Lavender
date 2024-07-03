@@ -50,6 +50,11 @@ namespace Lavender
 		s_RenderInstance->Submit(function);
 	}
 
+	void Renderer::SubmitToBack(RenderFunction function)
+	{
+		s_RenderInstance->SubmitToBack(function);
+	}
+
 	void Renderer::SubmitFree(FreeFunction function)
 	{
 		s_RenderInstance->SubmitFree(function);

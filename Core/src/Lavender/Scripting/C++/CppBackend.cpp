@@ -52,9 +52,14 @@ namespace Lavender
 
 		m_Cache.OnCreate = m_Dll->GetCustomFunction<Script::OnCreateFn>("Lavender_ScriptEntityOnCreate");
 		m_Cache.OnUpdate = m_Dll->GetCustomFunction<Script::OnUpdateFn>("Lavender_ScriptEntityOnUpdate");
+		m_Cache.OnEvent = m_Dll->GetCustomFunction<Script::OnEventFn>("Lavender_ScriptEntityOnEvent");
 		m_Cache.GetUUID = m_Dll->GetCustomFunction<Script::GetUUIDFn>("Lavender_ScriptEntityGetUUID");
 
 		CppFunctions::OutSource(m_Dll);
+
+		// Initialize Utils::Tools
+		Script::ToolsInitFn toolsInit = m_Dll->GetCustomFunction<Script::ToolsInitFn>("Lavender_ToolsInit");
+		if (toolsInit) toolsInit();
 
 		// Reload previous class instances
 		for (auto& [uuid, info] : classes)
@@ -73,11 +78,17 @@ namespace Lavender
 			m_Cache.OnUpdate(info.Instance, deltaTime);
 	}
 
+	void CppBackend::OnEventAll(Event& event)
+	{
+		for (auto& [uuid, info] : m_Instances)
+			m_Cache.OnEvent(info.Instance, (Script::Event*)&event);
+	}
+
 	void CppBackend::AddInstance(const std::string& classname, const UUID& entity)
 	{
 		m_Instances[entity] = ScriptEntityInfo(classname, (Script::Entity*)m_Dll->CreateClass(classname));
 		
-		UUID& uuid = *m_Cache.GetUUID(m_Instances[entity].Instance);
+		UUID& uuid = *((UUID*)m_Cache.GetUUID(m_Instances[entity].Instance));
 		uuid = entity;
 	}
 

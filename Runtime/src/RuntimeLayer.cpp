@@ -44,7 +44,7 @@ void RuntimeLayer::OnUpdate(float deltaTime)
 {
 	APP_PROFILE_SCOPE("Runtime::Update");
 
-	Application::Get().GetWindow().SetTitle(fmt::format("{0} - {1} | FPS: {2} | Frametime: {3:.3f}ms", m_Project->GetInfo().Name, Track::Lavender::VersionTitle, Track::Frame::FPS, Track::Frame::FrameTime)); // TODO: Remove takes 300microsecs
+	//Application::Get().GetWindow().SetTitle(fmt::format("{0} - {1} | FPS: {2} | Frametime: {3:.3f}ms", m_Project->GetInfo().Name, Track::Lavender::VersionTitle, Track::Frame::FPS, Track::Frame::FrameTime)); // TODO: Remove takes 300microsecs
 
 	m_Project->OnUpdate(deltaTime);
 }

@@ -25,15 +25,21 @@ namespace Lavender
 		{
 			Constants::DepthVert = { Track::Lavender::Directory / "Editor/Resources/Shaders/Depth.vert.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Depth.vert.cache" };
 			Constants::DepthFrag = { Track::Lavender::Directory / "Editor/Resources/Shaders/Depth.frag.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Depth.frag.cache" };
+
 			Constants::LightCulling = { Track::Lavender::Directory / "Editor/Resources/Shaders/LightCulling.comp.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/LightCulling.comp.cache" };
+
 			Constants::ShadingVert = { Track::Lavender::Directory / "Editor/Resources/Shaders/Shading.vert.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Shading.vert.cache" };
 			Constants::ShadingFrag = { Track::Lavender::Directory / "Editor/Resources/Shaders/Shading.frag.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/Shading.frag.cache" };
+
+			Constants::UIVert = { Track::Lavender::Directory / "Editor/Resources/Shaders/UI.vert.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/UI.vert.cache" };
+			Constants::UIFrag = { Track::Lavender::Directory / "Editor/Resources/Shaders/UI.frag.glsl", Track::Lavender::Directory / "Editor/Resources/Shaders/Caches/UI.frag.cache" };
 		}
 
 		// Initialize all resources
 		InitDepth(compiler, cacher);
 		InitLightCulling(compiler, cacher);
 		InitShading(compiler, cacher);
+		InitUI(compiler, cacher);
 		InitResources();
 	}
 
@@ -67,6 +73,11 @@ namespace Lavender
 		Shading.RenderPass.reset();
 
 		Shading.DescriptorSets.reset();
+
+		// UI
+		UI.Pipeline.reset();
+		UI.RenderPass.reset();
+		UI.DescriptorSets.reset();
 
 		// FrameResources
 		SceneBuffer.reset();
@@ -228,7 +239,7 @@ namespace Lavender
 			renderPassSpecs.ColourAttachment = Renderer::GetSwapChainImages();
 
 		renderPassSpecs.ColourLoadOp = LoadOperation::Clear;
-		renderPassSpecs.ColourClearColour = { 0.0f, 0.0f, 0.0f, 1.0f };
+		renderPassSpecs.ColourClearColour = { 0.16f, 0.16f, 0.16f, 1.0f };
 		renderPassSpecs.PreviousColourImageLayout = ImageLayout::Undefined;
 
 		if (Project::Get()->GetState() == WorkSpace::State::Editor)
@@ -257,6 +268,58 @@ namespace Lavender
 		pipelineSpecs.Blending = false;
 
 		Shading.Pipeline = Pipeline::Create(pipelineSpecs, Shading.DescriptorSets, shader, Shading.RenderPass);
+	}
+
+	void FrameResources::InitUI(Ref<ShaderCompiler> compiler, Ref<ShaderCacher> cacher)
+	{
+		return; // TODO: Implement
+
+		UI.DescriptorSets = DescriptorSets::Create(
+		{
+			// Set 0
+			{ Constants::PreAllocatedUISets, { 0, {
+				{ DescriptorType::DynamicUniformBuffer, 0, "u_Model", ShaderStage::Vertex },
+			}}},
+
+			// Set 1
+			{ 1, { 1, {
+				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex },
+			}}}
+		});
+
+		CommandBufferSpecification cmdBufSpecs = {};
+		cmdBufSpecs.Usage = CommandBufferUsage::Sequence;
+
+		auto cmdBuf = CommandBuffer::Create(cmdBufSpecs);
+
+		RenderPassSpecification renderPassSpecs = {};
+		renderPassSpecs.ColourAttachment = Shading.RenderPass->GetSpecification().ColourAttachment;
+		renderPassSpecs.ColourLoadOp = LoadOperation::Clear;
+		renderPassSpecs.ColourClearColour = { 0.16f, 0.16f, 0.16f, 1.0f };
+		renderPassSpecs.PreviousColourImageLayout = Shading.RenderPass->GetSpecification().FinalColourImageLayout;
+		renderPassSpecs.FinalColourImageLayout = Shading.RenderPass->GetSpecification().FinalColourImageLayout;
+
+		renderPassSpecs.DepthLoadOp = LoadOperation::Clear;
+		renderPassSpecs.DepthAttachment = Renderer::GetDepthImage();
+		renderPassSpecs.PreviousDepthImageLayout = ImageLayout::DepthRead;
+		renderPassSpecs.FinalDepthImageLayout = ImageLayout::Depth;
+
+		UI.RenderPass = RenderPass::Create(renderPassSpecs, cmdBuf);
+
+		ShaderSpecification shaderSpecs = {};
+		shaderSpecs.Vertex = cacher->GetLatest(compiler, Constants::UIVert.Cache, Constants::UIVert.Shader, ShaderStage::Vertex);
+		shaderSpecs.Fragment = cacher->GetLatest(compiler, Constants::UIFrag.Cache, Constants::UIFrag.Shader, ShaderStage::Fragment);
+
+		auto shader = Shader::Create(shaderSpecs);
+
+		PipelineSpecification pipelineSpecs = {};
+		pipelineSpecs.Bufferlayout = MeshVertex::GetLayout(); // TODO: Update
+		pipelineSpecs.Polygonmode = PolygonMode::Fill;
+		pipelineSpecs.Cullingmode = CullingMode::None;
+		pipelineSpecs.LineWidth = 1.0f;
+		pipelineSpecs.Blending = false;
+
+		UI.Pipeline = Pipeline::Create(pipelineSpecs, UI.DescriptorSets, shader, UI.RenderPass);
 	}
 
 	void FrameResources::InitResources()

@@ -63,9 +63,11 @@ namespace Lavender::UI
 			TagComponent& tag = entity.GetComponent<TagComponent>();
 
 			bool selected = (uuid == m_SelectedEntity);
-			UI::Selectable(fmt::format("{0}##{1}", tag.Tag, uuid.String()), &selected);
+			bool wasSelected = selected;
+			bool pressed = UI::Selectable(fmt::format("{0}##{1}", tag.Tag, uuid.String()), selected);
 
-			if (selected) m_SelectedEntity = uuid;
+			if (pressed && wasSelected) m_SelectedEntity = UUID::Empty;
+			else if (selected) m_SelectedEntity = uuid;
 
 			// Extra data for popup
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
@@ -79,13 +81,21 @@ namespace Lavender::UI
 			{
 				// Entity creation
 				if (ImGui::MenuItem("Entity"))
+				{
 					m_SelectedEntity = Scene::Get()->GetRegistry(Project::Get()->GetState()).CreateEntity();
+
+					Entity& entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(m_SelectedEntity);
+					entity.AddComponent<TagComponent>();
+					entity.AddComponent<TransformComponent>();
+				}
 
 				ImGui::EndMenu();
 			}
 
 			if (entityHovered != UUID::Empty && ImGui::MenuItem(" Delete"))
 			{
+				Scene::Get()->GetRegistry(Project::Get()->GetState()).RemoveEntity(entityHovered);
+				
 				// Select the first entity as the selected
 				{
 					auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
@@ -95,8 +105,6 @@ namespace Lavender::UI
 						break;
 					}
 				}
-
-				Scene::Get()->GetRegistry(Project::Get()->GetState()).RemoveEntity(entityHovered);
 			}
 
 			ImGui::EndMenu();
