@@ -46,7 +46,8 @@ project "Editor"
 
 	links
 	{
-		"Lavender"
+		"Lavender",
+		"EditorGame"
 	}
 	
 	defines

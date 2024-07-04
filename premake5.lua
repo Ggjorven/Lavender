@@ -150,5 +150,6 @@ group "Lavender"
 group ""
 
 include "Editor"
+include "EditorGame"
 include "Runtime"
 ------------------------------------------------------------------------------

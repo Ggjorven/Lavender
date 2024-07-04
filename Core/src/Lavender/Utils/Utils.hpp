@@ -15,6 +15,9 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include <codecvt>
+#include <locale>
+
 #include <glm/glm.hpp>
 
 #include "Lavender/Core/Logging.hpp"
@@ -96,6 +99,12 @@ namespace Lavender::Utils
             }
 
             return false;
+        }
+
+        inline static std::wstring WideString(const std::string& str) 
+        {
+            std::wstring wideString = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
+            return wideString;
         }
 
     private:

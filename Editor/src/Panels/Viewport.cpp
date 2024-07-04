@@ -139,7 +139,18 @@ namespace Lavender::UI
 
 			// Play/Stop Button
 			if (ImGui::ImageButton((ImTextureID)playButton->GetTextureID(), { 32.0f, 32.0f }))
-				Project::Get()->SwitchState();
+			{
+				if (Project::Get()->GetScript())
+				{
+					Project::Get()->GetScript()->Unload();
+				}
+
+				// TODO: Make usable on all platforms
+				m_EditorGame.Start(Track::Lavender::Directory / "Editor/Resources/Editor/Game" / ConfigurationToString(Track::Lavender::Config) / "EditorGame.exe", std::filesystem::relative(Project::Get()->GetInfo().Path, Track::Lavender::Directory).string());
+
+				//Project::Get()->SwitchState();
+			}
+			if (m_EditorGame.IsRunning()) APP_LOG_TRACE("Running");
 
 
 			// ImGuizmo buttons

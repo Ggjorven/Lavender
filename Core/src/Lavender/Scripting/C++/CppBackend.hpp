@@ -44,6 +44,7 @@ namespace Lavender
 		CppBackend(const ScriptingSpecification& specs);
 		virtual ~CppBackend();
 
+		void Unload() override;
 		void Reload() override;
 
 		void OnCreateAll() override;

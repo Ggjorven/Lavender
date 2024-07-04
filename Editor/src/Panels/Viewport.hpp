@@ -8,6 +8,8 @@
 #include <Lavender/UI/UI.hpp>
 #include <Lavender/UI/Style.hpp>
 
+#include <Lavender/WorkSpace/Executable.hpp>
+
 #include <ImGuizmo.h>
 
 #include "Panels/Entities.hpp"
@@ -40,6 +42,8 @@ namespace Lavender::UI
 		UI::StyleList m_Colours = { };
 
 		glm::vec2 m_TopLeftCursorPos = {};
+
+		Executable m_EditorGame = {};
 
 		// ImGuizmo state
 		ImGuizmo::MODE m_Mode = ImGuizmo::MODE::LOCAL;

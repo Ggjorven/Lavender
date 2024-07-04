@@ -32,6 +32,12 @@ namespace Lavender
 			m_Dll->DeleteClass(info.Name, info.Instance);
 	}
 
+	void CppBackend::Unload()
+	{
+		m_Instances.clear();
+		m_Dll->Unload();
+	}
+
 	void CppBackend::Reload()
 	{
 		// Copy classes to recreate

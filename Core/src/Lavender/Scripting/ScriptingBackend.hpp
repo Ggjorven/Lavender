@@ -30,6 +30,7 @@ namespace Lavender
 		ScriptingBackend() = default;
 		virtual ~ScriptingBackend() = default;
 
+		virtual void Unload() = 0;
 		virtual void Reload() = 0;
 		
 		virtual void OnCreateAll() = 0;
