@@ -26,8 +26,6 @@ namespace Lavender
 		void OnRender();
 		void OnEvent(Event& e);
 
-		void SwitchState();
-
 		inline const WorkSpace::ProjectInfo& GetInfo() { return m_Info; }
 		inline WorkSpace::State& GetState() { return m_State; }
 		inline SceneCollection& GetScenes() { return m_Scenes; }

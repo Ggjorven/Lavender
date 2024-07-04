@@ -77,7 +77,7 @@ namespace Lavender
 	{
 		APP_PROFILE_SCOPE("SceneRenderer::UpdateModels");
 
-		auto view = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<MeshComponent>();
+		auto view = m_Scene->GetRegistry().GetRegistry().view<MeshComponent>();
 		
 		if (view.size() > (size_t)m_Resources.AllocatedModels)
 		{
@@ -90,7 +90,7 @@ namespace Lavender
 		size_t i = 0;
 		for (auto& entity : view)
 		{
-			auto transforms = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<TransformComponent>();
+			auto transforms = m_Scene->GetRegistry().GetRegistry().view<TransformComponent>();
 
 			if (!transforms.contains(entity))
 			{
@@ -111,7 +111,7 @@ namespace Lavender
 	{
 		APP_PROFILE_SCOPE("SceneRenderer::UpdateLights");
 
-		auto view = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<PointLightComponent>();
+		auto view = m_Scene->GetRegistry().GetRegistry().view<PointLightComponent>();
 		std::vector<ShaderResource::PointLight> lights(view.size());
 
 		size_t i = 0;
@@ -119,7 +119,7 @@ namespace Lavender
 		{
 			PointLightComponent pointLight = view.get<PointLightComponent>(entity);
 
-			auto transforms = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<TransformComponent>();
+			auto transforms = m_Scene->GetRegistry().GetRegistry().view<TransformComponent>();
 
 			if (!transforms.contains(entity))
 			{
@@ -171,7 +171,7 @@ namespace Lavender
 			m_Resources.Depth.Pipeline->Use(m_Resources.Depth.RenderPass->GetCommandBuffer());
 			cameraSet->Bind(m_Resources.Depth.Pipeline, m_Resources.Depth.RenderPass->GetCommandBuffer());
 
-			auto view = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<MeshComponent>();
+			auto view = m_Scene->GetRegistry().GetRegistry().view<MeshComponent>();
 			std::vector<ShaderResource::Model> matrices(view.size());
 
 			size_t i = 0;
@@ -247,7 +247,7 @@ namespace Lavender
 			m_Resources.Shading.Pipeline->Use(m_Resources.Shading.RenderPass->GetCommandBuffer());
 			set1->Bind(m_Resources.Shading.Pipeline, m_Resources.Shading.RenderPass->GetCommandBuffer());
 
-			auto view = m_Scene->GetRegistry(Project::Get()->GetState()).GetRegistry().view<MeshComponent>();
+			auto view = m_Scene->GetRegistry().GetRegistry().view<MeshComponent>();
 
 			size_t i = 0;
 			for (auto& entity : view)

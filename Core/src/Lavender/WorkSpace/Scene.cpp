@@ -99,9 +99,6 @@ namespace Lavender
 	void Scene::StartRuntime()
 	{
 		Ref<ScriptingBackend> script = Project::Get()->GetScript();
-
-		m_Registries[WorkSpace::State::Runtime].CopyRegistry(m_Registries[WorkSpace::State::Editor]);
-
 		if (script)
 		{
 			script->Reload();
@@ -111,10 +108,6 @@ namespace Lavender
 
 	void Scene::EndRuntime()
 	{
-		m_Registries[WorkSpace::State::Runtime].Clear();
-
-		// Reset things
-		Input::SetCursorMode(CursorMode::Shown);
 	}
 
 	Ref<Camera> Scene::GetActiveCamera()
@@ -124,7 +117,7 @@ namespace Lavender
 		case WorkSpace::State::Editor:		return m_Camera;
 		case WorkSpace::State::Runtime:
 		{
-			auto view = m_Registries[WorkSpace::State::Runtime].GetRegistry().view<CameraComponent>();
+			auto view = m_Registry.GetRegistry().view<CameraComponent>();
 			
 			// TODO: ScriptAble Camera
 			// TODO: Create a better system
@@ -133,7 +126,7 @@ namespace Lavender
 				CameraComponent& camera = view.get<CameraComponent>(entity);
 				if (!camera.Active) continue;
 
-				auto transformView = m_Registries[WorkSpace::State::Runtime].GetRegistry().view<TransformComponent>();
+				auto transformView = m_Registry.GetRegistry().view<TransformComponent>();
 				if (!transformView.contains(entity))
 				{
 					APP_LOG_WARN("Found active camera, but camera has no TransformComponent. Resorting to EditorCamera.");

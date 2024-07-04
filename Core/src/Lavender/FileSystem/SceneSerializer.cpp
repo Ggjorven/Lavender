@@ -152,7 +152,7 @@ namespace Lavender
 		file << Yaml::FileManip::Key << "Entities";
 		file << Yaml::FileManip::Value << YAML::BeginSeq;
 
-		for (auto& entity : m_Scene->m_Registries[WorkSpace::State::Editor].GetDict())
+		for (auto& entity : m_Scene->m_Registry.GetDict())
 			SerializeEntity(file.GetEmitter(), entity.first);
 
 		file << Yaml::FileManip::EndSeq;
@@ -187,7 +187,7 @@ namespace Lavender
 	// Entity Functions
 	void SceneSerializer::SerializeEntity(YAML::Emitter& emitter, const UUID& uuid)
 	{
-		Entity entity = m_Scene->GetRegistry(WorkSpace::State::Editor).GetDict()[uuid];
+		Entity entity = m_Scene->GetRegistry().GetDict()[uuid];
 
 		emitter << YAML::BeginMap;
 		emitter << YAML::Key << "Entity";
@@ -281,8 +281,8 @@ namespace Lavender
 	void SceneSerializer::DeserializeEntity(YAML::detail::iterator_value& node)
 	{
 		UUID uuid = node["Entity"].as<uint64_t>();
-		m_Scene->m_Registries[Project::Get()->GetState()].CreateEntity(uuid);
-		Entity entity = m_Scene->m_Registries[Project::Get()->GetState()].GetDict()[uuid];
+		m_Scene->m_Registry.CreateEntity(uuid);
+		Entity entity = m_Scene->m_Registry.GetDict()[uuid];
 
 		// TagComponent
 		auto tagComponent = node["TagComponent"];

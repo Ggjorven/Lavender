@@ -15,7 +15,7 @@ namespace Lavender::UI
 
 		// Select the first entity as the selected on startup
 		{
-			auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
+			auto& entities = Scene::Get()->GetRegistry().GetDict();
 			for (auto& [uuid, entity] : entities)
 			{
 				m_SelectedEntity = uuid;
@@ -50,7 +50,7 @@ namespace Lavender::UI
 		}
 
 		// All Entities
-		auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
+		auto& entities = Scene::Get()->GetRegistry().GetDict();
 		for (auto& [uuid, entity] : entities)
 		{
 			if (uuid == UUID::Empty) break;
@@ -82,9 +82,9 @@ namespace Lavender::UI
 				// Entity creation
 				if (ImGui::MenuItem("Entity"))
 				{
-					m_SelectedEntity = Scene::Get()->GetRegistry(Project::Get()->GetState()).CreateEntity();
+					m_SelectedEntity = Scene::Get()->GetRegistry().CreateEntity();
 
-					Entity& entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(m_SelectedEntity);
+					Entity& entity = Scene::Get()->GetRegistry().GetEntity(m_SelectedEntity);
 					entity.AddComponent<TagComponent>();
 					entity.AddComponent<TransformComponent>();
 				}
@@ -94,11 +94,11 @@ namespace Lavender::UI
 
 			if (entityHovered != UUID::Empty && ImGui::MenuItem(" Delete"))
 			{
-				Scene::Get()->GetRegistry(Project::Get()->GetState()).RemoveEntity(entityHovered);
+				Scene::Get()->GetRegistry().RemoveEntity(entityHovered);
 				
 				// Select the first entity as the selected
 				{
-					auto& entities = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetDict();
+					auto& entities = Scene::Get()->GetRegistry().GetDict();
 					for (auto& [uuid, entity] : entities)
 					{
 						m_SelectedEntity = uuid;

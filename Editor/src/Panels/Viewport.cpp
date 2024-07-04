@@ -8,6 +8,8 @@
 #include "Lavender/Renderer/Renderer.hpp"
 #include "Lavender/Renderer/CommandBuffer.hpp"
 
+#include "Lavender/FileSystem/ProjectSerializer.hpp"
+
 #include "Lavender/WorkSpace/Scene.hpp"
 #include "Lavender/WorkSpace/Project.hpp"
 #include "Lavender/WorkSpace/EngineTracker.hpp"
@@ -24,6 +26,8 @@
 
 namespace Lavender::UI
 {
+
+	static WorkSpace::State s_State = WorkSpace::State::Editor;
 
 	Viewport::Viewport(Ref<Entities> entities)
 		: m_EntitiesRef(entities)
@@ -133,24 +137,48 @@ namespace Lavender::UI
 
 		// Buttons
 		{
-			Ref<Image2D> playButton = ((Project::Get()->GetState() == WorkSpace::State::Editor) ? m_PlayButton : m_StopButton);
 			UI::ShiftCursorX(((float)Track::Viewport::Width / 2.0f) - ((32.0f / 2.0f)));
 			UI::ShiftCursorY(1.0f);
-
-			// Play/Stop Button
-			if (ImGui::ImageButton((ImTextureID)playButton->GetTextureID(), { 32.0f, 32.0f }))
+			
+			// Play/Stop
+			static ImVec2 buttonSize = { 32.0f, 32.0f };
+			switch (s_State)
 			{
-				if (Project::Get()->GetScript())
+			case WorkSpace::State::Editor:
+			{
+				if (ImGui::ImageButton((ImTextureID)m_PlayButton->GetTextureID(), buttonSize))
 				{
-					Project::Get()->GetScript()->Unload();
+					ProjectSerializer serializer(Project::Get());
+					serializer.Serialize();
+
+					SwitchState();
+
+					// TODO: Make usable on all platforms
+					m_EditorGame.Start(Track::Lavender::Directory / "Editor/Resources/Editor/Game" / ConfigurationToString(Track::Lavender::Config) / "EditorGame.exe", std::filesystem::relative(Project::Get()->GetInfo().Path, Track::Lavender::Directory).string());
+				}
+				break;
+			}
+			case WorkSpace::State::Runtime:
+			{
+				if (!m_EditorGame.IsRunning())
+				{
+					SwitchState();
+					break;
 				}
 
-				// TODO: Make usable on all platforms
-				m_EditorGame.Start(Track::Lavender::Directory / "Editor/Resources/Editor/Game" / ConfigurationToString(Track::Lavender::Config) / "EditorGame.exe", std::filesystem::relative(Project::Get()->GetInfo().Path, Track::Lavender::Directory).string());
-
-				//Project::Get()->SwitchState();
+				if (ImGui::ImageButton((ImTextureID)m_StopButton->GetTextureID(), buttonSize))
+				{
+					m_EditorGame.Close();
+					SwitchState();
+				}
+				break;
 			}
-			if (m_EditorGame.IsRunning()) APP_LOG_TRACE("Running");
+
+			default:
+				APP_LOG_ERROR("Invalid state passed in.")
+				break;
+			}
+
 
 
 			// ImGuizmo buttons
@@ -176,7 +204,6 @@ namespace Lavender::UI
 		}
 
 		// ImGuizmo
-		if (!(Project::Get()->GetState() == WorkSpace::State::Runtime))
 		{
 			auto scene = Scene::Get();
 			auto camera = scene->GetActiveCamera();
@@ -188,7 +215,7 @@ namespace Lavender::UI
 
 			if (m_EntitiesRef->m_SelectedEntity != UUID::Empty)
 			{
-				Entity& entity = scene->GetRegistry(Project::Get()->GetState()).GetEntity(m_EntitiesRef->m_SelectedEntity);
+				Entity& entity = scene->GetRegistry().GetEntity(m_EntitiesRef->m_SelectedEntity);
 
 				if (entity.HasComponent<TransformComponent>())
 				{
@@ -243,6 +270,33 @@ namespace Lavender::UI
 
 		m_Styles.Pop();
 		m_Colours.Pop();
+	}
+
+	void Viewport::SwitchState()
+	{
+		switch (s_State)
+		{
+		case WorkSpace::State::Editor:
+		{
+			s_State = WorkSpace::State::Runtime;
+			if (Project::Get()->GetScript())
+				Project::Get()->GetScript()->Unload();
+
+			break;
+		}
+		case WorkSpace::State::Runtime:
+		{
+			s_State = WorkSpace::State::Editor;
+			if (Project::Get()->GetScript())
+				Project::Get()->GetScript()->Reload();
+
+			break;
+		}
+
+		default:
+			APP_LOG_ERROR("Invalid State passed in.");
+			break;
+		}
 	}
 
 }

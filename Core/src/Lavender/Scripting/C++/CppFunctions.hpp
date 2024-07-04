@@ -119,7 +119,7 @@ namespace Lavender
 		/////////////////////////////////////////////////////
 		inline static void* Internal_AddComponent(Script::ComponentType type, Script::UUID uuid, void* data)
 		{
-			Entity entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity((uint64_t)uuid);
+			Entity entity = Scene::Get()->GetRegistry().GetEntity((uint64_t)uuid);
 
 			switch (type)
 			{
@@ -181,7 +181,7 @@ namespace Lavender
 
 		inline static void* Internal_AddOrReplaceComponent(Script::ComponentType type, Script::UUID uuid, void* data)
 		{
-			Entity entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity((uint64_t)uuid);
+			Entity entity = Scene::Get()->GetRegistry().GetEntity((uint64_t)uuid);
 
 			switch (type)
 			{
@@ -243,7 +243,7 @@ namespace Lavender
 
 		inline static bool Internal_HasComponent(Script::ComponentType type, Script::UUID uuid)
 		{
-			Entity entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity((uint64_t)uuid);
+			Entity entity = Scene::Get()->GetRegistry().GetEntity((uint64_t)uuid);
 
 			switch (type)
 			{
@@ -268,7 +268,7 @@ namespace Lavender
 
 		inline static void* Internal_GetComponent(Script::ComponentType type, Script::UUID uuid)
 		{
-			Entity entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity((uint64_t)uuid);
+			Entity entity = Scene::Get()->GetRegistry().GetEntity((uint64_t)uuid);
 
 			switch (type)
 			{
@@ -330,7 +330,7 @@ namespace Lavender
 
 		inline static void Internal_RemoveComponent(Script::ComponentType type, Script::UUID uuid)
 		{
-			Entity entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity((uint64_t)uuid);
+			Entity entity = Scene::Get()->GetRegistry().GetEntity((uint64_t)uuid);
 
 			switch (type)
 			{

@@ -79,12 +79,16 @@ namespace Lavender
         {
 #if defined(APP_PLATFORM_WINDOWS)
             TerminateProcess(m_ProcessInfo.hProcess, 0);
+            WaitForSingleObject(m_ProcessInfo.hProcess, INFINITE);
             CloseHandle(m_ProcessInfo.hProcess);
             CloseHandle(m_ProcessInfo.hThread);
 #elif defined(APP_PLATFORM_LINUX)
             kill(m_ProcessInfo, SIGKILL);
+            waitpid(m_ProcessInfo, nullptr, 0);
 #endif
         }
+
+        m_IsRunning = false;
     }
 
 }

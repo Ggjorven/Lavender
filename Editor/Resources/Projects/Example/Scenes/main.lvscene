@@ -19,7 +19,7 @@ Data:
       TagComponent:
         Tag: Camera
       TransformComponent:
-        Position: [0, 1.24415994, 2.48717856]
+        Position: [0, 1.83169377, 4.24117279]
         Size: [1, 1, 1]
         Rotation: [0, -0, 0]
       ScriptComponent:
@@ -31,3 +31,13 @@ Data:
         Active: true
         Near: 0.100000001
         Far: 1000
+    - Entity: 17080169310526362887
+      TagComponent:
+        Tag: Unnamed Entity
+      TransformComponent:
+        Position: [0.0181267858, 1.18487537, -0.0649394244]
+        Size: [1, 1, 1]
+        Rotation: [-90, -90, 0]
+      MeshComponent:
+        Mesh: 69
+        Material: 70

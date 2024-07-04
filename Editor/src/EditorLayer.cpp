@@ -130,14 +130,6 @@ bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
 		ProjectSerializer serializer(m_Project);
 		serializer.Serialize();
 	}
-	// Stop running
-	else if (e.GetKeyCode() == Key::Q && Input::IsKeyPressed(Key::LeftControl))
-	{
-		if (m_Project->GetState() == WorkSpace::State::Runtime)
-			Project::Get()->SwitchState();
-		else
-			APP_LOG_WARN("Tried to stop execution, but no project is running.");
-	}
 
 	return false;
 }
@@ -346,31 +338,6 @@ void EditorLayer::MenuBar()
 	if (ImGui::BeginMenu("Edit"))
 	{
 		// TODO: ...
-
-		ImGui::EndMenu();
-	}
-
-	if (ImGui::BeginMenu("Unnamed"))
-	{
-		switch (Project::Get()->GetState())
-		{
-		case WorkSpace::State::Editor:
-		{
-			if (ImGui::MenuItem("Start running"))
-				Project::Get()->SwitchState();
-			break;
-		}
-		case WorkSpace::State::Runtime:
-		{
-			if (ImGui::MenuItem("Stop running", "Ctrl+Q"))
-				Project::Get()->SwitchState();
-			break;
-		}
-
-		default:
-			APP_LOG_ERROR("Invalid state passed in");
-			break;
-		}
 
 		ImGui::EndMenu();
 	}

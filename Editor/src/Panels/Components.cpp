@@ -97,7 +97,7 @@ namespace Lavender::UI
 			return;
 		}
 
-		Entity& entity = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(m_EntitiesRef->m_SelectedEntity);
+		Entity& entity = Scene::Get()->GetRegistry().GetEntity(m_EntitiesRef->m_SelectedEntity);
 		if (!entity.HasComponent<TagComponent>())
 			entity.AddComponent<TagComponent>();
 
@@ -354,7 +354,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(asset->GetName(), [asset, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<MeshComponent>();
 						mesh.Mesh = RefHelper::RefAs<MeshAsset>(asset);
 					});
 					meshes.Add(item);
@@ -374,7 +374,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(data.Name, [data, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<MeshComponent>();
 
 						Ref<Asset> newMesh = MeshAsset::Create(data);
 						newMesh->Deserialize();
@@ -400,7 +400,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(asset->GetName(), [asset, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<MeshComponent>();
 						mesh.Material = RefHelper::RefAs<MaterialAsset>(asset);
 					});
 					materials.Add(item);
@@ -420,7 +420,7 @@ namespace Lavender::UI
 
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(data.Name, [data, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						MeshComponent& mesh = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<MeshComponent>();
+						MeshComponent& mesh = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<MeshComponent>();
 
 						Ref<Asset> newMaterial = MaterialAsset::Create(data);
 						newMaterial->Deserialize();
@@ -513,7 +513,7 @@ namespace Lavender::UI
 				{
 					std::pair<std::string, UI::Combo::SelectionFunc> item = std::make_pair(cls, [cls, selected = m_EntitiesRef->m_SelectedEntity]()
 					{
-						ScriptComponent& script = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<ScriptComponent>();
+						ScriptComponent& script = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<ScriptComponent>();
 
 						if (Project::Get()->GetScript())
 							Project::Get()->GetScript()->AddInstance(cls, selected);
@@ -563,11 +563,11 @@ namespace Lavender::UI
 			{
 				UI::Combo active = {};
 				active.Add(std::make_pair("True", [selected = m_EntitiesRef->m_SelectedEntity]() {
-					CameraComponent& camera = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<CameraComponent>();
+					CameraComponent& camera = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<CameraComponent>();
 					camera.Active = true;
 				}));
 				active.Add(std::make_pair("False", [selected = m_EntitiesRef->m_SelectedEntity]() {
-					CameraComponent& camera = Scene::Get()->GetRegistry(Project::Get()->GetState()).GetEntity(selected).GetComponent<CameraComponent>();
+					CameraComponent& camera = Scene::Get()->GetRegistry().GetEntity(selected).GetComponent<CameraComponent>();
 					camera.Active = false;
 				}));
 

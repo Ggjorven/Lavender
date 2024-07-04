@@ -35,6 +35,8 @@ namespace Lavender::UI
 
 		void RenderTopUI();
 
+		void SwitchState();
+
 	private:
 		Ref<Entities> m_EntitiesRef = nullptr;
 

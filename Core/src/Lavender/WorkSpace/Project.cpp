@@ -39,25 +39,6 @@ namespace Lavender
 		m_Scenes.GetActive()->OnEvent(e);
 	}
 
-	void Project::SwitchState()
-	{
-		switch (m_State)
-		{
-		case WorkSpace::State::Editor:
-			m_State = WorkSpace::State::Runtime;
-			m_Scenes.GetActive()->StartRuntime();
-			break;
-		case WorkSpace::State::Runtime:
-			m_State = WorkSpace::State::Editor;
-			m_Scenes.GetActive()->EndRuntime();
-			break;
-
-		default:
-			APP_LOG_ERROR("Invalid State passed in.");
-			break;
-		}
-	}
-
 	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
 	{
 		Ref<Project> project = RefHelper::Create<Project>(info, initialState);
