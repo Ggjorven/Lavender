@@ -17,6 +17,12 @@ namespace Lavender
 
 	class SceneSerializer;
 
+	struct SceneInfo
+	{
+	public:
+		std::filesystem::path Path = {};
+	};
+
 	class Scene
 	{
 	public:
@@ -43,7 +49,7 @@ namespace Lavender
 
 	private:
 		UUID m_ID = UUID::Empty;
-		WorkSpace::SceneInfo m_Info = {};
+		SceneInfo m_Info = {};
 
 		Registry m_Registry = { };
 
@@ -64,16 +70,16 @@ namespace Lavender
 		SceneCollection(const SceneCollection& other) = default;
 		virtual ~SceneCollection() = default;
 
-		void Add(const UUID& uuid, const WorkSpace::SceneInfo& info);
+		void Add(const UUID& uuid, const SceneInfo& info);
 		void Remove(const UUID& uuid); // Only removes the info
 		void Clear();
 
 		inline void SetActive(const UUID& uuid, Ref<Scene> scene) { m_ActiveScene = scene; m_LoadedScenes[uuid] = scene; }
 		inline Ref<Scene> GetActive() { return m_ActiveScene; }
-		Dict<UUID, WorkSpace::SceneInfo> GetAll() { return m_ScenesInfo; }
+		Dict<UUID, SceneInfo> GetAll() { return m_ScenesInfo; }
 
 	private:
-		Dict<UUID, WorkSpace::SceneInfo> m_ScenesInfo = { };
+		Dict<UUID, SceneInfo> m_ScenesInfo = { };
 
 		Dict<UUID, Ref<Scene>> m_LoadedScenes = { };
 		Ref<Scene> m_ActiveScene = nullptr;

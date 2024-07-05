@@ -12,14 +12,14 @@ namespace Lavender
 	struct ScriptingSpecification
 	{
 	public:
-		WorkSpace::ScriptingBackendType Type = WorkSpace::ScriptingBackendType::None;
+		WorkSpace::ScriptType Type = WorkSpace::ScriptType::None;
 
 		// Path is a dll for C++ and C# and a directory for Python
 		std::filesystem::path Path = {};
 
 	public:
 		ScriptingSpecification() = default;
-		ScriptingSpecification(WorkSpace::ScriptingBackendType type, const std::filesystem::path& path);
+		ScriptingSpecification(WorkSpace::ScriptType type, const std::filesystem::path& path);
 		virtual ~ScriptingSpecification() = default;
 	};
 
@@ -42,7 +42,9 @@ namespace Lavender
 
 		virtual std::vector<std::string> GetClasses() = 0;
 		virtual ScriptingSpecification& GetSpecification() = 0;
-		virtual WorkSpace::ScriptingBackendType GetBackendType() const = 0;
+		virtual WorkSpace::ScriptType GetBackendType() const = 0;
+
+		static std::filesystem::path GetPath(WorkSpace::ScriptType type);
 	
 		static Ref<ScriptingBackend> Create(const ScriptingSpecification& specs);
 	};

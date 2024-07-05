@@ -60,13 +60,13 @@ namespace Lavender::WorkSpace
 		return {};
 	}
 
-	std::string ScriptingBackendTypeToString(ScriptingBackendType type)
+	std::string ScriptTypeToString(ScriptType type)
 	{
 		switch (type)
 		{
-		case ScriptingBackendType::Cpp: return "C++";
-		case ScriptingBackendType::Cs: return "C#";
-		case ScriptingBackendType::Python: return "Python";
+		case ScriptType::Cpp: return "C++";
+		case ScriptType::Cs: return "C#";
+		case ScriptType::Python: return "Python";
 
 		default:
 			APP_LOG_ERROR("Invalid Configuration passed in.");

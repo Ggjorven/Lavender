@@ -16,23 +16,41 @@ namespace Lavender
 
 	class ProjectSerializer;
 
+	struct ProjectInfo
+	{
+	public:
+		std::string Name = {};
+		UUID StartScene = UUID::Empty;
+
+		std::filesystem::path Path = {};
+		std::filesystem::path Directory = {};
+
+		std::filesystem::path Assets = {};
+		std::filesystem::path Script = {};
+		std::filesystem::path Scenes = {};
+
+		WorkSpace::ScriptType ScriptType = WorkSpace::ScriptType::None;
+	};
+
 	class Project
 	{
 	public:
-		Project(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState);
+		Project(const ProjectInfo& info, WorkSpace::State initialState);
 		virtual ~Project();
 
 		void OnUpdate(float deltaTime);
 		void OnRender();
 		void OnEvent(Event& e);
 
-		inline const WorkSpace::ProjectInfo& GetInfo() { return m_Info; }
+		inline const ProjectInfo& GetInfo() { return m_Info; }
 		inline WorkSpace::State& GetState() { return m_State; }
 		inline SceneCollection& GetScenes() { return m_Scenes; }
 		inline Ref<AssetManager> GetAssets() { return m_Assets; }
 		inline Ref<ScriptingBackend> GetScript() { return m_Scripting; }
 
-		static Ref<Project> Create(const WorkSpace::ProjectInfo& info = WorkSpace::ProjectInfo(), WorkSpace::State initialState = WorkSpace::State::Runtime);
+		void LoadScript();
+
+		static Ref<Project> Create(const ProjectInfo& info = ProjectInfo(), WorkSpace::State initialState = WorkSpace::State::Runtime);
 		static Ref<Project> Get();
 
 	private:
@@ -40,7 +58,7 @@ namespace Lavender
 		void Destroy();
 
 	private:
-		WorkSpace::ProjectInfo m_Info = {};
+		ProjectInfo m_Info = {};
 		WorkSpace::State m_State = WorkSpace::State::None;
 		SceneCollection m_Scenes = { };
 

@@ -164,7 +164,7 @@ namespace Lavender
 
 
 	// SceneCollection
-	void SceneCollection::Add(const UUID& uuid, const WorkSpace::SceneInfo& info)
+	void SceneCollection::Add(const UUID& uuid, const SceneInfo& info)
 	{
 		m_ScenesInfo[uuid] = info;
 	}

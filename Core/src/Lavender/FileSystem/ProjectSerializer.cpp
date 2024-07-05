@@ -108,7 +108,7 @@ namespace Lavender
 
 		// Scripting
 		auto scripting = file["Scripting"];
-		info.ScriptType = (WorkSpace::ScriptingBackendType)scripting["Type"].as<uint32_t>();
+		info.ScriptType = (WorkSpace::ScriptType)scripting["Type"].as<uint32_t>();
 
 		m_Project->Init();
 	}

@@ -58,11 +58,14 @@ namespace Lavender::UI
 		{
 			UI::BeginPropertyGrid("##ScriptGrid", 2);
 
+			UI::Property("Type", "", "{0}", (Project::Get()->GetScript() ? WorkSpace::ScriptTypeToString(Project::Get()->GetScript()->GetBackendType()) : "None"));
 			UI::Property("Loaded", "", "{0}", (Project::Get()->GetScript() ? "True" : "False"));
 			UI::Property("Reload", "Reload", []() 
 			{
 				if (Project::Get()->GetScript())
 					Project::Get()->GetScript()->Reload();
+				else 
+					Project::Get()->LoadScript();
 			});
 
 			UI::EndPropertyGrid("##ScriptGrid");

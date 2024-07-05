@@ -59,7 +59,7 @@ namespace Lavender
 		inline Ref<Insight::Dll> GetDll() { return m_Dll; }
 		inline Dict<UUID, ScriptEntityInfo>& GetInstances() { return m_Instances; }
 
-		inline WorkSpace::ScriptingBackendType GetBackendType() const override { return WorkSpace::ScriptingBackendType::Cpp; }
+		inline WorkSpace::ScriptType GetBackendType() const override { return WorkSpace::ScriptType::Cpp; }
 
 	private:
 		void CopyOver();

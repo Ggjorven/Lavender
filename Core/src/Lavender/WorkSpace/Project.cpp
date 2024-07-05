@@ -13,7 +13,7 @@ namespace Lavender
 
 	static WeakRef<Project> s_Project = {};
 
-	Project::Project(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
+	Project::Project(const ProjectInfo& info, WorkSpace::State initialState)
 		: m_Info(info), m_State(initialState), m_Assets(AssetManager::Create())
 	{
 	}
@@ -39,7 +39,20 @@ namespace Lavender
 		m_Scenes.GetActive()->OnEvent(e);
 	}
 
-	Ref<Project> Project::Create(const WorkSpace::ProjectInfo& info, WorkSpace::State initialState)
+	void Project::LoadScript()
+	{
+		std::filesystem::path path = ScriptingBackend::GetPath(m_Info.ScriptType);
+		if (std::filesystem::exists(path))
+		{
+			ScriptingSpecification scriptingSpecs = {};
+			scriptingSpecs.Type = m_Info.ScriptType;
+			scriptingSpecs.Path = path;
+
+			m_Scripting = ScriptingBackend::Create(scriptingSpecs);
+		}
+	}
+
+	Ref<Project> Project::Create(const ProjectInfo& info, WorkSpace::State initialState)
 	{
 		Ref<Project> project = RefHelper::Create<Project>(info, initialState);
 		s_Project = project;
@@ -60,15 +73,7 @@ namespace Lavender
 		m_Assets->UpdateCache(m_Info.Directory / m_Info.Assets);
 
 		// Initialize script
-		std::filesystem::path path = m_Info.Directory / m_Info.Script / "bin" / fmt::format("{0}-{1}", ConfigurationToString(Track::Lavender::Config), PlatformToString(Track::Lavender::Platform, false)) / "Script/Script.dll";
-		if (std::filesystem::exists(path))
-		{
-			ScriptingSpecification scriptingSpecs = {};
-			scriptingSpecs.Type = m_Info.ScriptType;
-			scriptingSpecs.Path = path;
-
-			m_Scripting = ScriptingBackend::Create(scriptingSpecs);
-		}
+		LoadScript();
 
 		// Initialize startscene
 		Ref<Scene> startScene = Scene::Create(m_Info.StartScene);
