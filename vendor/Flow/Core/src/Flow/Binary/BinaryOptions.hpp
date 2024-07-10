@@ -8,25 +8,30 @@ namespace Flow::Binary
 {
 
 	template<typename T>
-	struct Convert
+	struct Type
 	{
 	public:
-		static void Write(std::ofstream& output, T data)
+		inline static void Write(std::ofstream& output, T data)
 		{
 			output.write(reinterpret_cast<const char*>(&data), sizeof(T));
 		}
 
-		static T Read(std::vector<char>& input, size_t offset = 0)
+		inline static T Read(std::vector<char>& input, size_t offset = 0)
 		{
 			T result = {};
 			memcpy(&result, &input[offset], sizeof(T));
 
 			return result;
 		}
+
+		inline static size_t Size(T value = T())
+		{
+			return sizeof(T);
+		}
 	};
 
 	template<>
-	struct Convert<std::string>
+	struct Type<std::string>
 	{
 	public:
 		static void Write(std::ofstream& output, std::string data)
@@ -55,19 +60,11 @@ namespace Flow::Binary
 
 			return std::string(input.begin() + offset, input.begin() + offset + size);
 		}
+
+		inline static size_t Size(std::string value = std::string())
+		{
+			return sizeof(int32_t) + value.size();
+		}
 	};
-
-	// Used for getting the size of an object in binary files
-	template<typename T>
-	inline size_t SizeOf(T value = T())
-	{
-		return sizeof(T);
-	}
-
-	template<>
-	inline size_t SizeOf<std::string>(std::string value)
-	{
-		return sizeof(int32_t) + value.size();
-	}
 
 }

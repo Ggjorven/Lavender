@@ -15,7 +15,7 @@
 namespace Lavender::Utils
 {
 
-	std::unique_ptr<ToolKit> ToolKit::s_Instance = std::make_unique<WindowsToolKit>();
+	Unique<ToolKit> ToolKit::s_Instance = UniqueHelper::Create<WindowsToolKit>();
 	
 	WindowsToolKit::WindowsToolKit()
 	{

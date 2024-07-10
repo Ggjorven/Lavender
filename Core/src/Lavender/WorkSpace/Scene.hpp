@@ -74,7 +74,11 @@ namespace Lavender
 		void Remove(const UUID& uuid); // Only removes the info
 		void Clear();
 
-		inline void SetActive(const UUID& uuid, Ref<Scene> scene) { m_ActiveScene = scene; m_LoadedScenes[uuid] = scene; }
+		void Unload(const UUID& uuid);
+		void UnloadActive();
+		void UnloadAll();
+
+		void SetActive(const UUID& uuid, Ref<Scene> scene = nullptr);
 		inline Ref<Scene> GetActive() { return m_ActiveScene; }
 		Dict<UUID, SceneInfo> GetAll() { return m_ScenesInfo; }
 

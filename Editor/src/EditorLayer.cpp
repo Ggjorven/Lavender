@@ -9,6 +9,7 @@
 #include <Lavender/Renderer/Shader.hpp>
 
 #include <Lavender/FileSystem/ProjectSerializer.hpp>
+#include <Lavender/FileSystem/Serialization.hpp>
 
 #include <Lavender/WorkSpace/EngineTracker.hpp>
 

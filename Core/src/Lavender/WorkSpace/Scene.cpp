@@ -5,6 +5,8 @@
 #include "Lavender/Utils/Profiler.hpp"
 #include "Lavender/Core/Input/Input.hpp"
 
+#include "Lavender/FileSystem/SceneSerializer.hpp"
+
 #include "Lavender/WorkSpace/Project.hpp"
 
 namespace Lavender
@@ -179,6 +181,59 @@ namespace Lavender
 		m_ScenesInfo.clear();
 		m_LoadedScenes.clear();
 		m_ActiveScene = nullptr;
+	}
+
+	void SceneCollection::Unload(const UUID& uuid)
+	{
+		if (m_LoadedScenes.contains(uuid))
+		{
+			m_LoadedScenes[uuid] = nullptr;
+			if (m_ActiveScene->GetID() == uuid)
+				m_ActiveScene = nullptr;
+		}
+		else
+			APP_LOG_ERROR("Scene by ID: {0} doesn't exist.", (uint64_t)uuid);
+	}
+
+	void SceneCollection::UnloadActive()
+	{
+		if (m_ActiveScene)
+		{
+			m_LoadedScenes[m_ActiveScene->GetID()] = nullptr;
+			m_ActiveScene = nullptr;
+		}
+	}
+
+	void SceneCollection::UnloadAll()
+	{
+		m_ActiveScene = nullptr;
+		m_LoadedScenes.clear();
+	}
+
+	void SceneCollection::SetActive(const UUID& uuid, Ref<Scene> scene)
+	{
+		if (scene)
+		{
+			m_ActiveScene = scene;
+			m_LoadedScenes[uuid] = scene;
+		}
+		else
+		{
+			if (m_ScenesInfo.contains(uuid))
+			{
+				SceneInfo& info = m_ScenesInfo[uuid];
+
+				Ref<Scene> newScene = Scene::Create(uuid);
+
+				SceneSerializer serializer(newScene);
+				serializer.Deserialize(info.Path);
+
+				m_ActiveScene = newScene;
+				m_LoadedScenes[uuid] = newScene;
+			}
+			else
+				APP_LOG_ERROR("Scene by ID: {0} doesn't exist.", (uint64_t)uuid);
+		}
 	}
 
 }

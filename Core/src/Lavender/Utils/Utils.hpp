@@ -20,6 +20,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Lavender/Core/Core.hpp"
 #include "Lavender/Core/Logging.hpp"
 
 #define BIT(x) (1 << x)
@@ -118,7 +119,7 @@ namespace Lavender::Utils
         virtual size_t GetHeapMemoryUsageImpl() const = 0;
 
     private:
-        static std::unique_ptr<ToolKit> s_Instance;
+        static Unique<ToolKit> s_Instance;
     };
 
     struct Timer

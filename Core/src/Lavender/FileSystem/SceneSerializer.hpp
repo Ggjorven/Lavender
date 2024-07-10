@@ -20,10 +20,6 @@ namespace Lavender
 		void Deserialize(const std::filesystem::path& filepath);
 
 	private:
-		void SerializeEntity(YAML::Emitter& emitter, const UUID& uuid);
-		void DeserializeEntity(YAML::detail::iterator_value& node);
-
-	private:
 		Ref<Scene> m_Scene = nullptr;
 
 		friend class Scene;

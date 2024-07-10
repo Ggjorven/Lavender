@@ -11,8 +11,11 @@ namespace Flow::Yaml
 	class File
 	{
 	public:
+		File() = default;
 		File(const std::filesystem::path& file, FileMode mode);
 		virtual ~File();
+
+		void Close();
 
 		template<typename T>
 		File& operator << (const T& value);
@@ -20,6 +23,9 @@ namespace Flow::Yaml
 
 		YAML::Node operator [] (const std::string& key);
 
+		inline FileMode GetFileMode() const { return m_Mode; }
+
+		inline YAML::Node& GetNode() { return m_Read; }
 		inline YAML::Emitter& GetEmitter() { return m_Write; }
 
 	private:

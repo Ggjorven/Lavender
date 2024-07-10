@@ -12,6 +12,9 @@ namespace Lavender
     using Ref = std::shared_ptr<T>;
 
     template<typename T>
+    using Unique = std::unique_ptr<T>;
+
+    template<typename T>
     using WeakRef = std::weak_ptr<T>;
 
     class RefHelper
@@ -29,6 +32,16 @@ namespace Lavender
             Ref<T> newPtr = std::dynamic_pointer_cast<T>(ptr);
             APP_ASSERT(newPtr, "Assertion Failed: Failed to cast from Ref<T> to Ref<T2>");
             return newPtr;
+        }
+    };
+
+    class UniqueHelper
+    {
+    public:
+        template<typename T, typename... Args>
+        static Unique<T> Create(Args&&... args)
+        {
+            return std::make_unique<T>(std::forward<Args>(args)...);
         }
     };
 

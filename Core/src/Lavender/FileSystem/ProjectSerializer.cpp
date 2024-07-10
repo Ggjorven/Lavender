@@ -3,10 +3,17 @@
 
 #include "Lavender/Core/Logging.hpp"
 
+#include "Lavender/FileSystem/Serialization.hpp"
+#include "Lavender/FileSystem/SerializationUtils.hpp"
+
 #include <Flow/Flow.hpp>
 
 using namespace Flow;
+using namespace Flow::Yaml;
 
+//////////////////////////////////////////////////
+// Core Functions
+//////////////////////////////////////////////////
 namespace Lavender
 {
 
@@ -23,61 +30,57 @@ namespace Lavender
 	{
 		auto& info = m_Project->m_Info;
 
-		Yaml::File file = Yaml::File(info.Path, FileMode::Write);
-		file << Yaml::FileManip::BeginMap;
+		File<SerializationType::Yaml> file = File<SerializationType::Yaml>(info.Path, SerializationMode::Serialize);
 
 		// Project Name
-		file << Yaml::FileManip::Key << "Project";
-		file << Yaml::FileManip::Value << info.Name;
+		file << FileManip::Key << "Project";
+		file << FileManip::Value << info.Name;
 
 		// Directories
-		file << Yaml::FileManip::Key << "Directories";
-		file << Yaml::FileManip::Value << Yaml::FileManip::BeginMap;
+		file << FileManip::Key << "Directories";
+		file << FileManip::Value << FileManip::BeginMap;
 
-		file << Yaml::FileManip::Key << "Assets";
-		file << Yaml::FileManip::Value << info.Assets.string();
+		file << FileManip::Key << "Assets";
+		file << FileManip::Value << info.Assets.string();
 
-		file << Yaml::FileManip::Key << "Script";
-		file << Yaml::FileManip::Value << info.Script.string();
+		file << FileManip::Key << "Script";
+		file << FileManip::Value << info.Script.string();
 
-		file << Yaml::FileManip::Key << "Scenes";
-		file << Yaml::FileManip::Value << info.Scenes.string();
+		file << FileManip::Key << "Scenes";
+		file << FileManip::Value << info.Scenes.string();
 
-		file << Yaml::FileManip::EndMap;
+		file << FileManip::EndMap;
 	
 		// Scenes
-		file << Yaml::FileManip::Key << "Scenes";
-		file << Yaml::FileManip::Value << Yaml::FileManip::BeginSeq;
+		file << FileManip::Key << "Scenes";
+		file << FileManip::Value << FileManip::BeginSeq;
 
 		for (auto& [id, info] : m_Project->m_Scenes.GetAll())
 		{
-			file << Yaml::FileManip::BeginMap;
+			file << FileManip::BeginMap;
 
-			file << Yaml::FileManip::Key << "Scene";
-			file << Yaml::FileManip::Value << (uint64_t)id;
+			file << FileManip::Key << "Scene";
+			file << FileManip::Value << (uint64_t)id;
 
-			file << Yaml::FileManip::Key << "Path";
-			file << Yaml::FileManip::Value << info.Path.string();
+			file << FileManip::Key << "Path";
+			file << FileManip::Value << info.Path.string();
 
-			file << Yaml::FileManip::EndMap;
+			file << FileManip::EndMap;
 		}
 		
-		file << Yaml::FileManip::EndSeq;
+		file << FileManip::EndSeq;
 
-		file << Yaml::FileManip::Key << "StartScene";
-		file << Yaml::FileManip::Value << (uint64_t)info.StartScene;
+		file << FileManip::Key << "StartScene";
+		file << FileManip::Value << (uint64_t)info.StartScene;
 
 		// Scripting
-		file << Yaml::FileManip::Key << "Scripting";
-		file << Yaml::FileManip::Value << Yaml::FileManip::BeginMap;
+		file << FileManip::Key << "Scripting";
+		file << FileManip::Value << FileManip::BeginMap;
 
-		file << Yaml::FileManip::Key << "Type";
-		file << Yaml::FileManip::Value << (uint32_t)info.ScriptType;
+		file << FileManip::Key << "Type";
+		file << FileManip::Value << (uint32_t)info.ScriptType;
 
-		file << Yaml::FileManip::EndMap;
-
-
-		file << Yaml::FileManip::EndMap;
+		file << FileManip::EndMap;
 
 		m_Project->Destroy();
 	}
@@ -88,7 +91,8 @@ namespace Lavender
 		info.Path = filepath;
 		info.Directory = filepath.parent_path();
 
-		Yaml::File file = Yaml::File(filepath, FileMode::Read);
+		File<SerializationType::Yaml> file = File<SerializationType::Yaml>(filepath, SerializationMode::Deserialize);
+
 		// Name
 		info.Name = file["Project"].as<std::string>();
 

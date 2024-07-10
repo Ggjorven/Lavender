@@ -39,6 +39,7 @@ project "Runtime"
 		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.EnTT.IncludeDir}",
 		"%{Dependencies.VMA.IncludeDir}",
+		"%{Dependencies.JoltPhysics.IncludeDir}",
 
 		"%{Dependencies.Flow.IncludeDir}",
 		"%{Dependencies.Insight.IncludeDir}"

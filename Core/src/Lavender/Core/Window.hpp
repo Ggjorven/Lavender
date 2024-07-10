@@ -81,7 +81,7 @@ namespace Lavender
 
 		virtual void* GetNativeWindow() const = 0;
 
-		static std::unique_ptr<Window> Create(const WindowSpecification& properties = WindowSpecification());
+		static Unique<Window> Create(const WindowSpecification& properties = WindowSpecification());
 	};
 
 }

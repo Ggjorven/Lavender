@@ -25,6 +25,10 @@ project "Lavender"
 		"src/Lavender/FileSystem/**.h",
 		"src/Lavender/FileSystem/**.hpp",
 		"src/Lavender/FileSystem/**.cpp",
+
+		"src/Lavender/Physics/**.h",
+		"src/Lavender/Physics/**.hpp",
+		"src/Lavender/Physics/**.cpp",
 		
 		"src/Lavender/Renderer/**.h",
 		"src/Lavender/Renderer/**.hpp",
@@ -83,6 +87,7 @@ project "Lavender"
 		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.EnTT.IncludeDir}",
 		"%{Dependencies.VMA.IncludeDir}",
+		"%{Dependencies.JoltPhysics.IncludeDir}",
 
 		"%{Dependencies.Flow.IncludeDir}",
 		"%{Dependencies.Insight.IncludeDir}"
@@ -94,6 +99,7 @@ project "Lavender"
 		"%{Dependencies.VMA.LibName}",
 		"%{Dependencies.ImGui.LibName}",
 		"%{Dependencies.ImGuizmo.LibName}",
+		"%{Dependencies.JoltPhysics.LibName}",
 
 		"%{Dependencies.Flow.LibName}",
 		"%{Dependencies.Insight.LibName}"
@@ -155,7 +161,11 @@ project "Lavender"
 		defines
 		{
 			"TRACY_ENABLE",
-			"NOMINMAX"
+			"NOMINMAX",
+
+			"JPH_DEBUG_RENDERER",
+			"JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+			"JPH_EXTERNAL_PROFILE"
 		}
 
 	filter "configurations:Release"
@@ -166,7 +176,11 @@ project "Lavender"
 		defines 
 		{
 			"TRACY_ENABLE",
-			"NOMINMAX"
+			"NOMINMAX",
+
+			"JPH_DEBUG_RENDERER",
+			"JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+			"JPH_EXTERNAL_PROFILE"
 		}
 
 	filter "configurations:Dist"

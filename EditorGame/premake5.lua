@@ -39,6 +39,7 @@ project "EditorGame"
 		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.EnTT.IncludeDir}",
 		"%{Dependencies.VMA.IncludeDir}",
+		"%{Dependencies.JoltPhysics.IncludeDir}",
 
 		"%{Dependencies.Flow.IncludeDir}",
 		"%{Dependencies.Insight.IncludeDir}"
@@ -79,7 +80,11 @@ project "EditorGame"
 		defines
 		{
 			"TRACY_ENABLE",
-			"NOMINMAX"
+			"NOMINMAX",
+
+			"JPH_DEBUG_RENDERER",
+			"JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+			"JPH_EXTERNAL_PROFILE"
 		}
 
 	filter "configurations:Release"
@@ -90,7 +95,11 @@ project "EditorGame"
 		defines
 		{
 			"TRACY_ENABLE",
-			"NOMINMAX"
+			"NOMINMAX",
+
+			"JPH_DEBUG_RENDERER",
+			"JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+			"JPH_EXTERNAL_PROFILE"
 		}
 
 	filter "configurations:Dist"

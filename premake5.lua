@@ -80,6 +80,11 @@ Dependencies =
 		IncludeDir = "%{wks.location}/vendor/ImGuizmo",
 		LibName = "ImGuizmo"
 	},
+	JoltPhysics = 
+	{
+		IncludeDir = "%{wks.location}/vendor/JoltPhysics/JoltPhysics",
+		LibName = "JoltPhysics"
+	},
 
 	-- Custom Libs
 	Flow = 
@@ -140,6 +145,7 @@ group "Dependencies"
 	include "vendor/ImGui"
 	include "vendor/ImGuizmo"
 	include "vendor/vma"
+	include "vendor/JoltPhysics/JoltPhysics"
 
 	include "vendor/Flow/Core"
 	include "vendor/Insight/Core"

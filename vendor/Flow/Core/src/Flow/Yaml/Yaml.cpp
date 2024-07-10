@@ -24,19 +24,28 @@ namespace Flow::Yaml
 
 	File::~File()
 	{
-		switch (m_Mode)
-		{
-		case FileMode::Read:
-			EndRead();
-			break;
-		case FileMode::Write:
-			EndWrite();
-			break;
+		Close();
+	}
 
-		default:
-			// TODO: Logging
-			break;
+	void File::Close()
+	{
+		if (!m_Path.empty()) // Our check to see if it isn't already closed
+		{
+			switch (m_Mode)
+			{
+			case FileMode::Read:
+				EndRead();
+				break;
+			case FileMode::Write:
+				EndWrite();
+				break;
+
+			default:	// Might just have never been initialized
+				break;
+			}
 		}
+
+		m_Path = ""; // Empty the path
 	}
 
 	void File::StartRead()

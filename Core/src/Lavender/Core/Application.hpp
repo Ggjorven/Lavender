@@ -53,7 +53,7 @@ namespace Lavender
 	private:
 		ApplicationSpecification m_AppInfo = {};
 
-		std::unique_ptr<Window> m_Window = nullptr;
+		Unique<Window> m_Window = nullptr;
 		bool m_Running = true;
 		bool m_Minimized = false;
 

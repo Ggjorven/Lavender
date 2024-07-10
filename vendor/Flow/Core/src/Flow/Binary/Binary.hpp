@@ -21,7 +21,7 @@ namespace Flow::Binary
 		template<typename T>
 		inline void Write(T data)
 		{
-			Convert<T>::Write(m_Write, data);
+			Type<T>::Write(m_Write, data);
 		}
 
 		template<typename T>
@@ -35,7 +35,7 @@ namespace Flow::Binary
 		template<typename T>
 		inline T Read(size_t offset = 0)
 		{
-			return Convert<T>::Read(m_Read, offset);
+			return Type<T>::Read(m_Read, offset);
 		}
 
 	private:
