@@ -1,0 +1,50 @@
+#pragma once
+
+#include "Lavender/Core/Window.hpp"
+
+#include <GLFW/glfw3.h>
+
+namespace Lavender
+{
+
+	class WindowsWindow : public Window
+	{
+	public:
+		WindowsWindow(const WindowSpecification& properties);
+		virtual ~WindowsWindow();
+
+		void SetEventCallBack(EventCallBackFn func) override { m_Data.EventCallBack = func; }
+		void SetDragDropCallBack(DragDropCallBackFn func) override { m_Data.DragDropCallBack = func; }
+
+		void OnUpdate() override;
+		void OnRender() override;
+
+		uint32_t GetWidth() const override { return m_Data.Width; }
+		uint32_t GetHeight() const override { return m_Data.Height; }
+
+		uint32_t GetPositionX() const override;
+		uint32_t GetPositionY() const override;
+
+		uint32_t GetMonitorWidth() const override;
+		uint32_t GetMonitorHeight() const override;
+
+		void SetVSync(bool enabled) override;
+		bool IsVSync() const override { return m_Data.VSync; }
+
+		void SetTitle(const std::string& title) override;
+
+		void* GetNativeWindow() const override { return (void*)m_Window; }
+
+	private:
+		static void ErrorCallBack(int errorCode, const char* description);
+
+	private:
+		static bool s_GLFWinitialized;
+		static uint32_t s_Instances;
+
+		GLFWwindow* m_Window = nullptr;
+		WindowData m_Data = {};
+
+	};
+
+}

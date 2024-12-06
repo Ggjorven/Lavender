@@ -21,10 +21,12 @@ public:
 Lavender::Application* Lavender::CreateApplication(int argc, char* argv[])
 {
 	ApplicationSpecification appInfo = {};
-	appInfo.WindowSpecs.Name = "Custom";
+	appInfo.WindowSpecs.Name = "Editor | Initializing...";
+	appInfo.WindowSpecs.Width = 1280;
+	appInfo.WindowSpecs.Height = 720;
 	appInfo.WindowSpecs.VSync = false;
 
-	appInfo.RenderSpecs.FramesInFlight = 3;
+	appInfo.EnableUI = true;
 
 	return new Sandbox(appInfo);
 }

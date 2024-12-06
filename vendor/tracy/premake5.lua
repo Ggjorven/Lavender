@@ -45,6 +45,9 @@ project "Tracy"
 
 	filter "system:linux"
 		staticruntime "On"
+
+		-- TODO: Check if any links are necessary
+
 		files 
 		{
 			"tracy/public/libbacktrace/posix.cpp",

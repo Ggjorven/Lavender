@@ -1,0 +1,133 @@
+#include "ispch.h"
+#include "Dll.hpp"
+
+namespace Insight
+{
+
+#if defined(APP_PLATFORM_WINDOWS)
+	Dll::Dll(const std::filesystem::path& path)
+		: m_Path(path)
+	{
+		Reload(m_Path);
+	}
+
+	Dll::~Dll()
+	{
+		Unload();
+	}
+
+	void Dll::Unload()
+	{
+		if (!m_ActiveClasses.empty())
+		{
+			// TODO: Implement logging
+
+			// Create a copy of the map to avoid iterator invalidation
+			auto activeClassesCopy = m_ActiveClasses;
+			for (auto& [instance, name] : activeClassesCopy)
+				DeleteClass(name, instance);
+		}
+
+		if (m_Handle)
+			FreeLibrary(m_Handle);
+	}
+
+	void Dll::Reload()
+	{
+		Reload(m_Path);
+	}
+
+	void Dll::Reload(const std::filesystem::path& path)
+	{
+		if (!std::filesystem::exists(path))
+		{
+			// TODO: Implement logging
+			return;
+		}
+		if (m_Handle)
+			FreeLibrary(m_Handle);
+
+		m_Handle = LoadLibraryA(m_Path.string().c_str());
+		if (!m_Handle)
+		{
+			// TODO: Implement logging
+			return;
+		}
+
+		// Load functions and set pointers
+		std::string fnName = std::string("Insight_GetClasses");
+		GetClassesFn getClassesFP = (GetClassesFn)GetProcAddress(m_Handle, fnName.c_str());
+		m_Classes = *getClassesFP();
+
+		// Initialize cache
+		m_Cache.Info.clear();
+
+		for (auto& [name, info] : m_Classes.GetClasses())
+		{
+			std::string fnName = std::string("Insight_Create") + name;
+			m_Cache.Info[name].Create = (CreateClassFn)GetProcAddress(m_Handle, fnName.c_str());
+
+			fnName = std::string("Insight_Delete") + name;
+			m_Cache.Info[name].Delete = (DeleteClassFn)GetProcAddress(m_Handle, fnName.c_str());
+		}
+	}
+
+	void* Dll::CreateClass(const std::string& className)
+	{
+		if (!m_Cache.Exists(className))
+		{
+			// TODO: Implement logging
+			return nullptr;
+		}
+
+		void* cls = m_Cache.Info[className].Create();
+		m_ActiveClasses[cls] = className;
+
+		return cls;
+	}
+
+	void Dll::DeleteClass(const std::string& className, void* instance)
+	{
+		if (!m_Cache.Exists(className))
+		{
+			// TODO: Implement logging
+		}
+
+		m_ActiveClasses.erase(instance);
+
+		m_Cache.Info[className].Delete(instance);
+	}
+
+	std::vector<OpaqueVariable> Dll::GetVariables(const std::string& className, void* classInstance)
+	{
+		std::vector<OpaqueVariable> vars = { };
+
+		std::string fnName = std::string("Empty");
+		for (auto& var : m_Classes.GetClasses()[className].Variables)
+		{
+			OpaqueVariable& newVar = vars.emplace_back();
+			newVar.GetInstance() = classInstance;
+			newVar.GetVariableInfo() = var;
+
+			fnName = std::string("Insight_Get") + var.Name + className;
+			newVar.GetGetter() = (GetDefaultFn)GetProcAddress(m_Handle, fnName.c_str());
+
+			fnName = std::string("Insight_Set") + var.Name + className;
+			newVar.GetSetter() = (SetDefaultFn)GetProcAddress(m_Handle, fnName.c_str());
+		}
+
+		return vars;
+	}
+
+#elif defined(APP_PLATFORM_LINUX)
+
+	// TODO: ...
+
+#endif
+
+	std::shared_ptr<Dll> Dll::Create(const std::filesystem::path& path)
+	{
+		return std::make_shared<Dll>(path);
+	}
+
+}

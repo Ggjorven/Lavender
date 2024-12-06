@@ -1,0 +1,514 @@
+#pragma once
+
+#include <stdint.h>
+
+#include <map>
+#include <mutex>
+#include <queue>
+#include <future>
+#include <memory>
+#include <vector>
+#include <chrono>
+#include <thread>
+#include <algorithm>
+#include <filesystem>
+#include <type_traits>
+#include <unordered_map>
+
+#include <codecvt>
+#include <locale>
+
+#include <glm/glm.hpp>
+
+#include "Lavender/Core/Core.hpp"
+#include "Lavender/Core/Logging.hpp"
+
+#define BIT(x) (1 << x)
+#define BIT_X(x, y) (x << y)
+
+#define DEFINE_BITWISE_OPS(Type) \
+constexpr Type operator | (Type lhs, Type rhs) \
+{ \
+    return static_cast<Type>(static_cast<int>(lhs) | static_cast<int>(rhs)); \
+} \
+constexpr bool operator & (Type lhs, Type rhs) \
+{ \
+    return static_cast<int>(lhs) & static_cast<int>(rhs); \
+} \
+constexpr Type operator ^ (Type lhs, Type rhs) \
+{ \
+    return static_cast<Type>(static_cast<int>(lhs) ^ static_cast<int>(rhs)); \
+} \
+
+#define MAX_UINT8 255
+#define MAX_UINT16 65535 
+#define MAX_UINT32 4294967295 
+#define MAX_UINT64 18446744073709551615ULL 
+#define MAX_INT8 127 
+#define MAX_INT16 32767
+#define MAX_INT32 2147483647
+#define MAX_INT64 9223372036854775807LL
+#define MAX_FLOAT 3.402823466e+38F 
+#define MAX_DOUBLE 1.7976931348623158e+308
+
+#define PUBLIC_PADDING_RESOLVE(index, size) \
+private: \
+    char Padding##index[size] = {}; \
+public:
+#define PUBLIC_PADDING_HELPER(index, size) PUBLIC_PADDING_RESOLVE(index, size)
+#define PUBLIC_PADDING(size) PUBLIC_PADDING_HELPER(__COUNTER__, size)
+
+#define PRIVATE_PADDING_RESOLVE(index, size) \
+char Padding##index[size] = {}; 
+#define PRIVATE_PADDING_HELPER(index, size) PRIVATE_PADDING_RESOLVE(index, size)
+#define PRIVATE_PADDING(size) PRIVATE_PADDING_HELPER(__COUNTER__, size)
+
+namespace Lavender::Utils
+{
+
+    // Platform specific
+    class ToolKit
+    {
+    public:
+        static std::filesystem::path OpenFile(const std::string& filter, const std::filesystem::path& dir = "") { return s_Instance ? s_Instance->OpenFileImpl(filter, dir) : ""; }
+        static std::filesystem::path SaveFile(const std::string& filter, const std::filesystem::path& dir = "") { return s_Instance ? s_Instance->SaveFileImpl(filter, dir) : ""; }
+
+        static std::filesystem::path OpenDirectory(const std::string& dir = "") { return s_Instance ? s_Instance->OpenDirectoryImpl(dir) : ""; }
+
+        static size_t GetMemoryUsage() { return s_Instance ? s_Instance->GetMemoryUsageImpl() : 0; }
+        static size_t GetHeapMemoryUsage() { return s_Instance ? s_Instance->GetHeapMemoryUsageImpl() : 0; }
+
+        static double GetTime() { return s_Instance ? s_Instance->GetTimeImpl() : 0.0f; }
+
+        // Non-Platform specific
+        inline static void Sleep(uint32_t miliseconds)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
+        }
+
+        inline static void Replace(std::string& str, char replace, char with)
+        {
+            std::replace(str.begin(), str.end(), replace, with);
+        }
+
+        inline static bool PositionInRect(const glm::vec2& pos, const glm::vec2& rectPos, const glm::vec2& rectSize)
+        {
+            if (pos.x >= rectPos.x && pos.x <= rectPos.x + rectSize.x &&
+                pos.y >= rectPos.y && pos.y <= rectPos.y + rectSize.y)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        inline static std::wstring WideString(const std::string& str) 
+        {
+            std::wstring wideString = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
+            return wideString;
+        }
+
+    private:
+        virtual std::filesystem::path OpenFileImpl(const std::string& filter, const std::filesystem::path& dir) const = 0;
+        virtual std::filesystem::path SaveFileImpl(const std::string& filter, const std::filesystem::path& dir) const = 0;
+        
+        virtual std::filesystem::path OpenDirectoryImpl(const std::string& dir) const = 0;
+
+        virtual double GetTimeImpl() const = 0;
+        virtual size_t GetMemoryUsageImpl() const = 0;
+        virtual size_t GetHeapMemoryUsageImpl() const = 0;
+
+    private:
+        static Unique<ToolKit> s_Instance;
+    };
+
+    struct Timer
+    {
+    public:
+        double Start = 0.0;
+
+    public:
+        Timer()
+            : Start(ToolKit::GetTime())
+        {
+        }
+
+        inline double GetElapsedSeconds() const { return ToolKit::GetTime() - Start; }
+        inline double GetElapsedMilliSeconds() const { return (ToolKit::GetTime() - Start) * 1000.0; }
+    };
+
+    // A threadsafe class to be used for function queues
+    template<typename Func>
+    class Queue
+    {
+    public:
+        enum class ExecutionStyle
+        {
+            InOrder = 0, Parallel
+        };
+    public:
+        Queue() = default;
+        virtual ~Queue() = default;
+
+        inline void Add(Func func) 
+        { 
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+            m_Queue.push(func); 
+        }
+
+        inline void AddToBack(Func func) // Adds it to the back log
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+            m_BackLog.push_back(func);
+        }
+
+        inline Func Front()
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+            Func func = std::move(m_Queue.front());
+            m_Queue.pop();
+            return func;
+        }
+
+        // Note(Jorben): Executing simultaneously clears the queue.
+        template<typename ...Args>
+        inline void Execute(ExecutionStyle style = ExecutionStyle::InOrder, Args&& ...args)
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            // Add backlog to queue
+            for (const auto& func : m_BackLog)
+                m_Queue.push(func);
+            m_BackLog.clear();
+
+            // Check for ExecutionStyle
+            switch (style)
+            {
+            case ExecutionStyle::InOrder:
+            {
+                while (!m_Queue.empty())
+                {
+                    Func& func = m_Queue.front();
+                    func(std::forward<Args>(args)...);
+                    m_Queue.pop();
+                }
+                break;
+            }
+            case ExecutionStyle::Parallel:
+            {
+                std::vector<std::future<void>> futures = { };
+
+                while (!m_Queue.empty()) 
+                {
+                    Func func = std::move(m_Queue.front());
+                    m_Queue.pop();
+                    futures.emplace_back(std::async(std::launch::async, std::move(func), std::forward<Args>(args)...));
+                }
+
+                // Wait
+                for (auto& future : futures)
+                    future.get();
+
+                break;
+            }
+
+            default:
+                APP_LOG_ERROR("Invalid ExecutionStyle selected.");
+                break;
+            }
+        }
+
+        inline size_t Size() const
+        { 
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+            return (m_Queue.size() + m_BackLog.size()); 
+        }
+
+        inline void Clear()
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            while (!m_Queue.empty())
+                m_Queue.pop();
+
+            m_BackLog.clear();
+        }
+
+        inline std::vector<Func> AsVector() const
+        {
+            std::vector<Func> funcs = { };
+
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+            funcs.reserve(m_Queue.size() + m_BackLog.size());
+
+            for (const auto& func : m_Queue)
+                funcs.push_back(func);
+
+            for (const auto& func : m_BackLog)
+                funcs.push_back(func);
+
+            return funcs;
+        }
+
+
+    private:
+        std::mutex m_Mutex = {};
+
+        std::queue<Func> m_Queue = { };
+        std::vector<Func> m_BackLog = { };
+    };
+
+    class Random
+    {
+    public:
+        // Gets initialized in the ToolKit instance
+        inline static void Init()
+        {
+            std::srand(static_cast<unsigned>(std::time(0)));
+        }
+
+    public:
+        inline static int32_t Int(int32_t min = 0, int32_t max = MAX_INT32)
+        {
+            return (min + std::rand() % (max - min + 1));
+        }
+
+        inline static const char* CStr()
+        {
+            static std::string str = {};
+            str = std::to_string(Int());
+
+            return str.c_str();
+        }
+    };
+
+    template<typename ...Types>
+    struct TypeGroup
+    {
+    };
+
+}
+
+namespace Lavender
+{
+
+    template<typename Key, typename Value>
+    using Dict = std::unordered_map<Key, Value>;
+
+    template<typename Key, typename Value>
+    class SortedDict
+    {
+    public:
+        SortedDict() = default;
+        SortedDict(const SortedDict<Key, Value>& other) = default;
+        virtual ~SortedDict() = default;
+
+        inline Value& operator [] (const Key& key)
+        {
+            auto it = m_Indices.find(key);
+            if (it == m_Indices.end())
+            {
+                m_Items.push_back(std::make_pair(key, Value()));
+                m_Indices[key] = m_Items.size() - 1;
+            }
+            return m_Items[m_Indices[key]].second;
+        }
+
+        inline void insert(const Key& key, const Value& value)
+        {
+            if (m_Indices.find(key) == m_Indices.end())
+            {
+                m_Items.push_back(std::make_pair(key, value));
+                m_Indices[key] = m_Items.size() - 1;
+            }
+            else
+            {
+                m_Items[m_Indices[key]].second = value;
+            }
+        }
+
+        inline void erase(const Key& key)
+        {
+            auto it = m_Indices.find(key);
+            if (it != m_Indices.end())
+            {
+                size_t index = it->second;
+                m_Items.erase(m_Items.begin() + index);
+                m_Indices.erase(it);
+
+                // Update the indices of the elements that come after the erased element
+                for (size_t i = index; i < m_Items.size(); ++i)
+                {
+                    m_Indices[m_Items[i].first] = i;
+                }
+            }
+        }
+
+        inline void clear()
+        {
+            m_Items.clear();
+            m_Indices.clear();
+        }
+
+        inline auto begin() { return m_Items.begin(); }
+        inline const auto begin() const { return m_Items.begin(); }
+        inline auto end() { return m_Items.end(); }
+        inline const auto end() const { return m_Items.end(); }
+
+    public:
+        std::unordered_map<Key, size_t> m_Indices = { };
+        std::vector<std::pair<Key, Value>> m_Items = { };
+    };
+
+
+
+    // A threadsafe linked list class
+    template <typename T>
+    class LinkedList 
+    {
+    private:
+        struct Node;
+    public:
+        LinkedList() 
+            : Head(nullptr) 
+        {
+        }
+
+        virtual ~LinkedList() 
+        {
+            Clear();
+        }
+
+        inline void Push(const T& newData) 
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            Node* newNode = new Node(newData);
+            if (!Head) 
+            {
+                Head = newNode;
+                return;
+            }
+
+            Node* current = Head;
+            while (current->Next)
+                current = current->Next;
+
+            current->Next = newNode;
+        }
+
+        inline void Pop() 
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            if (Head) 
+            {
+                Node* temp = Head;
+                Head = Head->Next;
+                delete temp;
+            }
+        }
+
+        inline T& Front() 
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            if (Head) 
+                return Head->Data;
+
+            APP_ASSERT(false, "LinkedList is empty");
+            
+            static T empty = {};
+            return empty;
+        }
+
+        inline std::vector<T>& AsVector() const 
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            static std::vector<T> result = { };
+            result.clear();
+
+            Node* current = Head;
+            while (current) 
+            {
+                result.push_back(current->Data);
+                current = current->Next;
+            }
+
+            return result;
+        }
+
+        inline void Remove(const T& value) 
+        {
+            std::scoped_lock<std::mutex> lock(m_Mutex);
+
+            Node* current = Head;
+            Node* prev = nullptr;
+
+            while (current) 
+            {
+                if (current->Data == value) 
+                {
+                    if (prev)
+                        prev->Next = current->Next;
+                    else
+                        Head = current->Next;
+
+                    delete current;
+                    return;
+                }
+                prev = current;
+                current = current->Next;
+            }
+
+            APP_ASSERT(false, "Failed to find item by T value and remove it from LinkedList.");
+        }
+
+        inline bool HasItem(const T& value) const
+        {
+            Node* current = Head;
+            while (current)
+            {
+                if (current->Data == value)
+                    return true;
+
+                current = current->Next;
+            }
+
+            return false;
+        }
+
+        inline void Clear() 
+        {
+            while (Head) 
+            {
+                Node* temp = Head;
+                Head = Head->Next;
+                delete temp;
+            }
+        }
+
+        inline bool Empty() const { return Head == nullptr; }
+
+    private:
+        struct Node
+        {
+        public:
+            T Data = {};
+            Node* Next = nullptr;
+
+        public:
+            Node(const T& newData) 
+                : Data(newData), Next(nullptr) 
+            {
+            }
+        };
+    private:
+        mutable std::mutex m_Mutex = {};
+
+        Node* Head = nullptr;
+    };
+
+
+}

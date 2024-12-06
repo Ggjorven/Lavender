@@ -1,0 +1,4 @@
+AssetHandle: 69
+AssetName: VikingMesh
+MeshAsset:
+  Mesh: Meshes/viking_room.obj

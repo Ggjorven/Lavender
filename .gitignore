@@ -19,9 +19,14 @@
 **.vcxproj.filters
 **.vcxproj.user
 
+# Types
+**.pdb
+**.exp
+**.lib
+
 # Binaries
 /bin/
 /bin-int/
 
-/Editor/Projects/**/bin/
-/Editor/Projects/**/bin-int/
+/Editor/Resources/Projects/**/bin/
+/Editor/Resources/Projects/**/bin-int/

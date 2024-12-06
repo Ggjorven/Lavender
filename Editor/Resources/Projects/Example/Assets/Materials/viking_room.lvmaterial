@@ -1,0 +1,4 @@
+AssetHandle: 70
+AssetName: VikingMaterial
+MaterialAsset:
+  Albedo: Materials/viking_room.png

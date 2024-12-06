@@ -25,28 +25,35 @@ project "Editor"
 	includedirs
 	{
 		"src",
-		"vendor",
-
-		"%{wks.location}/Lavender/src",
-		"%{wks.location}/Scripting/src",
 		"%{wks.location}/vendor",
 
-		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.spdlog}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.entt}",
-		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.assimp}",
-		"%{IncludeDir.tracy}",
-		"%{IncludeDir.VulkanSDK}",
-		"%{IncludeDir.VMA}"
+		"%{wks.location}/Core/src",
+
+		"%{Dependencies.GLFW.IncludeDir}",
+		"%{Dependencies.GLM.IncludeDir}",
+		"%{Dependencies.Spdlog.IncludeDir}",
+		"%{Dependencies.Stb_image.IncludeDir}",
+		"%{Dependencies.Assimp.IncludeDir}",
+		"%{Dependencies.ImGui.IncludeDir}",
+		"%{Dependencies.ImGuizmo.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
+		"%{Dependencies.EnTT.IncludeDir}",
+		"%{Dependencies.VMA.IncludeDir}",
+		"%{Dependencies.JoltPhysics.IncludeDir}",
+
+		"%{Dependencies.Flow.IncludeDir}",
+		"%{Dependencies.Insight.IncludeDir}"
 	}
 
 	links
 	{
-		"Lavender"
+		"Lavender",
+		"EditorGame"
+	}
+	
+	defines
+	{
+		"yaml_cpp_EXPORTS"
 	}
 
 	disablewarnings
@@ -61,12 +68,12 @@ project "Editor"
 
 		defines
 		{
-			"LV_PLATFORM_WINDOWS",
-			"GLFW_INCLUDE_NONE",
+			"APP_PLATFORM_WINDOWS",
+			"GLFW_INCLUDE_NONE"
 		}
 
 	filter "configurations:Debug"
-		defines "LV_DEBUG"
+		defines "APP_DEBUG"
 		runtime "Debug"
 		symbols "on"
 		editandcontinue "Off"
@@ -74,42 +81,45 @@ project "Editor"
 		defines
 		{
 			"TRACY_ENABLE",
-			"NOMINMAX"
+			"NOMINMAX",
+
+			"JPH_DEBUG_RENDERER",
+			"JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+			"JPH_EXTERNAL_PROFILE"
 		}
 
 	filter "configurations:Release"
-		defines "LV_RELEASE"
+		defines "APP_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 		defines
 		{
 			"TRACY_ENABLE",
-			"NOMINMAX"
+			"NOMINMAX",
+
+			"JPH_DEBUG_RENDERER",
+			"JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
+			"JPH_EXTERNAL_PROFILE"
 		}
 
 	filter "configurations:Dist"
-		defines "LV_DIST"
+		defines "APP_DIST"
 		runtime "Release"
 		optimize "Full"
 
 	filter { "system:windows", "configurations:Debug" }
 		postbuildcommands
 		{
-			'{COPYFILE} "%{wks.location}/vendor/assimp/bin/windows/Debug/assimp-vc143-mtd.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{Dependencies.Assimp.Windows.DebugDynamicLib}" "%{cfg.targetdir}"'
 		}
 
-	filter { "system:windows", "configurations:Release" }
+	filter { "system:windows", "configurations:Release or configurations:Dist" }
 		postbuildcommands
 		{
-			'{COPYFILE} "%{wks.location}/vendor/assimp/bin/windows/Release/assimp-vc143-mt.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{Dependencies.Assimp.Windows.DynamicLib}" "%{cfg.targetdir}"'
 		}
 
 	filter { "system:windows", "configurations:Dist" }
 		-- Dist filter for Windows for Windowed Applications
 		kind "WindowedApp"
-
-		postbuildcommands
-		{
-			'{COPYFILE} "%{wks.location}/vendor/assimp/bin/windows/Release/assimp-vc143-mt.dll" "%{cfg.targetdir}"',
-		}

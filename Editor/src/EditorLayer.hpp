@@ -1,28 +1,17 @@
 #pragma once
 
-#include <vector>
-
 #include <Lavender/Core/Layer.hpp>
-#include <Lavender/UI/UIPreferences.hpp>
-#include <Lavender/Utils/Utils.hpp>
 
-#include <Lavender/Renderer/RenderPass.hpp>
-#include <Lavender/Renderer/Pipeline.hpp>
-#include <Lavender/Renderer/VertexBuffer.hpp>
-#include <Lavender/Renderer/IndexBuffer.hpp>
-#include <Lavender/Renderer/UniformBuffer.hpp>
-#include <Lavender/Renderer/Image.hpp>
-#include <Lavender/Renderer/Viewport.hpp>
-#include <Lavender/Renderer/Mesh.hpp>
+#include <Lavender/WorkSpace/Project.hpp>
 
-#include <Lavender/Workspace/Project.hpp>
+#include <Lavender/UI/Style.hpp>
 
-#include "Panels/ContentBrowserPanel.hpp"
-#include "Panels/EntitiesPanel.hpp"
-#include "Panels/MaterialPanel.hpp"
-#include "Panels/DebugPanel.hpp"
+#include "Panels/UIEditor.hpp"
 
-#include "Panels/SettingsWindow.hpp"
+#include "Panels/Viewport.hpp"
+#include "Panels/Entities.hpp"
+#include "Panels/Components.hpp"
+#include "Panels/Debug.hpp"
 
 using namespace Lavender;
 
@@ -33,30 +22,31 @@ public:
 	void OnDetach() override;
 
 	void OnUpdate(float deltaTime) override;
-	void OnRender();
-	void OnImGuiRender() override;
-
-	void OnEvent(Event& e);
-
-private:
-	bool OnKeyPressEvent(KeyPressedEvent& e);
-	bool OnResizeEvent(WindowResizeEvent& e);
-
-	void RenderMenuBar();
+	void OnRender() override;
+	void OnEvent(Event& e) override;
+	void OnUIRender() override;
 
 private:
-	Ref<UIPreferences> m_Preferences = nullptr;
+	void LoadProject(const std::filesystem::path& file = "Editor/Resources/Projects/Example/Example.lvproj");
+	void InitStyles();
+	void InitUI();
 
+	void MenuBar();
+
+	void CreateProject(const std::string& name, const std::filesystem::path& directory);
+
+	bool OnKeyPress(KeyPressedEvent& e);
+
+private:
 	Ref<Project> m_Project = nullptr;
 
-	Ref<ContentBrowserPanel> m_ContentBrowserPanel = nullptr;
-	Ref<EntitiesPanel> m_EntityPanel = nullptr;
-	Ref<MaterialPanel> m_MaterialPanel = nullptr;
-	Ref<DebugPanel> m_DebugPanel = nullptr;
+	UI::Editor m_Editor = {}; // TODO: Remove
 
-	Ref<SettingsWindow> m_SettingsWindow = nullptr;
+	UI::StyleList m_GlobalUIStyles = {};
+	UI::StyleList m_GlobalUIColours = {};
 
-	Ref<Image2D> m_Image = nullptr;
-
-	Entity m_Entity = {};
+	Ref<UI::Viewport> m_Viewport = {};
+	Ref<UI::Entities> m_Entities = {};
+	Ref<UI::Components> m_Components = {};
+	Ref<UI::Debug> m_Debug = {};
 };
