@@ -16,6 +16,15 @@ Currently, the engine does not support much. The focus has been primarily on est
 
 ## Project Status
 
+Here is a showcase of the editor:
+
+![Editor](doc/images/editor.png)
+
+The project also supports exporting the game as an executable on Windows & Linux (dev branch).
+This shows the project from the editor as an exported game:
+
+![Game](doc/images/game.png)
+
 This is an ongoing personal project, reflecting my journey into the depths of 3D graphics programming. While it is in its early stages, the foundation laid by this engine paves the way for continuous learning and development. Contributions and feedback are welcome as I aim to expand its capabilities.
 
 ## Getting Started
