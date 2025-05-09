@@ -28,6 +28,8 @@ group ""
 
 group "Lavender"
 	include "Lavender"
+--	include "Scripting"
 group ""
 
 include "Editor"
+include "Sandbox"

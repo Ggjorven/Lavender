@@ -38,6 +38,8 @@ namespace Lavender
 
 		m_Depthformat = GetDepthFormat();
 
+		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &m_Properties);
+
 		// Note(Jorben): Check if no device was selected
 		if (m_PhysicalDevice == VK_NULL_HANDLE)
 			LV_LOG_ERROR("Failed to find a suitable GPU!");

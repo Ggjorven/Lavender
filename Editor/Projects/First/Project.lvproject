@@ -1,0 +1,8 @@
+Project:
+  Directories:
+    Assets: Assets
+    Scripts: Script
+  Scenes:
+    Start: Scenes/first.lvscene
+  Extra:
+    ScriptConfig: Debug

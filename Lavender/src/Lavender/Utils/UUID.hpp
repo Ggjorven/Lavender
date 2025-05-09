@@ -295,15 +295,30 @@ namespace Lavender
     {
     public:
         UUID() = default;
+        UUID(uint64_t uuid);
         virtual ~UUID() = default;
 
         static UUID Create();
 
         inline uint64_t Get() const { return m_UUID; }
 
+        bool operator == (const UUID& other) const
+        {
+            return m_UUID == other.m_UUID;
+        }
+
+        bool operator < (const UUID& rhs) const
+        {
+            return m_UUID < rhs.m_UUID;
+        }
+
+    public:
+        static const UUID Empty;
+
     private:
         uint64_t m_UUID = 0ull;
     };
+    inline const UUID UUID::Empty = UUID(0);
 
     // 128 bit
     class UUID128
@@ -320,4 +335,17 @@ namespace Lavender
         uint128_t m_UUID = 0ull;
     };
 
+}
+
+namespace std 
+{
+    template<>
+    struct hash<Lavender::UUID> 
+    {
+        // Define the operator() to generate the hash
+        uint64_t operator()(const Lavender::UUID& uuid) const 
+        {
+            return uuid.Get();
+        }
+    };
 }

@@ -15,6 +15,8 @@ namespace Lavender
 
 		virtual void Bind(Ref<RenderCommandBuffer> commandBuffer) = 0;
 
+		virtual Ref<VertexBuffer> Copy() = 0;
+
 		static Ref<VertexBuffer> Create(void* data, size_t size);
 	};
 

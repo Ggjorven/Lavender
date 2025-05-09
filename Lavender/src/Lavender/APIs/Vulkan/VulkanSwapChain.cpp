@@ -46,7 +46,7 @@ namespace Lavender
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// SwapChain
+		// SwapChain // TODO: Clean up this section
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		VkSwapchainKHR oldSwapchain = m_SwapChain;
 
@@ -181,14 +181,22 @@ namespace Lavender
 		if (oldSwapchain)
 			vkDestroySwapchainKHR(device, oldSwapchain, nullptr); // Destroys Images?
 
-		for (auto& image : m_Images)
-			vkDestroyImageView(device, image.ImageView, nullptr);
-		m_Images.clear();
+		if (Renderer::Initialized())
+		{
+			auto images = m_Images;
+			auto depthStencil = m_DepthStencil;
+			Renderer::SubmitFree([device, images, depthStencil]()
+			{
+				for (auto& image : images)
+					vkDestroyImageView(device, image.ImageView, nullptr);
 
-		if (m_DepthStencil.Image)
-			VulkanAllocator::DestroyImage(m_DepthStencil.Image, m_DepthStencil.MemoryAlloc);
-		if (m_DepthStencil.ImageView)
-			vkDestroyImageView(device, m_DepthStencil.ImageView, nullptr);
+				if (depthStencil.Image)
+					VulkanAllocator::DestroyImage(depthStencil.Image, depthStencil.MemoryAlloc);
+				if (depthStencil.ImageView)
+					vkDestroyImageView(device, depthStencil.ImageView, nullptr);
+			});
+			m_Images.clear();
+		}
 
 		// Get the swap chain images
 		static uint32_t imageCount = 0;
@@ -201,7 +209,10 @@ namespace Lavender
 
 		// Copy over the images to the swapchain images
 		for (size_t i = 0; i < imageCount; i++)
+		{
 			m_Images[i].Image = imageCopies[i];
+			VulkanAllocator::TransitionImageLayout(m_Images[i].Image, m_ColourFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
+		}
 
 		for (uint32_t i = 0; i < imageCount; i++)
 		{
@@ -233,6 +244,8 @@ namespace Lavender
 
 		m_DepthStencil.ImageView = VulkanAllocator::CreateImageView(m_DepthStencil.Image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 		VulkanAllocator::TransitionImageLayout(m_DepthStencil.Image, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
+		m_DepthStencil.Width = width;
+		m_DepthStencil.Height = height;
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Synchronization Objects
@@ -306,6 +319,7 @@ namespace Lavender
 		VkResult result = VK_SUCCESS;
 		{
 			LV_PROFILE_SCOPE("QueuePresent");
+			vkQueueWaitIdle(m_Device->GetGraphicsQueue());
 			result = vkQueuePresentKHR(m_Device->GetPresentQueue(), &presentInfo);
 		}
 
@@ -320,17 +334,35 @@ namespace Lavender
 		}
 
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetSpecification().FramesInFlight;
-
-		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height, const bool vsync)
 	{
 		auto device = m_Device->GetVulkanDevice();
 
-		vkDeviceWaitIdle(device);
 		Init(width, height, vsync);
-		vkDeviceWaitIdle(device);
+	}
+
+	void VulkanSwapChain::ResizeDepth(uint32_t width, uint32_t height)
+	{
+		m_DepthStencil.Width = width;
+		m_DepthStencil.Height = height;
+
+		VkDevice device = m_Device->GetVulkanDevice();
+		auto depthStencil = m_DepthStencil;
+		Renderer::SubmitFree([device, depthStencil]()
+		{
+			if (depthStencil.Image)
+				VulkanAllocator::DestroyImage(depthStencil.Image, depthStencil.MemoryAlloc);
+			if (depthStencil.ImageView)
+				vkDestroyImageView(device, depthStencil.ImageView, nullptr);
+		});
+
+		VkFormat depthFormat = VulkanAllocator::FindDepthFormat();
+		m_DepthStencil.MemoryAlloc = VulkanAllocator::CreateImage(width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_DepthStencil.Image);
+
+		m_DepthStencil.ImageView = VulkanAllocator::CreateImageView(m_DepthStencil.Image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+		VulkanAllocator::TransitionImageLayout(m_DepthStencil.Image, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 	}
 
 	std::vector<VkImageView> VulkanSwapChain::GetImageViews()
@@ -349,6 +381,7 @@ namespace Lavender
 		LV_PROFILE_SCOPE("AquireNextImage");
 		uint32_t imageIndex = 0;
 
+		//vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 		VkResult result = vkAcquireNextImageKHR(m_Device->GetVulkanDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{

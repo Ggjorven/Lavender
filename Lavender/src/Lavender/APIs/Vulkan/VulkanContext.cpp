@@ -7,6 +7,7 @@
 #include "Lavender/Utils/Utils.hpp"
 
 #include "Lavender/APIs/Vulkan/VulkanAllocator.hpp"
+#include "Lavender/APIs/Vulkan/VulkanShader.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -163,7 +164,6 @@ namespace Lavender
 		vkDeviceWaitIdle(m_Device->GetVulkanDevice());
 
 		m_SwapChain->Destroy();
-		
 		VulkanAllocator::Destroy();
 
 		m_Device->Destroy();

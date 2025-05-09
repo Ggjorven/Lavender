@@ -41,6 +41,7 @@ namespace Lavender
 		inline VkPhysicalDevice& GetVulkanPhysicalDevice() { return m_PhysicalDevice; }
 
 		inline VkFormat GetDepthFormat() const { return m_Depthformat; }
+		inline const VkPhysicalDeviceProperties& GetProperties() { return m_Properties; }
 
 		static Ref<VulkanPhysicalDevice> Select();
 
@@ -52,6 +53,7 @@ namespace Lavender
 	private:
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 		
+		VkPhysicalDeviceProperties m_Properties = {};
 		VkFormat m_Depthformat = VK_FORMAT_UNDEFINED;
 	};
 

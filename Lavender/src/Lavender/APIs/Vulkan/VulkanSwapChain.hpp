@@ -20,7 +20,14 @@ namespace Lavender
 			VkImage Image = VK_NULL_HANDLE;
 			VkImageView ImageView = VK_NULL_HANDLE;
 		};
+		struct DepthImage
+		{
+			VkImage Image = VK_NULL_HANDLE;
+			VmaAllocation MemoryAlloc = VK_NULL_HANDLE;
+			VkImageView ImageView = VK_NULL_HANDLE;
 
+			uint32_t Width = 0, Height = 0;
+		};
 	public:
 		VulkanSwapChain(VkInstance vkInstance, Ref<VulkanDevice> vkDevice);
 
@@ -31,6 +38,7 @@ namespace Lavender
 		void EndFrame();
 
 		void OnResize(uint32_t width, uint32_t height, const bool vsync);
+		void ResizeDepth(uint32_t width, uint32_t height);
 
 		inline VkFormat GetColourFormat() const { return m_ColourFormat; }
 
@@ -39,6 +47,7 @@ namespace Lavender
 
 		std::vector<VkImageView> GetImageViews();
 		inline VkImageView GetDepthImageView() { return m_DepthStencil.ImageView; }
+		inline DepthImage& GetDepthImage() { return m_DepthStencil; }
 
 		std::vector<SwapchainImage> GetSwapChainImages() { return m_Images; }
 
@@ -63,12 +72,7 @@ namespace Lavender
 
 		std::vector<SwapchainImage> m_Images = { };
 
-		struct
-		{
-			VkImage Image = VK_NULL_HANDLE;
-			VmaAllocation MemoryAlloc = VK_NULL_HANDLE;
-			VkImageView ImageView = VK_NULL_HANDLE;
-		} m_DepthStencil;
+		DepthImage m_DepthStencil = {};
 
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 

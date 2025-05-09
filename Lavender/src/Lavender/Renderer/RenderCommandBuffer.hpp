@@ -5,14 +5,20 @@
 namespace Lavender
 {
 
-	class RenderCommandBuffer
+	struct CommandBufferSpecification
 	{
 	public:
-		enum class Usage : uint8_t
+		enum class UsageFlags : uint8_t
 		{
-			None = 0, Sequential, Standalone
+			None = 0, WaitForLatest = BIT(0), NoWaiting = BIT(1)
 		};
+	public:
+		UsageFlags Flags = UsageFlags::WaitForLatest;
+	};
+	DEFINE_BITWISE_OPS(CommandBufferSpecification::UsageFlags)
 
+	class RenderCommandBuffer
+	{
 	public:
 		RenderCommandBuffer() = default;
 		virtual ~RenderCommandBuffer() = default;
@@ -21,7 +27,7 @@ namespace Lavender
 		virtual void End() = 0;
 		virtual void Submit() = 0;
 
-		static Ref<RenderCommandBuffer> Create(Usage usage = Usage::Sequential);
+		static Ref<RenderCommandBuffer> Create(CommandBufferSpecification specs = {});
 	};
 
 }

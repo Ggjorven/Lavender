@@ -10,12 +10,16 @@ namespace Lavender
 {
 
 	static RenderInstance* s_RenderInstance = nullptr;
-	RendererSpecification Renderer::s_Specifications = {};
+	RendererSpecification Renderer::s_Specification = {};
 
-	void Renderer::Init(const RendererSpecification& specs)
+	void Renderer::Init()
 	{
-		s_RenderInstance = RenderInstance::Create(specs);
-		s_Specifications = specs;
+		s_RenderInstance = RenderInstance::Create();
+	}
+
+	bool Renderer::Initialized()
+	{
+		return s_RenderInstance != nullptr;;
 	}
 
 	void Renderer::Destroy()
@@ -38,9 +42,19 @@ namespace Lavender
 		s_RenderInstance->Submit(function);
 	}
 
+	void Renderer::SubmitFree(FreeFunction function)
+	{
+		s_RenderInstance->SubmitFree(function);
+	}
+
 	void Renderer::WaitFor(Ref<RenderCommandBuffer> commandBuffer)
 	{
 		s_RenderInstance->WaitFor(commandBuffer);
+	}
+
+	void Renderer::Wait()
+	{
+		s_RenderInstance->Wait();
 	}
 
 	void Renderer::DrawIndexed(Ref<RenderCommandBuffer> commandBuffer, Ref<IndexBuffer> indexBuffer)
@@ -56,6 +70,11 @@ namespace Lavender
 	RenderInstance* Renderer::GetInstance()
 	{
 		return s_RenderInstance;
+	}
+
+	RenderData Renderer::GetRenderData()
+	{
+		return s_RenderInstance->GetRenderData();
 	}
 
 }

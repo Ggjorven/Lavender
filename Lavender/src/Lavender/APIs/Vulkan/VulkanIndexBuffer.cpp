@@ -17,7 +17,7 @@ namespace Lavender
 	{
 		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
 
-		m_BufferAllocation = VulkanAllocator::AllocateBuffer(bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Buffer);
+		m_BufferAllocation = VulkanAllocator::AllocateBuffer(bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY, m_Buffer);
 
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
 		VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
@@ -38,14 +38,32 @@ namespace Lavender
 
 	VulkanIndexBuffer::~VulkanIndexBuffer()
 	{
-		if (m_Buffer != VK_NULL_HANDLE)
-			VulkanAllocator::DestroyBuffer(m_Buffer, m_BufferAllocation);
+		auto buffer = m_Buffer;
+		auto allocation = m_BufferAllocation;
+
+		Renderer::SubmitFree([buffer, allocation]() 
+		{
+			if (buffer != VK_NULL_HANDLE)
+				VulkanAllocator::DestroyBuffer(buffer, allocation);
+		});
+
 	}
 
 	void VulkanIndexBuffer::Bind(Ref<RenderCommandBuffer> commandBuffer) const
 	{
 		auto cmdBuf = RefHelper::RefAs<VulkanRenderCommandBuffer>(commandBuffer);
 		vkCmdBindIndexBuffer(cmdBuf->GetVulkanCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+	}
+
+	Ref<IndexBuffer> VulkanIndexBuffer::Copy()
+	{
+		Ref<VulkanIndexBuffer> newBuffer = RefHelper::Create<VulkanIndexBuffer>();
+
+		newBuffer->m_BufferAllocation = VulkanAllocator::AllocateBuffer(m_Count * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY, newBuffer->m_Buffer);
+		VulkanAllocator::CopyBuffer(m_Buffer, newBuffer->m_Buffer, m_Count * sizeof(uint32_t));
+		newBuffer->m_Count = m_Count;
+
+		return newBuffer;
 	}
 
 }

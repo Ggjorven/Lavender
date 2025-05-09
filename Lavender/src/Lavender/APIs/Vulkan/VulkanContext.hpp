@@ -14,7 +14,7 @@ namespace Lavender
 {
 
 	#ifndef LV_DIST
-		inline static constexpr const bool s_Validation = true;
+		inline static constexpr const bool s_Validation = true; 
 	#else
 		inline static constexpr const bool s_Validation = false;
 	#endif

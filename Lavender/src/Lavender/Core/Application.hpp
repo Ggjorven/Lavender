@@ -23,6 +23,7 @@ namespace Lavender
 		WindowSpecification WindowSpecs = { };
 		RendererSpecification RenderSpecs = { };
 
+	public:
 		ApplicationSpecification() = default;
 	};
 
@@ -31,6 +32,9 @@ namespace Lavender
 	public:
 		Application(const ApplicationSpecification& appInfo);
 		virtual ~Application();
+
+		static void SetInitialized(bool value);
+		static bool Initialized();
 
 		void OnEvent(Ref<Event>& e);
 
@@ -47,13 +51,13 @@ namespace Lavender
 
 		inline bool IsMinimized() const { return m_Minimized; }
 
+		void HandleEvents();
+	
 	private:
 		void Init(const ApplicationSpecification& appInfo);
 
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
-
-		void HandleEvents();
 
 	private:
 		ApplicationSpecification m_AppInfo;

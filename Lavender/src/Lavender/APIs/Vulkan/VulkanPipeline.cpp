@@ -10,54 +10,49 @@
 #include "Lavender/APIs/Vulkan/VulkanShader.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderPass.hpp"
 #include "Lavender/APIs/Vulkan/VulkanRenderCommandBuffer.hpp"
+#include "Lavender/APIs/Vulkan/VulkanDescriptorSet.hpp"
 
 namespace Lavender
 {
 
 	static VkFormat DataTypeToVulkanType(DataType type);
-	static VkDescriptorType UniformDataTypeToVulkanDescriptorType(UniformDataType type);
-	static VkShaderStageFlags UniformStageFlagsToVulkanStageFlags(UniformElement::ShaderStage flags);
 
 	VulkanPipeline::VulkanPipeline()
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineSpecification specs)
-		: m_Specification(specs)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets)
+		: m_Specification(specs), m_Sets(sets)
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader)
-		: m_Specification(specs), m_Shader(shader)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<Shader> shader)
+		: m_Specification(specs), m_Sets(sets), m_Shader(shader)
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<RenderPass> renderpass)
-		: m_Specification(specs), m_RenderPass(renderpass)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<RenderPass> renderpass)
+		: m_Specification(specs), m_Sets(sets), m_RenderPass(renderpass)
 	{
 	}
 
-	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<Shader> shader, Ref<RenderPass> renderpass)
-		: m_Specification(specs), m_Shader(shader), m_RenderPass(renderpass)
+	VulkanPipeline::VulkanPipeline(PipelineSpecification specs, Ref<DescriptorSetGroup> sets, Ref<Shader> shader, Ref<RenderPass> renderpass)
+		: m_Specification(specs), m_Sets(sets), m_Shader(shader), m_RenderPass(renderpass)
 	{
 	}
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
+		auto pipeline = m_GraphicsPipeline;
+		auto layout = m_PipelineLayout;
 
-		vkDestroyPipeline(device, m_GraphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
-
-		for (auto& pool : m_DescriptorPools)
+		Renderer::SubmitFree([pipeline, layout]()
 		{
-			vkDestroyDescriptorPool(device, pool.second, nullptr);
-		}
+			auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
 
-		for (auto& layout : m_DescriptorLayouts)
-		{
-			vkDestroyDescriptorSetLayout(device, layout.second, nullptr);
-		}
+			vkDestroyPipeline(device, pipeline, nullptr);
+			vkDestroyPipelineLayout(device, layout, nullptr);
+		});
 	}
 
 	void VulkanPipeline::Initialize()
@@ -68,10 +63,7 @@ namespace Lavender
 			return;
 		}
 
-		CreateDescriptorSetLayout();
 		CreateGraphicsPipeline();
-		CreateDescriptorPool();
-		CreateDescriptorSets();
 	}
 
 	void VulkanPipeline::Use(Ref<RenderCommandBuffer> commandBuffer)
@@ -80,45 +72,9 @@ namespace Lavender
 		uint32_t currentFrame = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetSwapChain()->GetCurrentFrame();
 
 		vkCmdBindPipeline(cmdBuf->GetVulkanCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-
-		// Bind all sets to appropriate slots
-		for (auto& set : m_DescriptorSets)
-		{
-			vkCmdBindDescriptorSets(cmdBuf->GetVulkanCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, set.first, 1, &set.second[currentFrame], 0, nullptr);
-		}
 	}
 
-	// Note(Jorben): Just for myself, this specifies all the different types that are gonna be in a descriptor set
-	void VulkanPipeline::CreateDescriptorSetLayout()
-	{
-		for (auto& set : m_Specification.Uniformlayout.GetElements())
-		{
-			std::vector<VkDescriptorSetLayoutBinding> layouts = { };
-
-			for (auto& element : set.second)
-			{
-				VkDescriptorSetLayoutBinding layoutBinding = {};
-				layoutBinding.binding = element.Binding;
-				layoutBinding.descriptorType = UniformDataTypeToVulkanDescriptorType(element.Type);
-				layoutBinding.descriptorCount = element.Count;
-				layoutBinding.stageFlags = UniformStageFlagsToVulkanStageFlags(element.Stage);
-				layoutBinding.pImmutableSamplers = nullptr; // Optional
-
-				layouts.push_back(layoutBinding);
-			}
-
-			VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-			layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			layoutInfo.bindingCount =(uint32_t)layouts.size();
-			layoutInfo.pBindings = layouts.data();
-
-			m_DescriptorLayouts[set.first] = VK_NULL_HANDLE;
-			if (vkCreateDescriptorSetLayout(RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice(), &layoutInfo, nullptr, &m_DescriptorLayouts[set.first]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to create descriptor set layout!");
-		}
-	}
-
-	void VulkanPipeline::CreateGraphicsPipeline() // TODO(Jorben): Add customizability
+	void VulkanPipeline::CreateGraphicsPipeline()
 	{
 		auto vulkanShader = RefHelper::RefAs<VulkanShader>(m_Shader);
 
@@ -174,7 +130,7 @@ namespace Lavender
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = (VkPolygonMode)(m_Specification.Polygonmode);
 		rasterizer.lineWidth = m_Specification.LineWidth;
-		rasterizer.cullMode = (VkCullModeFlags)(m_Specification.Cullingmode); // Change to VK_CULL_MODE_BACK_BIT? // VK_CULL_MODE_FRONT_BIT
+		rasterizer.cullMode = (VkCullModeFlags)(m_Specification.Cullingmode);
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		
@@ -221,10 +177,12 @@ namespace Lavender
 		dynamicState.pDynamicStates = dynamicStates.data();
 		
 		// Descriptor layouts
-		std::vector<VkDescriptorSetLayout> descriptorLayouts = { };
-		descriptorLayouts.reserve(m_DescriptorLayouts.size());
+		auto vkDescriptorSets = RefHelper::RefAs<VulkanDescriptorSetGroup>(m_Sets);
 
-		for (auto& pair : m_DescriptorLayouts)
+		std::vector<VkDescriptorSetLayout> descriptorLayouts = { };
+		descriptorLayouts.reserve(vkDescriptorSets->m_DescriptorLayouts.size());
+
+		for (auto& pair : vkDescriptorSets->m_DescriptorLayouts)
 			descriptorLayouts.push_back(pair.second);
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
@@ -259,58 +217,6 @@ namespace Lavender
 		
 		if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS)
 			LV_LOG_ERROR("Failed to create graphics pipeline!");
-	}
-
-	void VulkanPipeline::CreateDescriptorPool()
-	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-
-		for (auto& set : m_Specification.Uniformlayout.GetElements())
-		{
-			// Note(Jorben): Just for myself, the poolSizes is just the amount of elements of a certain type to able to allocate per pool
-			std::vector<VkDescriptorPoolSize> poolSizes = { };
-			poolSizes.resize((size_t)m_Specification.Uniformlayout.UniqueCount(set.first));
-			poolSizes.clear(); // Note(Jorben): For some reason without this line there is a VK_SAMPLER or something in the list.
-
-			for (auto& type : m_Specification.Uniformlayout.UniqueTypes(set.first))
-			{
-				VkDescriptorPoolSize poolSize = {};
-				poolSize.type = UniformDataTypeToVulkanDescriptorType(type);
-				poolSize.descriptorCount = m_Specification.Uniformlayout.AmountOf(set.first, type) * Renderer::GetSpecification().FramesInFlight;
-
-				poolSizes.push_back(poolSize);
-			}
-
-			VkDescriptorPoolCreateInfo poolInfo = {};
-			poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			poolInfo.poolSizeCount = (uint32_t)poolSizes.size();
-			poolInfo.pPoolSizes = poolSizes.data();
-			poolInfo.maxSets = (uint32_t)Renderer::GetSpecification().FramesInFlight; // A set for every frame in flight
-
-			m_DescriptorPools[set.first] = VK_NULL_HANDLE;
-			if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPools[set.first]) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to create descriptor pool!");
-		}
-	}
-
-	void VulkanPipeline::CreateDescriptorSets()
-	{
-		auto device = RefHelper::RefAs<VulkanContext>(Renderer::GetContext())->GetLogicalDevice()->GetVulkanDevice();
-		
-		for (auto& set : m_Specification.Uniformlayout.GetElements())
-		{
-			std::vector<VkDescriptorSetLayout> layouts(Renderer::GetSpecification().FramesInFlight, m_DescriptorLayouts[set.first]);
-
-			VkDescriptorSetAllocateInfo allocInfo = {};
-			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			allocInfo.descriptorPool = m_DescriptorPools[set.first];
-			allocInfo.descriptorSetCount = (uint32_t)Renderer::GetSpecification().FramesInFlight;
-			allocInfo.pSetLayouts = layouts.data();
-
-			m_DescriptorSets[set.first].resize((size_t)Renderer::GetSpecification().FramesInFlight);
-			if (vkAllocateDescriptorSets(device, &allocInfo, m_DescriptorSets[set.first].data()) != VK_SUCCESS)
-				LV_LOG_ERROR("Failed to allocate descriptor sets!");
-		}
 	}
 
 	VkVertexInputBindingDescription VulkanPipeline::GetBindingDescription()
@@ -348,39 +254,16 @@ namespace Lavender
 		case DataType::Float2:  return VK_FORMAT_R32G32_SFLOAT;
 		case DataType::Float3:  return VK_FORMAT_R32G32B32_SFLOAT;
 		case DataType::Float4:  return VK_FORMAT_R32G32B32A32_SFLOAT;
-		case DataType::Mat3:    return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
-		case DataType::Mat4:    return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
-		case DataType::Int:     return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
-		case DataType::Int2:    return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
-		case DataType::Int3:    return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
-		case DataType::Int4:    return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
-		case DataType::Bool:    return VK_FORMAT_UNDEFINED;		// TODO(Jorben): Implement these
+		case DataType::Mat3:    return VK_FORMAT_UNDEFINED;		// TODO: Implement these
+		case DataType::Mat4:    return VK_FORMAT_UNDEFINED;		// TODO: Implement these
+		case DataType::Int:     return VK_FORMAT_UNDEFINED;		// TODO: Implement these
+		case DataType::Int2:    return VK_FORMAT_UNDEFINED;		// TODO: Implement these
+		case DataType::Int3:    return VK_FORMAT_UNDEFINED;		// TODO: Implement these
+		case DataType::Int4:    return VK_FORMAT_UNDEFINED;		// TODO: Implement these
+		case DataType::Bool:    return VK_FORMAT_UNDEFINED;		// TODO: Implement these
 		}
 
 		return VK_FORMAT_UNDEFINED;
-	}
-
-	static VkDescriptorType UniformDataTypeToVulkanDescriptorType(UniformDataType type)
-	{
-		switch (type)
-		{
-		case UniformDataType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		case UniformDataType::Image: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		// TODO(Jorben): Implement the rest
-		}
-
-		return VK_DESCRIPTOR_TYPE_MAX_ENUM;
-	}
-
-	static VkShaderStageFlags UniformStageFlagsToVulkanStageFlags(UniformElement::ShaderStage flags)
-	{
-		VkShaderStageFlags result = 0;
-		if (flags & UniformElement::ShaderStage::Vertex)
-			result |= VK_SHADER_STAGE_VERTEX_BIT;
-		if (flags & UniformElement::ShaderStage::Fragment)
-			result |= VK_SHADER_STAGE_FRAGMENT_BIT;
-
-		return result;
 	}
 
 }

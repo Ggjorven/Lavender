@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <Lavender/Core/Layer.hpp>
+#include <Lavender/UI/UIPreferences.hpp>
 #include <Lavender/Utils/Utils.hpp>
 
 #include <Lavender/Renderer/RenderPass.hpp>
@@ -12,8 +13,16 @@
 #include <Lavender/Renderer/UniformBuffer.hpp>
 #include <Lavender/Renderer/Image.hpp>
 #include <Lavender/Renderer/Viewport.hpp>
+#include <Lavender/Renderer/Mesh.hpp>
 
-#include <imgui.h>
+#include <Lavender/Workspace/Project.hpp>
+
+#include "Panels/ContentBrowserPanel.hpp"
+#include "Panels/EntitiesPanel.hpp"
+#include "Panels/MaterialPanel.hpp"
+#include "Panels/DebugPanel.hpp"
+
+#include "Panels/SettingsWindow.hpp"
 
 using namespace Lavender;
 
@@ -30,16 +39,24 @@ public:
 	void OnEvent(Event& e);
 
 private:
+	bool OnKeyPressEvent(KeyPressedEvent& e);
 	bool OnResizeEvent(WindowResizeEvent& e);
 
+	void RenderMenuBar();
+
 private:
-	Ref<Viewport> m_Viewport = nullptr;
+	Ref<UIPreferences> m_Preferences = nullptr;
 
-	Ref<Pipeline> m_Pipeline = nullptr;
+	Ref<Project> m_Project = nullptr;
 
-	Ref<VertexBuffer> m_VertexBuffer = nullptr;
-	Ref<IndexBuffer> m_IndexBuffer = nullptr;
+	Ref<ContentBrowserPanel> m_ContentBrowserPanel = nullptr;
+	Ref<EntitiesPanel> m_EntityPanel = nullptr;
+	Ref<MaterialPanel> m_MaterialPanel = nullptr;
+	Ref<DebugPanel> m_DebugPanel = nullptr;
+
+	Ref<SettingsWindow> m_SettingsWindow = nullptr;
 
 	Ref<Image2D> m_Image = nullptr;
-	Ref<UniformBuffer> m_CameraBuffer = nullptr;
+
+	Entity m_Entity = {};
 };
